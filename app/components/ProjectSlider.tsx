@@ -85,8 +85,8 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
   };
 
   return (
-    <div className="mt-12 bg-neutral-950 text-white lg:mt-14">
-      <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
+    <div className="mt-12 w-full max-w-full overflow-hidden bg-neutral-950 text-white lg:mt-14">
+      <div className="grid min-w-0 gap-0 lg:grid-cols-[1.15fr_0.85fr]">
         <div
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -103,7 +103,7 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
             }}
           >
             {activeProject.images.map((image, index) => (
-              <div key={image} className="relative h-full min-w-full">
+              <div key={image} className="relative h-full min-w-0 shrink-0 basis-full">
                 <Image
                   src={image}
                   alt={`${activeProject.title} ${index + 1}`}
@@ -123,12 +123,12 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
           </div>
         </div>
 
-        <div className="flex flex-col justify-between p-6 sm:p-8 lg:p-10">
-          <div>
+        <div className="flex min-w-0 flex-col justify-between p-6 sm:p-8 lg:p-10">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/42">
               {activeProject.type}
             </p>
-            <h3 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
+            <h3 className="mt-4 text-3xl font-semibold leading-tight sm:text-5xl">
               {activeProject.title}
             </h3>
             <p className="mt-5 leading-7 text-white/62">{activeProject.description}</p>
@@ -154,7 +154,7 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
               </button>
             </div>
 
-            <div className="mt-7 grid gap-2 sm:grid-cols-2">
+            <div className="mt-7 grid min-w-0 gap-2 sm:grid-cols-2">
               {projects.map((project, index) => (
                 <button
                   key={project.title}

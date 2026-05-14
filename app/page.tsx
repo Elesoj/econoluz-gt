@@ -17,7 +17,7 @@ import {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen overflow-x-clip bg-white text-black">
       <SiteNavbar
         items={homeNavItems}
         ctaHref="/catalogo#asesoria-proyecto"
@@ -42,12 +42,12 @@ export default function Home() {
           <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black to-transparent" />
         </div>
 
-        <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          <div className="max-w-4xl">
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+          <div className="min-w-0 max-w-4xl">
             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.34em] text-white/62">
               Iluminación arquitectónica premium
             </p>
-            <h1 className="max-w-5xl text-5xl font-semibold leading-[0.96] tracking-normal text-white sm:text-7xl lg:text-8xl">
+            <h1 className="max-w-full text-[2.45rem] font-semibold leading-[1.02] tracking-normal text-white [overflow-wrap:anywhere] sm:max-w-5xl sm:text-7xl sm:leading-[0.96] lg:text-8xl">
               Luz precisa para espacios que se sienten extraordinarios.
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-7 text-white/72 sm:text-xl sm:leading-8">
@@ -101,12 +101,12 @@ export default function Home() {
         id="empresa"
         className="scroll-mt-20 px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
       >
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <div>
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
               Empresa
             </p>
-            <h2 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
+            <h2 className="mt-4 text-3xl font-semibold leading-tight sm:text-5xl">
               Iluminación con criterio técnico y sensibilidad arquitectónica.
             </h2>
             <p className="mt-6 max-w-xl text-base leading-7 text-neutral-600 sm:text-lg sm:leading-8">
@@ -115,7 +115,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid min-w-0 gap-5 md:grid-cols-3">
             {companyHighlights.map((highlight) => (
               <article
                 key={highlight.title}
@@ -131,7 +131,7 @@ export default function Home() {
       </section>
 
       <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
-        <div className="mx-auto grid max-w-7xl gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-black sm:p-8 lg:grid-cols-[0.9fr_1fr_auto] lg:items-center">
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-black sm:p-8 lg:grid-cols-[0.9fr_1fr_auto] lg:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
               Calculadora LED
@@ -157,7 +157,7 @@ export default function Home() {
         id="colecciones"
         className="scroll-mt-20 px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24"
       >
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full max-w-7xl min-w-0">
           <SectionHeader
             eyebrow="Explorar"
             title="Colecciones para especificación profesional."
@@ -172,7 +172,7 @@ export default function Home() {
             }
           />
 
-          <div className="mt-12 grid gap-5 md:grid-cols-3">
+          <div className="mt-12 grid min-w-0 gap-5 md:grid-cols-3">
             {collections.map((category) => (
               <article key={category.title} className="group bg-neutral-950 text-white">
                 <div className="relative aspect-[4/5] overflow-hidden">
@@ -201,7 +201,7 @@ export default function Home() {
         id="proyectos"
         className="scroll-mt-20 px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24"
       >
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full max-w-7xl min-w-0">
           <SectionHeader
             eyebrow="Proyectos"
             title="Aplicaciones reales de luz arquitectónica."
@@ -213,7 +213,7 @@ export default function Home() {
       </section>
 
       <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr]">
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[0.72fr_1.28fr]">
           <SectionHeader eyebrow="Antes de cotizar" title="Preguntas rápidas." />
 
           <div className="grid gap-4">
@@ -234,12 +234,12 @@ export default function Home() {
         id="contacto"
         className="scroll-mt-20 bg-black px-5 py-20 text-white sm:px-8 sm:py-24 lg:py-28"
       >
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
-          <div>
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/48">
               Cotizar
             </p>
-            <h2 className="mt-4 max-w-4xl text-5xl font-semibold leading-none sm:text-7xl">
+            <h2 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight sm:text-7xl sm:leading-none">
               Especifiquemos la luz correcta desde el inicio.
             </h2>
           </div>
