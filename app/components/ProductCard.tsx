@@ -49,7 +49,7 @@ export default function ProductCard({
             onClick={onAdd}
             className="inline-flex justify-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
           >
-            {quantity > 0 ? `Agregado (${quantity})` : "Agregar al proyecto"}
+            {quantity > 0 ? `Agregado (${quantity})` : "Agregar a cotización"}
           </button>
         </div>
       </div>

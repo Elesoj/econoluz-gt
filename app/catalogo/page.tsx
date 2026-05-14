@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import QuoteDrawer from "../components/QuoteDrawer";
 import SectionHeader from "../components/SectionHeader";
@@ -177,6 +177,8 @@ type QuoteFormState = {
   message: string;
 };
 
+type QuoteFormErrors = Partial<Record<keyof QuoteFormState, string>>;
+
 const initialFormState: QuoteFormState = {
   fullName: "",
   phone: "",
@@ -195,11 +197,36 @@ const formatPrice = (price: number) =>
     maximumFractionDigits: 0,
   }).format(price);
 
+const validateForm = (formState: QuoteFormState) => {
+  const errors: QuoteFormErrors = {};
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneDigits = formState.phone.replace(/\D/g, "");
+
+  if (formState.fullName.trim().length < 2) {
+    errors.fullName = "Ingresa tu nombre completo.";
+  }
+
+  if (phoneDigits.length < 8) {
+    errors.phone = "Ingresa un número de teléfono válido.";
+  }
+
+  if (!emailPattern.test(formState.email.trim())) {
+    errors.email = "Ingresa un correo electrónico válido.";
+  }
+
+  if (!formState.projectType) {
+    errors.projectType = "Selecciona el tipo de proyecto.";
+  }
+
+  return errors;
+};
+
 export default function Catalogo() {
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
   const [formState, setFormState] = useState<QuoteFormState>(initialFormState);
+  const [formErrors, setFormErrors] = useState<QuoteFormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const filteredProducts = useMemo(() => {
@@ -215,6 +242,39 @@ export default function Catalogo() {
     (total, item) => total + item.product.price * item.quantity,
     0,
   );
+
+  const whatsappMessage = useMemo(() => {
+    const selectedProducts = quoteItems.map(
+      (item) => `${item.product.name} (${item.quantity})`,
+    );
+    const details = [
+      formState.fullName ? `Nombre: ${formState.fullName}` : "",
+      formState.projectType ? `Tipo de proyecto: ${formState.projectType}` : "",
+      formState.estimatedArea ? `Área estimada: ${formState.estimatedArea} m²` : "",
+      formState.budgetRange ? `Presupuesto: ${formState.budgetRange}` : "",
+      selectedProducts.length ? `Productos: ${selectedProducts.join(", ")}` : "",
+    ].filter(Boolean);
+
+    return `Hola, quiero cotizar un proyecto de iluminación.${
+      details.length ? `\n${details.join("\n")}` : ""
+    }`;
+  }, [formState, quoteItems]);
+
+  const whatsappHref = `https://wa.me/50240428790?text=${encodeURIComponent(whatsappMessage)}`;
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      "econoluz_quote_context",
+      JSON.stringify({
+        clientName: formState.fullName,
+        projectType: formState.projectType,
+        estimatedArea: formState.estimatedArea,
+        budgetRange: formState.budgetRange,
+        products: quoteItems.map((item) => `${item.product.name} (${item.quantity})`),
+      }),
+    );
+    window.dispatchEvent(new Event("econoluz-quote-updated"));
+  }, [formState, quoteItems]);
 
   const addToQuote = (product: Product) => {
     setQuoteItems((currentItems) => {
@@ -252,11 +312,20 @@ export default function Catalogo() {
 
   const updateFormField = (field: keyof QuoteFormState, value: string) => {
     setFormState((currentForm) => ({ ...currentForm, [field]: value }));
+    setFormErrors((currentErrors) => ({ ...currentErrors, [field]: undefined }));
     setIsSubmitted(false);
   };
 
   const submitQuotation = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const errors = validateForm(formState);
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setIsSubmitted(false);
+      return;
+    }
+
     setIsSubmitted(true);
     setIsQuoteOpen(false);
   };
@@ -403,6 +472,7 @@ export default function Catalogo() {
 
           <form
             onSubmit={submitQuotation}
+            noValidate
             className="border border-white/12 bg-white p-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8"
           >
             {isSubmitted && (
@@ -421,44 +491,63 @@ export default function Catalogo() {
               <label className="grid gap-2">
                 <span className="text-sm font-semibold">Nombre completo</span>
                 <input
-                  required
                   value={formState.fullName}
                   onChange={(event) => updateFormField("fullName", event.target.value)}
-                  className="border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
+                  className={`border px-4 py-3 outline-none transition focus:border-black ${
+                    formErrors.fullName ? "border-black bg-neutral-50" : "border-neutral-200"
+                  }`}
                   placeholder="Nombre y apellido"
                 />
+                {formErrors.fullName && (
+                  <span className="text-xs font-medium text-neutral-600">
+                    {formErrors.fullName}
+                  </span>
+                )}
               </label>
 
               <label className="grid gap-2">
                 <span className="text-sm font-semibold">Teléfono</span>
                 <input
-                  required
                   value={formState.phone}
                   onChange={(event) => updateFormField("phone", event.target.value)}
-                  className="border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
+                  className={`border px-4 py-3 outline-none transition focus:border-black ${
+                    formErrors.phone ? "border-black bg-neutral-50" : "border-neutral-200"
+                  }`}
                   placeholder="+502 0000 0000"
                 />
+                {formErrors.phone && (
+                  <span className="text-xs font-medium text-neutral-600">
+                    {formErrors.phone}
+                  </span>
+                )}
               </label>
 
               <label className="grid gap-2 sm:col-span-2">
                 <span className="text-sm font-semibold">Email</span>
                 <input
-                  required
                   type="email"
                   value={formState.email}
                   onChange={(event) => updateFormField("email", event.target.value)}
-                  className="border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
+                  className={`border px-4 py-3 outline-none transition focus:border-black ${
+                    formErrors.email ? "border-black bg-neutral-50" : "border-neutral-200"
+                  }`}
                   placeholder="correo@empresa.com"
                 />
+                {formErrors.email && (
+                  <span className="text-xs font-medium text-neutral-600">
+                    {formErrors.email}
+                  </span>
+                )}
               </label>
 
               <label className="grid gap-2">
                 <span className="text-sm font-semibold">Tipo de proyecto</span>
                 <select
-                  required
                   value={formState.projectType}
                   onChange={(event) => updateFormField("projectType", event.target.value)}
-                  className="border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-black"
+                  className={`border bg-white px-4 py-3 outline-none transition focus:border-black ${
+                    formErrors.projectType ? "border-black bg-neutral-50" : "border-neutral-200"
+                  }`}
                 >
                   <option value="">Seleccionar</option>
                   {projectTypes.map((projectType) => (
@@ -467,6 +556,11 @@ export default function Catalogo() {
                     </option>
                   ))}
                 </select>
+                {formErrors.projectType && (
+                  <span className="text-xs font-medium text-neutral-600">
+                    {formErrors.projectType}
+                  </span>
+                )}
               </label>
 
               <label className="grid gap-2">
@@ -530,6 +624,18 @@ export default function Catalogo() {
             >
               Solicitar asesoría de proyecto
             </button>
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 flex w-full items-center justify-center rounded-full border border-black px-7 py-4 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-black hover:text-white"
+            >
+              Contactar por WhatsApp
+            </a>
+            <p className="mt-4 text-xs leading-5 text-neutral-500">
+              Esta solicitud queda preparada localmente para futuras conexiones con email,
+              Google Sheets, CRM o APIs de backend.
+            </p>
           </form>
         </div>
       </section>
