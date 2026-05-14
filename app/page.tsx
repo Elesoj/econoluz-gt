@@ -17,7 +17,7 @@ import {
 
 export default function Home() {
   return (
-    <main className="min-h-screen overflow-x-clip bg-white text-black">
+    <main className="w-full max-w-full overflow-x-hidden bg-white text-black">
       <SiteNavbar
         items={homeNavItems}
         ctaHref="/catalogo#asesoria-proyecto"
@@ -27,7 +27,7 @@ export default function Home() {
 
       <section
         id="inicio"
-        className="relative isolate flex min-h-[100svh] scroll-mt-20 items-end overflow-hidden bg-black px-5 pb-12 pt-28 text-white sm:px-8 sm:pb-14 lg:pb-16"
+        className="relative isolate flex min-h-[100svh] w-full max-w-full scroll-mt-20 items-end overflow-hidden bg-black px-5 pb-12 pt-28 text-white sm:px-8 sm:pb-14 lg:pb-16"
       >
         <div className="absolute inset-0 -z-10">
           <Image
@@ -44,10 +44,10 @@ export default function Home() {
 
         <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div className="min-w-0 max-w-4xl">
-            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.34em] text-white/62">
+            <p className="mb-5 max-w-full text-[0.68rem] font-semibold uppercase leading-5 tracking-[0.22em] text-white/62 [overflow-wrap:anywhere] sm:text-xs sm:tracking-[0.34em]">
               Iluminación arquitectónica premium
             </p>
-            <h1 className="max-w-full text-[2.45rem] font-semibold leading-[1.02] tracking-normal text-white [overflow-wrap:anywhere] sm:max-w-5xl sm:text-7xl sm:leading-[0.96] lg:text-8xl">
+            <h1 className="max-w-full text-[2.12rem] font-semibold leading-[1.05] tracking-normal text-white [overflow-wrap:anywhere] sm:max-w-5xl sm:text-7xl sm:leading-[0.96] lg:text-8xl">
               Luz precisa para espacios que se sienten extraordinarios.
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-7 text-white/72 sm:text-xl sm:leading-8">
@@ -55,30 +55,30 @@ export default function Home() {
               hospitalidad con luminarias LED, asesoría técnica y piezas seleccionadas
               para arquitectura contemporánea.
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex w-full max-w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <Link
                 href="/catalogo#asesoria-proyecto"
-                className="inline-flex items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-200"
+                className="inline-flex w-full items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-200 sm:w-auto"
               >
                 Agendar asesoría
               </Link>
               <Link
                 href="/catalogo"
-                className="inline-flex items-center justify-center rounded-full border border-white/22 px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white/10"
+                className="inline-flex w-full items-center justify-center rounded-full border border-white/22 px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white/10 sm:w-auto"
               >
                 Ver catálogo
               </Link>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 border-t border-white/16 pt-6 text-white/78 lg:min-w-[20rem] lg:border-l lg:border-t-0 lg:gap-10 lg:pl-8 lg:pt-0">
+          <div className="grid min-w-0 grid-cols-2 gap-4 border-t border-white/16 pt-6 text-white/78 sm:gap-8 lg:min-w-[20rem] lg:border-l lg:border-t-0 lg:gap-10 lg:pl-8 lg:pt-0">
             {[
               ["2006", "Trayectoria"],
               ["LED", "Tecnología eficiente"],
             ].map(([value, label]) => (
-              <div key={label}>
+              <div key={label} className="min-w-0">
                 <p className="text-xl font-semibold text-white sm:text-2xl lg:text-3xl">{value}</p>
-                <p className="mt-2 text-[0.65rem] uppercase tracking-[0.2em] sm:text-xs">
+                <p className="mt-2 max-w-full text-[0.58rem] uppercase leading-4 tracking-[0.13em] [overflow-wrap:anywhere] sm:text-xs sm:tracking-[0.2em]">
                   {label}
                 </p>
               </div>

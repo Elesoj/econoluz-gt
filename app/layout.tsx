@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full w-full max-w-full flex-col overflow-x-hidden">
         {children}
         <FloatingWhatsApp />
       </body>

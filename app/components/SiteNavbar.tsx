@@ -12,8 +12,8 @@ type NavItem = {
 
 type SiteNavbarProps = {
   items: NavItem[];
-  ctaHref: string;
-  ctaLabel: string;
+  ctaHref?: string;
+  ctaLabel?: string;
   mobileCtaLabel?: string;
 };
 
@@ -204,14 +204,16 @@ export default function SiteNavbar({
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            href={ctaHref}
-            className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-neutral-200"
-          >
-            {ctaLabel}
-          </Link>
-        </div>
+        {ctaHref && ctaLabel && (
+          <div className="hidden items-center gap-3 md:flex">
+            <Link
+              href={ctaHref}
+              className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-neutral-200"
+            >
+              {ctaLabel}
+            </Link>
+          </div>
+        )}
 
         <details className="group relative md:hidden">
           <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-white/18 transition hover:bg-white/10 [&::-webkit-details-marker]:hidden">
@@ -236,12 +238,14 @@ export default function SiteNavbar({
                 </Link>
               ))}
             </div>
-            <Link
-              href={ctaHref}
-              className="mt-4 flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200"
-            >
-              {mobileCtaLabel}
-            </Link>
+            {ctaHref && mobileCtaLabel && (
+              <Link
+                href={ctaHref}
+                className="mt-4 flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200"
+              >
+                {mobileCtaLabel}
+              </Link>
+            )}
           </div>
         </details>
       </div>

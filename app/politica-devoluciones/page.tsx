@@ -67,9 +67,6 @@ export default function PoliticaDevoluciones() {
     <main className="min-h-screen bg-white text-black">
       <SiteNavbar
         items={mainNavItems}
-        ctaHref="/#contacto"
-        ctaLabel="Contacto"
-        mobileCtaLabel="Contactar"
       />
 
       <section className="bg-black px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-20 lg:pb-24 lg:pt-40">
