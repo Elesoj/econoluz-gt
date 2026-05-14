@@ -65,7 +65,12 @@ export default function SiteFooter() {
               <a href="tel:+50223111846" className="transition hover:text-black">
                 2311 1846 / 2311 1847
               </a>
-              <a href="https://wa.me/50240428790" className="transition hover:text-black">
+              <a
+                href="https://wa.me/50240428790?text=Hola%2C%20quiero%20cotizar%20un%20proyecto%20de%20iluminaci%C3%B3n."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition hover:text-black"
+              >
                 WhatsApp 4042 8790
               </a>
               <p>Lunes a viernes, 8:00 AM - 5:00 PM</p>

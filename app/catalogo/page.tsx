@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
+import ProductCard from "../components/ProductCard";
+import QuoteDrawer from "../components/QuoteDrawer";
+import SectionHeader from "../components/SectionHeader";
 import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
 
@@ -314,18 +315,12 @@ export default function Catalogo() {
 
       <section className="px-5 pb-20 pt-6 sm:px-8 sm:pb-24 lg:pb-32">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                Referencias para proyecto
-              </p>
-              <h2 className="mt-3 text-3xl font-semibold leading-tight sm:text-4xl">
-                {activeCategory === "Todos" ? "Todas las categorias" : activeCategory}
-              </h2>
-            </div>
-            <p className="text-sm text-neutral-500">
-              {filteredProducts.length} luminarias disponibles como referencia
-            </p>
+          <div className="mb-8">
+            <SectionHeader
+              eyebrow="Referencias para proyecto"
+              title={activeCategory === "Todos" ? "Todas las categorias" : activeCategory}
+              description={`${filteredProducts.length} luminarias disponibles como referencia. Agrega productos para preparar una solicitud de asesoría más precisa.`}
+            />
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -333,46 +328,13 @@ export default function Catalogo() {
               const selectedItem = quoteItems.find((item) => item.product.id === product.id);
 
               return (
-                <article
+                <ProductCard
                   key={product.id}
-                  className="group flex min-h-full flex-col overflow-hidden border border-neutral-200 bg-white transition duration-500 hover:-translate-y-1 hover:border-black hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)]"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0"
-                    />
-                  </div>
-
-                  <div className="flex flex-1 flex-col p-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                      {product.category}
-                    </p>
-                    <h3 className="mt-3 text-2xl font-semibold leading-tight">{product.name}</h3>
-                    <p className="mt-4 flex-1 leading-7 text-neutral-600">{product.description}</p>
-
-                    <div className="mt-7 grid gap-4 border-t border-neutral-200 pt-5 sm:grid-cols-[1fr_auto] sm:items-center">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
-                          Precio ref.
-                        </p>
-                        <p className="mt-1 text-xl font-semibold">{formatPrice(product.price)}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => addToQuote(product)}
-                        className="inline-flex justify-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
-                      >
-                        {selectedItem
-                          ? `Agregado (${selectedItem.quantity})`
-                          : "Agregar al proyecto"}
-                      </button>
-                    </div>
-                  </div>
-                </article>
+                  product={product}
+                  quantity={selectedItem?.quantity}
+                  formatPrice={formatPrice}
+                  onAdd={() => addToQuote(product)}
+                />
               );
             })}
           </div>
@@ -572,32 +534,6 @@ export default function Catalogo() {
         </div>
       </section>
 
-      {/* CTA final eliminado: el formulario de asesoría ahora es el cierre principal. */}
-      <section className="hidden bg-black px-5 py-20 text-white sm:px-8 lg:py-28">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/46">
-              Asesoría especializada
-            </p>
-            <h2 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-              ¿No sabes qué luminaria elegir? Solicita asesoría especializada.
-            </h2>
-          </div>
-          <div>
-            <p className="text-base leading-7 text-white/66 sm:text-lg sm:leading-8">
-              Revisamos cantidades, temperaturas, ópticas y compatibilidad antes
-              de cerrar una propuesta. Esta fase no incluye ventas individuales.
-            </p>
-            <Link
-              href="#asesoria-proyecto"
-              className="mt-8 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200"
-            >
-              Solicitar asesoría
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {quoteCount > 0 && (
         <button
           type="button"
@@ -611,109 +547,15 @@ export default function Catalogo() {
         </button>
       )}
 
-      {isQuoteOpen && (
-        <div className="fixed inset-0 z-50">
-          <button
-            type="button"
-            aria-label="Cerrar proyecto"
-            onClick={() => setIsQuoteOpen(false)}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-          />
-          <aside className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-white text-black shadow-2xl">
-            <div className="flex items-start justify-between border-b border-neutral-200 p-6">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
-                  Proyecto
-                </p>
-                <h2 className="mt-2 text-3xl font-semibold">Referencias seleccionadas</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsQuoteOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-xl leading-none transition hover:border-black"
-              >
-                x
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-6">
-              {quoteItems.length === 0 ? (
-                <div className="flex min-h-64 items-center justify-center border border-dashed border-neutral-300 p-8 text-center">
-                  <p className="max-w-xs text-sm leading-6 text-neutral-500">
-                    Aún no has agregado referencias. Selecciona luminarias del catálogo para
-                    preparar una asesoría de proyecto.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {quoteItems.map((item) => (
-                    <div key={item.product.id} className="border border-neutral-200 p-4">
-                      <div className="flex justify-between gap-4">
-                        <div>
-                          <h3 className="font-semibold">{item.product.name}</h3>
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {formatPrice(item.product.price)} ref.
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFromQuote(item.product.id)}
-                          className="text-sm font-semibold text-neutral-500 transition hover:text-black"
-                        >
-                          Quitar
-                        </button>
-                      </div>
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="inline-flex items-center rounded-full border border-neutral-200">
-                          <button
-                            type="button"
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                            className="h-9 w-9 text-lg transition hover:bg-neutral-100"
-                          >
-                            -
-                          </button>
-                          <span className="w-10 text-center text-sm font-semibold">
-                            {item.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            className="h-9 w-9 text-lg transition hover:bg-neutral-100"
-                          >
-                            +
-                          </button>
-                        </div>
-                        <p className="font-semibold">
-                          {formatPrice(item.product.price * item.quantity)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-neutral-200 p-6">
-              <div className="flex items-center justify-between">
-                <p className="text-sm uppercase tracking-[0.18em] text-neutral-500">
-                  Total estimado
-                </p>
-                <p className="text-2xl font-semibold">{formatPrice(quoteTotal)}</p>
-              </div>
-              <a
-                href="#asesoria-proyecto"
-                onClick={() => setIsQuoteOpen(false)}
-                className="mt-5 flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
-              >
-                Completar asesoría
-              </a>
-              <p className="mt-4 text-xs leading-5 text-neutral-500">
-                Lista temporal en el navegador. No se guarda información ni se procesa ningún pago.
-              </p>
-            </div>
-          </aside>
-        </div>
-      )}
+      <QuoteDrawer
+        isOpen={isQuoteOpen}
+        items={quoteItems}
+        total={quoteTotal}
+        formatPrice={formatPrice}
+        onClose={() => setIsQuoteOpen(false)}
+        onRemove={removeFromQuote}
+        onUpdateQuantity={updateQuantity}
+      />
 
       <SiteFooter />
     </main>

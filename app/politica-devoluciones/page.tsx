@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ContactCTA from "../components/ContactCTA";
 import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
 
@@ -139,6 +140,14 @@ export default function PoliticaDevoluciones() {
           </div>
         </div>
       </section>
+
+      <ContactCTA
+        eyebrow="Ayuda"
+        title="¿Tienes dudas sobre una devolución?"
+        description="Comparte el comprobante de compra y el estado del producto para que el equipo pueda revisar tu caso."
+        href="/#contacto"
+        label="Contactar a ECONOLUZ"
+      />
 
       <SiteFooter />
     </main>

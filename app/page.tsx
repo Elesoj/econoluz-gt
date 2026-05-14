@@ -1,6 +1,7 @@
 import Image from "next/image";
 import SiteFooter from "./components/SiteFooter";
 import ProjectSlider from "./components/ProjectSlider";
+import SectionHeader from "./components/SectionHeader";
 import SiteNavbar from "./components/SiteNavbar";
 
 const navItems = [
@@ -486,22 +487,18 @@ export default function Home() {
 
       <section id="proyectos" className="scroll-mt-20 px-5 pb-20 pt-10 sm:px-8 sm:pb-24 sm:pt-12 lg:pb-32 lg:pt-14">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                Proyectos
-              </p>
-              <h2 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">
-                Proyectos iluminados por ECONOLUZ.
-              </h2>
-            </div>
-            <a
-              href="/catalogo#asesoria-proyecto"
-              className="inline-flex w-fit rounded-full border border-black px-6 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
-            >
-              Hablemos de tu proyecto
-            </a>
-          </div>
+          <SectionHeader
+            eyebrow="Proyectos"
+            title="Proyectos iluminados por ECONOLUZ."
+            action={
+              <a
+                href="/catalogo#asesoria-proyecto"
+                className="inline-flex w-fit rounded-full border border-black px-6 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
+              >
+                Hablemos de tu proyecto
+              </a>
+            }
+          />
 
           <ProjectSlider projects={projects} />
         </div>
@@ -509,14 +506,10 @@ export default function Home() {
 
       <section className="px-5 pb-20 pt-10 sm:px-8 sm:pb-24 sm:pt-12 lg:pb-32 lg:pt-14">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr]">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
-              Preguntas frecuentes
-            </p>
-            <h2 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-              Información útil antes de cotizar.
-            </h2>
-          </div>
+          <SectionHeader
+            eyebrow="Preguntas frecuentes"
+            title="Información útil antes de cotizar."
+          />
 
           <div className="grid gap-4">
             {[
