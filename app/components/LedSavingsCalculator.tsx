@@ -1,21 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { formatCurrency, formatNumber } from "../lib/formatters";
 
 const daysPerMonth = 30;
 const monthsPerYear = 12;
-
-const formatNumber = (value: number) =>
-  new Intl.NumberFormat("es-GT", {
-    maximumFractionDigits: 1,
-  }).format(value);
-
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("es-GT", {
-    style: "currency",
-    currency: "GTQ",
-    maximumFractionDigits: 0,
-  }).format(value);
 
 export default function LedSavingsCalculator() {
   const [fixtures, setFixtures] = useState(24);

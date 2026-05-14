@@ -3,14 +3,7 @@ import LedSavingsCalculator from "../components/LedSavingsCalculator";
 import SectionHeader from "../components/SectionHeader";
 import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
-
-const navItems = [
-  { label: "Inicio", href: "/#inicio" },
-  { label: "Empresa", href: "/#empresa" },
-  { label: "Catálogo", href: "/catalogo" },
-  { label: "Proyectos", href: "/#proyectos" },
-  { label: "Contacto", href: "/#contacto" },
-];
+import { mainNavItems } from "../data/siteData";
 
 const benefits = [
   {
@@ -35,7 +28,7 @@ export default function CalculadoraLed() {
   return (
     <main className="min-h-screen bg-white text-black">
       <SiteNavbar
-        items={navItems}
+        items={mainNavItems}
         ctaHref="/catalogo#asesoria-proyecto"
         ctaLabel="Cotizar"
         mobileCtaLabel="Cotizar proyecto"

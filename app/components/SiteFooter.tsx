@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { contact, mainNavItems } from "../data/siteData";
 
 export default function SiteFooter() {
   return (
@@ -22,21 +23,11 @@ export default function SiteFooter() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em]">Navegación</p>
             <div className="mt-4 grid gap-3 text-sm text-neutral-600">
-              <Link href="/#inicio" className="transition hover:text-black">
-                Inicio
-              </Link>
-              <Link href="/#empresa" className="transition hover:text-black">
-                Empresa
-              </Link>
-              <Link href="/catalogo" className="transition hover:text-black">
-                Catálogo
-              </Link>
-              <Link href="/#proyectos" className="transition hover:text-black">
-                Proyectos
-              </Link>
-              <Link href="/#contacto" className="transition hover:text-black">
-                Contacto
-              </Link>
+              {mainNavItems.map((item) => (
+                <Link key={item.href} href={item.href} className="transition hover:text-black">
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -46,7 +37,7 @@ export default function SiteFooter() {
               <p>
                 <span className="font-semibold text-black">Guatemala</span>
                 <br />
-                21 Avenida 0-18, Vista Hermosa 2, Zona 15.
+                {contact.address}
               </p>
               <p>
                 <span className="font-semibold text-black">Quetzaltenango</span>
@@ -59,21 +50,21 @@ export default function SiteFooter() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em]">Contacto</p>
             <div className="mt-4 grid gap-3 text-sm text-neutral-600">
-              <a href="mailto:ventas@econoluz.net" className="transition hover:text-black">
-                ventas@econoluz.net
+              <a href={`mailto:${contact.email}`} className="transition hover:text-black">
+                {contact.email}
               </a>
-              <a href="tel:+50223111846" className="transition hover:text-black">
-                2311 1846 / 2311 1847
+              <a href={contact.phoneHref} className="transition hover:text-black">
+                {contact.phoneLabel}
               </a>
               <a
-                href="https://wa.me/50240428790?text=Hola%2C%20quiero%20cotizar%20un%20proyecto%20de%20iluminaci%C3%B3n."
+                href={`https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(contact.whatsappDefaultMessage)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="transition hover:text-black"
               >
-                WhatsApp 4042 8790
+                {contact.whatsappLabel}
               </a>
-              <p>Lunes a viernes, 8:00 AM - 5:00 PM</p>
+              <p>{contact.hours}</p>
             </div>
           </div>
         </div>

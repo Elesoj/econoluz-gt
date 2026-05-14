@@ -184,7 +184,7 @@ export default function SiteNavbar({
           </span>
         </Link>
 
-        <div className="hidden items-center gap-9 text-[0.95rem] font-medium text-white/62 md:flex">
+        <div className="hidden items-center gap-6 text-[0.9rem] font-medium text-white/62 md:flex lg:gap-8">
           {items.map((item) => (
             <Link
               key={item.href}

@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ECONOLUZ GT
 
-## Getting Started
+Premium architectural lighting website for ECONOLUZ GT, built to present LED lighting solutions, project references, a curated product catalog, a quotation flow, and an LED savings calculator for clients in Guatemala.
 
-First, run the development server:
+The visual direction is minimalist, architectural, black and white, and product-focused. The site is designed to guide visitors through a clear flow: discover the brand, estimate LED savings, explore products and projects, then request a quote.
+
+## Tech Stack
+
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- Next Image optimization
+- Local browser storage for temporary quote and calculator context
+
+## Features
+
+- Premium responsive homepage
+- Curated lighting catalog with category filters
+- Quote drawer with quantity controls and estimated totals
+- Dynamic WhatsApp message generation from quote context
+- LED savings calculator with local result handoff into the quote form
+- Project gallery slider using existing ECONOLUZ imagery
+- Reusable layout and interface components
+- Shared data files for navigation, contact details, products, projects, and homepage content
+- Return and refund policy page
+
+## Routes
+
+- `/` - Homepage with brand overview, calculator teaser, collections, projects, FAQs, and quote CTA
+- `/catalogo` - Product catalog and project quote form
+- `/calculadora-led` - LED savings calculator
+- `/politica-devoluciones` - Returns and refunds policy
+
+## Project Structure
+
+```text
+app/
+  calculadora-led/
+  catalogo/
+  components/
+  data/
+    products.ts
+    projects.ts
+    siteData.ts
+  lib/
+    formatters.ts
+  politica-devoluciones/
+  globals.css
+  layout.tsx
+  page.tsx
+public/
+```
+
+## Setup
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a production build:
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Run linting:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Screenshots
 
-## Deploy on Vercel
+Add final screenshots here before launch:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Homepage desktop
+- Homepage mobile
+- Catalog and quote drawer
+- LED calculator
+- Project gallery
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Future Roadmap
+
+- Connect quote submissions to email, CRM, Google Sheets, or a backend API
+- Add product detail pages for richer specifications
+- Add structured SEO metadata per route
+- Add analytics for catalog filters, quote starts, and calculator usage
+- Add admin-editable content through a CMS or lightweight data source
+- Add accessibility regression checks and visual QA snapshots before release

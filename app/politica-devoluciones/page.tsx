@@ -2,14 +2,7 @@ import Link from "next/link";
 import ContactCTA from "../components/ContactCTA";
 import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
-
-const navItems = [
-  { label: "Inicio", href: "/#inicio" },
-  { label: "Empresa", href: "/#empresa" },
-  { label: "Catálogo", href: "/catalogo" },
-  { label: "Proyectos", href: "/#proyectos" },
-  { label: "Contacto", href: "/#contacto" },
-];
+import { mainNavItems } from "../data/siteData";
 
 const policySections = [
   {
@@ -73,7 +66,7 @@ export default function PoliticaDevoluciones() {
   return (
     <main className="min-h-screen bg-white text-black">
       <SiteNavbar
-        items={navItems}
+        items={mainNavItems}
         ctaHref="/#contacto"
         ctaLabel="Contacto"
         mobileCtaLabel="Contactar"
