@@ -164,7 +164,7 @@ export default function SiteNavbar({
 
   return (
     <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/90 text-white backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
+      <div className="relative mx-auto grid h-20 w-full max-w-7xl grid-cols-[auto_auto] items-center justify-between px-5 sm:px-8 md:grid-cols-[auto_1fr_auto] md:gap-8">
         <Link
           href="/#inicio"
           onClick={() => handleLinkClick("/#inicio")}
@@ -184,7 +184,15 @@ export default function SiteNavbar({
           </span>
         </Link>
 
-        <div className="hidden items-center gap-6 text-[0.9rem] font-medium text-white/62 md:flex lg:gap-8">
+        <div
+          className="hidden items-center justify-center gap-6 text-[0.9rem] font-medium text-white/62 md:flex lg:gap-8"
+          style={{
+            left: "50%",
+            position: "absolute",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
           {items.map((item) => (
             <Link
               key={item.href}
@@ -204,16 +212,16 @@ export default function SiteNavbar({
           ))}
         </div>
 
-        {ctaHref && ctaLabel && (
-          <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden min-w-[7.25rem] items-center justify-end gap-3 md:flex">
+          {ctaHref && ctaLabel && (
             <Link
               href={ctaHref}
               className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-neutral-200"
             >
               {ctaLabel}
             </Link>
-          </div>
-        )}
+          )}
+        </div>
 
         <details className="group relative md:hidden">
           <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-white/18 transition hover:bg-white/10 [&::-webkit-details-marker]:hidden">
