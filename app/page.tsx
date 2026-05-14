@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "./components/SiteFooter";
 import AnimatedStat from "./components/AnimatedStat";
+import BrandsCarousel from "./components/BrandsCarousel";
 import ProjectSlider from "./components/ProjectSlider";
 import SectionHeader from "./components/SectionHeader";
 import SiteNavbar from "./components/SiteNavbar";
@@ -96,6 +97,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <BrandsCarousel />
 
       <section
         id="empresa"
