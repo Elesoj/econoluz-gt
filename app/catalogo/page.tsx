@@ -179,6 +179,10 @@ type QuoteFormState = {
 
 type QuoteFormErrors = Partial<Record<keyof QuoteFormState, string>>;
 
+type StoredLedResults = {
+  summary?: string;
+};
+
 const initialFormState: QuoteFormState = {
   fullName: "",
   phone: "",
@@ -221,13 +225,52 @@ const validateForm = (formState: QuoteFormState) => {
   return errors;
 };
 
+const getStoredLedResultsSummary = () => {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const storedResults = window.localStorage.getItem("econoluz_led_results");
+
+  if (!storedResults) {
+    return "";
+  }
+
+  try {
+    const parsedResults = JSON.parse(storedResults) as StoredLedResults;
+    return parsedResults.summary ?? "";
+  } catch {
+    return "";
+  }
+};
+
+const buildInitialFormState = () => {
+  const ledResultsSummary = getStoredLedResultsSummary();
+
+  if (!ledResultsSummary) {
+    return initialFormState;
+  }
+
+  return {
+    ...initialFormState,
+    message: `${ledResultsSummary}\n\nNecesito asesoría para interpretar estos resultados y elegir luminarias adecuadas.`,
+  };
+};
+
+const clearTemporaryQuoteData = () => {
+  window.localStorage.removeItem("econoluz_quote_context");
+  window.localStorage.removeItem("econoluz_led_results");
+  window.dispatchEvent(new Event("econoluz-quote-updated"));
+};
+
 export default function Catalogo() {
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
-  const [formState, setFormState] = useState<QuoteFormState>(initialFormState);
+  const [formState, setFormState] = useState<QuoteFormState>(buildInitialFormState);
   const [formErrors, setFormErrors] = useState<QuoteFormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [ledResultsSummary, setLedResultsSummary] = useState(getStoredLedResultsSummary);
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === "Todos") {
@@ -253,16 +296,30 @@ export default function Catalogo() {
       formState.estimatedArea ? `Área estimada: ${formState.estimatedArea} m²` : "",
       formState.budgetRange ? `Presupuesto: ${formState.budgetRange}` : "",
       selectedProducts.length ? `Productos: ${selectedProducts.join(", ")}` : "",
+      ledResultsSummary ? ledResultsSummary : "",
     ].filter(Boolean);
 
     return `Hola, quiero cotizar un proyecto de iluminación.${
       details.length ? `\n${details.join("\n")}` : ""
     }`;
-  }, [formState, quoteItems]);
+  }, [formState, ledResultsSummary, quoteItems]);
 
   const whatsappHref = `https://wa.me/50240428790?text=${encodeURIComponent(whatsappMessage)}`;
 
   useEffect(() => {
+    const hasQuoteContext =
+      quoteItems.length > 0 ||
+      formState.fullName ||
+      formState.projectType ||
+      formState.estimatedArea ||
+      formState.budgetRange;
+
+    if (!hasQuoteContext) {
+      window.localStorage.removeItem("econoluz_quote_context");
+      window.dispatchEvent(new Event("econoluz-quote-updated"));
+      return;
+    }
+
     window.localStorage.setItem(
       "econoluz_quote_context",
       JSON.stringify({
@@ -275,6 +332,14 @@ export default function Catalogo() {
     );
     window.dispatchEvent(new Event("econoluz-quote-updated"));
   }, [formState, quoteItems]);
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", clearTemporaryQuoteData);
+
+    return () => {
+      window.removeEventListener("beforeunload", clearTemporaryQuoteData);
+    };
+  }, []);
 
   const addToQuote = (product: Product) => {
     setQuoteItems((currentItems) => {
@@ -328,6 +393,11 @@ export default function Catalogo() {
 
     setIsSubmitted(true);
     setIsQuoteOpen(false);
+    setQuoteItems([]);
+    setFormState(initialFormState);
+    setFormErrors({});
+    setLedResultsSummary("");
+    clearTemporaryQuoteData();
   };
 
   return (
@@ -468,6 +538,25 @@ export default function Catalogo() {
                 <p className="text-2xl font-semibold">{formatPrice(quoteTotal)}</p>
               </div>
             </div>
+
+            {!ledResultsSummary && (
+              <div className="mt-5 border border-white/12 p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/44">
+                  Consejo
+                </p>
+                <p className="mt-3 text-sm leading-6 text-white/62">
+                  Para recibir una respuesta más precisa, puedes usar la calculadora LED
+                  antes de enviar tu solicitud. Los resultados se agregarán automáticamente
+                  al formulario.
+                </p>
+                <a
+                  href="/calculadora-led"
+                  className="mt-5 inline-flex text-sm font-semibold text-white underline decoration-white/30 underline-offset-8 transition hover:decoration-white"
+                >
+                  Usar calculadora LED
+                </a>
+              </div>
+            )}
           </div>
 
           <form
@@ -475,6 +564,18 @@ export default function Catalogo() {
             noValidate
             className="border border-white/12 bg-white p-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8"
           >
+            {ledResultsSummary && (
+              <div className="mb-6 border border-neutral-200 bg-neutral-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
+                  Resultados LED adjuntos
+                </p>
+                <p className="mt-3 text-sm leading-6 text-neutral-600">
+                  Agregamos los resultados de la calculadora al mensaje adicional para que el
+                  equipo pueda revisarlos junto con tu solicitud.
+                </p>
+              </div>
+            )}
+
             {isSubmitted && (
               <div className="mb-6 border border-black bg-black p-5 text-white">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/54">

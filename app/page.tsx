@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import SiteFooter from "./components/SiteFooter";
 import ProjectSlider from "./components/ProjectSlider";
 import SectionHeader from "./components/SectionHeader";
@@ -441,6 +442,31 @@ export default function Home() {
                 </div>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-5 pb-20 sm:px-8 lg:pb-28">
+        <div className="mx-auto grid max-w-7xl gap-8 border border-neutral-200 bg-white p-7 transition duration-300 hover:border-black sm:p-9 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
+              Herramienta LED
+            </p>
+            <h2 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">
+              Calcula cuánto podrías ahorrar con iluminación LED
+            </h2>
+          </div>
+          <div>
+            <p className="text-base leading-7 text-neutral-600 sm:text-lg sm:leading-8">
+              Estima consumo, ahorro mensual y reducción energética antes de definir
+              luminarias para un proyecto residencial, comercial o corporativo.
+            </p>
+            <Link
+              href="/calculadora-led"
+              className="mt-8 inline-flex rounded-full bg-black px-7 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            >
+              Usar calculadora
+            </Link>
           </div>
         </div>
       </section>
