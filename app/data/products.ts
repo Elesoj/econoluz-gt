@@ -1,120 +1,201 @@
-export const catalogCategories = [
-  "Todos",
-  "Iluminación arquitectónica",
-  "Iluminación decorativa",
-  "Iluminación exterior",
-  "Iluminación comercial",
+const artlitePlateCodes = [
+  "APL-001",
+  "APL-002",
+  "APL-101",
+  "APL-102",
+  "APL-103",
+  "APL-104",
+  "APL-105",
+  "APL-106",
+  "APL-107",
+  "APL-108",
+  "APL-109",
+  "APL-110",
+  "APL-111",
+  "APL-112",
+  "APL-113",
+  "APL-201",
+  "APL-202",
+  "APL-203",
+  "APL-204",
+  "APL-205",
+  "APL-206",
+  "APL-207",
+  "APL-208",
+  "APL-209",
+  "APL-210",
+  "APL-211",
+  "APL-212",
+  "APL-213",
+  "APL-301",
+  "APL-302",
+  "APL-303",
+  "APL-304",
+  "APL-305",
+  "APL-306",
+  "APL-307",
+  "APL-308",
+  "APL-309",
+  "APL-310",
+  "APL-311",
+  "APL-312",
+  "APL-313",
 ];
 
-export const products = [
-  {
-    id: "spot-led-empotrable",
-    name: "Spot LED empotrable",
-    category: "Iluminación arquitectónica",
-    description: "Spot empotrable de bajo deslumbramiento para acento, pasillos y áreas sociales.",
-    price: 285,
-    image:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=85",
+const artliteSubcategories = [
+  "Apagadores",
+  "Contactos",
+  "Contactos USB",
+  "Datos / LAN",
+  "TV / coaxial",
+  "Atenuadores",
+  "Timbres",
+  "Tapas ciegas",
+];
+
+const getPlateSuffix = (code: string) => code.slice(-3);
+
+const subcategoryBySuffix: Record<string, string> = {
+  "001": "Apagadores",
+  "002": "Contactos",
+  "101": "Apagadores",
+  "102": "Apagadores",
+  "103": "Apagadores",
+  "104": "Contactos",
+  "105": "Contactos",
+  "106": "Contactos",
+  "107": "Contactos USB",
+  "108": "Datos / LAN",
+  "109": "Datos / LAN",
+  "110": "TV / coaxial",
+  "111": "Atenuadores",
+  "112": "Tapas ciegas",
+  "113": "Timbres",
+  "201": "Apagadores",
+  "202": "Apagadores",
+  "203": "Apagadores",
+  "204": "Contactos",
+  "205": "Contactos",
+  "206": "Contactos",
+  "207": "Contactos USB",
+  "208": "Datos / LAN",
+  "209": "Datos / LAN",
+  "210": "TV / coaxial",
+  "211": "Atenuadores",
+  "212": "Tapas ciegas",
+  "213": "Timbres",
+  "301": "Apagadores",
+  "302": "Apagadores",
+  "303": "Apagadores",
+  "304": "Contactos",
+  "305": "Contactos",
+  "306": "Contactos",
+  "307": "Contactos USB",
+  "308": "Datos / LAN",
+  "309": "Datos / LAN",
+  "310": "TV / coaxial",
+  "311": "Atenuadores",
+  "312": "Tapas ciegas",
+  "313": "Timbres",
+};
+
+const getPlateSubcategory = (code: string) =>
+  subcategoryBySuffix[getPlateSuffix(code)] ?? "Consultar ficha técnica";
+
+const getPlateFinish = (code: string) => {
+  if (code.startsWith("APL-3")) {
+    return "Negro mate";
+  }
+
+  if (code.startsWith("APL-2") || code === "APL-001" || code === "APL-002") {
+    return "Blanco brillante";
+  }
+
+  return "Gris metálico";
+};
+
+const getPlateMaterial = (finish: string) =>
+  finish === "Gris metálico"
+    ? "Acero inoxidable + PC + hierro galvanizado"
+    : "Policarbonato + hierro galvanizado";
+
+const getPlateDimensions = (finish: string) =>
+  finish === "Gris metálico" ? "7.7 cm x 12.4 cm" : "7.5 cm x 11.8 cm";
+
+const baseTechnicalSpecs = (code: string, finish: string) => ({
+  voltage: "Consultar ficha técnica",
+  amperage: "Consultar ficha técnica",
+  frequency: "Consultar ficha técnica",
+  material: getPlateMaterial(finish),
+  dimensions: getPlateDimensions(finish),
+  finish,
+  usbOutput: "",
+  gfciSupport: "",
+  applicationType: getPlateSubcategory(code),
+  specialFeatures: [] as string[],
+});
+
+const technicalSpecsByCode: Record<
+  string,
+  Partial<ReturnType<typeof baseTechnicalSpecs>>
+> = {
+  "APL-002": {
+    gfciSupport: "Sí",
+    applicationType: "Contacto dúplex GFCI",
+    specialFeatures: ["Indicador LED", "Botones TEST y RESET"],
   },
-  {
-    id: "panel-led-ultra-delgado",
-    name: "Panel LED ultra delgado",
-    category: "Iluminación arquitectónica",
-    description: "Panel de luz uniforme para oficinas, cocinas, salas de reunión y cielos modulares.",
-    price: 320,
-    image:
-      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1000&q=85",
+  "APL-107": {
+    usbOutput: "USB Type C",
+    applicationType: "Contacto + salidas USB",
+    specialFeatures: ["Contacto con salidas USB", "Puerto USB Type C"],
   },
-  {
-    id: "riel-magnetico-modular",
-    name: "Riel magnético modular",
-    category: "Iluminación arquitectónica",
-    description: "Sistema de riel magnético con módulos orientables para residencias y galerías.",
-    price: 1650,
-    image:
-      "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1000&q=85",
+  "APL-109": {
+    applicationType: "Salida de comunicación LAN",
+    specialFeatures: ["Salida LAN / comunicación"],
   },
-  {
-    id: "lampara-colgante-cristal",
-    name: "Lámpara colgante de cristal",
-    category: "Iluminación decorativa",
-    description: "Colgante decorativo para comedores, barras, lobbies y espacios de hospitalidad.",
-    price: 890,
-    image:
-      "https://images.unsplash.com/photo-1540932239986-30128078f3c5?auto=format&fit=crop&w=1000&q=85",
+  "APL-110": {
+    applicationType: "Salida TV coaxial",
+    specialFeatures: ["Salida coaxial para televisión"],
   },
-  {
-    id: "aplique-led-interior",
-    name: "Aplique LED interior",
-    category: "Iluminación decorativa",
-    description: "Aplique de pared con luz indirecta para pasillos, dormitorios y recepciones.",
-    price: 540,
-    image:
-      "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=1000&q=85",
+  "APL-111": {
+    applicationType: "Dimmer / atenuador",
+    specialFeatures: ["Atenuador", "Iluminación máxima 100 W"],
   },
-  {
-    id: "luminaria-lineal-suspendida",
-    name: "Luminaria lineal suspendida",
-    category: "Iluminación decorativa",
-    description: "Perfil suspendido de luz continua para mesas largas, salas y áreas colaborativas.",
-    price: 2350,
-    image:
-      "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    id: "wall-washer-exterior",
-    name: "Wall washer exterior",
-    category: "Iluminación exterior",
-    description: "Bañador lineal IP65 para fachadas, muros de piedra y volúmenes arquitectónicos.",
-    price: 720,
-    image:
-      "https://images.unsplash.com/photo-1598228723793-52759bba239c?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    id: "baliza-led-jardin",
-    name: "Baliza LED para jardín",
-    category: "Iluminación exterior",
-    description: "Baliza minimalista para recorridos, terrazas y jardines con luz controlada.",
-    price: 390,
-    image:
-      "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    id: "proyector-led-exterior",
-    name: "Proyector LED exterior",
-    category: "Iluminación exterior",
-    description: "Proyector exterior compacto para volúmenes, vegetación y detalles de fachada.",
-    price: 680,
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    id: "iluminacion-comercial-led",
-    name: "Iluminación comercial LED",
-    category: "Iluminación comercial",
-    description: "Solución LED para tiendas, vitrinas y zonas de venta con alta reproducción visual.",
-    price: 520,
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    id: "panel-led-oficina-ugr",
-    name: "Panel LED para oficina UGR",
-    category: "Iluminación comercial",
-    description: "Panel LED de bajo deslumbramiento para oficinas, salas y áreas operativas.",
-    price: 310,
-    image:
-      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    id: "cilindro-led-sobrepuesto",
-    name: "Cilindro LED sobrepuesto",
-    category: "Iluminación comercial",
-    description: "Cilindro sobrepuesto para galerías, lobbies y circulaciones comerciales.",
-    price: 620,
-    image:
-      "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1000&q=85",
-  },
-] as const;
+};
+
+const getTechnicalSpecs = (code: string, finish: string) => ({
+  ...baseTechnicalSpecs(code, finish),
+  ...(technicalSpecsByCode[code] ?? {}),
+});
+
+export const catalogFilters = {
+  brands: ["Artlite"],
+  categories: ["Placas y accesorios eléctricos"],
+  subcategories: artliteSubcategories,
+  finishes: ["Gris metálico", "Blanco brillante", "Negro mate"],
+};
+
+export const catalogCategories = [
+  "Todos",
+  ...catalogFilters.categories,
+];
+
+export const products = artlitePlateCodes.map((code) => {
+  const finish = getPlateFinish(code);
+
+  return {
+    id: code.toLowerCase(),
+    sku: code,
+    name: code,
+    brand: "Artlite",
+    category: "Placas y accesorios eléctricos",
+    subcategory: getPlateSubcategory(code),
+    finish,
+    description: "Placa ARTLITE para proyecto. Información técnica pendiente de actualización.",
+    price: 0,
+    image: `/catalogos/artlite/placas/${code.toLowerCase()}.png`,
+    technicalSpecs: getTechnicalSpecs(code, finish),
+  };
+});
 
 export type Product = (typeof products)[number];

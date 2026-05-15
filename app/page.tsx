@@ -40,7 +40,7 @@ export default function Home() {
             className="object-cover opacity-[0.62]"
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92),rgba(0,0,0,0.58)_46%,rgba(0,0,0,0.18))]" />
-          <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black via-black/78 to-transparent" />
         </div>
 
         <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
@@ -49,7 +49,7 @@ export default function Home() {
               Iluminación arquitectónica premium
             </p>
             <h1 className="max-w-full text-[2.12rem] font-semibold leading-[1.05] tracking-normal text-white [overflow-wrap:anywhere] sm:max-w-5xl sm:text-7xl sm:leading-[0.96] lg:text-8xl">
-              Luz precisa para espacios que se sienten extraordinarios.
+              Luz precisa para espacios que se sienten extraordinarios
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-7 text-white/72 sm:text-xl sm:leading-8">
               ECONOLUZ GT acompaña proyectos residenciales, comerciales y de
@@ -258,12 +258,22 @@ export default function Home() {
               >
                 Preparar cotización
               </Link>
-              <a
-                href={`mailto:${contact.email}?subject=Solicitud%20de%20asesoria%20ECONOLUZ%20GT`}
-                className="inline-flex items-center justify-center rounded-full border border-white/22 px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white/10"
-              >
-                {contact.email}
-              </a>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <a
+                  href={`mailto:${contact.email}?subject=Solicitud%20de%20asesoria%20ECONOLUZ%20GT`}
+                  className="inline-flex items-center justify-center rounded-full border border-white/22 px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white/10"
+                >
+                  {contact.email}
+                </a>
+                <a
+                  href={`https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(contact.whatsappDefaultMessage)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-full border border-white/22 px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white/10"
+                >
+                  WhatsApp
+                </a>
+              </div>
             </div>
             <div className="mt-8 grid gap-4 border-t border-white/12 pt-6 text-sm leading-6 text-white/58 sm:grid-cols-2">
               <p>

@@ -36,3 +36,26 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.brands-marquee {
+  animation: brands-marquee 28s linear infinite;
+}
+
+.brands-marquee:hover {
+  animation-play-state: paused;
+}
+
+.product-drawer-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+@keyframes brands-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% - 0.5rem));
+  }
+}

@@ -78,7 +78,7 @@ export default function QuoteDrawer({
                     <div>
                       <h3 className="font-semibold">{item.product.name}</h3>
                       <p className="mt-1 text-sm text-neutral-500">
-                        {formatPrice(item.product.price)} ref.
+                        {item.product.price > 0 ? `${formatPrice(item.product.price)} ref.` : "Por cotizar"}
                       </p>
                     </div>
                     <button
@@ -110,7 +110,9 @@ export default function QuoteDrawer({
                       </button>
                     </div>
                     <p className="font-semibold">
-                      {formatPrice(item.product.price * item.quantity)}
+                      {item.product.price > 0
+                        ? formatPrice(item.product.price * item.quantity)
+                        : "Por cotizar"}
                     </p>
                   </div>
                 </div>
@@ -124,7 +126,9 @@ export default function QuoteDrawer({
             <p className="text-sm uppercase tracking-[0.18em] text-neutral-500">
               Total estimado
             </p>
-            <p className="text-2xl font-semibold">{formatPrice(total)}</p>
+            <p className="text-2xl font-semibold">
+              {total > 0 ? formatPrice(total) : "Por cotizar"}
+            </p>
           </div>
           <a
             href="#asesoria-proyecto"

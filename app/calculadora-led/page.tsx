@@ -1,4 +1,3 @@
-import ContactCTA from "../components/ContactCTA";
 import LedSavingsCalculator from "../components/LedSavingsCalculator";
 import SectionHeader from "../components/SectionHeader";
 import SiteFooter from "../components/SiteFooter";
@@ -116,14 +115,6 @@ export default function CalculadoraLed() {
           </div>
         </div>
       </section>
-
-      <ContactCTA
-        eyebrow="Siguiente paso"
-        title="Solicitar asesoría con estos resultados"
-        description="Usa el resultado como punto de partida y completa una solicitud de proyecto para revisar cantidades, temperaturas, ópticas y productos adecuados."
-        href="/catalogo#asesoria-proyecto"
-        label="Solicitar asesoría"
-      />
 
       <SiteFooter />
     </main>

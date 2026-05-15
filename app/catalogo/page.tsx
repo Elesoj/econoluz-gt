@@ -1,12 +1,13 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/ProductCard";
+import ProductTechnicalDrawer from "../components/ProductTechnicalDrawer";
 import QuoteDrawer from "../components/QuoteDrawer";
 import SectionHeader from "../components/SectionHeader";
 import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
-import { catalogCategories, products, type Product } from "../data/products";
+import { catalogFilters, products, type Product } from "../data/products";
 import {
   contact,
   mainNavItems,
@@ -49,30 +50,6 @@ const initialFormState: QuoteFormState = {
   message: "",
 };
 
-const validateForm = (formState: QuoteFormState) => {
-  const errors: QuoteFormErrors = {};
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneDigits = formState.phone.replace(/\D/g, "");
-
-  if (formState.fullName.trim().length < 2) {
-    errors.fullName = "Ingresa tu nombre completo.";
-  }
-
-  if (phoneDigits.length < 8) {
-    errors.phone = "Ingresa un número de teléfono válido.";
-  }
-
-  if (!emailPattern.test(formState.email.trim())) {
-    errors.email = "Ingresa un correo electrónico válido.";
-  }
-
-  if (!formState.projectType) {
-    errors.projectType = "Selecciona el tipo de proyecto.";
-  }
-
-  return errors;
-};
-
 const getStoredLedResultsSummary = () => {
   if (typeof window === "undefined") {
     return "";
@@ -112,21 +89,29 @@ const clearTemporaryQuoteData = () => {
 };
 
 export default function Catalogo() {
-  const [activeCategory, setActiveCategory] = useState("Todos");
+  const [selectedBrand, setSelectedBrand] = useState("Todos");
+  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("Todos");
+  const [selectedFinish, setSelectedFinish] = useState("Todos");
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
+  const [technicalProduct, setTechnicalProduct] = useState<Product | null>(null);
   const [formState, setFormState] = useState<QuoteFormState>(buildInitialFormState);
   const [formErrors, setFormErrors] = useState<QuoteFormErrors>({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [ledResultsSummary, setLedResultsSummary] = useState(getStoredLedResultsSummary);
+  const [ledResultsSummary] = useState(getStoredLedResultsSummary);
 
   const filteredProducts = useMemo(() => {
-    if (activeCategory === "Todos") {
-      return products;
-    }
+    return products.filter((product) => {
+      const matchesBrand = selectedBrand === "Todos" || product.brand === selectedBrand;
+      const matchesCategory =
+        selectedCategory === "Todos" || product.category === selectedCategory;
+      const matchesSubcategory =
+        selectedSubcategory === "Todos" || product.subcategory === selectedSubcategory;
+      const matchesFinish = selectedFinish === "Todos" || product.finish === selectedFinish;
 
-    return products.filter((product) => product.category === activeCategory);
-  }, [activeCategory]);
+      return matchesBrand && matchesCategory && matchesSubcategory && matchesFinish;
+    });
+  }, [selectedBrand, selectedCategory, selectedFinish, selectedSubcategory]);
 
   const quoteCount = quoteItems.reduce((total, item) => total + item.quantity, 0);
   const quoteTotal = quoteItems.reduce(
@@ -140,10 +125,14 @@ export default function Catalogo() {
     );
     const details = [
       formState.fullName ? `Nombre: ${formState.fullName}` : "",
+      formState.phone ? `Teléfono: ${formState.phone}` : "",
+      formState.email ? `Email: ${formState.email}` : "",
       formState.projectType ? `Tipo de proyecto: ${formState.projectType}` : "",
       formState.estimatedArea ? `Área estimada: ${formState.estimatedArea} m²` : "",
       formState.budgetRange ? `Presupuesto: ${formState.budgetRange}` : "",
+      formState.lightingType ? `Tipo de iluminación: ${formState.lightingType}` : "",
       selectedProducts.length ? `Productos: ${selectedProducts.join(", ")}` : "",
+      formState.message ? `Mensaje: ${formState.message}` : "",
       ledResultsSummary ? ledResultsSummary : "",
     ].filter(Boolean);
 
@@ -189,7 +178,7 @@ export default function Catalogo() {
     };
   }, []);
 
-  const addToQuote = (product: Product) => {
+  const addToQuote = (product: Product, openQuote = true) => {
     setQuoteItems((currentItems) => {
       const existingItem = currentItems.find((item) => item.product.id === product.id);
 
@@ -201,7 +190,10 @@ export default function Catalogo() {
 
       return [...currentItems, { product, quantity: 1 }];
     });
-    setIsQuoteOpen(true);
+
+    if (openQuote) {
+      setIsQuoteOpen(true);
+    }
   };
 
   const removeFromQuote = (productId: string) => {
@@ -226,26 +218,6 @@ export default function Catalogo() {
   const updateFormField = (field: keyof QuoteFormState, value: string) => {
     setFormState((currentForm) => ({ ...currentForm, [field]: value }));
     setFormErrors((currentErrors) => ({ ...currentErrors, [field]: undefined }));
-    setIsSubmitted(false);
-  };
-
-  const submitQuotation = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const errors = validateForm(formState);
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      setIsSubmitted(false);
-      return;
-    }
-
-    setIsSubmitted(true);
-    setIsQuoteOpen(false);
-    setQuoteItems([]);
-    setFormState(initialFormState);
-    setFormErrors({});
-    setLedResultsSummary("");
-    clearTemporaryQuoteData();
   };
 
   return (
@@ -277,25 +249,64 @@ export default function Catalogo() {
 
       <section className="px-5 py-8 sm:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="flex gap-2 overflow-x-auto border-b border-neutral-200 pb-5">
-            {catalogCategories.map((category) => {
-              const isActive = activeCategory === category;
-
-              return (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => setActiveCategory(category)}
-                  className={`shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition duration-300 ${
-                    isActive
-                      ? "border-black bg-black text-white"
-                      : "border-neutral-200 bg-white text-neutral-700 hover:border-black hover:text-black"
-                  }`}
+          <div className="grid gap-4 border-b border-neutral-200 pb-6 lg:grid-cols-[repeat(4,1fr)_auto] lg:items-end">
+            {[
+              {
+                label: "Marca",
+                value: selectedBrand,
+                onChange: setSelectedBrand,
+                options: catalogFilters.brands,
+              },
+              {
+                label: "Categoría",
+                value: selectedCategory,
+                onChange: setSelectedCategory,
+                options: catalogFilters.categories,
+              },
+              {
+                label: "Subcategoría",
+                value: selectedSubcategory,
+                onChange: setSelectedSubcategory,
+                options: catalogFilters.subcategories,
+              },
+              {
+                label: "Acabado / color",
+                value: selectedFinish,
+                onChange: setSelectedFinish,
+                options: catalogFilters.finishes,
+              },
+            ].map((filter) => (
+              <label key={filter.label} className="grid gap-2">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                  {filter.label}
+                </span>
+                <select
+                  value={filter.value}
+                  onChange={(event) => filter.onChange(event.target.value)}
+                  className="w-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-black outline-none transition focus:border-black"
                 >
-                  {category}
-                </button>
-              );
-            })}
+                  <option value="Todos">Todos</option>
+                  {filter.options.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedBrand("Todos");
+                setSelectedCategory("Todos");
+                setSelectedSubcategory("Todos");
+                setSelectedFinish("Todos");
+              }}
+              className="inline-flex justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
+            >
+              Limpiar
+            </button>
           </div>
         </div>
       </section>
@@ -305,8 +316,8 @@ export default function Catalogo() {
           <div className="mb-8">
             <SectionHeader
               eyebrow="Referencias para proyecto"
-              title={activeCategory === "Todos" ? "Todas las categorias" : activeCategory}
-              description={`${filteredProducts.length} luminarias disponibles como referencia. Agrega productos para preparar una solicitud de asesoría más precisa.`}
+              title="Placas ARTLITE"
+              description={`${filteredProducts.length} referencias disponibles. Combina marca, categoría, subcategoría y acabado para preparar una solicitud más precisa.`}
             />
           </div>
 
@@ -320,7 +331,11 @@ export default function Catalogo() {
                   product={product}
                   quantity={selectedItem?.quantity}
                   formatPrice={formatCurrency}
-                  onAdd={() => addToQuote(product)}
+                  onAdd={() => addToQuote(product, false)}
+                  onDecrease={() =>
+                    updateQuantity(product.id, (selectedItem?.quantity ?? 1) - 1)
+                  }
+                  onViewDetails={() => setTechnicalProduct(product)}
                 />
               );
             })}
@@ -368,11 +383,15 @@ export default function Catalogo() {
                         <p className="font-semibold text-white">{item.product.name}</p>
                         <p className="mt-1 text-sm text-white/48">
                           {item.quantity} unidad{item.quantity > 1 ? "es" : ""} /{" "}
-                          {formatCurrency(item.product.price)} ref.
+                          {item.product.price > 0
+                            ? `${formatCurrency(item.product.price)} ref.`
+                            : "Por cotizar"}
                         </p>
                       </div>
                       <p className="shrink-0 font-semibold">
-                        {formatCurrency(item.product.price * item.quantity)}
+                        {item.product.price > 0
+                          ? formatCurrency(item.product.price * item.quantity)
+                          : "Por cotizar"}
                       </p>
                     </div>
                   ))
@@ -383,7 +402,9 @@ export default function Catalogo() {
                 <p className="text-sm uppercase tracking-[0.18em] text-white/44">
                   Total estimado
                 </p>
-                <p className="text-2xl font-semibold">{formatCurrency(quoteTotal)}</p>
+                <p className="text-2xl font-semibold">
+                  {quoteTotal > 0 ? formatCurrency(quoteTotal) : "Por cotizar"}
+                </p>
               </div>
             </div>
 
@@ -407,9 +428,7 @@ export default function Catalogo() {
             )}
           </div>
 
-          <form
-            onSubmit={submitQuotation}
-            noValidate
+          <div
             className="border border-white/12 bg-white p-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8"
           >
             {ledResultsSummary && (
@@ -420,18 +439,6 @@ export default function Catalogo() {
                 <p className="mt-3 text-sm leading-6 text-neutral-600">
                   Agregamos los resultados de la calculadora al mensaje adicional para que el
                   equipo pueda revisarlos junto con tu solicitud.
-                </p>
-              </div>
-            )}
-
-            {isSubmitted && (
-              <div className="mb-6 border border-black bg-black p-5 text-white">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/54">
-                  Solicitud recibida
-                </p>
-                <p className="mt-3 text-lg font-semibold leading-7">
-                  Gracias por solicitar una asesoría especializada. Nuestro equipo se
-                  comunicará contigo pronto.
                 </p>
               </div>
             )}
@@ -567,25 +574,19 @@ export default function Catalogo() {
               </label>
             </div>
 
-            <button
-              type="submit"
-              className="mt-7 w-full rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
-            >
-              Solicitar asesoría de proyecto
-            </button>
             <a
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 flex w-full items-center justify-center rounded-full border border-black px-7 py-4 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-black hover:text-white"
+              className="mt-7 flex w-full items-center justify-center rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
             >
-              Contactar por WhatsApp
+              Enviar información por WhatsApp
             </a>
             <p className="mt-4 text-xs leading-5 text-neutral-500">
-              Esta solicitud queda preparada localmente para futuras conexiones con email,
-              Google Sheets, CRM o APIs de backend.
+              Los datos del formulario y productos seleccionados se enviarán por WhatsApp
+              al asesor disponible.
             </p>
-          </form>
+          </div>
         </div>
       </section>
 
@@ -595,7 +596,7 @@ export default function Catalogo() {
           onClick={() => setIsQuoteOpen(true)}
           className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:bg-neutral-800 sm:bottom-8 sm:right-8"
         >
-          Ver proyecto
+          Ver carrito
           <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">
             {quoteCount}
           </span>
@@ -610,6 +611,20 @@ export default function Catalogo() {
         onClose={() => setIsQuoteOpen(false)}
         onRemove={removeFromQuote}
         onUpdateQuantity={updateQuantity}
+      />
+
+      <ProductTechnicalDrawer
+        key={technicalProduct?.id ?? "closed-technical-product"}
+        product={technicalProduct}
+        formatPrice={formatCurrency}
+        onAdd={(product) => {
+          addToQuote(product as Product, false);
+        }}
+        onClose={() => setTechnicalProduct(null)}
+        onViewQuote={() => {
+          setTechnicalProduct(null);
+          setIsQuoteOpen(true);
+        }}
       />
 
       <SiteFooter />
