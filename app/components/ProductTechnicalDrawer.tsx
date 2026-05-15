@@ -24,6 +24,14 @@ type TechnicalProduct = {
     usbOutput?: string;
     gfciSupport?: string;
     applicationType?: string;
+    protection?: string;
+    standard?: string;
+    disconnectSpeed?: string;
+    operatingTemperature?: string;
+    humidity?: string;
+    dielectricVoltage?: string;
+    shortCircuitCurrent?: string;
+    switchingLevel?: string;
     specialFeatures?: string[];
   };
 };
@@ -85,7 +93,7 @@ export default function ProductTechnicalDrawer({
   };
 
   const specs = product.technicalSpecs;
-  const specRows = [
+  const baseSpecRows = [
     ["Voltaje", specs?.voltage],
     ["Amperaje", specs?.amperage],
     ["Frecuencia", specs?.frequency],
@@ -95,7 +103,20 @@ export default function ProductTechnicalDrawer({
     ["Salida USB", specs?.usbOutput],
     ["Soporte GFCI", specs?.gfciSupport],
     ["Aplicación", specs?.applicationType ?? product.subcategory],
-  ].map(([label, value]) => [label, value || "Consultar ficha técnica"]);
+  ].filter(([, value]) => Boolean(value));
+
+  const extraSpecRows = [
+    ["Protección", specs?.protection],
+    ["Estándar", specs?.standard],
+    ["Velocidad de desconexión", specs?.disconnectSpeed],
+    ["Operaciones", specs?.operatingTemperature],
+    ["Humedad", specs?.humidity],
+    ["Voltaje dieléctrico", specs?.dielectricVoltage],
+    ["SCCR", specs?.shortCircuitCurrent],
+    ["Nivel de conmutación", specs?.switchingLevel],
+  ].filter(([, value]) => Boolean(value));
+
+  const specRows = [...baseSpecRows, ...extraSpecRows];
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -184,7 +205,7 @@ export default function ProductTechnicalDrawer({
                 {specRows.map(([label, value]) => (
                   <div
                     key={label}
-                    className="border-b border-neutral-200 p-4 last:border-b-0 even:sm:border-l sm:[&:nth-last-child(-n+2)]:border-b-0"
+                    className="border-b border-neutral-200 p-4 last:border-b-0 even:sm:border-l sm:last:border-b-0 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
                   >
                     <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
                       {label}
