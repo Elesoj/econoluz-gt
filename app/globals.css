@@ -50,6 +50,18 @@ body {
   scrollbar-gutter: stable;
 }
 
+.catalog-stage {
+  animation: catalog-stage-in 420ms ease both;
+}
+
+.catalog-stage-out {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
 @keyframes brands-marquee {
   from {
     transform: translateX(0);
@@ -57,5 +69,27 @@ body {
 
   to {
     transform: translateX(calc(-50% - 0.5rem));
+  }
+}
+
+@keyframes catalog-stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-stage {
+    animation: none;
+  }
+
+  .catalog-stage-out {
+    transition: none;
   }
 }

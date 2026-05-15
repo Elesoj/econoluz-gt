@@ -102,6 +102,20 @@ const subcategoryBySuffix: Record<string, string> = {
 const getPlateSubcategory = (code: string) =>
   subcategoryBySuffix[getPlateSuffix(code)] ?? "Consultar ficha técnica";
 
+const productTypeByPlateSubcategory: Record<string, string> = {
+  Apagadores: "Placas y apagadores",
+  Contactos: "Contactos",
+  "Contactos USB": "USB y conectividad",
+  "Datos / LAN": "USB y conectividad",
+  "TV / coaxial": "USB y conectividad",
+  Atenuadores: "Placas y apagadores",
+  Timbres: "Placas y apagadores",
+  "Tapas ciegas": "Placas y apagadores",
+};
+
+const getPlateProductType = (code: string) =>
+  productTypeByPlateSubcategory[getPlateSubcategory(code)] ?? "Placas y apagadores";
+
 const getPlateFinish = (code: string) => {
   if (code.startsWith("APL-3")) {
     return "Negro mate";
@@ -147,6 +161,15 @@ const technicalSpecsByCode: Record<
       dielectricVoltage: string;
       shortCircuitCurrent: string;
       switchingLevel: string;
+      luminousFlux: string;
+      power: string;
+      efficiency: string;
+      dimming: string;
+      colorTemperature: string;
+      cri: string;
+      beamAngle: string;
+      impactRating: string;
+      productCode: string;
     }
   >
 > = {
@@ -608,10 +631,47 @@ const descriptionByCode: Record<string, string> = {
 };
 
 export const catalogFilters = {
-  brands: ["Artlite"],
-  categories: ["Placas y accesorios eléctricos"],
-  subcategories: artliteSubcategories,
+  brands: ["Artlite", "Construlita"],
+  categories: [
+    "Iluminación industrial",
+    "Iluminación arquitectónica",
+    "Iluminación exterior",
+    "Iluminación residencial",
+    "Placas y accesorios eléctricos",
+    "Tiras LED",
+    "Emergencia y señalización",
+  ],
+  subcategories: [
+    ...artliteSubcategories,
+    "Cuasar",
+    "HB Pure",
+    "HB Steel",
+    "Highlens",
+    "Supreme",
+  ],
   finishes: ["Gris metálico", "Blanco brillante", "Negro mate"],
+  applications: [
+    "Alto montaje",
+    "Altura media",
+    "Lineales industriales",
+    "Gabinetes",
+    "A prueba de vapor",
+    "Wallpacks",
+    "Downlights",
+    "Luminarios para riel",
+    "Suspendidos",
+    "Empotrados en piso",
+    "Arbotantes",
+    "Decorativos",
+    "Placas y apagadores",
+    "Contactos",
+    "USB y conectividad",
+    "Datos / LAN",
+    "TV / coaxial",
+    "Atenuadores",
+    "Timbres",
+    "Tapas ciegas",
+  ],
 };
 
 export const catalogCategories = [
@@ -619,7 +679,7 @@ export const catalogCategories = [
   ...catalogFilters.categories,
 ];
 
-export const products = artlitePlateCodes.map((code) => {
+const artliteProducts = artlitePlateCodes.map((code) => {
   const finish = getPlateFinish(code);
 
   return {
@@ -629,6 +689,8 @@ export const products = artlitePlateCodes.map((code) => {
     brand: "Artlite",
     category: "Placas y accesorios eléctricos",
     subcategory: getPlateSubcategory(code),
+    collection: "APL",
+    application: getPlateProductType(code),
     finish,
     description:
       descriptionByCode[code] ??
@@ -638,5 +700,216 @@ export const products = artlitePlateCodes.map((code) => {
     technicalSpecs: getTechnicalSpecs(code, finish),
   };
 });
+
+const construlitaAltoMontajeProducts = [
+  {
+    id: "construlita-cuasar",
+    sku: "cuasar",
+    name: "Cuasar",
+    brand: "Construlita",
+    category: "Iluminación industrial",
+    subcategory: "Cuasar",
+    collection: "Cuasar",
+    application: "Alto montaje",
+    finish: "",
+    description:
+      "Luminario LED de alto montaje con eficiencia de 170 lm/W, opciones de 75 a 200 W, flujo hasta 34 000 lm y montaje suspendido o sobrepuesto.",
+    price: 0,
+    image: "/catalogos/construlita/alto_montaje/cuasar1.png",
+    images: [
+      "/catalogos/construlita/alto_montaje/cuasar1.png",
+      "/catalogos/construlita/alto_montaje/cuasar2.png",
+    ],
+    technicalSpecs: {
+      productCode:
+        "IN8031NBNA / IN8028NBFA / IN8028NBNA / IN8029NBFA / IN8029NBNA / IN8030NBFA / IN8030NBNA",
+      luminousFlux: "12 250 lm / 17 000 lm / 25 500 lm / 34 000 lm",
+      power: "75 W / 100 W / 150 W / 200 W",
+      efficiency: "170 lm/W",
+      voltage: "100-277V~",
+      dimming: "0-10V",
+      colorTemperature: "4 000 K / 5 000 K",
+      cri: "80",
+      beamAngle: "90°",
+      protection: "IP65",
+      impactRating: "IK10",
+      dimensions:
+        "75 W / 100 W: Ø 275 mm x 166 mm; 150 W: Ø 285 mm x 165 mm; 200 W: Ø 305 mm x 181 mm",
+      applicationType: "Alto montaje con convección natural de aire",
+      specialFeatures: [
+        "Incluye argolla para montaje suspendido",
+        "Incluye herraje dirigible para montaje sobrepuesto",
+        "Ajuste dirigible ±90°",
+        "LEDs distribuidos desde el centro de la PCB",
+      ],
+    },
+  },
+  {
+    id: "construlita-hb-pure",
+    sku: "hb_pure",
+    name: "HB Pure",
+    brand: "Construlita",
+    category: "Iluminación industrial",
+    subcategory: "HB Pure",
+    collection: "HB Pure",
+    application: "Alto montaje",
+    finish: "",
+    description:
+      "Luminario LED de alto montaje para industria alimenticia, con cuerpo autolimpiable, IP66, óptica 120° y potencias de 100 a 200 W.",
+    price: 0,
+    image: "/catalogos/construlita/alto_montaje/hb_pure.png",
+    technicalSpecs: {
+      productCode: "IN8025BBNA / IN8026BBNA / IN8027BBNA",
+      luminousFlux: "13 500 lm / 20 000 lm / 26 000 lm",
+      power: "100 W / 150 W / 200 W",
+      efficiency: "135 lm/W / 133 lm/W / 130 lm/W",
+      voltage: "100-277V~",
+      dimming: "0-10V",
+      colorTemperature: "4 000 K",
+      cri: "80",
+      beamAngle: "120°",
+      protection: "IP66",
+      impactRating: "IK05",
+      dimensions: "Ø 489 mm x 200 mm",
+      applicationType: "Alto montaje para industria alimenticia",
+      specialFeatures: [
+        "Autolimpieza",
+        "Cuerpo liso diseñado para evitar acumulación de polvo y agua",
+        "Sin tornillería expuesta",
+        "Materiales de construcción seguros",
+        "Sin vidrio en la pantalla",
+        "Lentes de PC",
+      ],
+    },
+  },
+  {
+    id: "construlita-hb-steel",
+    sku: "hb_steel",
+    name: "HB Steel",
+    brand: "Construlita",
+    category: "Iluminación industrial",
+    subcategory: "HB Steel",
+    collection: "HB Steel",
+    application: "Alto montaje",
+    finish: "",
+    description:
+      "Luminario LED lineal de alto montaje para aplicaciones industriales, 160 lm/W, hasta 36 000 lm y opciones de sensor o emergencia.",
+    price: 0,
+    image: "/catalogos/construlita/alto_montaje/hb_steel.png",
+    technicalSpecs: {
+      productCode:
+        "IN8204BBFA / IN8220BBFA / IN8201BBFA / IN8221BBFA / IN8202BBFA / IN8222BBFA / IN8223BBFA / IN8203BBFA / IN8224BBFA",
+      luminousFlux:
+        "12 000 lm / 15 000 lm / 18 000 lm / 20 000 lm / 24 000 lm / 26 000 lm / 30 000 lm / 35 000 lm / 36 000 lm",
+      power: "73 W / 95 W / 110 W / 126 W / 146 W / 160 W / 184 W / 215 W / 225 W",
+      efficiency: "160 lm/W",
+      voltage: "100-277V~",
+      dimming: "0-10V",
+      colorTemperature: "5 000 K",
+      cri: "80",
+      beamAngle: "105°",
+      protection: "IP40",
+      dimensions:
+        "73 W / 95 W / 110 W / 126 W / 146 W / 160 W: 325 x 612 x 53 mm; 184 W / 215 W / 225 W: 325 x 1 217 x 53 mm",
+      applicationType: "Alto montaje lineal para aplicaciones industriales",
+      specialFeatures: [
+        "Hasta 100,000 horas de vida L70",
+        "Driver de emergencia AC7520",
+        "Sensor de movimiento AC1300B",
+        "Control remoto AC1301B para sensor de movimiento",
+        "Sensor PIR AC1302B",
+        "Control remoto AC1303N para sensor PIR",
+        "Batería de emergencia 90 min",
+        "Sensor ideal según proyecto o sensibilidad requerida",
+      ],
+    },
+  },
+  {
+    id: "construlita-highlens",
+    sku: "highlens",
+    name: "Highlens",
+    brand: "Construlita",
+    category: "Iluminación industrial",
+    subcategory: "Highlens",
+    collection: "Highlens",
+    application: "Alto montaje",
+    finish: "",
+    description:
+      "Luminario LED de alto montaje con selector de potencia, selector de lentes, 170 lm/W, IP65 y ángulos configurables de 60°, 85° o 105°.",
+    price: 0,
+    image: "/catalogos/construlita/alto_montaje/highlens1.png",
+    images: [
+      "/catalogos/construlita/alto_montaje/highlens1.png",
+      "/catalogos/construlita/alto_montaje/highlens2.png",
+    ],
+    technicalSpecs: {
+      productCode: "IN8025BBFA",
+      luminousFlux: "15 300 lm / 20 400 lm / 25 500 lm",
+      power: "90 W / 120 W / 150 W",
+      efficiency: "170 lm/W",
+      voltage: "100-277V~",
+      dimming: "0-10V",
+      colorTemperature: "5 000 K",
+      cri: "80",
+      beamAngle: "60° / 85° / 105°",
+      protection: "IP65",
+      impactRating: "IK08",
+      dimensions: "Ø 295 mm x 70.5 mm x 181 mm",
+      applicationType: "Alto montaje con selector de potencia y selector de lentes",
+      specialFeatures: [
+        "Selector de potencia 60% / 80% / 100%",
+        "Selector de lentes W 105°, M 85°, N 60°",
+      ],
+    },
+  },
+  {
+    id: "construlita-supreme",
+    sku: "supreme",
+    name: "Supreme",
+    brand: "Construlita",
+    category: "Iluminación industrial",
+    subcategory: "Supreme",
+    collection: "Supreme",
+    application: "Alto montaje",
+    finish: "",
+    description:
+      "Luminario LED de alto montaje configurable, 170 lm/W, ópticas intercambiables, IP65 y accesorios para sensor, control remoto o emergencia.",
+    price: 0,
+    image: "/catalogos/construlita/alto_montaje/supreme.png",
+    technicalSpecs: {
+      productCode:
+        "IN8040NBFA / IN8040NBNA / IN8041NBFA / IN8041NBNA / IN8042NBFA / IN8042NBNA",
+      luminousFlux: "17 000 lm / 25 500 lm / 34 000 lm",
+      power: "100 W / 150 W / 200 W",
+      efficiency: "170 lm/W",
+      voltage: "100-277V~",
+      dimming: "0-10V",
+      colorTemperature: "5 000 K / 4 000 K",
+      cri: "80",
+      beamAngle: "85° instalado, con opción a sustituirse por 55° o 110°",
+      protection: "IP65",
+      impactRating: "IK08",
+      dimensions: "100 W: Ø 308 mm x 216 mm; 150 W: Ø 321 mm x 220 mm; 200 W: Ø 331 mm x 225 mm",
+      applicationType: "Alto montaje configurable con ópticas intercambiables",
+      specialFeatures: [
+        "Configurable",
+        "Argolla para suspender",
+        "Sobreponer en superficie horizontal",
+        "Sobreponer en superficie vertical",
+        "Convección natural de aire",
+        "LEDs distribuidos desde el centro de la PCB",
+        "Sensor opcional AC1305B",
+        "Control remoto AC1304B",
+        "Campana Cutoff AC1400N",
+        "Batería de emergencia 90 min AC7540N",
+        "Óptica AC1410 55°",
+        "Óptica instalada 85°",
+        "Óptica AC1411 110°",
+      ],
+    },
+  },
+];
+
+export const products = [...artliteProducts, ...construlitaAltoMontajeProducts];
 
 export type Product = (typeof products)[number];

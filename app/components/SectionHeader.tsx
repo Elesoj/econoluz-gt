@@ -26,20 +26,20 @@ export default function SectionHeader({
       }`}
     >
       <div>
-        <p
-          className={`text-xs font-semibold uppercase tracking-[0.28em] ${
-            invert ? "text-white/46" : "text-neutral-500"
-          }`}
-        >
-          {eyebrow}
-        </p>
         <h2
-          className={`mt-4 text-4xl font-semibold leading-tight sm:text-5xl ${
+          className={`text-4xl font-semibold leading-tight sm:text-5xl ${
             invert ? "text-white" : "text-black"
           }`}
         >
           {title}
         </h2>
+        <p
+          className={`mt-4 text-xs font-semibold uppercase tracking-[0.28em] ${
+            invert ? "text-white/46" : "text-neutral-500"
+          }`}
+        >
+          {eyebrow}
+        </p>
       </div>
 
       {(description || action) && (

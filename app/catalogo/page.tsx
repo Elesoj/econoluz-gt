@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductTechnicalDrawer from "../components/ProductTechnicalDrawer";
 import QuoteDrawer from "../components/QuoteDrawer";
@@ -16,6 +16,79 @@ import {
   quoteProjectTypes,
 } from "../data/siteData";
 import { formatCurrency } from "../lib/formatters";
+
+const PAGE_SIZE = 40;
+
+const catalogTypeCards = [
+  {
+    title: "Iluminación industrial",
+    description: "Luminarias para bodegas, plantas, producción y grandes alturas.",
+    marker: "IND",
+  },
+  {
+    title: "Iluminación arquitectónica",
+    description: "Soluciones para acento, integración y lectura espacial.",
+    marker: "ARQ",
+  },
+  {
+    title: "Iluminación exterior",
+    description: "Equipos para fachadas, perímetros, jardines y áreas abiertas.",
+    marker: "EXT",
+  },
+  {
+    title: "Iluminación residencial",
+    description: "Luz funcional y decorativa para vivienda e interiores.",
+    marker: "RES",
+  },
+  {
+    title: "Placas y accesorios eléctricos",
+    description: "Apagadores, contactos, conectividad y acabados de línea.",
+    marker: "APL",
+  },
+  {
+    title: "Tiras LED",
+    description: "Líneas flexibles para integración, detalle y luz indirecta.",
+    marker: "LED",
+  },
+  {
+    title: "Emergencia y señalización",
+    description: "Soluciones para rutas, respaldo y seguridad operativa.",
+    marker: "SEG",
+  },
+];
+
+const applicationGroups: Record<string, string[]> = {
+  "Iluminación industrial": [
+    "Alto montaje",
+    "Altura media",
+    "Lineales industriales",
+    "Gabinetes",
+    "A prueba de vapor",
+    "Wallpacks",
+  ],
+  "Iluminación arquitectónica": [
+    "Downlights",
+    "Luminarios para riel",
+    "Suspendidos",
+    "Empotrados en piso",
+    "Arbotantes",
+    "Decorativos",
+  ],
+  "Iluminación exterior": ["Wallpacks", "Arbotantes", "Decorativos"],
+  "Iluminación residencial": ["Downlights", "Decorativos", "Placas y apagadores"],
+  "Placas y accesorios eléctricos": [
+    "Placas y apagadores",
+    "Contactos",
+    "USB y conectividad",
+    "Datos / LAN",
+    "TV / coaxial",
+    "Atenuadores",
+    "Timbres",
+    "Tapas ciegas",
+  ],
+  "Tiras LED": ["Decorativos"],
+  "Emergencia y señalización": ["Gabinetes"],
+};
 
 type QuoteItem = {
   product: Product;
@@ -89,29 +162,219 @@ const clearTemporaryQuoteData = () => {
 };
 
 export default function Catalogo() {
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("Todos");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("Todos");
+  const [selectedCollection, setSelectedCollection] = useState("Todos");
+  const [selectedApplication, setSelectedApplication] = useState("Todos");
   const [selectedFinish, setSelectedFinish] = useState("Todos");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [isCatalogTransitioning, setIsCatalogTransitioning] = useState(false);
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
   const [technicalProduct, setTechnicalProduct] = useState<Product | null>(null);
   const [formState, setFormState] = useState<QuoteFormState>(buildInitialFormState);
   const [formErrors, setFormErrors] = useState<QuoteFormErrors>({});
   const [ledResultsSummary] = useState(getStoredLedResultsSummary);
+  const catalogStageRef = useRef<HTMLDivElement>(null);
+
+  const filterOptions = useMemo(() => {
+    const uniqueValues = (values: string[]) =>
+      Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b));
+
+    const matchesBrand = (product: Product) =>
+      selectedBrand === "Todos" || product.brand === selectedBrand;
+    const matchesCategory = (product: Product) =>
+      selectedCategory === "Todos" || product.category === selectedCategory;
+    const matchesCollection = (product: Product) =>
+      selectedCollection === "Todos" || product.collection === selectedCollection;
+    const matchesApplication = (product: Product) =>
+      selectedApplication === "Todos" || product.application === selectedApplication;
+    const matchesFinish = (product: Product) =>
+      selectedFinish === "Todos" || product.finish === selectedFinish;
+
+    return {
+      brands: catalogFilters.brands,
+      categories: catalogFilters.categories.filter((category) =>
+        products.some(
+          (product) =>
+            product.category === category &&
+            matchesBrand(product) &&
+            matchesCollection(product) &&
+            matchesApplication(product) &&
+            matchesFinish(product),
+        ),
+      ),
+      collections: uniqueValues(
+        products
+          .filter(
+            (product) =>
+              matchesBrand(product) &&
+              matchesCategory(product) &&
+              matchesApplication(product) &&
+              matchesFinish(product),
+          )
+          .map((product) => product.collection ?? ""),
+      ),
+      applications: catalogFilters.applications.filter((application) =>
+        products.some(
+          (product) =>
+            product.application === application &&
+            matchesBrand(product) &&
+            matchesCategory(product) &&
+            matchesCollection(product) &&
+            matchesFinish(product),
+        ),
+      ),
+      finishes: catalogFilters.finishes.filter((finish) =>
+        products.some(
+          (product) =>
+            product.finish === finish &&
+            matchesBrand(product) &&
+            matchesCategory(product) &&
+            matchesApplication(product) &&
+            matchesCollection(product),
+        ),
+      ),
+    };
+  }, [
+    selectedApplication,
+    selectedBrand,
+    selectedCategory,
+    selectedFinish,
+    selectedCollection,
+  ]);
 
   const filteredProducts = useMemo(() => {
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+
     return products.filter((product) => {
       const matchesBrand = selectedBrand === "Todos" || product.brand === selectedBrand;
       const matchesCategory =
         selectedCategory === "Todos" || product.category === selectedCategory;
-      const matchesSubcategory =
-        selectedSubcategory === "Todos" || product.subcategory === selectedSubcategory;
+      const matchesCollection =
+        selectedCollection === "Todos" || product.collection === selectedCollection;
+      const matchesApplication =
+        selectedApplication === "Todos" || product.application === selectedApplication;
       const matchesFinish = selectedFinish === "Todos" || product.finish === selectedFinish;
+      const searchableText = [
+        product.name,
+        product.sku,
+        product.brand,
+        product.category,
+        product.subcategory,
+        product.collection,
+        product.application,
+        product.finish,
+        product.description,
+        ...(product.technicalSpecs ? Object.values(product.technicalSpecs).flat() : []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const matchesSearch =
+        !normalizedSearch || searchableText.includes(normalizedSearch);
 
-      return matchesBrand && matchesCategory && matchesSubcategory && matchesFinish;
+      return (
+        matchesSearch &&
+        matchesBrand &&
+        matchesCategory &&
+        matchesCollection &&
+        matchesApplication &&
+        matchesFinish
+      );
     });
-  }, [selectedBrand, selectedCategory, selectedFinish, selectedSubcategory]);
+  }, [
+    searchQuery,
+    selectedApplication,
+    selectedBrand,
+    selectedCategory,
+    selectedFinish,
+    selectedCollection,
+  ]);
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+  const hasMoreProducts = visibleCount < filteredProducts.length;
+
+  const activeFilters = [
+    ["Buscar", searchQuery.trim()],
+    ["Marca", selectedBrand],
+    ["Tipo", selectedCategory],
+    ["Serie", selectedCollection],
+    ["Aplicación", selectedApplication],
+    ["Color", selectedFinish],
+  ].filter(([, value]) => value && value !== "Todos");
+
+  const selectedApplications =
+    selectedCategory === "Todos" ? [] : applicationGroups[selectedCategory] ?? [];
+  const shouldShowApplications =
+    selectedCategory !== "Todos" &&
+    selectedApplication === "Todos" &&
+    !searchQuery.trim();
+  const shouldShowProducts = Boolean(searchQuery.trim()) || selectedApplication !== "Todos";
+  const breadcrumbItems = [
+    "Catálogo",
+    selectedCategory !== "Todos" ? selectedCategory : "",
+    selectedApplication !== "Todos" ? selectedApplication : "",
+    selectedCollection !== "Todos" ? selectedCollection : "",
+  ].filter(Boolean);
+  const canGoBack =
+    selectedCategory !== "Todos" ||
+    selectedApplication !== "Todos" ||
+    selectedCollection !== "Todos" ||
+    Boolean(searchQuery.trim());
+
+  const goBackInCatalog = () => {
+    if (selectedApplication !== "Todos") {
+      setSelectedApplication("Todos");
+      setSelectedCollection("Todos");
+      return;
+    }
+
+    if (selectedCategory !== "Todos") {
+      setSelectedCategory("Todos");
+      return;
+    }
+
+    setSearchQuery("");
+  };
+
+  const resetCatalogNavigation = () => {
+    setSearchQuery("");
+    setSelectedCategory("Todos");
+    setSelectedApplication("Todos");
+    setSelectedCollection("Todos");
+  };
+
+  const scrollCatalogStageIntoView = () => {
+    window.requestAnimationFrame(() => {
+      catalogStageRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  };
+
+  const transitionCatalog = (updateNavigation: () => void) => {
+    setIsCatalogTransitioning(true);
+
+    window.setTimeout(() => {
+      updateNavigation();
+      setIsCatalogTransitioning(false);
+      scrollCatalogStageIntoView();
+    }, 180);
+  };
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [
+    searchQuery,
+    selectedApplication,
+    selectedBrand,
+    selectedCategory,
+    selectedFinish,
+    selectedCollection,
+  ]);
 
   const quoteCount = quoteItems.reduce((total, item) => total + item.quantity, 0);
   const quoteTotal = quoteItems.reduce(
@@ -175,6 +438,14 @@ export default function Catalogo() {
 
     return () => {
       window.removeEventListener("beforeunload", clearTemporaryQuoteData);
+    };
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("econoluz-catalog-reset", resetCatalogNavigation);
+
+    return () => {
+      window.removeEventListener("econoluz-catalog-reset", resetCatalogNavigation);
     };
   }, []);
 
@@ -249,97 +520,310 @@ export default function Catalogo() {
 
       <section className="px-5 py-8 sm:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="grid gap-4 border-b border-neutral-200 pb-6 lg:grid-cols-[repeat(4,1fr)_auto] lg:items-end">
-            {[
-              {
-                label: "Marca",
-                value: selectedBrand,
-                onChange: setSelectedBrand,
-                options: catalogFilters.brands,
-              },
-              {
-                label: "Categoría",
-                value: selectedCategory,
-                onChange: setSelectedCategory,
-                options: catalogFilters.categories,
-              },
-              {
-                label: "Subcategoría",
-                value: selectedSubcategory,
-                onChange: setSelectedSubcategory,
-                options: catalogFilters.subcategories,
-              },
-              {
-                label: "Acabado / color",
-                value: selectedFinish,
-                onChange: setSelectedFinish,
-                options: catalogFilters.finishes,
-              },
-            ].map((filter) => (
-              <label key={filter.label} className="grid gap-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                  {filter.label}
-                </span>
-                <select
-                  value={filter.value}
-                  onChange={(event) => filter.onChange(event.target.value)}
-                  className="w-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-black outline-none transition focus:border-black"
-                >
-                  <option value="Todos">Todos</option>
-                  {filter.options.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
+          <div className="grid gap-6 border-b border-neutral-200 pb-8">
+            <label className="grid gap-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Buscar en catálogo
+              </span>
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Busca por nombre, código, serie, color o especificación"
+                className="w-full border border-neutral-200 bg-white px-4 py-4 text-base font-semibold text-black outline-none transition placeholder:text-neutral-400 focus:border-black"
+              />
+            </label>
 
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedBrand("Todos");
-                setSelectedCategory("Todos");
-                setSelectedSubcategory("Todos");
-                setSelectedFinish("Todos");
-              }}
-              className="inline-flex justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
-            >
-              Limpiar
-            </button>
           </div>
         </div>
       </section>
 
       <section className="px-5 pb-20 pt-6 sm:px-8 sm:pb-24 lg:pb-32">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8">
-            <SectionHeader
-              eyebrow="Referencias para proyecto"
-              title="Placas ARTLITE"
-              description={`${filteredProducts.length} referencias disponibles. Combina marca, categoría, subcategoría y acabado para preparar una solicitud más precisa.`}
-            />
-          </div>
+        <div ref={catalogStageRef} className="mx-auto scroll-mt-28 max-w-7xl">
+          {!searchQuery.trim() && selectedCategory === "Todos" && (
+            <div
+              key="catalog-types"
+              className={`catalog-stage ${isCatalogTransitioning ? "catalog-stage-out" : ""}`}
+            >
+              <SectionHeader
+                eyebrow="Catálogo guiado"
+                title="¿Qué tipo de producto buscas?"
+                description="Elige una familia principal para entrar al catálogo de forma ordenada."
+              />
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {catalogTypeCards.map((type) => (
+                  <button
+                    key={type.title}
+                    type="button"
+                    onClick={() =>
+                      transitionCatalog(() => {
+                        setSelectedCategory(type.title);
+                        setSelectedApplication("Todos");
+                        setSelectedCollection("Todos");
+                      })
+                    }
+                    className="group min-h-44 overflow-hidden border border-neutral-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] active:scale-[0.99]"
+                  >
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
+                      {type.marker}
+                    </span>
+                    <h2 className="mt-7 text-2xl font-semibold leading-tight">
+                      {type.title}
+                    </h2>
+                    <p className="mt-4 text-sm leading-6 text-neutral-500">
+                      {type.description}
+                    </p>
+                    <span className="mt-6 block h-px w-10 bg-black transition duration-300 group-hover:w-20" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredProducts.map((product) => {
-              const selectedItem = quoteItems.find((item) => item.product.id === product.id);
+          {shouldShowApplications && (
+            <div
+              key={`applications-${selectedCategory}`}
+              className={`catalog-stage ${isCatalogTransitioning ? "catalog-stage-out" : ""}`}
+            >
+              <SectionHeader
+                eyebrow="Aplicación"
+                title={selectedCategory}
+                description="Selecciona dónde se instalará o qué función debe resolver el producto."
+              />
+              <div className="mt-6 grid gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  {breadcrumbItems.map((item, index) => (
+                    <div key={`${item}-${index}`} className="flex items-center gap-2">
+                      {index > 0 && (
+                        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-300">
+                          /
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (index === 0) {
+                            transitionCatalog(resetCatalogNavigation);
+                            return;
+                          }
 
-              return (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  quantity={selectedItem?.quantity}
-                  formatPrice={formatCurrency}
-                  onAdd={() => addToQuote(product, false)}
-                  onDecrease={() =>
-                    updateQuantity(product.id, (selectedItem?.quantity ?? 1) - 1)
-                  }
-                  onViewDetails={() => setTechnicalProduct(product)}
+                          if (index === 1) {
+                            transitionCatalog(() => {
+                              setSelectedApplication("Todos");
+                              setSelectedCollection("Todos");
+                            });
+                            return;
+                          }
+
+                          if (index === 2) {
+                            transitionCatalog(() => setSelectedCollection("Todos"));
+                          }
+                        }}
+                        className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
+                      >
+                        {item}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                    {filteredProducts.length} resultados
+                  </span>
+                  {activeFilters.map(([label, value]) => (
+                    <span
+                      key={`${label}-${value}`}
+                      className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-600"
+                    >
+                      {label}: {value}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => transitionCatalog(goBackInCatalog)}
+                  className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
+                >
+                  Volver
+                </button>
+                <button
+                  type="button"
+                  onClick={() => transitionCatalog(resetCatalogNavigation)}
+                  className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
+                >
+                  Inicio del catálogo
+                </button>
+              </div>
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {selectedApplications.map((application) => {
+                  const count = products.filter(
+                    (product) =>
+                      product.category === selectedCategory &&
+                      product.application === application &&
+                      (selectedBrand === "Todos" || product.brand === selectedBrand) &&
+                      (selectedFinish === "Todos" || product.finish === selectedFinish),
+                  ).length;
+
+                  return (
+                    <button
+                      key={application}
+                      type="button"
+                      onClick={() =>
+                        transitionCatalog(() => {
+                          setSelectedApplication(application);
+                          setSelectedCollection("Todos");
+                        })
+                      }
+                      className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
+                    >
+                      <span className="text-xl font-semibold">{application}</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
+                        {count} ref.
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {shouldShowProducts && (
+            <div
+              key={`products-${searchQuery.trim() || selectedCategory}-${selectedApplication}`}
+              className={`catalog-stage ${isCatalogTransitioning ? "catalog-stage-out" : ""}`}
+            >
+              <div className="mb-8">
+                <SectionHeader
+                  eyebrow="Referencias para proyecto"
+                  title={searchQuery.trim() ? "Resultados de búsqueda" : selectedApplication}
+                  description={`${filteredProducts.length} referencias encontradas.`}
                 />
-              );
-            })}
-          </div>
+                <div className="mt-6 grid gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {breadcrumbItems.map((item, index) => (
+                      <div key={`${item}-${index}`} className="flex items-center gap-2">
+                        {index > 0 && (
+                          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-300">
+                            /
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (index === 0) {
+                              transitionCatalog(resetCatalogNavigation);
+                              return;
+                            }
+
+                            if (index === 1) {
+                              transitionCatalog(() => {
+                                setSelectedApplication("Todos");
+                                setSelectedCollection("Todos");
+                              });
+                              return;
+                            }
+
+                            if (index === 2) {
+                              transitionCatalog(() => setSelectedCollection("Todos"));
+                            }
+                          }}
+                          className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
+                        >
+                          {item}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                      {filteredProducts.length} resultados
+                    </span>
+                    {activeFilters.map(([label, value]) => (
+                      <span
+                        key={`${label}-${value}`}
+                        className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-600"
+                      >
+                        {label}: {value}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {canGoBack && (
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => transitionCatalog(goBackInCatalog)}
+                      className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
+                    >
+                      Volver
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => transitionCatalog(resetCatalogNavigation)}
+                      className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
+                    >
+                      Inicio del catálogo
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+                {visibleProducts.map((product) => {
+                  const selectedItem = quoteItems.find((item) => item.product.id === product.id);
+
+                  return (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      quantity={selectedItem?.quantity}
+                      formatPrice={formatCurrency}
+                      onAdd={() => addToQuote(product, false)}
+                      onDecrease={() =>
+                        updateQuantity(product.id, (selectedItem?.quantity ?? 1) - 1)
+                      }
+                      onViewDetails={() => setTechnicalProduct(product)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {shouldShowProducts && filteredProducts.length === 0 && (
+            <div className="border border-neutral-200 p-8 text-center">
+              <p className="text-sm font-semibold text-neutral-700">
+                No encontramos referencias con esos filtros.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedBrand("Todos");
+                  setSelectedCategory("Todos");
+                  setSelectedCollection("Todos");
+                  setSelectedApplication("Todos");
+                  setSelectedFinish("Todos");
+                }}
+                className="mt-4 rounded-full border border-black px-5 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          )}
+
+          {shouldShowProducts && hasMoreProducts && (
+            <div className="mt-10 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((currentCount) => currentCount + PAGE_SIZE)}
+                className="rounded-full border border-black px-7 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
+              >
+                Cargar más ({filteredProducts.length - visibleProducts.length})
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

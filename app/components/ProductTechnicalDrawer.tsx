@@ -13,6 +13,7 @@ type TechnicalProduct = {
   description: string;
   price: number;
   image: string;
+  images?: string[];
   sku?: string;
   technicalSpecs?: {
     voltage?: string;
@@ -32,6 +33,15 @@ type TechnicalProduct = {
     dielectricVoltage?: string;
     shortCircuitCurrent?: string;
     switchingLevel?: string;
+    luminousFlux?: string;
+    power?: string;
+    efficiency?: string;
+    dimming?: string;
+    colorTemperature?: string;
+    cri?: string;
+    beamAngle?: string;
+    impactRating?: string;
+    productCode?: string;
     specialFeatures?: string[];
   };
 };
@@ -93,6 +103,7 @@ export default function ProductTechnicalDrawer({
   };
 
   const specs = product.technicalSpecs;
+  const productImages = product.images?.length ? product.images : [product.image];
   const baseSpecRows = [
     ["Voltaje", specs?.voltage],
     ["Amperaje", specs?.amperage],
@@ -114,6 +125,15 @@ export default function ProductTechnicalDrawer({
     ["Voltaje dieléctrico", specs?.dielectricVoltage],
     ["SCCR", specs?.shortCircuitCurrent],
     ["Nivel de conmutación", specs?.switchingLevel],
+    ["Código", specs?.productCode],
+    ["Flujo luminoso", specs?.luminousFlux],
+    ["Potencia", specs?.power],
+    ["Eficiencia", specs?.efficiency],
+    ["Atenuación", specs?.dimming],
+    ["TCC", specs?.colorTemperature],
+    ["IRC", specs?.cri],
+    ["Ángulo", specs?.beamAngle],
+    ["IK", specs?.impactRating],
   ].filter(([, value]) => Boolean(value));
 
   const specRows = [...baseSpecRows, ...extraSpecRows];
@@ -148,14 +168,23 @@ export default function ProductTechnicalDrawer({
         </div>
 
         <div className="product-drawer-scroll flex-1 overflow-y-auto overscroll-contain">
-          <div className="relative aspect-[16/10] shrink-0 bg-white p-8">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              sizes="(min-width: 768px) 42rem, 100vw"
-              className="object-contain p-8"
-            />
+          <div className="grid shrink-0 gap-px bg-neutral-200 sm:grid-cols-2">
+            {productImages.map((image, index) => (
+              <div
+                key={image}
+                className={`relative aspect-[16/10] bg-white p-8 ${
+                  productImages.length === 1 ? "sm:col-span-2" : ""
+                }`}
+              >
+                <Image
+                  src={image}
+                  alt={`${product.name}${productImages.length > 1 ? ` ${index + 1}` : ""}`}
+                  fill
+                  sizes="(min-width: 768px) 42rem, 100vw"
+                  className="object-contain p-8"
+                />
+              </div>
+            ))}
           </div>
 
           <div className="grid gap-7 p-5 sm:p-7">

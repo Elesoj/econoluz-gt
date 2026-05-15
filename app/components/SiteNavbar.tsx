@@ -156,6 +156,10 @@ export default function SiteNavbar({
   const handleLinkClick = (href: string) => {
     const hash = getHash(href);
 
+    if (pathname === "/catalogo" && href === "/catalogo") {
+      window.dispatchEvent(new Event("econoluz-catalog-reset"));
+    }
+
     if (hash && (href.startsWith("#") || href.startsWith("/#"))) {
       activeHrefRef.current = hash;
       setActiveHref(hash);
