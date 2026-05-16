@@ -365,6 +365,11 @@ export default function Catalogo() {
     }, 180);
   };
 
+  const handleSearchSubmit = () => {
+    setVisibleCount(PAGE_SIZE);
+    scrollCatalogStageIntoView();
+  };
+
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [
@@ -528,6 +533,13 @@ export default function Catalogo() {
               <input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    event.currentTarget.blur();
+                    handleSearchSubmit();
+                  }
+                }}
                 placeholder="Busca por nombre, código, serie, color o especificación"
                 className="w-full border border-neutral-200 bg-white px-4 py-4 text-base font-semibold text-black outline-none transition placeholder:text-neutral-400 focus:border-black"
               />
@@ -1100,9 +1112,18 @@ export default function Catalogo() {
       <ProductTechnicalDrawer
         key={technicalProduct?.id ?? "closed-technical-product"}
         product={technicalProduct}
+        quantity={
+          technicalProduct
+            ? quoteItems.find((item) => item.product.id === technicalProduct.id)?.quantity ?? 0
+            : 0
+        }
         formatPrice={formatCurrency}
         onAdd={(product) => {
           addToQuote(product as Product, false);
+        }}
+        onDecrease={(product) => {
+          const selectedItem = quoteItems.find((item) => item.product.id === product.id);
+          updateQuantity(product.id, (selectedItem?.quantity ?? 1) - 1);
         }}
         onClose={() => setTechnicalProduct(null)}
         onViewQuote={() => {

@@ -33,7 +33,7 @@ export default function BrandsCarousel() {
             <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent" />
 
             <div className="max-w-full overflow-hidden" aria-label="Marcas proveedoras de ECONOLUZ GT">
-              <div className="brands-marquee flex w-max gap-4">
+              <div className="brands-marquee flex w-max touch-pan-y select-none gap-4">
                 {[...brands, ...brands].map((brand, index) => (
                   <div
                     key={`${brand.name}-${index}`}

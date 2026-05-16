@@ -30,6 +30,7 @@ export default function SiteNavbar({
 }: SiteNavbarProps) {
   const pathname = usePathname();
   const [activeHref, setActiveHref] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const activeHrefRef = useRef("");
 
   useEffect(() => {
@@ -154,6 +155,8 @@ export default function SiteNavbar({
   };
 
   const handleLinkClick = (href: string) => {
+    setIsMobileMenuOpen(false);
+
     const hash = getHash(href);
 
     if (pathname === "/catalogo" && href === "/catalogo") {
@@ -227,14 +230,28 @@ export default function SiteNavbar({
           )}
         </div>
 
-        <details className="group relative md:hidden">
-          <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-white/18 transition hover:bg-white/10 [&::-webkit-details-marker]:hidden">
-            <span className="sr-only">Abrir menú</span>
+        <div className="relative md:hidden">
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen((isOpen) => !isOpen)}
+            className="group flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-white/18 transition hover:bg-white/10"
+            aria-expanded={isMobileMenuOpen}
+            aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+          >
             <span className="relative block h-3.5 w-4">
-              <span className="absolute left-0 top-0 h-px w-4 bg-white transition group-open:top-1.5 group-open:rotate-45" />
-              <span className="absolute bottom-0 left-0 h-px w-4 bg-white transition group-open:bottom-2 group-open:-rotate-45" />
+              <span
+                className={`absolute left-0 h-px w-4 bg-white transition ${
+                  isMobileMenuOpen ? "top-1.5 rotate-45" : "top-0"
+                }`}
+              />
+              <span
+                className={`absolute left-0 h-px w-4 bg-white transition ${
+                  isMobileMenuOpen ? "bottom-2 -rotate-45" : "bottom-0"
+                }`}
+              />
             </span>
-          </summary>
+          </button>
+          {isMobileMenuOpen && (
           <div className="absolute right-0 top-14 w-[min(86vw,22rem)] border border-white/10 bg-black p-4 shadow-2xl">
             <div className="grid gap-1">
               {items.map((item) => (
@@ -253,13 +270,15 @@ export default function SiteNavbar({
             {ctaHref && mobileCtaLabel && (
               <Link
                 href={ctaHref}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="mt-4 flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200"
               >
                 {mobileCtaLabel}
               </Link>
             )}
           </div>
-        </details>
+          )}
+        </div>
       </div>
     </nav>
   );

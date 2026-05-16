@@ -48,21 +48,23 @@ type TechnicalProduct = {
 
 type ProductTechnicalDrawerProps = {
   product: TechnicalProduct | null;
+  quantity?: number;
   formatPrice: (price: number) => string;
   onAdd: (product: TechnicalProduct) => void;
+  onDecrease: (product: TechnicalProduct) => void;
   onClose: () => void;
   onViewQuote: () => void;
 };
 
 export default function ProductTechnicalDrawer({
   product,
+  quantity = 0,
   formatPrice,
   onAdd,
+  onDecrease,
   onClose,
   onViewQuote,
 }: ProductTechnicalDrawerProps) {
-  const [isAdded, setIsAdded] = useState(false);
-
   useEffect(() => {
     if (!product) {
       return;
@@ -99,7 +101,6 @@ export default function ProductTechnicalDrawer({
 
   const addProduct = () => {
     onAdd(product);
-    setIsAdded(true);
   };
 
   const specs = product.technicalSpecs;
@@ -265,11 +266,32 @@ export default function ProductTechnicalDrawer({
         </div>
 
         <div className="shrink-0 border-t border-neutral-200 bg-white p-5 sm:p-7">
-          {isAdded ? (
+          {quantity > 0 ? (
             <div>
-              <p className="text-center text-sm font-semibold text-black">
-                Producto agregado a cotización
-              </p>
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-semibold text-black">
+                  Producto agregado
+                </p>
+                <div className="inline-flex h-11 items-center rounded-full bg-black text-sm font-semibold text-white">
+                  <button
+                    type="button"
+                    onClick={() => onDecrease(product)}
+                    className="flex h-11 w-12 items-center justify-center rounded-full transition hover:bg-white/12"
+                    aria-label={`Quitar una unidad de ${product.name}`}
+                  >
+                    -
+                  </button>
+                  <span className="min-w-12 text-center">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={addProduct}
+                    className="flex h-11 w-12 items-center justify-center rounded-full transition hover:bg-white/12"
+                    aria-label={`Agregar una unidad de ${product.name}`}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"

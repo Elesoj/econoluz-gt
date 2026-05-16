@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { type PointerEvent, useRef, useState } from "react";
+import { type PointerEvent, useEffect, useRef, useState } from "react";
 
 type Project = {
   title: string;
@@ -21,6 +21,20 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
   const [dragOffset, setDragOffset] = useState(0);
   const dragStartX = useRef<number | null>(null);
   const activeProject = projects[activeProjectIndex];
+  const shouldRenderImage = (index: number) => {
+    const lastIndex = activeProject.images.length - 1;
+    const previousIndex = activeImageIndex === 0 ? lastIndex : activeImageIndex - 1;
+    const nextIndex = activeImageIndex === lastIndex ? 0 : activeImageIndex + 1;
+
+    return index === activeImageIndex || index === previousIndex || index === nextIndex;
+  };
+
+  useEffect(() => {
+    const nextIndex =
+      activeImageIndex === activeProject.images.length - 1 ? 0 : activeImageIndex + 1;
+    const nextImage = new window.Image();
+    nextImage.src = activeProject.images[nextIndex];
+  }, [activeImageIndex, activeProject.images]);
 
   const setProject = (index: number) => {
     setActiveProjectIndex(index);
@@ -104,15 +118,18 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
           >
             {activeProject.images.map((image, index) => (
               <div key={image} className="relative h-full min-w-0 shrink-0 basis-full">
-                <Image
-                  src={image}
-                  alt={`${activeProject.title} ${index + 1}`}
-                  fill
-                  sizes="(min-width: 1024px) 58vw, 100vw"
-                  className="pointer-events-none object-cover object-top"
-                  priority={activeProjectIndex === 0 && index === 0}
-                  draggable={false}
-                />
+                {shouldRenderImage(index) && (
+                  <Image
+                    src={image}
+                    alt={`${activeProject.title} ${index + 1}`}
+                    fill
+                    sizes="(min-width: 1024px) 58vw, (min-width: 640px) 92vw, 100vw"
+                    className="pointer-events-none object-cover object-top"
+                    priority={activeProjectIndex === 0 && index === 0}
+                    loading={activeProjectIndex === 0 && index === 0 ? "eager" : "lazy"}
+                    draggable={false}
+                  />
+                )}
               </div>
             ))}
           </div>

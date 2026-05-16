@@ -1,8 +1,32 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { type MouseEvent } from "react";
+import { usePathname } from "next/navigation";
 import { contact, mainNavItems } from "../data/siteData";
 
 export default function SiteFooter() {
+  const pathname = usePathname();
+
+  const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!href.startsWith("/#") || pathname !== "/") {
+      return;
+    }
+
+    event.preventDefault();
+    const target = document.querySelector<HTMLElement>(href.replace("/", ""));
+
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState(null, "", href);
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.history.replaceState(null, "", href);
+  };
+
   return (
     <footer className="bg-white px-5 py-12 text-black sm:px-8">
       <div className="mx-auto max-w-7xl">
@@ -24,7 +48,12 @@ export default function SiteFooter() {
             <p className="text-sm font-semibold uppercase tracking-[0.18em]">Navegación</p>
             <div className="mt-4 grid gap-3 text-sm text-neutral-600">
               {mainNavItems.map((item) => (
-                <Link key={item.href} href={item.href} className="transition hover:text-black">
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={(event) => handleNavClick(event, item.href)}
+                  className="transition hover:text-black"
+                >
                   {item.label}
                 </Link>
               ))}

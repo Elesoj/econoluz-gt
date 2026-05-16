@@ -41,7 +41,7 @@ body {
   animation: brands-marquee 28s linear infinite;
 }
 
-.brands-marquee:hover {
+.brands-marquee:active {
   animation-play-state: paused;
 }
 
