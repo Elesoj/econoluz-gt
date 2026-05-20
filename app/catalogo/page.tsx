@@ -64,7 +64,6 @@ const applicationGroups: Record<string, string[]> = {
     "Lineales industriales",
     "Gabinetes",
     "A prueba de vapor",
-    "Wallpacks",
   ],
   "Iluminación arquitectónica": [
     "Downlights",
