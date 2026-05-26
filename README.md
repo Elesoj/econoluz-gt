@@ -1,58 +1,56 @@
-# ECONOLUZ GT
+﻿# ECONOLUZ GT
 
-Premium architectural lighting website for ECONOLUZ GT, built to present LED lighting solutions, project references, a curated product catalog, a quotation flow, and an LED savings calculator for clients in Guatemala.
+Premium black/white lighting catalog website for ECONOLUZ GT. The project presents architectural, technical, exterior, residential, and accessory lighting references for quotation-based sales in Guatemala.
 
-The visual direction is minimalist, architectural, black and white, and product-focused. The site is designed to guide visitors through a clear flow: discover the brand, estimate LED savings, explore products and projects, then request a quote.
+The site is not an ecommerce store. Products do not expose prices, checkout, payment, inventory, authentication, or backend order processing. Catalog selections are collected into a temporary quote context and sent through WhatsApp for asesoría técnica.
 
-## Tech Stack
+## Technologies
 
 - Next.js App Router
 - React
 - TypeScript
 - Tailwind CSS
 - Next Image optimization
-- Local browser storage for temporary quote and calculator context
+- Local browser storage for temporary quote and LED calculator context
+- Vercel deployment
 
-## Features
+## Main Features
 
-- Premium responsive homepage
-- Curated lighting catalog with category filters
-- Quote drawer with quantity controls and estimated totals
-- Dynamic WhatsApp message generation from quote context
-- LED savings calculator with local result handoff into the quote form
-- Project gallery slider using existing ECONOLUZ imagery
-- Reusable layout and interface components
-- Shared data files for navigation, contact details, products, projects, and homepage content
-- Return and refund policy page
+- Responsive premium homepage with ECONOLUZ project imagery
+- Guided catalog UX by product type and application
+- Compact product grid prepared for larger catalogs
+- Search and filters by brand, type, series, application, finish, and specs
+- Technical product drawer/modal
+- Quotation/add-to-quote flow without prices
+- WhatsApp message generation from selected products and project form data
+- LED savings calculator with handoff into the quote form
+- Project gallery and supplier/brand presentation
+- Shared data files for products, projects, navigation, contact, and homepage content
 
-## Routes
-
-- `/` - Homepage with brand overview, calculator teaser, collections, projects, FAQs, and quote CTA
-- `/catalogo` - Product catalog and project quote form
-- `/calculadora-led` - LED savings calculator
-- `/politica-devoluciones` - Returns and refunds policy
-
-## Project Structure
+## Folder Structure
 
 ```text
 app/
-  calculadora-led/
-  catalogo/
-  components/
+  calculadora-led/          LED savings calculator route
+  catalogo/                 Guided catalog and quotation route
+  components/               Shared UI components
   data/
-    products.ts
-    projects.ts
-    siteData.ts
+    products.ts             Real catalog product data and filters
+    projects.ts             Project gallery image data
+    siteData.ts             Navigation, contact, homepage, quote, FAQ, and brand data
   lib/
-    formatters.ts
-  politica-devoluciones/
-  globals.css
-  layout.tsx
-  page.tsx
+    formatters.ts           Number and currency formatters for non-catalog tools
+  politica-devoluciones/    Return/refund policy route
+  globals.css               Global Tailwind styles
+  layout.tsx                App metadata and root layout
+  page.tsx                  Homepage
 public/
+  catalogos/                Product PDFs and catalog product images
+  proyectos/                Structured project images
+  proveedores/              Supplier/brand logos
 ```
 
-## Setup
+## Local Setup
 
 Install dependencies:
 
@@ -72,33 +70,25 @@ Open:
 http://localhost:3000
 ```
 
-Create a production build:
-
-```bash
-npm run build
-```
-
-Run linting:
+Run quality checks:
 
 ```bash
 npm run lint
+npm run build
 ```
 
-## Screenshots
+## Deployment Notes
 
-Add final screenshots here before launch:
+- The public deployment is managed on Vercel.
+- Product and project images must live under `public/` and be referenced with root-relative paths, for example `/catalogos/construlita/downlight/alfa.png`.
+- Keep catalog image folders structured by brand and family to avoid broken legacy paths such as `/bmw1.jpeg`.
+- The catalog is static data today. Adding products requires updating `app/data/products.ts` and placing matching images/PDFs in `public/catalogos/`.
+- Do not add prices, ecommerce checkout, payment flows, backend inventory, authentication, or admin-only features without changing the product strategy.
 
-- Homepage desktop
-- Homepage mobile
-- Catalog and quote drawer
-- LED calculator
-- Project gallery
+## Current Status
 
-## Future Roadmap
-
-- Connect quote submissions to email, CRM, Google Sheets, or a backend API
-- Add product detail pages for richer specifications
-- Add structured SEO metadata per route
-- Add analytics for catalog filters, quote starts, and calculator usage
-- Add admin-editable content through a CMS or lightweight data source
-- Add accessibility regression checks and visual QA snapshots before release
+- Homepage, guided catalog, product drawer, quote flow, WhatsApp flow, and LED calculator are implemented.
+- ARTLITE products and many CONSTRULITA product families are represented with real catalog images/specs.
+- Catalog rendering uses an initial page size with a "Cargar más" flow so the UI does not render every matching product at once.
+- Product model is quotation-first and price-free.
+- More CONSTRULITA PDFs/products can be added gradually once image paths and product data are verified.

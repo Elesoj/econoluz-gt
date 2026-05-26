@@ -1,7 +1,6 @@
-type QuoteDrawerProduct = {
+﻿type QuoteDrawerProduct = {
   id: string;
   name: string;
-  price: number;
 };
 
 type QuoteDrawerItem = {
@@ -12,8 +11,6 @@ type QuoteDrawerItem = {
 type QuoteDrawerProps = {
   isOpen: boolean;
   items: QuoteDrawerItem[];
-  total: number;
-  formatPrice: (price: number) => string;
   onClose: () => void;
   onRemove: (productId: string) => void;
   onUpdateQuantity: (productId: string, quantity: number) => void;
@@ -22,8 +19,6 @@ type QuoteDrawerProps = {
 export default function QuoteDrawer({
   isOpen,
   items,
-  total,
-  formatPrice,
   onClose,
   onRemove,
   onUpdateQuantity,
@@ -78,7 +73,7 @@ export default function QuoteDrawer({
                     <div>
                       <h3 className="font-semibold">{item.product.name}</h3>
                       <p className="mt-1 text-sm text-neutral-500">
-                        {item.product.price > 0 ? `${formatPrice(item.product.price)} ref.` : "Por cotizar"}
+                        Cotización bajo asesoría
                       </p>
                     </div>
                     <button
@@ -109,11 +104,7 @@ export default function QuoteDrawer({
                         +
                       </button>
                     </div>
-                    <p className="font-semibold">
-                      {item.product.price > 0
-                        ? formatPrice(item.product.price * item.quantity)
-                        : "Por cotizar"}
-                    </p>
+                    <p className="font-semibold">Por cotizar</p>
                   </div>
                 </div>
               ))}
@@ -124,11 +115,9 @@ export default function QuoteDrawer({
         <div className="border-t border-neutral-200 p-6">
           <div className="flex items-center justify-between">
             <p className="text-sm uppercase tracking-[0.18em] text-neutral-500">
-              Total estimado
+              Modalidad
             </p>
-            <p className="text-2xl font-semibold">
-              {total > 0 ? formatPrice(total) : "Por cotizar"}
-            </p>
+            <p className="text-2xl font-semibold">Por cotizar</p>
           </div>
           <a
             href="#asesoria-proyecto"

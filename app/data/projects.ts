@@ -1,4 +1,4 @@
-const projectImages = (folder: string, files: string[]) =>
+﻿const projectImages = (folder: string, files: string[]) =>
   files.map((file) => `/proyectos/${folder}/${file}`);
 
 export const projects = [

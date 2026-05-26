@@ -1,4 +1,4 @@
-export const mainNavItems = [
+﻿export const mainNavItems = [
   { label: "Inicio", href: "/#inicio" },
   { label: "Empresa", href: "/#empresa" },
   { label: "Calculadora LED", href: "/calculadora-led" },
@@ -20,6 +20,21 @@ export const contact = {
   whatsappDefaultMessage: "Hola, quiero cotizar un proyecto de iluminación.",
   address: "21 Avenida 0-18, Vista Hermosa 2, Zona 15.",
   hours: "Lunes a viernes, 8:00 AM - 5:00 PM",
+};
+
+export const homeHero = {
+  eyebrow: "Iluminación arquitectónica premium",
+  title: "Luz precisa para espacios que se sienten extraordinarios",
+  description:
+    "ECONOLUZ GT acompaña proyectos residenciales, comerciales y de hospitalidad con luminarias LED, asesoría técnica y piezas seleccionadas para arquitectura contemporánea.",
+  image: "/proyectos/borghetto/borghetto1.jpg",
+  imageAlt: "Interior arquitectónico con iluminación premium",
+  primaryCta: { label: "Agendar asesoría", href: "/catalogo#asesoria-proyecto" },
+  secondaryCta: { label: "Ver catálogo", href: "/catalogo" },
+  stats: [
+    { value: "2006", label: "Trayectoria" },
+    { value: "LED", label: "Tecnología eficiente" },
+  ],
 };
 
 export const companyStats = [
@@ -48,21 +63,32 @@ export const collections = [
   {
     title: "Decorativa",
     detail: "Colgantes, apliques y piezas de acento para ambientes memorables.",
-    image:
-      "https://images.unsplash.com/photo-1540932239986-30128078f3c5?auto=format&fit=crop&w=1100&q=85",
+    image: "/proyectos/sanmartin/sanmartin1.jpeg",
   },
   {
     title: "Arquitectónica",
     detail: "Perfiles lineales, luz indirecta y soluciones integradas a obra.",
-    image:
-      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1100&q=85",
+    image: "/proyectos/perfilesled/perfilesled1.jpg",
   },
   {
     title: "Técnica",
     detail: "Downlights, paneles y sistemas LED para precisión, eficiencia y confort.",
-    image:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1100&q=85",
+    image: "/proyectos/insigne/insigne1.jpeg",
   },
+];
+
+export const partnerBrands = [
+  { name: "Construlita", src: "/proveedores/construlita.png" },
+  { name: "Highlum", src: "/proveedores/highlum.png" },
+  { name: "Ilum", src: "/proveedores/ilum.png" },
+  { name: "Ilumitec", src: "/proveedores/ilumitec.png" },
+  { name: "Lighttec", src: "/proveedores/lighttec.png" },
+  { name: "OSRAM", src: "/proveedores/osram.png" },
+  { name: "Philips", src: "/proveedores/philips.png" },
+  { name: "Proelca", src: "/proveedores/proelca.png" },
+  { name: "Sunnovation", src: "/proveedores/sunnovation.png" },
+  { name: "Sylvania", src: "/proveedores/sylvania.png" },
+  { name: "Tecnolite", src: "/proveedores/tecnolite.png" },
 ];
 
 export const faqs = [

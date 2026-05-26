@@ -7,7 +7,17 @@ import QuoteDrawer from "../components/QuoteDrawer";
 import SectionHeader from "../components/SectionHeader";
 import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
-import { catalogFilters, products, type Product } from "../data/products";
+import {
+  getApplicationLabel,
+  getBrandLabel,
+  getFinishLabel,
+  getProductTypeLabel,
+  getSeriesLabel,
+  productTypeList,
+  productTypes,
+  type ProductTypeId,
+} from "../data/catalogTaxonomy";
+import { products, type Product } from "../data/products";
 import {
   contact,
   mainNavItems,
@@ -15,103 +25,8 @@ import {
   quoteLightingTypes,
   quoteProjectTypes,
 } from "../data/siteData";
-import { formatCurrency } from "../lib/formatters";
 
 const PAGE_SIZE = 40;
-
-const catalogTypeCards = [
-  {
-    title: "Iluminación industrial",
-    description: "Luminarias para bodegas, plantas, producción y grandes alturas.",
-    marker: "IND",
-  },
-  {
-    title: "Iluminación arquitectónica",
-    description: "Soluciones para acento, integración y lectura espacial.",
-    marker: "ARQ",
-  },
-  {
-    title: "Iluminación exterior",
-    description: "Equipos para fachadas, perímetros, jardines y áreas abiertas.",
-    marker: "EXT",
-  },
-  {
-    title: "Iluminación residencial",
-    description: "Luz funcional y decorativa para vivienda e interiores.",
-    marker: "RES",
-  },
-  {
-    title: "Placas y accesorios eléctricos",
-    description: "Apagadores, contactos, conectividad y acabados de línea.",
-    marker: "APL",
-  },
-  {
-    title: "Tiras LED",
-    description: "Líneas flexibles para integración, detalle y luz indirecta.",
-    marker: "LED",
-  },
-  {
-    title: "Iluminación lineal",
-    description: "Barras lineales para integración exterior empotrada o sobrepuesta.",
-    marker: "LIN",
-  },
-  {
-    title: "Lámparas",
-    description: "Luminarios compactos para luz de cortesía e integración en muro.",
-    marker: "LMP",
-  },
-  {
-    title: "Emergencia y señalización",
-    description: "Soluciones para rutas, respaldo y seguridad operativa.",
-    marker: "SEG",
-  },
-];
-
-const applicationGroups: Record<string, string[]> = {
-  "Iluminación industrial": [
-    "Alto montaje",
-    "Altura media",
-    "Lineales industriales",
-    "Gabinetes",
-    "A prueba de vapor",
-  ],
-  "Iluminación arquitectónica": [
-    "Downlights",
-    "Luminarios para riel",
-    "Magnetrack Pro",
-    "Suspendidos",
-    "Empotrados en piso",
-    "Arbotantes",
-    "Decorativos",
-  ],
-  "Iluminación exterior": [
-    "Wallpacks",
-    "Bronce",
-    "Arbotantes",
-    "Sumergibles",
-    "Decorativos",
-    "Postes",
-    "Minipostes",
-    "Luminarios para poste",
-    "Proyectores de gran amplitud",
-    "Vialidades",
-  ],
-  "Iluminación residencial": ["Downlights", "Decorativos", "Placas y apagadores"],
-  "Placas y accesorios eléctricos": [
-    "Placas y apagadores",
-    "Contactos",
-    "USB y conectividad",
-    "Datos / LAN",
-    "TV / coaxial",
-    "Atenuadores",
-    "Timbres",
-    "Tapas ciegas",
-  ],
-  "Tiras LED": ["Interior", "Exterior", "Drivers", "Perfiles"],
-  "Iluminación lineal": ["Barras"],
-  "Lámparas": ["Luz de cortesía muro"],
-  "Emergencia y señalización": ["Señalización"],
-};
 
 type QuoteItem = {
   product: Product;
@@ -184,6 +99,28 @@ const clearTemporaryQuoteData = () => {
   window.dispatchEvent(new Event("econoluz-quote-updated"));
 };
 
+const buildProductSearchText = (product: Product) =>
+  [
+    product.name,
+    product.sku,
+    product.brand,
+    product.productType,
+    product.application,
+    product.series,
+    product.finish,
+    product.labels.brand,
+    product.labels.productType,
+    product.labels.family,
+    product.labels.series,
+    product.labels.application,
+    product.labels.finish,
+    product.description,
+    ...(product.technicalSpecs ? Object.values(product.technicalSpecs).flat() : []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
 export default function Catalogo() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("Todos");
@@ -200,103 +137,30 @@ export default function Catalogo() {
   const [formErrors, setFormErrors] = useState<QuoteFormErrors>({});
   const [ledResultsSummary] = useState(getStoredLedResultsSummary);
   const catalogStageRef = useRef<HTMLDivElement>(null);
-
-  const filterOptions = useMemo(() => {
-    const uniqueValues = (values: string[]) =>
-      Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b));
-
-    const matchesBrand = (product: Product) =>
-      selectedBrand === "Todos" || product.brand === selectedBrand;
-    const matchesCategory = (product: Product) =>
-      selectedCategory === "Todos" || product.category === selectedCategory;
-    const matchesCollection = (product: Product) =>
-      selectedCollection === "Todos" || product.collection === selectedCollection;
-    const matchesApplication = (product: Product) =>
-      selectedApplication === "Todos" || product.application === selectedApplication;
-    const matchesFinish = (product: Product) =>
-      selectedFinish === "Todos" || product.finish === selectedFinish;
-
-    return {
-      brands: catalogFilters.brands,
-      categories: catalogFilters.categories.filter((category) =>
-        products.some(
-          (product) =>
-            product.category === category &&
-            matchesBrand(product) &&
-            matchesCollection(product) &&
-            matchesApplication(product) &&
-            matchesFinish(product),
-        ),
-      ),
-      collections: uniqueValues(
-        products
-          .filter(
-            (product) =>
-              matchesBrand(product) &&
-              matchesCategory(product) &&
-              matchesApplication(product) &&
-              matchesFinish(product),
-          )
-          .map((product) => product.collection ?? ""),
-      ),
-      applications: catalogFilters.applications.filter((application) =>
-        products.some(
-          (product) =>
-            product.application === application &&
-            matchesBrand(product) &&
-            matchesCategory(product) &&
-            matchesCollection(product) &&
-            matchesFinish(product),
-        ),
-      ),
-      finishes: catalogFilters.finishes.filter((finish) =>
-        products.some(
-          (product) =>
-            product.finish === finish &&
-            matchesBrand(product) &&
-            matchesCategory(product) &&
-            matchesApplication(product) &&
-            matchesCollection(product),
-        ),
-      ),
-    };
-  }, [
-    selectedApplication,
-    selectedBrand,
-    selectedCategory,
-    selectedFinish,
-    selectedCollection,
-  ]);
+  const searchableProducts = useMemo(
+    () =>
+      products.map((product) => ({
+        product,
+        searchText: buildProductSearchText(product),
+      })),
+    [],
+  );
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
 
-    return products.filter((product) => {
+    return searchableProducts
+      .filter(({ product, searchText }) => {
       const matchesBrand = selectedBrand === "Todos" || product.brand === selectedBrand;
       const matchesCategory =
-        selectedCategory === "Todos" || product.category === selectedCategory;
+        selectedCategory === "Todos" || product.productType === selectedCategory;
       const matchesCollection =
-        selectedCollection === "Todos" || product.collection === selectedCollection;
+        selectedCollection === "Todos" || product.series === selectedCollection;
       const matchesApplication =
         selectedApplication === "Todos" || product.application === selectedApplication;
       const matchesFinish = selectedFinish === "Todos" || product.finish === selectedFinish;
-      const searchableText = [
-        product.name,
-        product.sku,
-        product.brand,
-        product.category,
-        product.subcategory,
-        product.collection,
-        product.application,
-        product.finish,
-        product.description,
-        ...(product.technicalSpecs ? Object.values(product.technicalSpecs).flat() : []),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
       const matchesSearch =
-        !normalizedSearch || searchableText.includes(normalizedSearch);
+        !normalizedSearch || searchText.includes(normalizedSearch);
 
       return (
         matchesSearch &&
@@ -306,9 +170,11 @@ export default function Catalogo() {
         matchesApplication &&
         matchesFinish
       );
-    });
+    })
+      .map(({ product }) => product);
   }, [
     searchQuery,
+    searchableProducts,
     selectedApplication,
     selectedBrand,
     selectedCategory,
@@ -321,25 +187,53 @@ export default function Catalogo() {
 
   const activeFilters = [
     ["Buscar", searchQuery.trim()],
-    ["Marca", selectedBrand],
-    ["Tipo", selectedCategory],
-    ["Serie", selectedCollection],
-    ["Aplicación", selectedApplication],
-    ["Color", selectedFinish],
+    ["Marca", selectedBrand === "Todos" ? selectedBrand : getBrandLabel(selectedBrand)],
+    ["Tipo", selectedCategory === "Todos" ? selectedCategory : getProductTypeLabel(selectedCategory)],
+    [
+      "Serie",
+      selectedCollection === "Todos"
+        ? selectedCollection
+        : products.find((product) => product.series === selectedCollection)?.labels.series ??
+          getSeriesLabel(selectedCollection),
+    ],
+    ["Aplicación", selectedApplication === "Todos" ? selectedApplication : getApplicationLabel(selectedApplication)],
+    ["Color", selectedFinish === "Todos" ? selectedFinish : getFinishLabel(selectedFinish)],
   ].filter(([, value]) => value && value !== "Todos");
 
   const selectedApplications =
-    selectedCategory === "Todos" ? [] : applicationGroups[selectedCategory] ?? [];
+    selectedCategory === "Todos"
+      ? []
+      : productTypes[selectedCategory as ProductTypeId]?.applications ?? [];
+  const selectedSeries = Array.from(
+    new Map(
+      products
+        .filter(
+          (product) =>
+            product.productType === selectedCategory &&
+            product.application === selectedApplication &&
+            (selectedBrand === "Todos" || product.brand === selectedBrand) &&
+            (selectedFinish === "Todos" || product.finish === selectedFinish),
+        )
+        .map((product) => [product.series, product.labels.series]),
+    ),
+  ).sort((first, second) => first[1].localeCompare(second[1]));
   const shouldShowApplications =
     selectedCategory !== "Todos" &&
     selectedApplication === "Todos" &&
     !searchQuery.trim();
-  const shouldShowProducts = Boolean(searchQuery.trim()) || selectedApplication !== "Todos";
+  const shouldShowSeries =
+    selectedApplication !== "Todos" &&
+    selectedCollection === "Todos" &&
+    !searchQuery.trim();
+  const shouldShowProducts = Boolean(searchQuery.trim()) || selectedCollection !== "Todos";
   const breadcrumbItems = [
     "Catálogo",
-    selectedCategory !== "Todos" ? selectedCategory : "",
-    selectedApplication !== "Todos" ? selectedApplication : "",
-    selectedCollection !== "Todos" ? selectedCollection : "",
+    selectedCategory !== "Todos" ? getProductTypeLabel(selectedCategory) : "",
+    selectedApplication !== "Todos" ? getApplicationLabel(selectedApplication) : "",
+    selectedCollection !== "Todos"
+      ? selectedSeries.find(([series]) => series === selectedCollection)?.[1] ??
+        getSeriesLabel(selectedCollection)
+      : "",
   ].filter(Boolean);
   const canGoBack =
     selectedCategory !== "Todos" ||
@@ -348,6 +242,11 @@ export default function Catalogo() {
     Boolean(searchQuery.trim());
 
   const goBackInCatalog = () => {
+    if (selectedCollection !== "Todos") {
+      setSelectedCollection("Todos");
+      return;
+    }
+
     if (selectedApplication !== "Todos") {
       setSelectedApplication("Todos");
       setSelectedCollection("Todos");
@@ -382,6 +281,7 @@ export default function Catalogo() {
     setIsCatalogTransitioning(true);
 
     window.setTimeout(() => {
+      setVisibleCount(PAGE_SIZE);
       updateNavigation();
       setIsCatalogTransitioning(false);
       scrollCatalogStageIntoView();
@@ -393,22 +293,7 @@ export default function Catalogo() {
     scrollCatalogStageIntoView();
   };
 
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [
-    searchQuery,
-    selectedApplication,
-    selectedBrand,
-    selectedCategory,
-    selectedFinish,
-    selectedCollection,
-  ]);
-
   const quoteCount = quoteItems.reduce((total, item) => total + item.quantity, 0);
-  const quoteTotal = quoteItems.reduce(
-    (total, item) => total + item.product.price * item.quantity,
-    0,
-  );
 
   const whatsappMessage = useMemo(() => {
     const selectedProducts = quoteItems.map(
@@ -539,8 +424,8 @@ export default function Catalogo() {
             </h1>
             <p className="max-w-2xl text-base leading-7 text-white/66 sm:text-xl sm:leading-8 lg:justify-self-end">
               Explora luminarias de referencia para arquitectura, interiorismo,
-              exterior y espacios comerciales. Los precios son estimados en GTQ
-              para orientar una primera asesoría de proyecto.
+              exterior y espacios comerciales. Cada selección se cotiza con
+              asesoría técnica según alcance, disponibilidad y especificación.
             </p>
           </div>
         </div>
@@ -555,7 +440,10 @@ export default function Catalogo() {
               </span>
               <input
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  setVisibleCount(PAGE_SIZE);
+                  setSearchQuery(event.target.value);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
                     event.preventDefault();
@@ -585,13 +473,13 @@ export default function Catalogo() {
                 description="Elige una familia principal para entrar al catálogo de forma ordenada."
               />
               <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {catalogTypeCards.map((type) => (
+                {productTypeList.map((type) => (
                   <button
-                    key={type.title}
+                    key={type.id}
                     type="button"
                     onClick={() =>
                       transitionCatalog(() => {
-                        setSelectedCategory(type.title);
+                        setSelectedCategory(type.id);
                         setSelectedApplication("Todos");
                         setSelectedCollection("Todos");
                         setSelectedBrand("Todos");
@@ -604,7 +492,7 @@ export default function Catalogo() {
                       {type.marker}
                     </span>
                     <h2 className="mt-7 text-2xl font-semibold leading-tight">
-                      {type.title}
+                      {type.label}
                     </h2>
                     <p className="mt-4 text-sm leading-6 text-neutral-500">
                       {type.description}
@@ -623,7 +511,7 @@ export default function Catalogo() {
             >
               <SectionHeader
                 eyebrow="Aplicación"
-                title={selectedCategory}
+                title={getProductTypeLabel(selectedCategory)}
                 description="Selecciona dónde se instalará o qué función debe resolver el producto."
               />
               <div className="mt-6 grid gap-3">
@@ -696,7 +584,7 @@ export default function Catalogo() {
                 {selectedApplications.map((application) => {
                   const count = products.filter(
                     (product) =>
-                      product.category === selectedCategory &&
+                      product.productType === selectedCategory &&
                       product.application === application &&
                       (selectedBrand === "Todos" || product.brand === selectedBrand) &&
                       (selectedFinish === "Todos" || product.finish === selectedFinish),
@@ -714,7 +602,101 @@ export default function Catalogo() {
                       }
                       className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
                     >
-                      <span className="text-xl font-semibold">{application}</span>
+                      <span className="text-xl font-semibold">
+                        {getApplicationLabel(application)}
+                      </span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
+                        {count} ref.
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {shouldShowSeries && (
+            <div
+              key={`series-${selectedCategory}-${selectedApplication}`}
+              className={`catalog-stage ${isCatalogTransitioning ? "catalog-stage-out" : ""}`}
+            >
+              <SectionHeader
+                eyebrow="Serie"
+                title={getApplicationLabel(selectedApplication)}
+                description="Selecciona una serie o familia para ver las referencias disponibles."
+              />
+              <div className="mt-6 grid gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  {breadcrumbItems.map((item, index) => (
+                    <div key={`${item}-${index}`} className="flex items-center gap-2">
+                      {index > 0 && (
+                        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-300">
+                          /
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (index === 0) {
+                            transitionCatalog(resetCatalogNavigation);
+                            return;
+                          }
+
+                          if (index === 1) {
+                            transitionCatalog(() => {
+                              setSelectedApplication("Todos");
+                              setSelectedCollection("Todos");
+                            });
+                            return;
+                          }
+
+                          if (index === 2) {
+                            transitionCatalog(() => setSelectedCollection("Todos"));
+                          }
+                        }}
+                        className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
+                      >
+                        {item}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => transitionCatalog(goBackInCatalog)}
+                    className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
+                  >
+                    Volver
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => transitionCatalog(resetCatalogNavigation)}
+                    className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
+                  >
+                    Inicio del catálogo
+                  </button>
+                </div>
+              </div>
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {selectedSeries.map(([series, label]) => {
+                  const count = products.filter(
+                    (product) =>
+                      product.productType === selectedCategory &&
+                      product.application === selectedApplication &&
+                      product.series === series &&
+                      (selectedBrand === "Todos" || product.brand === selectedBrand) &&
+                      (selectedFinish === "Todos" || product.finish === selectedFinish),
+                  ).length;
+
+                  return (
+                    <button
+                      key={series}
+                      type="button"
+                      onClick={() => transitionCatalog(() => setSelectedCollection(series))}
+                      className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
+                    >
+                      <span className="text-xl font-semibold">{label}</span>
                       <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
                         {count} ref.
                       </span>
@@ -733,7 +715,11 @@ export default function Catalogo() {
               <div className="mb-8">
                 <SectionHeader
                   eyebrow="Referencias para proyecto"
-                  title={searchQuery.trim() ? "Resultados de búsqueda" : selectedApplication}
+                  title={
+                    searchQuery.trim()
+                      ? "Resultados de búsqueda"
+                      : getApplicationLabel(selectedApplication)
+                  }
                   description={`${filteredProducts.length} referencias encontradas.`}
                 />
                 <div className="mt-6 grid gap-3">
@@ -815,7 +801,6 @@ export default function Catalogo() {
                       key={product.id}
                       product={product}
                       quantity={selectedItem?.quantity}
-                      formatPrice={formatCurrency}
                       onAdd={() => addToQuote(product, false)}
                       onDecrease={() =>
                         updateQuantity(product.id, (selectedItem?.quantity ?? 1) - 1)
@@ -903,17 +888,10 @@ export default function Catalogo() {
                       <div>
                         <p className="font-semibold text-white">{item.product.name}</p>
                         <p className="mt-1 text-sm text-white/48">
-                          {item.quantity} unidad{item.quantity > 1 ? "es" : ""} /{" "}
-                          {item.product.price > 0
-                            ? `${formatCurrency(item.product.price)} ref.`
-                            : "Por cotizar"}
+                          {item.quantity} unidad{item.quantity > 1 ? "es" : ""} / Por cotizar
                         </p>
                       </div>
-                      <p className="shrink-0 font-semibold">
-                        {item.product.price > 0
-                          ? formatCurrency(item.product.price * item.quantity)
-                          : "Por cotizar"}
-                      </p>
+                      <p className="shrink-0 font-semibold">Por cotizar</p>
                     </div>
                   ))
                 )}
@@ -921,11 +899,9 @@ export default function Catalogo() {
 
               <div className="mt-5 flex items-center justify-between border-t border-white/12 pt-4">
                 <p className="text-sm uppercase tracking-[0.18em] text-white/44">
-                  Total estimado
+                  Modalidad
                 </p>
-                <p className="text-2xl font-semibold">
-                  {quoteTotal > 0 ? formatCurrency(quoteTotal) : "Por cotizar"}
-                </p>
+                <p className="text-2xl font-semibold">Cotización por asesoría</p>
               </div>
             </div>
 
@@ -1117,7 +1093,7 @@ export default function Catalogo() {
           onClick={() => setIsQuoteOpen(true)}
           className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:bg-neutral-800 sm:bottom-8 sm:right-8"
         >
-          Ver carrito
+          Ver selección
           <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">
             {quoteCount}
           </span>
@@ -1127,8 +1103,6 @@ export default function Catalogo() {
       <QuoteDrawer
         isOpen={isQuoteOpen}
         items={quoteItems}
-        total={quoteTotal}
-        formatPrice={formatCurrency}
         onClose={() => setIsQuoteOpen(false)}
         onRemove={removeFromQuote}
         onUpdateQuantity={updateQuantity}
@@ -1142,7 +1116,6 @@ export default function Catalogo() {
             ? quoteItems.find((item) => item.product.id === technicalProduct.id)?.quantity ?? 0
             : 0
         }
-        formatPrice={formatCurrency}
         onAdd={(product) => {
           addToQuote(product as Product, false);
         }}

@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "./components/SiteFooter";
 import AnimatedStat from "./components/AnimatedStat";
@@ -13,9 +13,9 @@ import {
   companyStats,
   contact,
   faqs,
+  homeHero,
   homeNavItems,
 } from "./data/siteData";
-
 export default function Home() {
   return (
     <main className="w-full max-w-full overflow-x-hidden bg-white text-black">
@@ -25,15 +25,14 @@ export default function Home() {
         ctaLabel="Cotizar"
         mobileCtaLabel="Cotizar proyecto"
       />
-
       <section
         id="inicio"
         className="relative isolate flex min-h-[100svh] w-full max-w-full scroll-mt-20 items-end overflow-hidden bg-black px-5 pb-12 pt-28 text-white sm:px-8 sm:pb-14 lg:pb-16"
       >
         <div className="absolute inset-0 -z-10">
           <Image
-            src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2200&q=90"
-            alt="Interior arquitectónico con iluminación premium"
+            src={homeHero.image}
+            alt={homeHero.imageAlt}
             fill
             priority
             sizes="100vw"
@@ -42,41 +41,34 @@ export default function Home() {
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92),rgba(0,0,0,0.58)_46%,rgba(0,0,0,0.18))]" />
           <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black via-black/78 to-transparent" />
         </div>
-
         <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div className="min-w-0 max-w-4xl">
             <p className="mb-5 max-w-full text-[0.68rem] font-semibold uppercase leading-5 tracking-[0.22em] text-white/62 [overflow-wrap:anywhere] sm:text-xs sm:tracking-[0.34em]">
-              Iluminación arquitectónica premium
+              {homeHero.eyebrow}
             </p>
             <h1 className="max-w-full text-[2.12rem] font-semibold leading-[1.05] tracking-normal text-white [overflow-wrap:anywhere] sm:max-w-5xl sm:text-7xl sm:leading-[0.96] lg:text-8xl">
-              Luz precisa para espacios que se sienten extraordinarios
+              {homeHero.title}
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-7 text-white/72 sm:text-xl sm:leading-8">
-              ECONOLUZ GT acompaña proyectos residenciales, comerciales y de
-              hospitalidad con luminarias LED, asesoría técnica y piezas seleccionadas
-              para arquitectura contemporánea.
+              {homeHero.description}
             </p>
             <div className="mt-9 flex w-full max-w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <Link
-                href="/catalogo#asesoria-proyecto"
+                href={homeHero.primaryCta.href}
                 className="inline-flex w-full items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-200 sm:w-auto"
               >
-                Agendar asesoría
+                {homeHero.primaryCta.label}
               </Link>
               <Link
-                href="/catalogo"
+                href={homeHero.secondaryCta.href}
                 className="inline-flex w-full items-center justify-center rounded-full border border-white/22 px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white/10 sm:w-auto"
               >
-                Ver catálogo
+                {homeHero.secondaryCta.label}
               </Link>
             </div>
           </div>
-
           <div className="grid min-w-0 grid-cols-2 gap-4 border-t border-white/16 pt-6 text-white/78 sm:gap-8 lg:min-w-[20rem] lg:border-l lg:border-t-0 lg:gap-10 lg:pl-8 lg:pt-0">
-            {[
-              ["2006", "Trayectoria"],
-              ["LED", "Tecnología eficiente"],
-            ].map(([value, label]) => (
+            {homeHero.stats.map(({ value, label }) => (
               <div key={label} className="min-w-0">
                 <p className="text-xl font-semibold text-white sm:text-2xl lg:text-3xl">{value}</p>
                 <p className="mt-2 max-w-full text-[0.58rem] uppercase leading-4 tracking-[0.13em] [overflow-wrap:anywhere] sm:text-xs sm:tracking-[0.2em]">
@@ -87,7 +79,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <section className="bg-white px-5 pt-8 sm:px-8 lg:pt-10">
         <div className="mx-auto max-w-7xl border border-neutral-200 bg-black text-white">
           <div className="grid divide-y divide-white/14 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
@@ -97,9 +88,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <BrandsCarousel />
-
       <section
         id="empresa"
         className="scroll-mt-20 px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
@@ -117,7 +106,6 @@ export default function Home() {
               ambiente: eficiente, precisa y alineada con la intención del proyecto.
             </p>
           </div>
-
           <div className="grid min-w-0 gap-5 md:grid-cols-3">
             {companyHighlights.map((highlight) => (
               <article
@@ -132,7 +120,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
         <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-black sm:p-8 lg:grid-cols-[0.9fr_1fr_auto] lg:items-center">
           <div>
@@ -155,7 +142,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
       <section
         id="colecciones"
         className="scroll-mt-20 px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24"
@@ -174,7 +160,6 @@ export default function Home() {
               </Link>
             }
           />
-
           <div className="mt-12 grid min-w-0 gap-5 md:grid-cols-3">
             {collections.map((category) => (
               <article key={category.title} className="group bg-neutral-950 text-white">
@@ -199,7 +184,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <section
         id="proyectos"
         className="scroll-mt-20 px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24"
@@ -210,15 +194,12 @@ export default function Home() {
             title="Aplicaciones reales de luz arquitectónica."
             description="Showrooms, edificios, restaurantes, residencias y luz lineal integrada a obra."
           />
-
           <ProjectSlider projects={projects} />
         </div>
       </section>
-
       <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
         <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[0.72fr_1.28fr]">
           <SectionHeader eyebrow="Antes de cotizar" title="Preguntas rápidas." />
-
           <div className="grid gap-4">
             {faqs.map((item) => (
               <article
@@ -232,7 +213,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <section
         id="contacto"
         className="scroll-mt-20 bg-black px-5 py-20 text-white sm:px-8 sm:py-24 lg:py-28"
@@ -289,7 +269,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <SiteFooter />
     </main>
   );

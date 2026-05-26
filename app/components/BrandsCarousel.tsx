@@ -1,18 +1,5 @@
 import Image from "next/image";
-
-const brands = [
-  { name: "Construlita", src: "/proveedores/construlita.png" },
-  { name: "Highlum", src: "/proveedores/highlum.png" },
-  { name: "Ilum", src: "/proveedores/ilum.png" },
-  { name: "Ilumitec", src: "/proveedores/ilumitec.png" },
-  { name: "Lighttec", src: "/proveedores/lighttec.png" },
-  { name: "OSRAM", src: "/proveedores/osram.png" },
-  { name: "Philips", src: "/proveedores/philips.png" },
-  { name: "Proelca", src: "/proveedores/proelca.png" },
-  { name: "Sunnovation", src: "/proveedores/sunnovation.png" },
-  { name: "Sylvania", src: "/proveedores/sylvania.png" },
-  { name: "Tecnolite", src: "/proveedores/tecnolite.png" },
-];
+import { partnerBrands } from "../data/siteData";
 
 export default function BrandsCarousel() {
   return (
@@ -34,7 +21,7 @@ export default function BrandsCarousel() {
 
             <div className="max-w-full overflow-hidden" aria-label="Marcas proveedoras de ECONOLUZ GT">
               <div className="brands-marquee flex w-max touch-pan-y select-none gap-4">
-                {[...brands, ...brands].map((brand, index) => (
+                {[...partnerBrands, ...partnerBrands].map((brand, index) => (
                   <div
                     key={`${brand.name}-${index}`}
                     className="flex h-24 w-40 shrink-0 items-center justify-center border border-neutral-200 bg-white px-6 transition duration-300 hover:border-black sm:w-48"

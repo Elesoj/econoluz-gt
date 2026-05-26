@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import "./globals.css";
@@ -14,9 +14,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ECONOLUZ GT | Iluminación arquitectónica premium",
+  title: {
+    default: "ECONOLUZ GT | Catálogo de iluminación por cotización",
+    template: "%s | ECONOLUZ GT",
+  },
   description:
-    "Rediseño premium de ECONOLUZ GT para luminarias LED, proyectos arquitectónicos y asesoría de iluminación en Guatemala.",
+    "Catálogo premium de luminarias LED, proyectos arquitectónicos y asesoría técnica de iluminación por cotización en Guatemala.",
+  keywords: [
+    "ECONOLUZ GT",
+    "iluminación Guatemala",
+    "luminarias LED",
+    "catálogo de iluminación",
+    "cotización de iluminación",
+    "asesoría de iluminación",
+  ],
+  openGraph: {
+    title: "ECONOLUZ GT | Catálogo de iluminación por cotización",
+    description:
+      "Luminarias LED, proyectos arquitectónicos y asesoría técnica de iluminación para Guatemala.",
+    locale: "es_GT",
+    siteName: "ECONOLUZ GT",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

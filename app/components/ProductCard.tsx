@@ -1,29 +1,9 @@
 import Image from "next/image";
+import type { Product } from "../data/products";
 
 type ProductCardProps = {
-  product: {
-    id: string;
-    name: string;
-    brand?: string;
-    category: string;
-    subcategory?: string;
-    collection?: string;
-    finish?: string;
-    application?: string;
-    description: string;
-    price: number;
-    image: string;
-    sku?: string;
-    technicalSpecs?: {
-      power?: string;
-      luminousFlux?: string;
-      voltage?: string;
-      protection?: string;
-      applicationType?: string;
-    };
-  };
+  product: Product;
   quantity?: number;
-  formatPrice: (price: number) => string;
   onAdd: () => void;
   onDecrease: () => void;
   onViewDetails: () => void;
@@ -40,8 +20,8 @@ export default function ProductCard({
     product.technicalSpecs?.power ??
     product.technicalSpecs?.luminousFlux ??
     product.technicalSpecs?.applicationType ??
-    product.subcategory ??
-    product.category;
+    product.labels.family ??
+    product.labels.productType;
 
   return (
     <article className="group flex min-h-full flex-col overflow-hidden border border-neutral-200 bg-white transition duration-300 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)]">
@@ -62,7 +42,7 @@ export default function ProductCard({
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-          {[product.brand, product.category].filter(Boolean).join(" / ")}
+          {[product.labels.brand, product.labels.productType].filter(Boolean).join(" / ")}
         </p>
         <button type="button" onClick={onViewDetails} className="mt-2 text-left">
           <h3 className="line-clamp-2 text-sm font-semibold leading-tight sm:text-base">
@@ -70,7 +50,7 @@ export default function ProductCard({
           </h3>
         </button>
         <p className="mt-2 line-clamp-2 min-h-10 text-xs leading-5 text-neutral-500">
-          {[shortSpec, product.finish].filter(Boolean).join(" / ")}
+          {[shortSpec, product.labels.finish].filter(Boolean).join(" / ")}
         </p>
 
         <div className="mt-auto grid gap-2 pt-4">
@@ -115,3 +95,5 @@ export default function ProductCard({
     </article>
   );
 }
+
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -104,7 +104,7 @@ export default function SiteFooter() {
             <Link href="/politica-devoluciones" className="transition hover:text-black">
               Política de devoluciones y reembolsos
             </Link>
-            <span>Precios sujetos a disponibilidad y especificación.</span>
+            <span>Cotizaciones sujetas a disponibilidad y especificación.</span>
           </div>
         </div>
       </div>
