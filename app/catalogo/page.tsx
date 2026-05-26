@@ -221,19 +221,12 @@ export default function Catalogo() {
     selectedCategory !== "Todos" &&
     selectedApplication === "Todos" &&
     !searchQuery.trim();
-  const shouldShowSeries =
-    selectedApplication !== "Todos" &&
-    selectedCollection === "Todos" &&
-    !searchQuery.trim();
-  const shouldShowProducts = Boolean(searchQuery.trim()) || selectedCollection !== "Todos";
+  const shouldShowSeries = false;
+  const shouldShowProducts = Boolean(searchQuery.trim()) || selectedApplication !== "Todos";
   const breadcrumbItems = [
     "Catálogo",
     selectedCategory !== "Todos" ? getProductTypeLabel(selectedCategory) : "",
     selectedApplication !== "Todos" ? getApplicationLabel(selectedApplication) : "",
-    selectedCollection !== "Todos"
-      ? selectedSeries.find(([series]) => series === selectedCollection)?.[1] ??
-        getSeriesLabel(selectedCollection)
-      : "",
   ].filter(Boolean);
   const canGoBack =
     selectedCategory !== "Todos" ||
@@ -791,6 +784,42 @@ export default function Catalogo() {
                   </div>
                 )}
               </div>
+
+              {selectedApplication !== "Todos" && selectedSeries.length > 1 && (
+                <div className="mb-7 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVisibleCount(PAGE_SIZE);
+                      setSelectedCollection("Todos");
+                    }}
+                    className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition ${
+                      selectedCollection === "Todos"
+                        ? "border-black bg-black text-white"
+                        : "border-neutral-200 bg-white text-neutral-600 hover:border-black hover:text-black"
+                    }`}
+                  >
+                    All
+                  </button>
+                  {selectedSeries.map(([series, label]) => (
+                    <button
+                      key={series}
+                      type="button"
+                      onClick={() => {
+                        setVisibleCount(PAGE_SIZE);
+                        setSelectedCollection(series);
+                      }}
+                      className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition ${
+                        selectedCollection === series
+                          ? "border-black bg-black text-white"
+                          : "border-neutral-200 bg-white text-neutral-600 hover:border-black hover:text-black"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                 {visibleProducts.map((product) => {
