@@ -51,6 +51,16 @@ const catalogTypeCards = [
     marker: "LED",
   },
   {
+    title: "Iluminación lineal",
+    description: "Barras lineales para integración exterior empotrada o sobrepuesta.",
+    marker: "LIN",
+  },
+  {
+    title: "Lámparas",
+    description: "Luminarios compactos para luz de cortesía e integración en muro.",
+    marker: "LMP",
+  },
+  {
     title: "Emergencia y señalización",
     description: "Soluciones para rutas, respaldo y seguridad operativa.",
     marker: "SEG",
@@ -68,12 +78,24 @@ const applicationGroups: Record<string, string[]> = {
   "Iluminación arquitectónica": [
     "Downlights",
     "Luminarios para riel",
+    "Magnetrack Pro",
     "Suspendidos",
     "Empotrados en piso",
     "Arbotantes",
     "Decorativos",
   ],
-  "Iluminación exterior": ["Wallpacks", "Arbotantes", "Decorativos"],
+  "Iluminación exterior": [
+    "Wallpacks",
+    "Bronce",
+    "Arbotantes",
+    "Sumergibles",
+    "Decorativos",
+    "Postes",
+    "Minipostes",
+    "Luminarios para poste",
+    "Proyectores de gran amplitud",
+    "Vialidades",
+  ],
   "Iluminación residencial": ["Downlights", "Decorativos", "Placas y apagadores"],
   "Placas y accesorios eléctricos": [
     "Placas y apagadores",
@@ -85,8 +107,10 @@ const applicationGroups: Record<string, string[]> = {
     "Timbres",
     "Tapas ciegas",
   ],
-  "Tiras LED": ["Decorativos"],
-  "Emergencia y señalización": ["Gabinetes"],
+  "Tiras LED": ["Interior", "Exterior", "Drivers", "Perfiles"],
+  "Iluminación lineal": ["Barras"],
+  "Lámparas": ["Luz de cortesía muro"],
+  "Emergencia y señalización": ["Señalización"],
 };
 
 type QuoteItem = {
@@ -570,6 +594,8 @@ export default function Catalogo() {
                         setSelectedCategory(type.title);
                         setSelectedApplication("Todos");
                         setSelectedCollection("Todos");
+                        setSelectedBrand("Todos");
+                        setSelectedFinish("Todos");
                       })
                     }
                     className="group min-h-44 overflow-hidden border border-neutral-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] active:scale-[0.99]"
