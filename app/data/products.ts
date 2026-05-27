@@ -26,6 +26,31 @@ type RawProduct = {
   images?: string[];
   technicalSpecs?: Record<string, string | string[] | undefined>;
 };
+
+const publicReferencePrefixes: Record<string, string> = {
+  "Iluminación industrial": "IND",
+  "Placas y accesorios eléctricos": "ELE",
+};
+
+const sanitizeSupplierText = (text: string) =>
+  text.replace(/\b(ARTLITE|Artlite|Construlita|CONSTRULITA)\b/g, "línea de proyecto");
+
+const buildPublicName = ({
+  category,
+  application,
+  subcategory,
+}: Pick<RawProduct, "category" | "application" | "subcategory">) => {
+  if (category === "Placas y accesorios eléctricos") {
+    return subcategory ? `Módulo eléctrico ${subcategory.toLowerCase()}` : "Módulo eléctrico";
+  }
+
+  return `Luminaria ${application.toLowerCase()}`;
+};
+
+const buildEconoluzReference = (category: string, index: number) => {
+  const prefix = publicReferencePrefixes[category] ?? "CAT";
+  return `ECO-${prefix}-${String(index + 1).padStart(4, "0")}`;
+};
 const artlitePlateCodes = [
   "APL-001",
   "APL-002",
@@ -6089,7 +6114,7 @@ const normalizeProduct = ({
   application,
   finish = "",
   ...product
-}: RawProduct) => {
+}: RawProduct, index: number) => {
   const brandId = getBrandId(brand);
   const productTypeId = getProductTypeId(category);
   const applicationId = getApplicationId(application);
@@ -6099,6 +6124,11 @@ const normalizeProduct = ({
 
   return {
     ...product,
+    publicName: buildPublicName({ category, application, subcategory }),
+    publicDescription: sanitizeSupplierText(product.description),
+    econoluzReference: buildEconoluzReference(category, index),
+    supplierCode: product.sku,
+    supplierBrand: brandId,
     brand: brandId,
     productType: productTypeId,
     application: applicationId,
@@ -6115,6 +6145,6 @@ const normalizeProduct = ({
   };
 };
 
-export const products = rawProducts.map(normalizeProduct);
+export const products = rawProducts.map((product, index) => normalizeProduct(product, index));
 
 export type Product = (typeof products)[number];

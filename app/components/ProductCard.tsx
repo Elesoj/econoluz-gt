@@ -20,7 +20,6 @@ export default function ProductCard({
     product.technicalSpecs?.power ??
     product.technicalSpecs?.luminousFlux ??
     product.technicalSpecs?.applicationType ??
-    product.labels.family ??
     product.labels.productType;
 
   return (
@@ -29,11 +28,11 @@ export default function ProductCard({
         type="button"
         onClick={onViewDetails}
         className="relative aspect-square overflow-hidden bg-white p-3 text-left sm:p-4"
-        aria-label={`Ver ficha técnica de ${product.name}`}
+        aria-label={`Ver ficha técnica de ${product.publicName}`}
       >
         <Image
           src={product.image}
-          alt={product.name}
+          alt={product.publicName}
           fill
           sizes="(min-width: 1536px) 20vw, (min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
           className="object-contain p-3 transition duration-500 group-hover:scale-105 sm:p-4"
@@ -42,13 +41,16 @@ export default function ProductCard({
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-          {[product.labels.brand, product.labels.productType].filter(Boolean).join(" / ")}
+          {product.labels.productType}
         </p>
         <button type="button" onClick={onViewDetails} className="mt-2 text-left">
           <h3 className="line-clamp-2 text-sm font-semibold leading-tight sm:text-base">
-            {product.name}
+            {product.publicName}
           </h3>
         </button>
+        <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+          Ref. {product.econoluzReference}
+        </p>
         <p className="mt-2 line-clamp-2 min-h-10 text-xs leading-5 text-neutral-500">
           {[shortSpec, product.labels.finish].filter(Boolean).join(" / ")}
         </p>
@@ -67,7 +69,7 @@ export default function ProductCard({
                 type="button"
                 onClick={onDecrease}
                 className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/12"
-                aria-label={`Quitar una unidad de ${product.name}`}
+                aria-label={`Quitar una unidad de ${product.publicName}`}
               >
                 -
               </button>
@@ -76,7 +78,7 @@ export default function ProductCard({
                 type="button"
                 onClick={onAdd}
                 className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/12"
-                aria-label={`Agregar una unidad de ${product.name}`}
+                aria-label={`Agregar una unidad de ${product.publicName}`}
               >
                 +
               </button>

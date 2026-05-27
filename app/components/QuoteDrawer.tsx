@@ -1,6 +1,7 @@
 ﻿type QuoteDrawerProduct = {
   id: string;
-  name: string;
+  publicName: string;
+  econoluzReference: string;
 };
 
 type QuoteDrawerItem = {
@@ -71,9 +72,9 @@ export default function QuoteDrawer({
                 <div key={item.product.id} className="border border-neutral-200 p-4">
                   <div className="flex justify-between gap-4">
                     <div>
-                      <h3 className="font-semibold">{item.product.name}</h3>
+                      <h3 className="font-semibold">{item.product.publicName}</h3>
                       <p className="mt-1 text-sm text-neutral-500">
-                        Cotización bajo asesoría
+                        Ref. {item.product.econoluzReference}
                       </p>
                     </div>
                     <button

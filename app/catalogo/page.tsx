@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductTechnicalDrawer from "../components/ProductTechnicalDrawer";
 import QuoteDrawer from "../components/QuoteDrawer";
@@ -9,10 +9,8 @@ import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
 import {
   getApplicationLabel,
-  getBrandLabel,
   getFinishLabel,
   getProductTypeLabel,
-  getSeriesLabel,
   productTypeList,
   productTypes,
   type ProductTypeId,
@@ -48,6 +46,14 @@ type QuoteFormErrors = Partial<Record<keyof QuoteFormState, string>>;
 
 type StoredLedResults = {
   summary?: string;
+};
+
+type CatalogHistoryState = {
+  econoluzCatalog: true;
+  searchQuery: string;
+  selectedCategory: string;
+  selectedApplication: string;
+  selectedCollection: string;
 };
 
 const initialFormState: QuoteFormState = {
@@ -99,23 +105,50 @@ const clearTemporaryQuoteData = () => {
   window.dispatchEvent(new Event("econoluz-quote-updated"));
 };
 
+const createCatalogHistoryState = (
+  selectedCategory = "Todos",
+  selectedApplication = "Todos",
+  selectedCollection = "Todos",
+  searchQuery = "",
+): CatalogHistoryState => ({
+  econoluzCatalog: true,
+  searchQuery,
+  selectedCategory,
+  selectedApplication,
+  selectedCollection,
+});
+
+const isCatalogHistoryState = (state: unknown): state is CatalogHistoryState =>
+  Boolean(
+    state &&
+      typeof state === "object" &&
+      "econoluzCatalog" in state &&
+      (state as CatalogHistoryState).econoluzCatalog,
+  );
+
+const getPublicTechnicalSpecValues = (product: Product) => {
+  if (!product.technicalSpecs) {
+    return [];
+  }
+
+  return Object.entries(product.technicalSpecs)
+    .filter(([key]) => key !== "productCode")
+    .map(([, value]) => value)
+    .flat();
+};
+
 const buildProductSearchText = (product: Product) =>
   [
-    product.name,
-    product.sku,
-    product.brand,
+    product.publicName,
+    product.econoluzReference,
     product.productType,
     product.application,
-    product.series,
     product.finish,
-    product.labels.brand,
     product.labels.productType,
-    product.labels.family,
-    product.labels.series,
     product.labels.application,
     product.labels.finish,
-    product.description,
-    ...(product.technicalSpecs ? Object.values(product.technicalSpecs).flat() : []),
+    product.publicDescription,
+    ...getPublicTechnicalSpecValues(product),
   ]
     .filter(Boolean)
     .join(" ")
@@ -137,6 +170,7 @@ export default function Catalogo() {
   const [formErrors, setFormErrors] = useState<QuoteFormErrors>({});
   const [ledResultsSummary] = useState(getStoredLedResultsSummary);
   const catalogStageRef = useRef<HTMLDivElement>(null);
+  const isApplyingBrowserHistoryRef = useRef(false);
   const searchableProducts = useMemo(
     () =>
       products.map((product) => ({
@@ -187,15 +221,7 @@ export default function Catalogo() {
 
   const activeFilters = [
     ["Buscar", searchQuery.trim()],
-    ["Marca", selectedBrand === "Todos" ? selectedBrand : getBrandLabel(selectedBrand)],
     ["Tipo", selectedCategory === "Todos" ? selectedCategory : getProductTypeLabel(selectedCategory)],
-    [
-      "Serie",
-      selectedCollection === "Todos"
-        ? selectedCollection
-        : products.find((product) => product.series === selectedCollection)?.labels.series ??
-          getSeriesLabel(selectedCollection),
-    ],
     ["Aplicación", selectedApplication === "Todos" ? selectedApplication : getApplicationLabel(selectedApplication)],
     ["Color", selectedFinish === "Todos" ? selectedFinish : getFinishLabel(selectedFinish)],
   ].filter(([, value]) => value && value !== "Todos");
@@ -234,26 +260,6 @@ export default function Catalogo() {
     selectedCollection !== "Todos" ||
     Boolean(searchQuery.trim());
 
-  const goBackInCatalog = () => {
-    if (selectedCollection !== "Todos") {
-      setSelectedCollection("Todos");
-      return;
-    }
-
-    if (selectedApplication !== "Todos") {
-      setSelectedApplication("Todos");
-      setSelectedCollection("Todos");
-      return;
-    }
-
-    if (selectedCategory !== "Todos") {
-      setSelectedCategory("Todos");
-      return;
-    }
-
-    setSearchQuery("");
-  };
-
   const resetCatalogNavigation = () => {
     setSearchQuery("");
     setSelectedCategory("Todos");
@@ -261,28 +267,73 @@ export default function Catalogo() {
     setSelectedCollection("Todos");
   };
 
-  const scrollCatalogStageIntoView = () => {
+  const scrollCatalogStageIntoView = useCallback(() => {
     window.requestAnimationFrame(() => {
       catalogStageRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     });
+  }, []);
+
+  const applyCatalogHistoryState = useCallback((catalogState: CatalogHistoryState) => {
+    isApplyingBrowserHistoryRef.current = true;
+    setVisibleCount(PAGE_SIZE);
+    setSearchQuery(catalogState.searchQuery);
+    setSelectedCategory(catalogState.selectedCategory);
+    setSelectedApplication(catalogState.selectedApplication);
+    setSelectedCollection(catalogState.selectedCollection);
+    setIsCatalogTransitioning(false);
+    scrollCatalogStageIntoView();
+
+    window.setTimeout(() => {
+      isApplyingBrowserHistoryRef.current = false;
+    }, 0);
+  }, [scrollCatalogStageIntoView]);
+
+  const pushCatalogHistoryState = (catalogState: CatalogHistoryState) => {
+    if (isApplyingBrowserHistoryRef.current) {
+      return;
+    }
+
+    window.history.pushState(catalogState, "", window.location.href);
   };
 
-  const transitionCatalog = (updateNavigation: () => void) => {
+  const replaceCatalogHistoryState = useCallback((catalogState: CatalogHistoryState) => {
+    window.history.replaceState(catalogState, "", window.location.href);
+  }, []);
+
+  const transitionCatalog = (
+    updateNavigation: () => void,
+    nextHistoryState?: CatalogHistoryState,
+  ) => {
     setIsCatalogTransitioning(true);
 
     window.setTimeout(() => {
       setVisibleCount(PAGE_SIZE);
       updateNavigation();
+      if (nextHistoryState) {
+        pushCatalogHistoryState(nextHistoryState);
+      }
       setIsCatalogTransitioning(false);
       scrollCatalogStageIntoView();
     }, 180);
   };
 
+  const navigateBackInCatalog = () => {
+    window.history.back();
+  };
+
   const handleSearchSubmit = () => {
     setVisibleCount(PAGE_SIZE);
+    pushCatalogHistoryState(
+      createCatalogHistoryState(
+        selectedCategory,
+        selectedApplication,
+        selectedCollection,
+        searchQuery,
+      ),
+    );
     scrollCatalogStageIntoView();
   };
 
@@ -290,7 +341,8 @@ export default function Catalogo() {
 
   const whatsappMessage = useMemo(() => {
     const selectedProducts = quoteItems.map(
-      (item) => `${item.product.name} (${item.quantity})`,
+      (item) =>
+        `${item.product.publicName} - Ref. ${item.product.econoluzReference} - Cantidad: ${item.quantity}`,
     );
     const details = [
       formState.fullName ? `Nombre: ${formState.fullName}` : "",
@@ -333,7 +385,10 @@ export default function Catalogo() {
         projectType: formState.projectType,
         estimatedArea: formState.estimatedArea,
         budgetRange: formState.budgetRange,
-        products: quoteItems.map((item) => `${item.product.name} (${item.quantity})`),
+        products: quoteItems.map(
+          (item) =>
+            `${item.product.publicName} - Ref. ${item.product.econoluzReference} - Cantidad: ${item.quantity}`,
+        ),
       }),
     );
     window.dispatchEvent(new Event("econoluz-quote-updated"));
@@ -354,6 +409,22 @@ export default function Catalogo() {
       window.removeEventListener("econoluz-catalog-reset", resetCatalogNavigation);
     };
   }, []);
+
+  useEffect(() => {
+    replaceCatalogHistoryState(createCatalogHistoryState());
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (isCatalogHistoryState(event.state)) {
+        applyCatalogHistoryState(event.state);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [applyCatalogHistoryState, replaceCatalogHistoryState]);
 
   const addToQuote = (product: Product, openQuote = true) => {
     setQuoteItems((currentItems) => {
@@ -477,7 +548,7 @@ export default function Catalogo() {
                         setSelectedCollection("Todos");
                         setSelectedBrand("Todos");
                         setSelectedFinish("Todos");
-                      })
+                      }, createCatalogHistoryState(type.id))
                     }
                     className="group min-h-44 overflow-hidden border border-neutral-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] active:scale-[0.99]"
                   >
@@ -520,7 +591,10 @@ export default function Catalogo() {
                         type="button"
                         onClick={() => {
                           if (index === 0) {
-                            transitionCatalog(resetCatalogNavigation);
+                            transitionCatalog(
+                              resetCatalogNavigation,
+                              createCatalogHistoryState(),
+                            );
                             return;
                           }
 
@@ -528,7 +602,7 @@ export default function Catalogo() {
                             transitionCatalog(() => {
                               setSelectedApplication("Todos");
                               setSelectedCollection("Todos");
-                            });
+                            }, createCatalogHistoryState(selectedCategory));
                             return;
                           }
 
@@ -560,14 +634,16 @@ export default function Catalogo() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() => transitionCatalog(goBackInCatalog)}
+                  onClick={navigateBackInCatalog}
                   className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
                 >
                   Volver
                 </button>
                 <button
                   type="button"
-                  onClick={() => transitionCatalog(resetCatalogNavigation)}
+                  onClick={() =>
+                    transitionCatalog(resetCatalogNavigation, createCatalogHistoryState())
+                  }
                   className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                 >
                   Inicio del catálogo
@@ -591,7 +667,7 @@ export default function Catalogo() {
                         transitionCatalog(() => {
                           setSelectedApplication(application);
                           setSelectedCollection("Todos");
-                        })
+                        }, createCatalogHistoryState(selectedCategory, application))
                       }
                       className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
                     >
@@ -631,7 +707,10 @@ export default function Catalogo() {
                         type="button"
                         onClick={() => {
                           if (index === 0) {
-                            transitionCatalog(resetCatalogNavigation);
+                            transitionCatalog(
+                              resetCatalogNavigation,
+                              createCatalogHistoryState(),
+                            );
                             return;
                           }
 
@@ -639,7 +718,7 @@ export default function Catalogo() {
                             transitionCatalog(() => {
                               setSelectedApplication("Todos");
                               setSelectedCollection("Todos");
-                            });
+                            }, createCatalogHistoryState(selectedCategory));
                             return;
                           }
 
@@ -657,14 +736,16 @@ export default function Catalogo() {
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
-                    onClick={() => transitionCatalog(goBackInCatalog)}
+                    onClick={navigateBackInCatalog}
                     className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
                   >
                     Volver
                   </button>
                   <button
                     type="button"
-                    onClick={() => transitionCatalog(resetCatalogNavigation)}
+                    onClick={() =>
+                      transitionCatalog(resetCatalogNavigation, createCatalogHistoryState())
+                    }
                     className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                   >
                     Inicio del catálogo
@@ -686,7 +767,16 @@ export default function Catalogo() {
                     <button
                       key={series}
                       type="button"
-                      onClick={() => transitionCatalog(() => setSelectedCollection(series))}
+                      onClick={() =>
+                        transitionCatalog(
+                          () => setSelectedCollection(series),
+                          createCatalogHistoryState(
+                            selectedCategory,
+                            selectedApplication,
+                            series,
+                          ),
+                        )
+                      }
                       className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
                     >
                       <span className="text-xl font-semibold">{label}</span>
@@ -728,7 +818,10 @@ export default function Catalogo() {
                           type="button"
                           onClick={() => {
                             if (index === 0) {
-                              transitionCatalog(resetCatalogNavigation);
+                              transitionCatalog(
+                                resetCatalogNavigation,
+                                createCatalogHistoryState(),
+                              );
                               return;
                             }
 
@@ -736,7 +829,7 @@ export default function Catalogo() {
                               transitionCatalog(() => {
                                 setSelectedApplication("Todos");
                                 setSelectedCollection("Todos");
-                              });
+                              }, createCatalogHistoryState(selectedCategory));
                               return;
                             }
 
@@ -769,14 +862,16 @@ export default function Catalogo() {
                   <div className="mt-6 flex flex-wrap gap-3">
                     <button
                       type="button"
-                      onClick={() => transitionCatalog(goBackInCatalog)}
+                      onClick={navigateBackInCatalog}
                       className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
                     >
                       Volver
                     </button>
                     <button
                       type="button"
-                      onClick={() => transitionCatalog(resetCatalogNavigation)}
+                      onClick={() =>
+                        transitionCatalog(resetCatalogNavigation, createCatalogHistoryState())
+                      }
                       className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                     >
                       Inicio del catálogo
@@ -784,42 +879,6 @@ export default function Catalogo() {
                   </div>
                 )}
               </div>
-
-              {selectedApplication !== "Todos" && selectedSeries.length > 1 && (
-                <div className="mb-7 flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setVisibleCount(PAGE_SIZE);
-                      setSelectedCollection("Todos");
-                    }}
-                    className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition ${
-                      selectedCollection === "Todos"
-                        ? "border-black bg-black text-white"
-                        : "border-neutral-200 bg-white text-neutral-600 hover:border-black hover:text-black"
-                    }`}
-                  >
-                    All
-                  </button>
-                  {selectedSeries.map(([series, label]) => (
-                    <button
-                      key={series}
-                      type="button"
-                      onClick={() => {
-                        setVisibleCount(PAGE_SIZE);
-                        setSelectedCollection(series);
-                      }}
-                      className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition ${
-                        selectedCollection === series
-                          ? "border-black bg-black text-white"
-                          : "border-neutral-200 bg-white text-neutral-600 hover:border-black hover:text-black"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
 
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                 {visibleProducts.map((product) => {
@@ -915,9 +974,9 @@ export default function Catalogo() {
                       className="flex items-center justify-between gap-4 border-t border-white/10 pt-3"
                     >
                       <div>
-                        <p className="font-semibold text-white">{item.product.name}</p>
+                        <p className="font-semibold text-white">{item.product.publicName}</p>
                         <p className="mt-1 text-sm text-white/48">
-                          {item.quantity} unidad{item.quantity > 1 ? "es" : ""} / Por cotizar
+                          Ref. {item.product.econoluzReference} / {item.quantity} unidad{item.quantity > 1 ? "es" : ""}
                         </p>
                       </div>
                       <p className="shrink-0 font-semibold">Por cotizar</p>

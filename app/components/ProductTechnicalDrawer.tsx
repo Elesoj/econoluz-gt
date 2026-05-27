@@ -86,7 +86,6 @@ export default function ProductTechnicalDrawer({
     ["Voltaje dieléctrico", specs?.dielectricVoltage],
     ["SCCR", specs?.shortCircuitCurrent],
     ["Nivel de conmutación", specs?.switchingLevel],
-    ["Código", specs?.productCode],
     ["Flujo luminoso", specs?.luminousFlux],
     ["Potencia", specs?.power],
     ["Eficiencia", specs?.efficiency],
@@ -118,8 +117,11 @@ export default function ProductTechnicalDrawer({
               Ficha técnica
             </p>
             <h2 className="mt-2 text-3xl font-semibold leading-tight sm:text-4xl">
-              {product.name}
+              {product.publicName}
             </h2>
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
+              Ref. {product.econoluzReference}
+            </p>
           </div>
           <button
             type="button"
@@ -142,7 +144,7 @@ export default function ProductTechnicalDrawer({
               >
                 <Image
                   src={image}
-                  alt={`${product.name}${productImages.length > 1 ? ` ${index + 1}` : ""}`}
+                  alt={`${product.publicName}${productImages.length > 1 ? ` ${index + 1}` : ""}`}
                   fill
                   sizes="(min-width: 768px) 42rem, 100vw"
                   className="object-contain p-8"
@@ -155,20 +157,10 @@ export default function ProductTechnicalDrawer({
             <div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                  {[product.labels.brand, product.labels.productType].filter(Boolean).join(" / ")}
+                  {product.labels.productType}
                 </p>
-                {product.sku && (
-                  <p className="mt-3 text-sm font-semibold uppercase tracking-[0.18em] text-neutral-500">
-                    Código {product.sku}
-                  </p>
-                )}
-                {(product.labels.family || product.labels.finish) && (
+                {product.labels.finish && (
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {product.labels.family && (
-                      <span className="rounded-full border border-neutral-200 px-3 py-1.5 text-sm text-neutral-700">
-                        {product.labels.family}
-                      </span>
-                    )}
                     {product.labels.finish && (
                       <span className="rounded-full border border-neutral-200 px-3 py-1.5 text-sm text-neutral-700">
                         {product.labels.finish}
@@ -177,7 +169,7 @@ export default function ProductTechnicalDrawer({
                   </div>
                 )}
                 <p className="mt-4 text-base leading-7 text-neutral-600">
-                  {product.description}
+                  {product.publicDescription}
                 </p>
               </div>
             </div>
@@ -234,7 +226,7 @@ export default function ProductTechnicalDrawer({
                     type="button"
                     onClick={() => onDecrease(product)}
                     className="flex h-11 w-12 items-center justify-center rounded-full transition hover:bg-white/12"
-                    aria-label={`Quitar una unidad de ${product.name}`}
+                    aria-label={`Quitar una unidad de ${product.publicName}`}
                   >
                     -
                   </button>
@@ -243,7 +235,7 @@ export default function ProductTechnicalDrawer({
                     type="button"
                     onClick={addProduct}
                     className="flex h-11 w-12 items-center justify-center rounded-full transition hover:bg-white/12"
-                    aria-label={`Agregar una unidad de ${product.name}`}
+                    aria-label={`Agregar una unidad de ${product.publicName}`}
                   >
                     +
                   </button>
