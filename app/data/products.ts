@@ -32,8 +32,44 @@ const publicReferencePrefixes: Record<string, string> = {
   "Placas y accesorios eléctricos": "ELE",
 };
 
+const supplierBrandPattern = /\b(ARTLITE|Artlite|Construlita|CONSTRULITA)\b/g;
+const supplierCodePattern =
+  /\b(?:APL|IN|OU|RE|OF|AC|CO|MT|MC|YS|CY|CU|ML|V|U)[-\s]?\d{1,}[A-Z0-9]*(?:\/[A-Z0-9]+)?\b/g;
+
 const sanitizeSupplierText = (text: string) =>
-  text.replace(/\b(ARTLITE|Artlite|Construlita|CONSTRULITA)\b/g, "línea de proyecto");
+  text
+    .replace(supplierBrandPattern, "línea de proyecto")
+    .replace(supplierCodePattern, "opción")
+    .replace(/\bopción(?:\s*[-/]\s*opción)+\b/g, "opciones")
+    .replace(/\bopción(?:\s*,\s*opción)+\b/g, "opciones")
+    .replace(/\s+([,.;:])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+const sanitizeTechnicalSpecValue = (value: string | string[] | undefined) => {
+  if (Array.isArray(value)) {
+    return Array.from(new Set(value.map(sanitizeSupplierText).filter(Boolean)));
+  }
+
+  return value ? sanitizeSupplierText(value) : value;
+};
+
+const sanitizeTechnicalSpecs = (
+  technicalSpecs?: RawProduct["technicalSpecs"],
+): RawProduct["technicalSpecs"] | undefined => {
+  if (!technicalSpecs) {
+    return undefined;
+  }
+
+  const sanitizedEntries = Object.entries(technicalSpecs)
+    .filter(([key]) => key !== "productCode")
+    .map(([key, value]) => [key, sanitizeTechnicalSpecValue(value)] as const)
+    .filter(([, value]) => (Array.isArray(value) ? value.length > 0 : Boolean(value)));
+
+  return sanitizedEntries.length
+    ? Object.fromEntries(sanitizedEntries)
+    : undefined;
+};
 
 const buildPublicName = ({
   category,
@@ -842,7 +878,7 @@ const artliteProducts = artlitePlateCodes.map((code) => {
     description:
       descriptionByCode[code] ??
       "Placa ARTLITE para proyecto. Información técnica pendiente de actualización.",
-    image: `/catalogos/artlite/placas/${code.toLowerCase()}.png`,
+    image: `/catalogos/artlite/placas/${code.toLowerCase()}_resultado.webp`,
     technicalSpecs: getTechnicalSpecs(code, finish),
   };
 });
@@ -6007,7 +6043,7 @@ const construlitaEmergenciaProducts = [
     application: "Señalización",
     finish: "Blanco",
     description: "Luminario de emergencia para muro con bateria de respaldo de 90 minutos.",
-    image: "/catalogos/construlita/emergencia_señalizacion/CO6314BBFL.png",
+    image: "/catalogos/construlita/emergencia_senalizacion/CO6314BBFL.png",
     technicalSpecs: {
       productCode: "CO6314BBFL",
       luminousFlux: "150 lm",
@@ -6035,7 +6071,7 @@ const construlitaEmergenciaProducts = [
     application: "Señalización",
     finish: "Blanco",
     description: "Señal de salida para muro con bateria de respaldo de 90 minutos.",
-    image: "/catalogos/construlita/emergencia_señalizacion/CO6315BVEL.png",
+    image: "/catalogos/construlita/emergencia_senalizacion/CO6315BVEL.png",
     technicalSpecs: {
       productCode: "CO6315BVEL",
       luminousFlux: "150 lm",
@@ -6061,7 +6097,7 @@ const construlitaEmergenciaProducts = [
     application: "Señalización",
     finish: "Blanco",
     description: "Señal de salida para techo con bateria de respaldo de 90 minutos.",
-    image: "/catalogos/construlita/emergencia_señalizacion/CO6316BVEL.png",
+    image: "/catalogos/construlita/emergencia_senalizacion/CO6316BVEL.png",
     technicalSpecs: {
       productCode: "CO6316BVEL",
       luminousFlux: "150 lm",
@@ -6121,11 +6157,13 @@ const normalizeProduct = ({
   const seriesSource = collection ?? subcategory ?? "";
   const seriesId = getSeriesId(seriesSource);
   const finishId = getFinishId(finish);
+  const publicTechnicalSpecs = sanitizeTechnicalSpecs(product.technicalSpecs);
 
   return {
     ...product,
     publicName: buildPublicName({ category, application, subcategory }),
     publicDescription: sanitizeSupplierText(product.description),
+    technicalSpecs: publicTechnicalSpecs,
     econoluzReference: buildEconoluzReference(category, index),
     supplierCode: product.sku,
     supplierBrand: brandId,
