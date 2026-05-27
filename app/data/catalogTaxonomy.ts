@@ -1,6 +1,7 @@
 export const brands = {
   artlite: { id: "artlite", label: "Artlite" },
   construlita: { id: "construlita", label: "Construlita" },
+  highlum: { id: "highlum", label: "Highlum" },
 } as const;
 
 export const productTypes = {
@@ -80,6 +81,13 @@ export const productTypes = {
     description: "Líneas flexibles para integración, detalle y luz indirecta.",
     applications: ["interior", "exterior_tiras_led", "drivers", "perfiles"],
   },
+  tubos_led: {
+    id: "tubos_led",
+    label: "Tubos LED",
+    marker: "TUB",
+    description: "Tubos LED para iluminación interior lineal y retrofit.",
+    applications: ["tubos_led"],
+  },
   lineal: {
     id: "lineal",
     label: "Iluminación lineal",
@@ -137,6 +145,7 @@ export const applications = {
   tapas_ciegas: { id: "tapas_ciegas", label: "Tapas ciegas" },
   interior: { id: "interior", label: "Interior" },
   exterior_tiras_led: { id: "exterior_tiras_led", label: "Exterior" },
+  tubos_led: { id: "tubos_led", label: "Tubos LED" },
   drivers: { id: "drivers", label: "Drivers" },
   perfiles: { id: "perfiles", label: "Perfiles" },
   barras: { id: "barras", label: "Barras" },
@@ -229,6 +238,7 @@ export const series = {
   supreme: { id: "supreme", label: "Supreme" },
   tiras_led_exterior: { id: "tiras_led_exterior", label: "Tiras LED Exterior" },
   tiras_led_interior: { id: "tiras_led_interior", label: "Tiras LED Interior" },
+  tubo_led_t8: { id: "tubo_led_t8", label: "Tubo LED T8" },
   trazzo: { id: "trazzo", label: "Trazzo" },
   uplight: { id: "uplight", label: "Uplight" },
   uplight_lineal_dirigible: { id: "uplight_lineal_dirigible", label: "Uplight lineal dirigible" },

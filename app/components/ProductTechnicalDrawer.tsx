@@ -75,11 +75,13 @@ export default function ProductTechnicalDrawer({
     ["Salida USB", specs?.usbOutput],
     ["Soporte GFCI", specs?.gfciSupport],
     ["Aplicación", specs?.applicationType ?? product.labels.application],
+    ["Instalación", specs?.installation],
   ].filter((row): row is [string, string | string[]] => Boolean(row[1]));
 
   const extraSpecRows: SpecRow[] = [
     ["Protección", specs?.protection],
     ["Estándar", specs?.standard],
+    ["Configuración", specs?.configuration],
     ["Velocidad de desconexión", specs?.disconnectSpeed],
     ["Operaciones", specs?.operatingTemperature],
     ["Humedad", specs?.humidity],
@@ -94,6 +96,11 @@ export default function ProductTechnicalDrawer({
     ["IRC", specs?.cri],
     ["Ángulo", specs?.beamAngle],
     ["IK", specs?.impactRating],
+    ["Vida útil", specs?.lifetime],
+    ["Ahorro", specs?.savings],
+    ["Equivalente", specs?.equivalent],
+    ["Certificados", specs?.certifications],
+    ["Garantía", specs?.warranty],
   ].filter((row): row is [string, string | string[]] => Boolean(row[1]));
 
   const specRows = [...baseSpecRows, ...extraSpecRows];
@@ -138,7 +145,9 @@ export default function ProductTechnicalDrawer({
             {productImages.map((image, index) => (
               <div
                 key={image}
-                className={`relative aspect-[16/10] bg-white p-8 ${
+                onContextMenu={(event) => event.preventDefault()}
+                onDragStart={(event) => event.preventDefault()}
+                className={`relative aspect-[16/10] select-none bg-white p-8 ${
                   productImages.length === 1 ? "sm:col-span-2" : ""
                 }`}
               >
@@ -146,8 +155,9 @@ export default function ProductTechnicalDrawer({
                   src={image}
                   alt={`${product.publicName}${productImages.length > 1 ? ` ${index + 1}` : ""}`}
                   fill
+                  draggable={false}
                   sizes="(min-width: 768px) 42rem, 100vw"
-                  className="object-contain p-8"
+                  className="pointer-events-none select-none object-contain p-8"
                 />
               </div>
             ))}

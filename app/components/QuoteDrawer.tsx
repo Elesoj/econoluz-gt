@@ -13,6 +13,7 @@ type QuoteDrawerProps = {
   isOpen: boolean;
   items: QuoteDrawerItem[];
   onClose: () => void;
+  onCompleteAdvice: () => void;
   onRemove: (productId: string) => void;
   onUpdateQuantity: (productId: string, quantity: number) => void;
 };
@@ -21,6 +22,7 @@ export default function QuoteDrawer({
   isOpen,
   items,
   onClose,
+  onCompleteAdvice,
   onRemove,
   onUpdateQuantity,
 }: QuoteDrawerProps) {
@@ -120,13 +122,13 @@ export default function QuoteDrawer({
             </p>
             <p className="text-2xl font-semibold">Por cotizar</p>
           </div>
-          <a
-            href="#asesoria-proyecto"
-            onClick={onClose}
+          <button
+            type="button"
+            onClick={onCompleteAdvice}
             className="mt-5 flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
           >
             Completar asesoría
-          </a>
+          </button>
           <p className="mt-4 text-xs leading-5 text-neutral-500">
             Lista temporal en el navegador. No se guarda información ni se procesa ningún pago.
           </p>

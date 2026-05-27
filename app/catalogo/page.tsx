@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductTechnicalDrawer from "../components/ProductTechnicalDrawer";
 import QuoteDrawer from "../components/QuoteDrawer";
@@ -48,6 +48,13 @@ type StoredLedResults = {
   summary?: string;
 };
 
+type StoredQuoteSession = {
+  items?: {
+    econoluzReference?: string;
+    quantity?: number;
+  }[];
+};
+
 type CatalogHistoryState = {
   econoluzCatalog: true;
   searchQuery: string;
@@ -65,6 +72,27 @@ const initialFormState: QuoteFormState = {
   budgetRange: "",
   lightingType: "",
   message: "",
+};
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const quoteSessionStorageKey = "econoluz_catalog_quote";
+
+const getStoredQuoteSession = (): StoredQuoteSession => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  const storedQuote = window.sessionStorage.getItem(quoteSessionStorageKey);
+
+  if (!storedQuote) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(storedQuote) as StoredQuoteSession;
+  } catch {
+    return {};
+  }
 };
 
 const getStoredLedResultsSummary = () => {
@@ -97,6 +125,29 @@ const buildInitialFormState = () => {
     ...initialFormState,
     message: `${ledResultsSummary}\n\nNecesito asesoría para interpretar estos resultados y elegir luminarias adecuadas.`,
   };
+};
+
+const buildInitialQuoteItems = (): QuoteItem[] => {
+  const storedItems = getStoredQuoteSession().items ?? [];
+  const productsByReference = new Map(
+    products.map((product) => [product.econoluzReference, product]),
+  );
+
+  return storedItems
+    .map((item) => {
+      if (!item.econoluzReference) {
+        return null;
+      }
+
+      const product = productsByReference.get(item.econoluzReference);
+      const quantity =
+        typeof item.quantity === "number" && Number.isFinite(item.quantity)
+          ? Math.max(1, Math.floor(item.quantity))
+          : 1;
+
+      return product ? { product, quantity } : null;
+    })
+    .filter((item): item is QuoteItem => Boolean(item));
 };
 
 const clearTemporaryQuoteData = () => {
@@ -163,7 +214,7 @@ export default function Catalogo() {
   const [selectedFinish, setSelectedFinish] = useState("Todos");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isCatalogTransitioning, setIsCatalogTransitioning] = useState(false);
-  const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
+  const [quoteItems, setQuoteItems] = useState<QuoteItem[]>(buildInitialQuoteItems);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
   const [technicalProduct, setTechnicalProduct] = useState<Product | null>(null);
   const [formState, setFormState] = useState<QuoteFormState>(buildInitialFormState);
@@ -260,12 +311,15 @@ export default function Catalogo() {
     selectedCollection !== "Todos" ||
     Boolean(searchQuery.trim());
 
-  const resetCatalogNavigation = () => {
+  const resetCatalogNavigation = useCallback(() => {
+    setVisibleCount(PAGE_SIZE);
     setSearchQuery("");
+    setSelectedBrand("Todos");
     setSelectedCategory("Todos");
     setSelectedApplication("Todos");
     setSelectedCollection("Todos");
-  };
+    setSelectedFinish("Todos");
+  }, []);
 
   const scrollCatalogStageIntoView = useCallback(() => {
     window.requestAnimationFrame(() => {
@@ -296,12 +350,19 @@ export default function Catalogo() {
       return;
     }
 
-    window.history.pushState(catalogState, "", window.location.href);
+    window.history.pushState(
+      catalogState,
+      "",
+      `${window.location.pathname}${window.location.search}`,
+    );
   };
 
-  const replaceCatalogHistoryState = useCallback((catalogState: CatalogHistoryState) => {
-    window.history.replaceState(catalogState, "", window.location.href);
-  }, []);
+  const replaceCatalogHistoryState = useCallback(
+    (catalogState: CatalogHistoryState, url = window.location.href) => {
+      window.history.replaceState(catalogState, "", url);
+    },
+    [],
+  );
 
   const transitionCatalog = (
     updateNavigation: () => void,
@@ -337,6 +398,16 @@ export default function Catalogo() {
     scrollCatalogStageIntoView();
   };
 
+  const scrollAdviceFormIntoView = useCallback(() => {
+    setIsQuoteOpen(false);
+    window.requestAnimationFrame(() => {
+      document.getElementById("asesoria-proyecto")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }, []);
+
   const quoteCount = quoteItems.reduce((total, item) => total + item.quantity, 0);
 
   const whatsappMessage = useMemo(() => {
@@ -363,6 +434,23 @@ export default function Catalogo() {
   }, [formState, ledResultsSummary, quoteItems]);
 
   const whatsappHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+
+  useEffect(() => {
+    if (quoteItems.length === 0) {
+      window.sessionStorage.removeItem(quoteSessionStorageKey);
+      return;
+    }
+
+    window.sessionStorage.setItem(
+      quoteSessionStorageKey,
+      JSON.stringify({
+        items: quoteItems.map((item) => ({
+          econoluzReference: item.product.econoluzReference,
+          quantity: item.quantity,
+        })),
+      }),
+    );
+  }, [quoteItems]);
 
   useEffect(() => {
     const hasQuoteContext =
@@ -403,12 +491,24 @@ export default function Catalogo() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("econoluz-catalog-reset", resetCatalogNavigation);
+    const handleCatalogReset = () => {
+      resetCatalogNavigation();
+      setIsCatalogTransitioning(false);
+      replaceCatalogHistoryState(
+        createCatalogHistoryState(),
+        `${window.location.pathname}${window.location.search}`,
+      );
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    };
+
+    window.addEventListener("econoluz-catalog-reset", handleCatalogReset);
 
     return () => {
-      window.removeEventListener("econoluz-catalog-reset", resetCatalogNavigation);
+      window.removeEventListener("econoluz-catalog-reset", handleCatalogReset);
     };
-  }, []);
+  }, [replaceCatalogHistoryState, resetCatalogNavigation]);
 
   useEffect(() => {
     replaceCatalogHistoryState(createCatalogHistoryState());
@@ -466,6 +566,38 @@ export default function Catalogo() {
   const updateFormField = (field: keyof QuoteFormState, value: string) => {
     setFormState((currentForm) => ({ ...currentForm, [field]: value }));
     setFormErrors((currentErrors) => ({ ...currentErrors, [field]: undefined }));
+  };
+
+  const validateQuoteForm = () => {
+    const nextErrors: QuoteFormErrors = {};
+
+    if (!formState.fullName.trim()) {
+      nextErrors.fullName = "Ingresa tu nombre completo.";
+    }
+
+    if (!formState.phone.trim()) {
+      nextErrors.phone = "Ingresa tu teléfono.";
+    }
+
+    if (!formState.email.trim()) {
+      nextErrors.email = "Ingresa tu email.";
+    } else if (!emailPattern.test(formState.email.trim())) {
+      nextErrors.email = "Ingresa un email válido.";
+    }
+
+    setFormErrors(nextErrors);
+
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleQuoteSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!validateQuoteForm()) {
+      return;
+    }
+
+    window.open(whatsappHref, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -939,8 +1071,8 @@ export default function Catalogo() {
 
       <section className="bg-neutral-950 px-5 py-20 text-white sm:px-8 lg:py-28">
         <div id="asesoria-proyecto" className="-mt-20 scroll-mt-20 pt-20" />
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.85fr_1.15fr]">
-          <div>
+        <div className="mx-auto grid max-w-7xl items-start gap-10 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/46">
               Asesoría de proyecto
             </p>
@@ -961,7 +1093,7 @@ export default function Catalogo() {
                 <p className="text-sm text-white/60">{quoteCount} unidades</p>
               </div>
 
-              <div className="mt-5 grid max-h-72 gap-3 overflow-y-auto pr-1">
+              <div className="mt-5 grid max-h-72 min-h-0 gap-3 overflow-y-auto overscroll-contain pr-1">
                 {quoteItems.length === 0 ? (
                   <p className="text-sm leading-6 text-white/52">
                     Aún no hay luminarias seleccionadas. Puedes enviar la solicitud
@@ -1013,8 +1145,10 @@ export default function Catalogo() {
             )}
           </div>
 
-          <div
-            className="border border-white/12 bg-white p-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8"
+          <form
+            onSubmit={handleQuoteSubmit}
+            noValidate
+            className="self-start border border-white/12 bg-white p-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8"
           >
             {ledResultsSummary && (
               <div className="mb-6 border border-neutral-200 bg-neutral-50 p-5">
@@ -1032,15 +1166,18 @@ export default function Catalogo() {
               <label className="grid gap-2">
                 <span className="text-sm font-semibold">Nombre completo</span>
                 <input
+                  required
                   value={formState.fullName}
                   onChange={(event) => updateFormField("fullName", event.target.value)}
+                  aria-invalid={Boolean(formErrors.fullName)}
+                  aria-describedby={formErrors.fullName ? "quote-full-name-error" : undefined}
                   className={`border px-4 py-3 outline-none transition focus:border-black ${
                     formErrors.fullName ? "border-black bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="Nombre y apellido"
                 />
                 {formErrors.fullName && (
-                  <span className="text-xs font-medium text-neutral-600">
+                  <span id="quote-full-name-error" className="text-xs font-medium text-neutral-600">
                     {formErrors.fullName}
                   </span>
                 )}
@@ -1049,15 +1186,19 @@ export default function Catalogo() {
               <label className="grid gap-2">
                 <span className="text-sm font-semibold">Teléfono</span>
                 <input
+                  required
+                  type="tel"
                   value={formState.phone}
                   onChange={(event) => updateFormField("phone", event.target.value)}
+                  aria-invalid={Boolean(formErrors.phone)}
+                  aria-describedby={formErrors.phone ? "quote-phone-error" : undefined}
                   className={`border px-4 py-3 outline-none transition focus:border-black ${
                     formErrors.phone ? "border-black bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="+502 0000 0000"
                 />
                 {formErrors.phone && (
-                  <span className="text-xs font-medium text-neutral-600">
+                  <span id="quote-phone-error" className="text-xs font-medium text-neutral-600">
                     {formErrors.phone}
                   </span>
                 )}
@@ -1066,16 +1207,19 @@ export default function Catalogo() {
               <label className="grid gap-2 sm:col-span-2">
                 <span className="text-sm font-semibold">Email</span>
                 <input
+                  required
                   type="email"
                   value={formState.email}
                   onChange={(event) => updateFormField("email", event.target.value)}
+                  aria-invalid={Boolean(formErrors.email)}
+                  aria-describedby={formErrors.email ? "quote-email-error" : undefined}
                   className={`border px-4 py-3 outline-none transition focus:border-black ${
                     formErrors.email ? "border-black bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="correo@empresa.com"
                 />
                 {formErrors.email && (
-                  <span className="text-xs font-medium text-neutral-600">
+                  <span id="quote-email-error" className="text-xs font-medium text-neutral-600">
                     {formErrors.email}
                   </span>
                 )}
@@ -1159,19 +1303,17 @@ export default function Catalogo() {
               </label>
             </div>
 
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="submit"
               className="mt-7 flex w-full items-center justify-center rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
             >
               Enviar información por WhatsApp
-            </a>
+            </button>
             <p className="mt-4 text-xs leading-5 text-neutral-500">
               Los datos del formulario y productos seleccionados se enviarán por WhatsApp
               al asesor disponible.
             </p>
-          </div>
+          </form>
         </div>
       </section>
 
@@ -1192,6 +1334,7 @@ export default function Catalogo() {
         isOpen={isQuoteOpen}
         items={quoteItems}
         onClose={() => setIsQuoteOpen(false)}
+        onCompleteAdvice={scrollAdviceFormIntoView}
         onRemove={removeFromQuote}
         onUpdateQuantity={updateQuantity}
       />

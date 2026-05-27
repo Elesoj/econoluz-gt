@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 
 type NavItem = {
   label: string;
@@ -154,13 +154,16 @@ export default function SiteNavbar({
     return pathname === href;
   };
 
-  const handleLinkClick = (href: string) => {
+  const handleLinkClick = (href: string, event?: MouseEvent<HTMLAnchorElement>) => {
     setIsMobileMenuOpen(false);
 
     const hash = getHash(href);
 
     if (pathname === "/catalogo" && href === "/catalogo") {
+      event?.preventDefault();
+      window.history.replaceState(window.history.state, "", "/catalogo");
       window.dispatchEvent(new Event("econoluz-catalog-reset"));
+      return;
     }
 
     if (hash && (href.startsWith("#") || href.startsWith("/#"))) {
@@ -174,7 +177,7 @@ export default function SiteNavbar({
       <div className="relative mx-auto grid h-20 w-full max-w-7xl grid-cols-[auto_auto] items-center justify-between px-5 sm:px-8 md:grid-cols-[auto_1fr_auto] md:gap-8">
         <Link
           href="/#inicio"
-          onClick={() => handleLinkClick("/#inicio")}
+          onClick={(event) => handleLinkClick("/#inicio", event)}
           className="flex items-center gap-3"
           aria-label="ECONOLUZ GT inicio"
         >
@@ -204,7 +207,7 @@ export default function SiteNavbar({
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => handleLinkClick(item.href)}
+              onClick={(event) => handleLinkClick(item.href, event)}
               className={`relative py-7 transition hover:text-white ${
                 isActive(item.href) ? "text-white" : ""
               }`}
@@ -258,7 +261,7 @@ export default function SiteNavbar({
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => handleLinkClick(item.href)}
+                  onClick={(event) => handleLinkClick(item.href, event)}
                   className={`px-3 py-3 text-base transition hover:bg-white/[0.08] hover:text-white ${
                     isActive(item.href) ? "bg-white text-black" : "text-white/78"
                   }`}

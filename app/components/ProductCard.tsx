@@ -27,15 +27,18 @@ export default function ProductCard({
       <button
         type="button"
         onClick={onViewDetails}
-        className="relative aspect-square overflow-hidden bg-white p-3 text-left sm:p-4"
+        onContextMenu={(event) => event.preventDefault()}
+        onDragStart={(event) => event.preventDefault()}
+        className="relative aspect-square select-none overflow-hidden bg-white p-3 text-left sm:p-4"
         aria-label={`Ver ficha técnica de ${product.publicName}`}
       >
         <Image
           src={product.image}
           alt={product.publicName}
           fill
+          draggable={false}
           sizes="(min-width: 1536px) 20vw, (min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
-          className="object-contain p-3 transition duration-500 group-hover:scale-105 sm:p-4"
+          className="pointer-events-none select-none object-contain p-3 transition duration-500 group-hover:scale-105 sm:p-4"
         />
       </button>
 
