@@ -896,10 +896,10 @@ const construlitaAltoMontajeProducts = [
     finish: "",
     description:
       "Luminario LED de alto montaje con eficiencia de 170 lm/W, opciones de 75 a 200 W, flujo hasta 34 000 lm y montaje suspendido o sobrepuesto.",
-    image: "/catalogos/construlita/alto_montaje/cuasar1.png",
+    image: "/catalogos/construlita/alto_montaje/cuasar1_resultado.webp",
     images: [
-      "/catalogos/construlita/alto_montaje/cuasar1.png",
-      "/catalogos/construlita/alto_montaje/cuasar2.png",
+      "/catalogos/construlita/alto_montaje/cuasar1_resultado.webp",
+      "/catalogos/construlita/alto_montaje/cuasar2_resultado.webp",
     ],
     technicalSpecs: {
       productCode:
@@ -937,7 +937,7 @@ const construlitaAltoMontajeProducts = [
     finish: "",
     description:
       "Luminario LED de alto montaje para industria alimenticia, con cuerpo autolimpiable, IP66, óptica 120° y potencias de 100 a 200 W.",
-    image: "/catalogos/construlita/alto_montaje/hb_pure.png",
+    image: "/catalogos/construlita/alto_montaje/hb_pure_resultado.webp",
     technicalSpecs: {
       productCode: "IN8025BBNA / IN8026BBNA / IN8027BBNA",
       luminousFlux: "13 500 lm / 20 000 lm / 26 000 lm",
@@ -974,7 +974,7 @@ const construlitaAltoMontajeProducts = [
     finish: "",
     description:
       "Luminario LED lineal de alto montaje para aplicaciones industriales, 160 lm/W, hasta 36 000 lm y opciones de sensor o emergencia.",
-    image: "/catalogos/construlita/alto_montaje/hb_steel.png",
+    image: "/catalogos/construlita/alto_montaje/hb_steel_resultado.webp",
     technicalSpecs: {
       productCode:
         "IN8204BBFA / IN8220BBFA / IN8201BBFA / IN8221BBFA / IN8202BBFA / IN8222BBFA / IN8223BBFA / IN8203BBFA / IN8224BBFA",
@@ -1015,10 +1015,10 @@ const construlitaAltoMontajeProducts = [
     finish: "",
     description:
       "Luminario LED de alto montaje con selector de potencia, selector de lentes, 170 lm/W, IP65 y ángulos configurables de 60°, 85° o 105°.",
-    image: "/catalogos/construlita/alto_montaje/highlens1.png",
+    image: "/catalogos/construlita/alto_montaje/highlens1_resultado.webp",
     images: [
-      "/catalogos/construlita/alto_montaje/highlens1.png",
-      "/catalogos/construlita/alto_montaje/highlens2.png",
+      "/catalogos/construlita/alto_montaje/highlens1_resultado.webp",
+      "/catalogos/construlita/alto_montaje/highlens2_resultado.webp",
     ],
     technicalSpecs: {
       productCode: "IN8025BBFA",
@@ -1052,7 +1052,7 @@ const construlitaAltoMontajeProducts = [
     finish: "",
     description:
       "Luminario LED de alto montaje configurable, 170 lm/W, ópticas intercambiables, IP65 y accesorios para sensor, control remoto o emergencia.",
-    image: "/catalogos/construlita/alto_montaje/supreme.png",
+    image: "/catalogos/construlita/alto_montaje/supreme_resultado.webp",
     technicalSpecs: {
       productCode:
         "IN8040NBFA / IN8040NBNA / IN8041NBFA / IN8041NBNA / IN8042NBFA / IN8042NBNA",
@@ -1097,7 +1097,7 @@ const construlitaAltoMontajeProducts = [
     finish: "Blanco",
     description:
       "Panel de alta potencia para espacios de doble altura, con alto rendimiento lumínico, pantalla anti deslumbramiento tipo panel de abeja y UGR <19.",
-    image: "/catalogos/construlita/gabinetes/paneled_highway.png",
+    image: "/catalogos/construlita/gabinetes/paneled_highway_resultado.webp",
     technicalSpecs: {
       productCode: "IN1123BBNA / IN1124BBNA",
       luminousFlux: "12 800 lm / 19 400 lm",
@@ -1141,7 +1141,7 @@ const construlitaAlturaMediaProducts = [
     finish: "Negro",
     description:
       "Canopy CCT para sobreponer, con sistema óptico de alta transmitancia, distribución de luz asimétrica Tipo V y selección de potencia y temperatura de color.",
-    image: "/catalogos/construlita/altura_media/canopy_cct_IN1854NCCA.png",
+    image: "/catalogos/construlita/altura_media/canopy_cct_IN1854NCCA_resultado.webp",
     technicalSpecs: {
       productCode: "IN1854NCCA",
       luminousFlux: "5 850 lm / 7 800 lm / 9 750 lm",
@@ -1179,7 +1179,7 @@ const construlitaAlturaMediaProducts = [
     finish: "Negro",
     description:
       "Canopy CCT para sobreponer, con sistema óptico de alta transmitancia, distribución de luz asimétrica Tipo V y selección de potencia y temperatura de color.",
-    image: "/catalogos/construlita/altura_media/canopy_cct_IN1855NCCA.png",
+    image: "/catalogos/construlita/altura_media/canopy_cct_IN1855NCCA_resultado.webp",
     technicalSpecs: {
       productCode: "IN1855NCCA",
       luminousFlux: "9 360 lm / 12 480 lm / 15 600 lm",
@@ -1217,7 +1217,7 @@ const construlitaAlturaMediaProducts = [
     finish: "Blanco",
     description:
       "Solución LED para empotrar, fabricada en lámina de acero con acabado en pintura electrostática color blanco, multivoltaje 100-277V, 5000K y curva tipo V.",
-    image: "/catalogos/construlita/altura_media/lowbay_IN1955BBFA.png",
+    image: "/catalogos/construlita/altura_media/lowbay_IN1955BBFA_resultado.webp",
     technicalSpecs: {
       productCode: "IN1955BBFA",
       luminousFlux: "10 300 lm",
@@ -1255,7 +1255,7 @@ const construlitaAlturaMediaProducts = [
     finish: "Blanco",
     description:
       "Solución LED para sobreponer, fabricada en lámina de acero con acabado en pintura electrostática color blanco, multivoltaje 100-277V, 5000K y curva tipo V.",
-    image: "/catalogos/construlita/altura_media/lowbay_IN4955BBFA.png",
+    image: "/catalogos/construlita/altura_media/lowbay_IN4955BBFA_resultado.webp",
     technicalSpecs: {
       productCode: "IN4955BBFA",
       luminousFlux: "10 300 lm",
@@ -1296,7 +1296,7 @@ const construlitaVaporProducts = [
     finish: "Transparente",
     description:
       "ARTIC ofrece alta protección contra humedad, polvo y arenas, con carcasa de policarbonato de alta resistencia preparada para ambientes salinos, corrosivos o con exposición a sustancias químicas.",
-    image: "/catalogos/construlita/a_prueba_de_vapor/artic.png",
+    image: "/catalogos/construlita/a_prueba_de_vapor/artic_resultado.webp",
     technicalSpecs: {
       productCode: "OF4027BBNA / IN8853BBFA / IN8854BBFA / IN8855BBFA",
       luminousFlux: "2 760 lm / 9 000 lm",
@@ -1337,7 +1337,7 @@ const construlitaVaporProducts = [
     finish: "Blanco",
     description:
       "Familia de luminarios a prueba de vapor diseñada para ofrecer resistencia superior contra humedad, polvo y arena, con opción de interconexión eléctrica, batería de emergencia o sensor de microondas/luz de día.",
-    image: "/catalogos/construlita/a_prueba_de_vapor/ocean.png",
+    image: "/catalogos/construlita/a_prueba_de_vapor/ocean_resultado.webp",
     technicalSpecs: {
       productCode:
         "ON/OFF: IN4043GBNB / IN4044GBNB / IN4045GBNB; 0-10V: IN4046GBNA / IN4047GBNA / IN4048GBNA / IN4049GBNA / IN4050GBNA / IN4051GBNA / IN4046GBFA / IN4047GBFA / IN4048GBFA / IN4049GBFA / IN4050GBFA / IN4051GBFA",
@@ -1388,7 +1388,7 @@ const construlitaWallpackProducts = [
     finish: "Negro",
     description:
       "Familia de montaje en muro con sistema óptico de alta transmitancia, distribución asimétrica y alta eficacia luminosa para incrementar la seguridad perimetral con bajo deslumbramiento.",
-    image: "/catalogos/construlita/wallpack/wallpack.png",
+    image: "/catalogos/construlita/wallpack/wallpack_resultado.webp",
     technicalSpecs: {
       productCode: "OU6810NBNA / OU6810NBFA / OU6811NBNA / OU6811NBFA",
       luminousFlux: "4 900 lm / 9 800 lm",
@@ -1430,7 +1430,7 @@ const construlitaWallpackProducts = [
     finish: "Negro",
     description:
       "Wallpack CCT con sistema óptico de alta transmitancia, distribución asimétrica y bajo deslumbramiento para instalación en muro, con potencia y temperatura de color seleccionables.",
-    image: "/catalogos/construlita/wallpack/wallpack_cct.png",
+    image: "/catalogos/construlita/wallpack/wallpack_cct_resultado.webp",
     technicalSpecs: {
       productCode: "IN6815NCCA / IN6816NCCA",
       luminousFlux: "3 900 lm / 5 200 lm / 6 500 lm / 7 800 lm / 10 400 lm / 13 000 lm",
@@ -1482,8 +1482,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la línea Bronce con base G4.",
-    image: "/catalogos/construlita/bronce/OU2001C00K.png",
-    images: ["/catalogos/construlita/bronce/OU2001C00K.png"],
+    image: "/catalogos/construlita/bronce/OU2001C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU2001C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "OU2001C00K",
       material: "Laton con acabado bronce",
@@ -1508,8 +1508,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la línea Bronce con base GX5.3.",
-    image: "/catalogos/construlita/bronce/OU6026C00K.png",
-    images: ["/catalogos/construlita/bronce/OU6026C00K.png"],
+    image: "/catalogos/construlita/bronce/OU6026C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU6026C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "OU6026C00K",
       material: "Laton con acabado bronce",
@@ -1534,8 +1534,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la línea Bronce con base GU10.",
-    image: "/catalogos/construlita/bronce/OU3022C00K.png",
-    images: ["/catalogos/construlita/bronce/OU3022C00K.png"],
+    image: "/catalogos/construlita/bronce/OU3022C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU3022C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "OU3022C00K",
       material: "Laton con acabado bronce",
@@ -1560,8 +1560,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la línea Bronce con base Gx5.3.",
-    image: "/catalogos/construlita/bronce/OU3023C00K.png",
-    images: ["/catalogos/construlita/bronce/OU3023C00K.png"],
+    image: "/catalogos/construlita/bronce/OU3023C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU3023C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "OU3023C00K",
       material: "Laton con acabado bronce",
@@ -1586,8 +1586,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la linea Bronce con base G4.",
-    image: "/catalogos/construlita/bronce/OU7012C00K.png",
-    images: ["/catalogos/construlita/bronce/OU7012C00K.png"],
+    image: "/catalogos/construlita/bronce/OU7012C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU7012C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "OU7012C00K",
       material: "Laton con acabado bronce",
@@ -1612,8 +1612,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la linea Bronce con base GU10.",
-    image: "/catalogos/construlita/bronce/OU7014C00K.png",
-    images: ["/catalogos/construlita/bronce/OU7014C00K.png"],
+    image: "/catalogos/construlita/bronce/OU7014C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU7014C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "OU7014C00K",
       material: "Laton con acabado bronce",
@@ -1638,8 +1638,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario colgante de la linea Bronce con base Gx5.3.",
-    image: "/catalogos/construlita/bronce/RE8200C00K.png",
-    images: ["/catalogos/construlita/bronce/RE8200C00K.png"],
+    image: "/catalogos/construlita/bronce/RE8200C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/RE8200C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "RE8200C00K",
       material: "Laton con acabado bronce",
@@ -1665,8 +1665,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario colgante de la linea Bronce con base Gx5.3.",
-    image: "/catalogos/construlita/bronce/RE8201C00K.png",
-    images: ["/catalogos/construlita/bronce/RE8201C00K.png"],
+    image: "/catalogos/construlita/bronce/RE8201C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/RE8201C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "RE8201C00K",
       material: "Laton con acabado bronce",
@@ -1692,8 +1692,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la linea Bronce con base G4.",
-    image: "/catalogos/construlita/bronce/OU9010C00K.png",
-    images: ["/catalogos/construlita/bronce/OU9010C00K.png"],
+    image: "/catalogos/construlita/bronce/OU9010C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU9010C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9010C00K",
       material: "Laton con acabado bronce",
@@ -1718,8 +1718,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la linea Bronce con LED integrado.",
-    image: "/catalogos/construlita/bronce/OU9011CBCF.png",
-    images: ["/catalogos/construlita/bronce/OU9011CBCF.png"],
+    image: "/catalogos/construlita/bronce/OU9011CBCF_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU9011CBCF_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9011CBCF",
       luminousFlux: "65 lm",
@@ -1753,8 +1753,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Luminario de la linea Bronce con base G4.",
-    image: "/catalogos/construlita/bronce/OU9012C00K.png",
-    images: ["/catalogos/construlita/bronce/OU9012C00K.png"],
+    image: "/catalogos/construlita/bronce/OU9012C00K_resultado.webp",
+    images: ["/catalogos/construlita/bronce/OU9012C00K_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9012C00K",
       material: "Laton con acabado bronce",
@@ -1779,8 +1779,8 @@ const construlitaBronceCatalogProducts = [
     application: "Bronce",
     finish: "Bronce",
     description: "Accesorio para sobreponer luminarios con estaca o pedestal.",
-    image: "/catalogos/construlita/bronce/AC7600C.png",
-    images: ["/catalogos/construlita/bronce/AC7600C.png"],
+    image: "/catalogos/construlita/bronce/AC7600C_resultado.webp",
+    images: ["/catalogos/construlita/bronce/AC7600C_resultado.webp"],
     technicalSpecs: {
       productCode: "AC7600C",
       material: "Laton con acabado bronce",
@@ -1817,8 +1817,8 @@ const construlitaSombraProducts = [
     finish: "Negro / Blanco",
     description:
       "Familia de arbotantes cilindricos y minimalistas para espacios interiores o exteriores, con emision directa e indirecta y opticas intercambiables.",
-    image: "/catalogos/construlita/arbotantes/sombra.png",
-    images: ["/catalogos/construlita/arbotantes/sombra.png"],
+    image: "/catalogos/construlita/arbotantes/sombra_resultado.webp",
+    images: ["/catalogos/construlita/arbotantes/sombra_resultado.webp"],
     technicalSpecs: {
       productCode:
         "OU6093NBCA / OU6094NBCA / OU6093NBNA / OU6094NBNA / OU6093BBCA / OU6094BBCA / OU6093BBNA / OU6094BBNA",
@@ -1866,8 +1866,8 @@ const construlitaLandscapeProducts = [
     finish: "Negro",
     description:
       "Familia Landscape de proyectores exteriores con opciones de potencia, temperatura de color y apertura de 15 o 30 grados.",
-    image: "/catalogos/construlita/proyector/landscape.png",
-    images: ["/catalogos/construlita/proyector/landscape.png"],
+    image: "/catalogos/construlita/proyector/landscape_resultado.webp",
+    images: ["/catalogos/construlita/proyector/landscape_resultado.webp"],
     technicalSpecs: {
       productCode:
         "OU7030NBCA / OU7031NBCA / OU7032NBCA / OU7030NBNA / OU7031NBNA / OU7032NBNA / OU7033NBCA / OU7034NBCA / OU7035NBCA / OU7033NBNA / OU7034NBNA / OU7035NBNA",
@@ -1913,8 +1913,8 @@ const construlitaPosteProducts = [
     finish: "Satinado",
     description:
       "Luminario para punta de poste con diseno optico que proporciona iluminacion indirecta y alto confort visual, disponible en 3000 K y 4000 K.",
-    image: "/catalogos/construlita/luminarios_para_poste/corvus.png",
-    images: ["/catalogos/construlita/luminarios_para_poste/corvus.png"],
+    image: "/catalogos/construlita/luminarios_para_poste/corvus_resultado.webp",
+    images: ["/catalogos/construlita/luminarios_para_poste/corvus_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9023SBCA / OU9023SBNA",
       luminousFlux: "5 000 lm",
@@ -1951,8 +1951,8 @@ const construlitaPosteProducts = [
     finish: "Negro",
     description:
       "Luminaria exterior Bright de diseno moderno y elegante, con optica especial para iluminacion uniforme de alta calidad en entornos urbanos.",
-    image: "/catalogos/construlita/luminarios_para_poste/bright.png",
-    images: ["/catalogos/construlita/luminarios_para_poste/bright.png"],
+    image: "/catalogos/construlita/luminarios_para_poste/bright_resultado.webp",
+    images: ["/catalogos/construlita/luminarios_para_poste/bright_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9032NBCA / OU9032NBNA / OU9033NBNA",
       luminousFlux: "3 700 lm / 5 107 lm",
@@ -1989,8 +1989,8 @@ const construlitaPosteProducts = [
     finish: "Grafito",
     description:
       "Luminario para punta de poste con cuerpo en inyeccion de aluminio y acabado grafito, disenado para zonas urbanas peatonales, parques, jardines y calles de fraccionamientos privados.",
-    image: "/catalogos/construlita/luminarios_para_poste/urbancity_OU9086FBFA_OU9087FBFA_OU9100FBNA.png",
-    images: ["/catalogos/construlita/luminarios_para_poste/urbancity_OU9086FBFA_OU9087FBFA_OU9100FBNA.png"],
+    image: "/catalogos/construlita/luminarios_para_poste/urbancity_OU9086FBFA_OU9087FBFA_OU9100FBNA_resultado.webp",
+    images: ["/catalogos/construlita/luminarios_para_poste/urbancity_OU9086FBFA_OU9087FBFA_OU9100FBNA_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9086FBFA / OU9087FBFA / OU9100FBNA",
       luminousFlux: "9 200 lm / 13 700 lm / 8 100 lm",
@@ -2027,8 +2027,8 @@ const construlitaPosteProducts = [
     finish: "Grafito",
     description:
       "Luminario para punta de poste con cuerpo en inyeccion de aluminio y acabado grafito, disenado para zonas urbanas peatonales, parques, jardines y calles de fraccionamientos privados.",
-    image: "/catalogos/construlita/luminarios_para_poste/urbancity_OU9021FBNA.png",
-    images: ["/catalogos/construlita/luminarios_para_poste/urbancity_OU9021FBNA.png"],
+    image: "/catalogos/construlita/luminarios_para_poste/urbancity_OU9021FBNA_resultado.webp",
+    images: ["/catalogos/construlita/luminarios_para_poste/urbancity_OU9021FBNA_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9021FBNA",
       luminousFlux: "8 000 lm",
@@ -2063,8 +2063,8 @@ const construlitaPosteProducts = [
     finish: "Grafito",
     description:
       "Luminario tipo farol colonial para punta de poste, con tecnologia LED y opticas para proyectos exteriores arquitectonicos.",
-    image: "/catalogos/construlita/luminarios_para_poste/faroled_colonial_OU9035FBCA_OU9036FBCA.png",
-    images: ["/catalogos/construlita/luminarios_para_poste/faroled_colonial_OU9035FBCA_OU9036FBCA.png"],
+    image: "/catalogos/construlita/luminarios_para_poste/faroled_colonial_OU9035FBCA_OU9036FBCA_resultado.webp",
+    images: ["/catalogos/construlita/luminarios_para_poste/faroled_colonial_OU9035FBCA_OU9036FBCA_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9035FBCA / OU9036FBCA",
       luminousFlux: "7 700 lm",
@@ -2097,8 +2097,8 @@ const construlitaPosteProducts = [
     finish: "Grafito",
     description:
       "Luminario tipo farol colonial para punta de poste, con tecnologia LED y optica Tipo V para proyectos exteriores arquitectonicos.",
-    image: "/catalogos/construlita/luminarios_para_poste/faroled_colonial_OU9906NBCA.png",
-    images: ["/catalogos/construlita/luminarios_para_poste/faroled_colonial_OU9906NBCA.png"],
+    image: "/catalogos/construlita/luminarios_para_poste/faroled_colonial_OU9906NBCA_resultado.webp",
+    images: ["/catalogos/construlita/luminarios_para_poste/faroled_colonial_OU9906NBCA_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9906NBCA",
       luminousFlux: "7 700 lm",
@@ -2130,8 +2130,8 @@ const construlitaPosteProducts = [
     finish: "Gris",
     description:
       "Poste luminoso de tres metros de altura con iluminacion bilateral, disenado para proporcionar iluminacion en parques, plazas publicas, circulaciones peatonales y ciclovias.",
-    image: "/catalogos/construlita/poste/cubic_poste.png",
-    images: ["/catalogos/construlita/poste/cubic_poste.png"],
+    image: "/catalogos/construlita/poste/cubic_poste_resultado.webp",
+    images: ["/catalogos/construlita/poste/cubic_poste_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9051GBNA",
       luminousFlux: "6 700 lm",
@@ -2167,8 +2167,8 @@ const construlitaPosteProducts = [
     finish: "Gris",
     description:
       "Miniposte de 680 mm de altura con emision luminosa anti deslumbramiento, pensado para circulaciones peatonales, zonas comerciales y proyectos hospitalarios.",
-    image: "/catalogos/construlita/minipostes/cubic_bolardo.png",
-    images: ["/catalogos/construlita/minipostes/cubic_bolardo.png"],
+    image: "/catalogos/construlita/minipostes/cubic_bolardo_resultado.webp",
+    images: ["/catalogos/construlita/minipostes/cubic_bolardo_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9047GBNB",
       luminousFlux: "220 lm",
@@ -2204,8 +2204,8 @@ const construlitaPosteProducts = [
     finish: "Grafito",
     description:
       "Bolardo Softglow de diseno moderno y sofisticado, con iluminacion suave y calida para crear ambientes acogedores en cualquier entorno.",
-    image: "/catalogos/construlita/minipostes/softglow.png",
-    images: ["/catalogos/construlita/minipostes/softglow.png"],
+    image: "/catalogos/construlita/minipostes/softglow_resultado.webp",
+    images: ["/catalogos/construlita/minipostes/softglow_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9095FBCA",
       luminousFlux: "1 850 lm",
@@ -2240,8 +2240,8 @@ const construlitaPosteProducts = [
     finish: "Cafe",
     description:
       "Miniposte Corvus para iluminacion exterior peatonal, con emision LED controlada y acabado cafe para proyectos arquitectonicos.",
-    image: "/catalogos/construlita/minipostes/corvusminiposte_OU9093CBCA.png",
-    images: ["/catalogos/construlita/minipostes/corvusminiposte_OU9093CBCA.png"],
+    image: "/catalogos/construlita/minipostes/corvusminiposte_OU9093CBCA_resultado.webp",
+    images: ["/catalogos/construlita/minipostes/corvusminiposte_OU9093CBCA_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9093CBCA",
       luminousFlux: "1 900 lm",
@@ -2276,8 +2276,8 @@ const construlitaPosteProducts = [
     finish: "Bronce",
     description:
       "Miniposte Corvus para iluminacion exterior peatonal, con emision LED controlada y acabado bronce para proyectos arquitectonicos.",
-    image: "/catalogos/construlita/minipostes/corvusminiposte_OU9092CBCA.png",
-    images: ["/catalogos/construlita/minipostes/corvusminiposte_OU9092CBCA.png"],
+    image: "/catalogos/construlita/minipostes/corvusminiposte_OU9092CBCA_resultado.webp",
+    images: ["/catalogos/construlita/minipostes/corvusminiposte_OU9092CBCA_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9092CBCA",
       luminousFlux: "2 100 lm",
@@ -2312,8 +2312,8 @@ const construlitaPosteProducts = [
     finish: "Satinado",
     description:
       "Miniposte Corvus para iluminacion exterior peatonal, con emision LED controlada y acabado satinado para proyectos arquitectonicos.",
-    image: "/catalogos/construlita/minipostes/corvusminiposte_OU9089SBCB.png",
-    images: ["/catalogos/construlita/minipostes/corvusminiposte_OU9089SBCB.png"],
+    image: "/catalogos/construlita/minipostes/corvusminiposte_OU9089SBCB_resultado.webp",
+    images: ["/catalogos/construlita/minipostes/corvusminiposte_OU9089SBCB_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9089SBCB",
       luminousFlux: "1 000 lm",
@@ -2348,8 +2348,8 @@ const construlitaPosteProducts = [
     finish: "Negro",
     description:
       "Bolardo LED para circulaciones exteriores, con acabado negro e iluminacion controlada para zonas peatonales y paisajismo.",
-    image: "/catalogos/construlita/minipostes/bollar_OU9090FBNB.png",
-    images: ["/catalogos/construlita/minipostes/bollar_OU9090FBNB.png"],
+    image: "/catalogos/construlita/minipostes/bollar_OU9090FBNB_resultado.webp",
+    images: ["/catalogos/construlita/minipostes/bollar_OU9090FBNB_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9090FBNB",
       luminousFlux: "245 lm",
@@ -2384,8 +2384,8 @@ const construlitaPosteProducts = [
     finish: "Negro",
     description:
       "Bolardo LED para circulaciones exteriores, con acabado negro e iluminacion controlada para zonas peatonales y paisajismo.",
-    image: "/catalogos/construlita/minipostes/bollard_OU9091FBNB.png",
-    images: ["/catalogos/construlita/minipostes/bollard_OU9091FBNB.png"],
+    image: "/catalogos/construlita/minipostes/bollard_OU9091FBNB_resultado.webp",
+    images: ["/catalogos/construlita/minipostes/bollard_OU9091FBNB_resultado.webp"],
     technicalSpecs: {
       productCode: "OU9091FBNB",
       luminousFlux: "780 lm",
@@ -2424,8 +2424,8 @@ const construlitaVialidadesProducts = [
     finish: "Negro",
     description:
       "Familia de luminarias viales Evolight de diseno ultra delgado, alto rendimiento y eficacia de hasta 160 lm/W para proyectos de vialidad exterior.",
-    image: "/catalogos/construlita/vialidades/evolight.png",
-    images: ["/catalogos/construlita/vialidades/evolight.png"],
+    image: "/catalogos/construlita/vialidades/evolight_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/evolight_resultado.webp"],
     technicalSpecs: {
       productCode:
         "V05516040U2MVN5 / V05516050U2MVN5 / V07516040U2MVN5 / V07516050U2MVN5 / V09016040U2MVN5 / V09016050U2MVN5",
@@ -2466,8 +2466,8 @@ const construlitaVialidadesProducts = [
     finish: "Satinado",
     description:
       "Luminario vial Nanovia de cuerpo compacto para proyectos exteriores, con optica Tipo II M y acabado satinado.",
-    image: "/catalogos/construlita/vialidades/nanovia_V0040UNN2M50.png",
-    images: ["/catalogos/construlita/vialidades/nanovia_V0040UNN2M50.png"],
+    image: "/catalogos/construlita/vialidades/nanovia_V0040UNN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/nanovia_V0040UNN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "V0040UN2M50",
       luminousFlux: "4 780 lm",
@@ -2502,8 +2502,8 @@ const construlitaVialidadesProducts = [
     finish: "Satinado",
     description:
       "Luminario vial Nanovia de cuerpo compacto para proyectos exteriores, con optica Tipo II M y acabado satinado.",
-    image: "/catalogos/construlita/vialidades/nanovia_V0052UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/nanovia_V0052UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/nanovia_V0052UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/nanovia_V0052UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "V0052UN2M50",
       luminousFlux: "5 000 lm",
@@ -2538,8 +2538,8 @@ const construlitaVialidadesProducts = [
     finish: "Satinado",
     description:
       "Luminario vial Nanovia de 100 W para proyectos exteriores, con optica Tipo II M y opciones 5000 K o 4000 K.",
-    image: "/catalogos/construlita/vialidades/nanovia_V0100UN2M40_V0100UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/nanovia_V0100UN2M40_V0100UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/nanovia_V0100UN2M40_V0100UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/nanovia_V0100UN2M40_V0100UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "V0100UN2M50 / V0100UN2M40",
       luminousFlux: "11 000 lm",
@@ -2575,8 +2575,8 @@ const construlitaVialidadesProducts = [
     finish: "Satinado",
     description:
       "Luminario vial Nanovia UL de 40 W para proyectos exteriores, con optica Tipo II M y opciones 4000 K o 5000 K.",
-    image: "/catalogos/construlita/vialidades/nanovia_ul.png",
-    images: ["/catalogos/construlita/vialidades/nanovia_ul.png"],
+    image: "/catalogos/construlita/vialidades/nanovia_ul_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/nanovia_ul_resultado.webp"],
     technicalSpecs: {
       productCode: "U0040UN2M40 / U0040UN2M50",
       luminousFlux: "4 350 lm",
@@ -2612,8 +2612,8 @@ const construlitaVialidadesProducts = [
     finish: "Gris",
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
-    image: "/catalogos/construlita/vialidades/vialed_V1050UN2M40_V1050UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/vialed_V1050UN2M40_V1050UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/vialed_V1050UN2M40_V1050UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/vialed_V1050UN2M40_V1050UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "V1050UN2M40 / V1050UN2M50",
       luminousFlux: "6 750 lm",
@@ -2644,8 +2644,8 @@ const construlitaVialidadesProducts = [
     finish: "Gris",
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
-    image: "/catalogos/construlita/vialidades/vialed_V1070UN2M40_V1070UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/vialed_V1070UN2M40_V1070UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/vialed_V1070UN2M40_V1070UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/vialed_V1070UN2M40_V1070UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "V1070UN2M40 / V1070UN2M50",
       luminousFlux: "9 800 lm",
@@ -2676,8 +2676,8 @@ const construlitaVialidadesProducts = [
     finish: "Gris",
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
-    image: "/catalogos/construlita/vialidades/vialed_V2100UN2M40_V2100UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/vialed_V2100UN2M40_V2100UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/vialed_V2100UN2M40_V2100UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/vialed_V2100UN2M40_V2100UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "V2100UN2M40 / V2100UN2M50",
       luminousFlux: "13 000 lm",
@@ -2708,8 +2708,8 @@ const construlitaVialidadesProducts = [
     finish: "Gris",
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
-    image: "/catalogos/construlita/vialidades/vialed_V2130UN2M40_V2130UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/vialed_V2130UN2M40_V2130UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/vialed_V2130UN2M40_V2130UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/vialed_V2130UN2M40_V2130UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "V2130UN2M40 / V2130UN2M50",
       luminousFlux: "16 900 lm",
@@ -2740,8 +2740,8 @@ const construlitaVialidadesProducts = [
     finish: "Gris",
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
-    image: "/catalogos/construlita/vialidades/vialed_V3160UN2M40_V3160UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/vialed_V3160UN2M40_V3160UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/vialed_V3160UN2M40_V3160UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/vialed_V3160UN2M40_V3160UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "V3160UN2M40 / V3160UN2M50",
       luminousFlux: "20 800 lm",
@@ -2772,8 +2772,8 @@ const construlitaVialidadesProducts = [
     finish: "Gris",
     description:
       "Luminario vial Vialed UL para alumbrado publico, con certificacion UL, optica Tipo II M y acabado gris.",
-    image: "/catalogos/construlita/vialidades/vialed_ul_U1050UN2M40_U1050UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/vialed_ul_U1050UN2M40_U1050UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/vialed_ul_U1050UN2M40_U1050UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/vialed_ul_U1050UN2M40_U1050UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "U1050UN2M40 / U1050UN2M50",
       luminousFlux: "6 300 lm",
@@ -2809,8 +2809,8 @@ const construlitaVialidadesProducts = [
     finish: "Gris",
     description:
       "Luminario vial Vialed UL para alumbrado publico, con certificacion UL, optica Tipo II M y acabado gris.",
-    image: "/catalogos/construlita/vialidades/vialed_ul_U1070UN2M40_U1070UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/vialed_ul_U1070UN2M40_U1070UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/vialed_ul_U1070UN2M40_U1070UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/vialed_ul_U1070UN2M40_U1070UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "U1070UN2M40 / U1070UN2M50",
       luminousFlux: "8 730 lm",
@@ -2846,8 +2846,8 @@ const construlitaVialidadesProducts = [
     finish: "Gris",
     description:
       "Luminario vial Vialed UL para alumbrado publico, con certificacion UL, optica Tipo II M y acabado gris.",
-    image: "/catalogos/construlita/vialidades/vialed_ul_U1090UN2M40_U1090UN2M50.png",
-    images: ["/catalogos/construlita/vialidades/vialed_ul_U1090UN2M40_U1090UN2M50.png"],
+    image: "/catalogos/construlita/vialidades/vialed_ul_U1090UN2M40_U1090UN2M50_resultado.webp",
+    images: ["/catalogos/construlita/vialidades/vialed_ul_U1090UN2M40_U1090UN2M50_resultado.webp"],
     technicalSpecs: {
       productCode: "U1090UN2M40 / U1090UN2M50",
       luminousFlux: "10 800 lm",
@@ -2900,8 +2900,8 @@ const construlitaGranAmplitudProducts = [
     finish: "Negro / Gris / Grafito",
     description:
       "Sistema Module configurable para proyeccion de gran amplitud, con opciones por instalacion, cantidad de tarjetas LED, potencia, color, TCC y optica.",
-    image: "/catalogos/construlita/proyector_para_areas_gran_amplitud/moduled.png",
-    images: ["/catalogos/construlita/proyector_para_areas_gran_amplitud/moduled.png"],
+    image: "/catalogos/construlita/proyector_areas_gran_amplitud/moduled_resultado.webp",
+    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/moduled_resultado.webp"],
     technicalSpecs: {
       productCode: "ML + instalacion + tarjetas LED + watts + color + TCC + version + optica + opcional",
       power: "Configurable",
@@ -2925,8 +2925,8 @@ const construlitaGranAmplitudProducts = [
     application: "Proyectores de gran amplitud",
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 45 W para proyeccion de gran amplitud.",
-    image: "/catalogos/construlita/proyector_para_areas_gran_amplitud/moduled.png",
-    images: ["/catalogos/construlita/proyector_para_areas_gran_amplitud/moduled.png"],
+    image: "/catalogos/construlita/proyector_areas_gran_amplitud/moduled_resultado.webp",
+    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/moduled_resultado.webp"],
     technicalSpecs: {
       productCode: "ML ... 05 ...",
       power: "45 W",
@@ -2947,8 +2947,8 @@ const construlitaGranAmplitudProducts = [
     application: "Proyectores de gran amplitud",
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 90 W para proyeccion de gran amplitud.",
-    image: "/catalogos/construlita/proyector_para_areas_gran_amplitud/90W.png",
-    images: ["/catalogos/construlita/proyector_para_areas_gran_amplitud/90W.png"],
+    image: "/catalogos/construlita/proyector_areas_gran_amplitud/90W_resultado.webp",
+    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/90W_resultado.webp"],
     technicalSpecs: {
       productCode: "ML ... 09 ...",
       power: "90 W",
@@ -2969,8 +2969,8 @@ const construlitaGranAmplitudProducts = [
     application: "Proyectores de gran amplitud",
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 135 W para proyeccion de gran amplitud.",
-    image: "/catalogos/construlita/proyector_para_areas_gran_amplitud/135W.png",
-    images: ["/catalogos/construlita/proyector_para_areas_gran_amplitud/135W.png"],
+    image: "/catalogos/construlita/proyector_areas_gran_amplitud/135W_resultado.webp",
+    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/135W_resultado.webp"],
     technicalSpecs: {
       productCode: "ML ... 13 ...",
       power: "135 W",
@@ -2991,8 +2991,8 @@ const construlitaGranAmplitudProducts = [
     application: "Proyectores de gran amplitud",
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 180 W para proyeccion de gran amplitud.",
-    image: "/catalogos/construlita/proyector_para_areas_gran_amplitud/180W.png",
-    images: ["/catalogos/construlita/proyector_para_areas_gran_amplitud/180W.png"],
+    image: "/catalogos/construlita/proyector_areas_gran_amplitud/180W_resultado.webp",
+    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/180W_resultado.webp"],
     technicalSpecs: {
       productCode: "ML ... 18 ...",
       power: "180 W",
@@ -3013,8 +3013,8 @@ const construlitaGranAmplitudProducts = [
     application: "Proyectores de gran amplitud",
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 270 W para proyeccion de gran amplitud.",
-    image: "/catalogos/construlita/proyector_para_areas_gran_amplitud/270W.png",
-    images: ["/catalogos/construlita/proyector_para_areas_gran_amplitud/270W.png"],
+    image: "/catalogos/construlita/proyector_areas_gran_amplitud/270W_resultado.webp",
+    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/270W_resultado.webp"],
     technicalSpecs: {
       productCode: "ML ... 27 ...",
       power: "270 W",
@@ -3035,8 +3035,8 @@ const construlitaGranAmplitudProducts = [
     application: "Proyectores de gran amplitud",
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 360 W para proyeccion de gran amplitud.",
-    image: "/catalogos/construlita/proyector_para_areas_gran_amplitud/360W.png",
-    images: ["/catalogos/construlita/proyector_para_areas_gran_amplitud/360W.png"],
+    image: "/catalogos/construlita/proyector_areas_gran_amplitud/360W_resultado.webp",
+    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/360W_resultado.webp"],
     technicalSpecs: {
       productCode: "ML ... 36 ...",
       power: "360 W",
@@ -3057,8 +3057,8 @@ const construlitaGranAmplitudProducts = [
     application: "Proyectores de gran amplitud",
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 540 W para proyeccion de gran amplitud.",
-    image: "/catalogos/construlita/proyector_para_areas_gran_amplitud/540W.png",
-    images: ["/catalogos/construlita/proyector_para_areas_gran_amplitud/540W.png"],
+    image: "/catalogos/construlita/proyector_areas_gran_amplitud/540W_resultado.webp",
+    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/540W_resultado.webp"],
     technicalSpecs: {
       productCode: "ML ... 60 ...",
       power: "540 W",
@@ -3082,8 +3082,8 @@ const construlitaSumergiblesCatalogProducts = [
     application: "Sumergibles",
     finish: "Satin",
     description: "Luminario sumergible empotrado para salidas de agua a presion.",
-    image: "/catalogos/construlita/sumergibles/escafandra_OU7056SBCG.png",
-    images: ["/catalogos/construlita/sumergibles/escafandra_OU7056SBCG.png"],
+    image: "/catalogos/construlita/sumergibles/escafandra_OU7056SBCG_resultado.webp",
+    images: ["/catalogos/construlita/sumergibles/escafandra_OU7056SBCG_resultado.webp"],
     technicalSpecs: {
       productCode: "OU7056SBCG",
       luminousFlux: "330 lm",
@@ -3117,8 +3117,8 @@ const construlitaSumergiblesCatalogProducts = [
     application: "Sumergibles",
     finish: "Satin",
     description: "Luminario sumergible empotrado para salidas de agua a presion.",
-    image: "/catalogos/construlita/sumergibles/escafandra_OU7057SBCG.png",
-    images: ["/catalogos/construlita/sumergibles/escafandra_OU7057SBCG.png"],
+    image: "/catalogos/construlita/sumergibles/escafandra_OU7057SBCG_resultado.webp",
+    images: ["/catalogos/construlita/sumergibles/escafandra_OU7057SBCG_resultado.webp"],
     technicalSpecs: {
       productCode: "OU7057SBCG",
       luminousFlux: "715 lm",
@@ -3152,8 +3152,8 @@ const construlitaSumergiblesCatalogProducts = [
     application: "Sumergibles",
     finish: "Satin",
     description: "Proyector sumergible para iluminacion subacuatica.",
-    image: "/catalogos/construlita/sumergibles/escafandra_proyector_OU7058SBCG.png",
-    images: ["/catalogos/construlita/sumergibles/escafandra_proyector_OU7058SBCG.png"],
+    image: "/catalogos/construlita/sumergibles/escafandra_proyector_OU7058SBCG_resultado.webp",
+    images: ["/catalogos/construlita/sumergibles/escafandra_proyector_OU7058SBCG_resultado.webp"],
     technicalSpecs: {
       productCode: "OU7058SBCG",
       luminousFlux: "215 lm",
@@ -3187,8 +3187,8 @@ const construlitaSumergiblesCatalogProducts = [
     application: "Sumergibles",
     finish: "Satin",
     description: "Proyector sumergible para iluminacion subacuatica.",
-    image: "/catalogos/construlita/sumergibles/escafandra_proyector_OU7059SBCG.png",
-    images: ["/catalogos/construlita/sumergibles/escafandra_proyector_OU7059SBCG.png"],
+    image: "/catalogos/construlita/sumergibles/escafandra_proyector_OU7059SBCG_resultado.webp",
+    images: ["/catalogos/construlita/sumergibles/escafandra_proyector_OU7059SBCG_resultado.webp"],
     technicalSpecs: {
       productCode: "OU7059SBCG",
       luminousFlux: "650 lm",
@@ -3226,14 +3226,14 @@ const construlitaUplightsProducts = [
     finish: "Negro",
     description:
       "Uplights empotrados en piso con opticas dirigibles individuales para iluminacion rasante en superficies verticales e instalacion sin marco.",
-    image: "/catalogos/construlita/empotrados_en_piso/uplight_OU3160.png",
+    image: "/catalogos/construlita/empotrados_en_piso/uplight_OU3160_resultado.webp",
     images: [
-      "/catalogos/construlita/empotrados_en_piso/uplight_OU3160.png",
-      "/catalogos/construlita/empotrados_en_piso/uplight_OU3162.png",
-      "/catalogos/construlita/empotrados_en_piso/uplight_OU3163.png",
-      "/catalogos/construlita/empotrados_en_piso/uplight_OU3164.png",
-      "/catalogos/construlita/empotrados_en_piso/uplight_OU3165.png",
-      "/catalogos/construlita/empotrados_en_piso/uplight_OU3166.png",
+      "/catalogos/construlita/empotrados_en_piso/uplight_OU3160_resultado.webp",
+      "/catalogos/construlita/empotrados_en_piso/uplight_OU3162_resultado.webp",
+      "/catalogos/construlita/empotrados_en_piso/uplight_OU3163_resultado.webp",
+      "/catalogos/construlita/empotrados_en_piso/uplight_OU3164_resultado.webp",
+      "/catalogos/construlita/empotrados_en_piso/uplight_OU3165_resultado.webp",
+      "/catalogos/construlita/empotrados_en_piso/uplight_OU3166_resultado.webp",
     ],
     technicalSpecs: {
       productCode:
@@ -3285,8 +3285,8 @@ const construlitaFragataProProducts = [
     finish: "Satinado",
     description:
       "Uplight de alta potencia para empotrar en piso con tecnologia LED, operacion de 50 W y configuraciones por temperatura de color y angulo de apertura.",
-    image: "/catalogos/construlita/empotrados_en_piso/fragata_pro.png",
-    images: ["/catalogos/construlita/empotrados_en_piso/fragata_pro.png"],
+    image: "/catalogos/construlita/empotrados_en_piso/fragata_pro_resultado.webp",
+    images: ["/catalogos/construlita/empotrados_en_piso/fragata_pro_resultado.webp"],
     technicalSpecs: {
       productCode: "OU3595SBCA / OU3595SBFA / OU3596SBCA / OU3596SBFA / OU3597SBCA / OU3597SBFA",
       luminousFlux: "4 000 lm",
@@ -3330,8 +3330,8 @@ const construlitaGoletaProProducts = [
     finish: "Negro",
     description:
       "Luminario empotrado en piso inyectado en policarbonato de alta resistencia, con opticas de policarbonato y protector de cristal templado.",
-    image: "/catalogos/construlita/empotrados_en_piso/goleta_pro.png",
-    images: ["/catalogos/construlita/empotrados_en_piso/goleta_pro.png"],
+    image: "/catalogos/construlita/empotrados_en_piso/goleta_pro_resultado.webp",
+    images: ["/catalogos/construlita/empotrados_en_piso/goleta_pro_resultado.webp"],
     technicalSpecs: {
       productCode:
         "OU3150NBCB / OU3150NBFB / OU3152NBCB / OU3152NBFB / OU3154NBCB / OU3174NBCA / OU3174NBFA / OU3176NAMA / OU3176NBCA / OU3176NBFA / OU3178NAMA / OU3178NBCA / OU3178NBFA",
@@ -3384,10 +3384,10 @@ const construlitaRoadlightProducts = [
     finish: "Gris",
     description:
       "Familia de luminarios para empotrar en piso con materiales que soportan el paso de trafico vehicular ligero e iluminacion de cortesia.",
-    image: "/catalogos/construlita/empotrados_en_piso/rodalight_OU3027GBCF.png",
+    image: "/catalogos/construlita/empotrados_en_piso/rodalight_OU3027GBCF_resultado.webp",
     images: [
-      "/catalogos/construlita/empotrados_en_piso/rodalight_OU3027GBCF.png",
-      "/catalogos/construlita/empotrados_en_piso/roadlight_OU3028GBCF.jpg",
+      "/catalogos/construlita/empotrados_en_piso/rodalight_OU3027GBCF_resultado.webp",
+      "/catalogos/construlita/empotrados_en_piso/roadlight_OU3028GBCF_resultado.webp",
     ],
     technicalSpecs: {
       productCode: "OU3027GBCF / OU3028GBCF",
@@ -3431,12 +3431,12 @@ const construlitaWalklightProducts = [
     finish: "Blanco / Negro",
     description:
       "Familia de luminarios compactos para luz de cortesia en muro con acabados blanco o negro y temperatura 3000 K o 4000 K.",
-    image: "/catalogos/construlita/luz_cortesia_muro/walklight_OU2015.png",
+    image: "/catalogos/construlita/luz_cortesia_muro/walklight_OU2015_resultado.webp",
     images: [
-      "/catalogos/construlita/luz_cortesia_muro/walklight_OU2015.png",
-      "/catalogos/construlita/luz_cortesia_muro/walklight_OU2016.png",
-      "/catalogos/construlita/luz_cortesia_muro/walklight_OU2017.png",
-      "/catalogos/construlita/luz_cortesia_muro/walklight_OU2018.png",
+      "/catalogos/construlita/luz_cortesia_muro/walklight_OU2015_resultado.webp",
+      "/catalogos/construlita/luz_cortesia_muro/walklight_OU2016_resultado.webp",
+      "/catalogos/construlita/luz_cortesia_muro/walklight_OU2017_resultado.webp",
+      "/catalogos/construlita/luz_cortesia_muro/walklight_OU2018_resultado.webp",
     ],
     technicalSpecs: {
       productCode:
@@ -3479,12 +3479,12 @@ const construlitaBarraProProducts = [
     finish: "Gris",
     description:
       "Iluminacion lineal para proyectos exteriores con instalacion empotrada o sobrepuesta en superficies verticales u horizontales.",
-    image: "/catalogos/construlita/barras/barrapro_OU3701_OU3702.png",
+    image: "/catalogos/construlita/barras/barrapro_OU3701_OU3702_resultado.webp",
     images: [
-      "/catalogos/construlita/barras/barrapro_OU3701_OU3702.png",
-      "/catalogos/construlita/barras/barrapro_OU3711_OU3712.png",
-      "/catalogos/construlita/barras/barrapro_OU6599_OU6601.png",
-      "/catalogos/construlita/barras/barrapro_OU6603_OU6605.png",
+      "/catalogos/construlita/barras/barrapro_OU3701_OU3702_resultado.webp",
+      "/catalogos/construlita/barras/barrapro_OU3711_OU3712_resultado.webp",
+      "/catalogos/construlita/barras/barrapro_OU6599_OU6601_resultado.webp",
+      "/catalogos/construlita/barras/barrapro_OU6603_OU6605_resultado.webp",
     ],
     technicalSpecs: {
       productCode:
@@ -3544,8 +3544,8 @@ const construlitaUplightLinealProducts = [
     finish: "Gris",
     description:
       "Luminarios lineales de diseno compacto y sutil integracion con la arquitectura exterior o interior, para instalacion sobrepuesta en superficies horizontales o verticales.",
-    image: "/catalogos/construlita/barras/uplight.png",
-    images: ["/catalogos/construlita/barras/uplight.png"],
+    image: "/catalogos/construlita/barras/uplight_resultado.webp",
+    images: ["/catalogos/construlita/barras/uplight_resultado.webp"],
     technicalSpecs: {
       productCode:
         "OU6608GBCA / OU6609GBCA / OU6608GBNA / OU6609GBNA / OU6615GBCA / OU6616GBCA / OU6615GBNA / OU6616GBNA",
@@ -3591,8 +3591,8 @@ const construlitaUplightLinealProducts = [
     finish: "Satinado",
     description:
       "Luminario lineal de 50 cm disenado para empotrarse en piso, con cuerpo optico dirigible para enfocar objetos o regular el efecto de iluminacion rasante en superficies verticales.",
-    image: "/catalogos/construlita/barras/uplight_lineal_digerible.png",
-    images: ["/catalogos/construlita/barras/uplight_lineal_digerible.png"],
+    image: "/catalogos/construlita/barras/uplight_lineal_digerible_resultado.webp",
+    images: ["/catalogos/construlita/barras/uplight_lineal_digerible_resultado.webp"],
     technicalSpecs: {
       productCode: "OU3705SBCA / OU3705SBNA",
       luminousFlux: "2 300 lm",
@@ -3632,8 +3632,8 @@ const construlitaUplightLinealProducts = [
     finish: "Negro",
     description:
       "Luminario lineal disenado para instalarse a baja altura en el parapeto de vialidades, con optica para iluminacion rasante sobre carpeta vehicular y perimetros de puentes o distribuidores viales.",
-    image: "/catalogos/construlita/barras/metroled.png",
-    images: ["/catalogos/construlita/barras/metroled.png"],
+    image: "/catalogos/construlita/barras/metroled_resultado.webp",
+    images: ["/catalogos/construlita/barras/metroled_resultado.webp"],
     technicalSpecs: {
       productCode: "OU7161FBFA",
       luminousFlux: "2 677 lm",
@@ -3672,7 +3672,7 @@ const construlitaLinealesProducts = [
     finish: "Blanco / Grafito / Gris / Negro",
     description:
       "Sistema de iluminación lineal interconectable de forma mecánica y eléctrica para grandes distancias, configurable para bajo y alto montaje con diferentes flujos, temperaturas de color y opciones ópticas.",
-    image: "/catalogos/construlita/lineales/hb_infinity.png",
+    image: "/catalogos/construlita/lineales/hb_infinity_resultado.webp",
     technicalSpecs: {
       productCode:
         "IN8500-IN8527 / módulos ciegos MC2, MC4 y MC8",
@@ -3719,7 +3719,7 @@ const construlitaLinealesProducts = [
     finish: "Blanco / Grafito / Gris / Negro",
     description:
       "Sistema de iluminación lineal para crear ejes de luz con alto confort visual, distribuciones fotométricas directa, indirecta y directa-indirecta, óptica Dark Light y sistema modular.",
-    image: "/catalogos/construlita/lineales/trazzo.png",
+    image: "/catalogos/construlita/lineales/trazzo_resultado.webp",
     technicalSpecs: {
       productCode: "TZ",
       luminousFlux:
@@ -3767,7 +3767,7 @@ const construlitaLinealesProducts = [
     finish: "Blanco / Grafito / Gris / Negro",
     description:
       "Sistema de iluminación lineal Slim con interconexión mecánica y eléctrica, opciones de empotrar, sobreponer o suspender, TCC seleccionable y diseño compacto para proyectos lineales.",
-    image: "/catalogos/construlita/lineales/slim.png",
+    image: "/catalogos/construlita/lineales/slim_resultado.webp",
     technicalSpecs: {
       productCode: "OF",
       luminousFlux: "1 350 lm / 2 700 lm / 4 860 lm / 6 075 lm",
@@ -3806,7 +3806,7 @@ const construlitaLinealesProducts = [
     finish: "Blanco / Negro",
     description:
       "Luminario lineal interconectable con instalación sencilla mediante pines magnéticos, emisión directa o indirecta, y accesorios para personalizar el confort visual según cada proyecto.",
-    image: "/catalogos/construlita/lineales/lynlight.png",
+    image: "/catalogos/construlita/lineales/lynlight_resultado.webp",
     technicalSpecs: {
       productCode:
         "OF4350BCCA / OF4350NCCA / OF4352NBCA / OF4352NNCA / AC4350BCCF / AC4251N / AC6251N",
@@ -3847,7 +3847,7 @@ const construlitaLinealesProducts = [
     finish: "Blanco / Negro",
     description:
       "Sistema de iluminación lineal para empotrar, sobreponer o suspender, con versiones ON/OFF y 0-10V, interconexión mecánica-eléctrica y accesorios X, T y L para formar líneas continuas.",
-    image: "/catalogos/construlita/lineales/vector_system.png",
+    image: "/catalogos/construlita/lineales/vector_system_resultado.webp",
     technicalSpecs: {
       productCode:
         "ON/OFF: OF4250 / AC4251 / AC4252 / AC4253; 0-10V: OF4253 / AC4260 / AC4259 / AC4258",
@@ -3894,7 +3894,7 @@ const construlitaLinealesProducts = [
     finish: "Blanco / Negro",
     description:
       "Sistema de luminarios lineales ultra delgados de bajo voltaje 48V, con soluciones de instalación sobrepuesta, empotrada y suspendida, IRC 90 y atenuación 0-10V.",
-    image: "/catalogos/construlita/lineales/micro_system.png",
+    image: "/catalogos/construlita/lineales/micro_system_resultado.webp",
     technicalSpecs: {
       productCode:
         "MT1001NBCV-MT1003NBCV / MT4001NBCV-MT4003NBCV / MT6001NBCV-MT6002NBCV / MT8001NBCV-MT8003NBCV / MT1001NBNV-MT1003NBNV / MT4001NBNV-MT4003NBNV / MT6001NBNV-MT6002NBNV / MT8001NBNV-MT8003NBNV",
@@ -3941,7 +3941,7 @@ const construlitaGabinetesProducts = [
     finish: "Blanco / Negro",
     description:
       "Línea de gabinetes circulares que combina iluminación general con estética decorativa, disponible en tres diámetros y con opción de instalar en superficie o suspender del techo.",
-    image: "/catalogos/construlita/gabinetes/aurora.png",
+    image: "/catalogos/construlita/gabinetes/aurora_resultado.webp",
     technicalSpecs: {
       productCode:
         "RE8065BCCA / RE8065NCCA / RE8066BCCA / RE8066NCCA / RE8067BCCA / RE8067NCCA",
@@ -3979,7 +3979,7 @@ const construlitaGabinetesProducts = [
     finish: "Blanco",
     description:
       "Luminario Paneled con tecnología LED, habilitado para empotrar o suspender, fabricado en aluminio extruido blanco con difusor acrílico y pantalla micro prismática.",
-    image: "/catalogos/construlita/gabinetes/paneled_OF1094.png",
+    image: "/catalogos/construlita/gabinetes/paneled_OF1094_resultado.webp",
     technicalSpecs: {
       productCode: "OF1093BBNA / OF1094BBCA / OF1095BBNA",
       luminousFlux: "3 700 lm / 4 350 lm / 4 600 lm",
@@ -4017,7 +4017,7 @@ const construlitaGabinetesProducts = [
     finish: "Blanco",
     description:
       "Luminario Paneled rectangular con tecnología LED para empotrar o suspender, cuerpo de aluminio extruido blanco, difusor acrílico y driver con certificación UL.",
-    image: "/catalogos/construlita/gabinetes/paneled_OF1096.png",
+    image: "/catalogos/construlita/gabinetes/paneled_OF1096_resultado.webp",
     technicalSpecs: {
       productCode: "OF1096BBNA",
       luminousFlux: "6 800 lm",
@@ -4052,7 +4052,7 @@ const construlitaGabinetesProducts = [
     finish: "Blanco",
     description:
       "Luminario de alta eficiencia modulado 2x2 para iluminación general en espacios de trabajo, con selector de potencia y TCC para una correcta integración al espacio.",
-    image: "/catalogos/construlita/gabinetes/alba_OF1838BCCA.png",
+    image: "/catalogos/construlita/gabinetes/alba_OF1838BCCA_resultado.webp",
     technicalSpecs: {
       productCode: "OF1838BCCA",
       luminousFlux: "3 700 lm / 4 640 lm / 5 800 lm",
@@ -4089,7 +4089,7 @@ const construlitaGabinetesProducts = [
     finish: "Blanco",
     description:
       "Luminario de alta eficiencia modulado 2x4 para iluminación general en espacios de trabajo, con selector de potencia y TCC para ambientes dinámicos y productivos.",
-    image: "/catalogos/construlita/gabinetes/alba_OF1840BCCA.png",
+    image: "/catalogos/construlita/gabinetes/alba_OF1840BCCA_resultado.webp",
     technicalSpecs: {
       productCode: "OF1840BCCA",
       luminousFlux: "4 000 lm / 5 000 lm / 6 250 lm",
@@ -4116,7 +4116,7 @@ const construlitaGabinetesProducts = [
   },
 ];
 
-const magnetrackProAccessoryImage = "/catalogos/construlita/magnetrackpro/microrriel.png";
+const magnetrackProAccessoryImage = "/catalogos/construlita/magnetrackpro/microrriel_resultado.webp";
 
 const createMagnetrackProAccessoryProduct = (accessory: {
   id: string;
@@ -4157,7 +4157,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5610n-conector-codo-empotrable",
     sku: "AC5610N",
     name: "Conector codo empotrable Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/conector_codo.png",
+    image: "/catalogos/construlita/magnetrackpro/conector_codo_resultado.webp",
     description:
       "Conector codo para riel empotrable que permite cambiar de direccion desplazando las fuentes en la misma superficie.",
     dimensions: "105 mm x 105 mm / diametro 4 mm",
@@ -4168,7 +4168,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5611n-codo-interno-empotrable",
     sku: "AC5611N",
     name: "Conector codo empotrable Magnetrack Pro AC5611N",
-    image: "/catalogos/construlita/magnetrackpro/conector_codo2.png",
+    image: "/catalogos/construlita/magnetrackpro/conector_codo2_resultado.webp",
     description:
       "Conector codo para cambiar de direccion desplazando las fuentes en la misma superficie.",
     dimensions: "80 mm x 80 mm / 43 mm",
@@ -4179,7 +4179,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5612n-codo-externo-empotrable",
     sku: "AC5612N",
     name: "Conector codo empotrable Magnetrack Pro AC5612N",
-    image: "/catalogos/construlita/magnetrackpro/conector_codo3.png",
+    image: "/catalogos/construlita/magnetrackpro/conector_codo3_resultado.webp",
     description:
       "Conector codo para cambiar de direccion desplazando las fuentes en la misma superficie.",
     dimensions: "80 mm x 80 mm / 66.9 mm",
@@ -4190,7 +4190,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5639n-conector-t-empotrable",
     sku: "AC5639N",
     name: "Conector T empotrable Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/conector_t.png",
+    image: "/catalogos/construlita/magnetrackpro/conector_t_resultado.webp",
     description:
       "Conector T para cambiar de direccion desplazando las fuentes en la misma superficie.",
     dimensions: "130 mm x 100 mm / 81.81 mm / 65 mm + 65 mm / angulos 45° y 90°",
@@ -4201,7 +4201,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5640n-conector-x-empotrable",
     sku: "AC5640N",
     name: "Conector X empotrable Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/conector_x.png",
+    image: "/catalogos/construlita/magnetrackpro/conector_x_resultado.webp",
     description:
       "Conector X para cambiar de direccion desplazando las fuentes en la misma superficie.",
     dimensions: "130 mm x 130 mm / 65 mm / diametro 5 mm / angulo 90°",
@@ -4212,7 +4212,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5630n-conector-codo-empotrable",
     sku: "AC5630N",
     name: "Conector codo empotrable Magnetrack Pro AC5630N",
-    image: "/catalogos/construlita/magnetrackpro/conector_codo_AC5630N.png",
+    image: "/catalogos/construlita/magnetrackpro/conector_codo_AC5630N_resultado.webp",
     description:
       "Conector codo para cambiar de direccion desplazando las fuentes en la misma superficie.",
     dimensions: "33.6 mm x 54.7 mm x 3 mm",
@@ -4223,7 +4223,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5637n-conector-t-suspendido-sobrepuesto",
     sku: "AC5637N",
     name: "Conector T para riel suspendido o sobrepuesto Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/conectort_AC5637N.png",
+    image: "/catalogos/construlita/magnetrackpro/conectort_AC5637N_resultado.webp",
     description: "Conector T para configuraciones de riel suspendido o sobrepuesto.",
     dimensions: "75 mm x 50 mm / 51 mm / 37.73 mm / 36.8 mm / diametro 3 mm",
     applicationType: "Accesorio para riel suspendido o sobrepuesto",
@@ -4233,7 +4233,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5638n-conector-x-suspendido-sobrepuesto",
     sku: "AC5638N",
     name: "Conector X para riel suspendido o sobrepuesto Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/conectorx_AC5638N.png",
+    image: "/catalogos/construlita/magnetrackpro/conectorx_AC5638N_resultado.webp",
     description: "Conector X para configuraciones de riel suspendido o sobrepuesto.",
     dimensions: "75 mm x 75 mm / 37.5 mm + 37.5 mm / diametro 3 mm",
     applicationType: "Accesorio para riel suspendido o sobrepuesto",
@@ -4243,7 +4243,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5710n-conector-codo-suspendido-sobrepuesto",
     sku: "AC5710N",
     name: "Conector codo para riel suspendido o sobrepuesto Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/conector_codo_AC5710N.png",
+    image: "/catalogos/construlita/magnetrackpro/conector_codo_AC5710N_resultado.webp",
     description:
       "Conector codo para cambiar de direccion desplazando las fuentes en la misma superficie.",
     dimensions: "50 mm x 50 mm / diametro 3 mm",
@@ -4254,7 +4254,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5711n-codo-interno-suspendido-sobrepuesto",
     sku: "AC5711N",
     name: "Codo interno para riel suspendido o sobrepuesto Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/codo_interno.png",
+    image: "/catalogos/construlita/magnetrackpro/codo_interno_resultado.webp",
     description:
       "Codo interno para cambiar de direccion desplazando las fuentes en dos superficies internas.",
     dimensions: "80 mm x 80 mm",
@@ -4265,7 +4265,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5712n-codo-externo-suspendido-sobrepuesto",
     sku: "AC5712N",
     name: "Codo externo para riel suspendido o sobrepuesto Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/codo_externo.png",
+    image: "/catalogos/construlita/magnetrackpro/codo_externo_resultado.webp",
     description:
       "Codo externo para cambiar de direccion desplazando las fuentes en dos superficies externas.",
     dimensions: "80 mm x 80 mm",
@@ -4276,7 +4276,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5730n-tapa-riel-suspendido-sobrepuesto",
     sku: "AC5730N",
     name: "Tapa para riel suspendido o sobrepuesto Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/tapa_riel.png",
+    image: "/catalogos/construlita/magnetrackpro/tapa_riel_resultado.webp",
     description: "Tapa para cierre de riel suspendido o sobrepuesto Magnetrack Pro.",
     dimensions: "26.6 mm x 53 mm",
     applicationType: "Accesorio para riel suspendido o sobrepuesto",
@@ -4286,7 +4286,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5530-interconector-flex",
     sku: "AC5530",
     name: "Interconector flex Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/interconector_flex.png",
+    image: "/catalogos/construlita/magnetrackpro/interconector_flex_resultado.webp",
     description: "Interconecta rieles aprovechando una misma salida electrica.",
     dimensions: "278.9 mm x 108.9 mm x 18 mm x 16.2 mm",
     applicationType: "Accesorio de interconexion de rieles",
@@ -4296,7 +4296,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5635n-interconector-t",
     sku: "AC5635N",
     name: "Interconector T Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/interconectort.png",
+    image: "/catalogos/construlita/magnetrackpro/interconectort_resultado.webp",
     description: "Interconecta tres rieles aprovechando una misma salida electrica.",
     dimensions: "278.9 mm x 151 mm x 108.9 mm x 18 mm x 16.2 mm",
     applicationType: "Accesorio de interconexion de rieles",
@@ -4306,7 +4306,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5631n-interconector-lineal",
     sku: "AC5631N",
     name: "Interconector lineal Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/interconector_linea.png",
+    image: "/catalogos/construlita/magnetrackpro/interconector_linea_resultado.webp",
     description: "Interconecta rieles aprovechando una misma salida electrica.",
     dimensions: "50 mm x 40 mm x 20 mm x 12.1 mm x 7.9 mm x 3 mm",
     applicationType: "Accesorio de interconexion de rieles",
@@ -4316,7 +4316,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5633n-placa-interconexion-mecanica",
     sku: "AC5633N",
     name: "Placa de interconexion mecanica Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/placa_interconexion_mecanica.png",
+    image: "/catalogos/construlita/magnetrackpro/placa_interconexion_mecanica_resultado.webp",
     description: "Placa de interconexion mecanica para rieles Magnetrack Pro.",
     dimensions: "50 mm x 40 mm x 20 mm x 22.8 mm x 6 mm",
     applicationType: "Accesorio de interconexion de rieles",
@@ -4326,7 +4326,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5632n-arnes-sobreponer-microrriel",
     sku: "AC5632N",
     name: "Arnes para sobreponer microrriel Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/arnes_sobreponer_microrriel.png",
+    image: "/catalogos/construlita/magnetrackpro/arnes_sobreponer_microrriel_resultado.webp",
     description: "Arnes para montaje sobrepuesto de microrriel Magnetrack Pro.",
     dimensions: "50.6 mm x 19 mm x 15.8 mm x 7.5 mm x 7 mm x 5.5 mm x 4 mm",
     applicationType: "Accesorio para montaje de rieles",
@@ -4336,7 +4336,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac5745-kit-suspension-microrriel",
     sku: "AC5745",
     name: "Kit para suspension de microrriel Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/kit_para_suspension.png",
+    image: "/catalogos/construlita/magnetrackpro/kit_para_suspension_resultado.webp",
     description: "Kit para suspension de microrriel Magnetrack Pro.",
     applicationType: "Accesorio para montaje de rieles",
     specialFeatures: ["Kit para suspension de microrriel", "Montaje suspendido"],
@@ -4345,7 +4345,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac78150-driver-150w",
     sku: "AC78150",
     name: "Driver 150 W Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/AC78150.png",
+    image: "/catalogos/construlita/magnetrackpro/AC78150_resultado.webp",
     description: "Driver independiente para sistema Magnetrack Pro con salida de 48 V.",
     applicationType: "Driver para sistema Magnetrack Pro",
     specialFeatures: ["Potencia 150 W", "Salida 48 V", "Driver independiente al sistema Magnetrack Pro"],
@@ -4354,7 +4354,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac78200-driver-200w",
     sku: "AC78200",
     name: "Driver 200 W Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/AC78200.png",
+    image: "/catalogos/construlita/magnetrackpro/AC78200_resultado.webp",
     description: "Driver independiente para sistema Magnetrack Pro con salida de 48 V.",
     applicationType: "Driver para sistema Magnetrack Pro",
     specialFeatures: ["Potencia 200 W", "Salida 48 V", "Driver independiente al sistema Magnetrack Pro"],
@@ -4363,7 +4363,7 @@ const magnetrackProAccessoryProducts = [
     id: "ac78350-driver-350w",
     sku: "AC78350",
     name: "Driver 350 W Magnetrack Pro",
-    image: "/catalogos/construlita/magnetrackpro/AC78350.png",
+    image: "/catalogos/construlita/magnetrackpro/AC78350_resultado.webp",
     description: "Driver independiente para sistema Magnetrack Pro con salida de 48 V.",
     applicationType: "Driver para sistema Magnetrack Pro",
     specialFeatures: ["Potencia 350 W", "Salida 48 V", "Driver independiente al sistema Magnetrack Pro"],
@@ -4383,7 +4383,7 @@ const construlitaMagnetrackProProducts = [
     finish: "Negro",
     description:
       "Luminarios lineales para sistema Magnetrack Pro que permiten generar iluminacion general flexible en microrrieles magneticos de 48V, con difusor opalino o frost.",
-    image: "/catalogos/construlita/magnetrackpro/linear.png",
+    image: "/catalogos/construlita/magnetrackpro/linear_resultado.webp",
     technicalSpecs: {
       productCode: "MT5101NBCV / MT5102NBCV / MT5103NBCV",
       luminousFlux: "300 lm / 570 lm / 1 300 lm",
@@ -4422,7 +4422,7 @@ const construlitaMagnetrackProProducts = [
     finish: "Negro",
     description:
       "Modulos lineales multispot de angulo medio para iluminacion sobre superficies de trabajo o superficies que requieren iluminacion concentrada en el plano horizontal.",
-    image: "/catalogos/construlita/magnetrackpro/multispot.png",
+    image: "/catalogos/construlita/magnetrackpro/multispot_resultado.webp",
     technicalSpecs: {
       productCode: "MT5104NBCV / MT5105NBCV",
       luminousFlux: "685 lm / 1 200 lm",
@@ -4458,7 +4458,7 @@ const construlitaMagnetrackProProducts = [
     finish: "Negro",
     description:
       "Modulo lineal dirigible con optica de angulo abierto para iluminacion de acento sobre plano vertical, horizontal o efectos de luz rasante.",
-    image: "/catalogos/construlita/magnetrackpro/grazer.png",
+    image: "/catalogos/construlita/magnetrackpro/grazer_resultado.webp",
     technicalSpecs: {
       productCode: "MT5106NBCV / MT5107NBCV",
       luminousFlux: "410 lm / 851 lm",
@@ -4494,7 +4494,7 @@ const construlitaMagnetrackProProducts = [
     finish: "Negro",
     description:
       "Banador de muros lineal con visera antideslumbramiento ideal para iluminar planos verticales.",
-    image: "/catalogos/construlita/magnetrackpro/washer.png",
+    image: "/catalogos/construlita/magnetrackpro/washer_resultado.webp",
     technicalSpecs: {
       productCode: "MT5108NBCV",
       luminousFlux: "1 050 lm",
@@ -4529,7 +4529,7 @@ const construlitaMagnetrackProProducts = [
     finish: "Negro",
     description:
       "Luminario compacto y dirigible con angulo medio para iluminacion de acento.",
-    image: "/catalogos/construlita/magnetrackpro/spot.png",
+    image: "/catalogos/construlita/magnetrackpro/spot_resultado.webp",
     technicalSpecs: {
       productCode: "MT5111NBCV / MT5112NBCV / MT5113NBCV",
       luminousFlux: "422 lm / 700 lm / 1 600 lm",
@@ -4567,7 +4567,7 @@ const construlitaMagnetrackProProducts = [
     finish: "Negro",
     description:
       "Pipe es un luminario decorativo para iluminacion puntual, con diseno minimalista para aportar personalidad al espacio.",
-    image: "/catalogos/construlita/magnetrackpro/pipe.png",
+    image: "/catalogos/construlita/magnetrackpro/pipe_resultado.webp",
     technicalSpecs: {
       luminousFlux: "461 lm",
       power: "7 W",
@@ -4602,7 +4602,7 @@ const construlitaMagnetrackProProducts = [
     finish: "Negro",
     description:
       "Luminario minimalista decorativo para iluminacion difusa, con altura o longitud ajustable y efecto pendular.",
-    image: "/catalogos/construlita/magnetrackpro/moon.png",
+    image: "/catalogos/construlita/magnetrackpro/moon_resultado.webp",
     technicalSpecs: {
       productCode: "MT5121NBCV",
       luminousFlux: "515 lm",
@@ -4638,7 +4638,7 @@ const construlitaMagnetrackProProducts = [
     finish: "Negro",
     description:
       "Microrrieles magneticos de 48 V con 23 mm de cutout, disponibles en versiones empotrables y para suspender o sobreponer.",
-    image: "/catalogos/construlita/magnetrackpro/microrriel.png",
+    image: "/catalogos/construlita/magnetrackpro/microrriel_resultado.webp",
     technicalSpecs: {
       productCode:
         "AC5641N / AC5642N / AC5643N / AC5741N / AC5742N / AC5743N / AC5610N / AC5611N / AC5612N / AC5630N / AC5639N / AC5640N / AC5637N / AC5638N / AC5710N / AC5711N / AC5712N / AC5730N / AC5530 / AC5635N / AC5631N / AC5633N / AC5632N / AC5745 / AC78150 / AC78200 / AC78350",
@@ -4700,7 +4700,7 @@ const construlitaRielProducts = [
     finish: "Blanco / Negro",
     description:
       "Solucion de facil instalacion para montaje en riel, con iluminacion de alta calidad, alto IRC 90 y sistema optico anti deslumbramiento. Incluye lentes intercambiables de 24, 36 y 60 grados para ajustarse a cada proyecto.",
-    image: "/catalogos/construlita/luminarios_para_riel/focus.png",
+    image: "/catalogos/construlita/luminarios_para_riel/focus_resultado.webp",
     technicalSpecs: {
       productCode:
         "CO5111BBCA / CO5111BBNA / CO5111NBCA / CO5111NBNA / CO5112BBCA / CO5112BBNA / CO5112NBCA / CO5112NBNA / CO5112GBCA / CO5112GBNA / CO5113BBCA / CO5113BBNA / CO5113NBCA / CO5113NBNA / CO5113GBCA / CO5113GBNA",
@@ -4744,7 +4744,7 @@ const construlitaRielProducts = [
     finish: "Blanco / Negro",
     description:
       "Proyector redondo compacto y minimalista para riel con tecnologia LED COB, alto IRC 90 y diseno anti deslumbramiento. Incluye opticas intercambiables de 20, 30 y 60 grados para ajustar la proyeccion de luz segun el espacio.",
-    image: "/catalogos/construlita/luminarios_para_riel/sphere.png",
+    image: "/catalogos/construlita/luminarios_para_riel/sphere_resultado.webp",
     technicalSpecs: {
       productCode:
         "CO5212BBCA / CO5212NBCA / CO5213BBCA / CO5213NBCA",
@@ -4788,7 +4788,7 @@ const construlitaRielProducts = [
     finish: "Blanco",
     description:
       "Panel de alta potencia para rieles, disenado para iluminacion precisa y enfocada en tiendas departamentales, supermercados y espacios comerciales. Su diseno delgado y ligero facilita la instalacion y ofrece luz blanca neutra de 4000K.",
-    image: "/catalogos/construlita/luminarios_para_riel/skylight.png",
+    image: "/catalogos/construlita/luminarios_para_riel/skylight_resultado.webp",
     technicalSpecs: {
       productCode: "CO5312BBNA / CO5313BBNA",
       luminousFlux: "8 500 lm / 10 500 lm",
@@ -4827,7 +4827,7 @@ const construlitaRielProducts = [
     finish: "Blanco / Negro",
     description:
       "Tracklight compacto y minimalista con optica Wall Washer de 30 x 60 grados. Permite regular el angulo de proyeccion hasta 120 grados para iluminar zonas perimetrales, paredes y elementos de boutiques o tiendas departamentales.",
-    image: "/catalogos/construlita/luminarios_para_riel/walltrack.png",
+    image: "/catalogos/construlita/luminarios_para_riel/walltrack_resultado.webp",
     technicalSpecs: {
       productCode: "CO5315NBCA / CO5315NBNA / CO5315BBCA / CO5315BBNA",
       luminousFlux: "4 500 lm",
@@ -4867,7 +4867,7 @@ const construlitaRielProducts = [
     finish: "Blanco / Negro",
     description:
       "Familia de luminarios para montaje en riel con alta potencia de 40 W y diseno compacto. Solucion de acento para proyectos que requieren alto IRC 90 y operacion ON/OFF.",
-    image: "/catalogos/construlita/luminarios_para_riel/cylinder.png",
+    image: "/catalogos/construlita/luminarios_para_riel/cylinder_resultado.webp",
     technicalSpecs: {
       productCode: "CO5069BBCA / CO5069NBCA",
       luminousFlux: "3 650 lm",
@@ -4903,7 +4903,7 @@ const construlitaRielProducts = [
     finish: "Blanco / Negro",
     description:
       "Familia para montaje en riel con alta configuracion: angulo de apertura, acabados, temperatura de color y control. Su fuente LED COB ofrece alto IRC 95 para aplicaciones comerciales y museograficas donde la calidad visual es prioritaria.",
-    image: "/catalogos/construlita/luminarios_para_riel/cylinder_pro.png",
+    image: "/catalogos/construlita/luminarios_para_riel/cylinder_pro_resultado.webp",
     technicalSpecs: {
       productCode: "CY 5",
       power: "Maximo 47 W; TRIAC 20 W / 30 W / 40 W",
@@ -4946,7 +4946,7 @@ const construlitaRielProducts = [
     finish: "Blanco / Negro",
     description:
       "Familia de luminarios para montaje en riel con alta configuracion de angulo de apertura, acabado, temperatura de color y driver. Su fuente LED COB con IRC 95 ofrece alta reproduccion de color para aplicaciones comerciales y museograficas.",
-    image: "/catalogos/construlita/luminarios_para_riel/cubic_pro.png",
+    image: "/catalogos/construlita/luminarios_para_riel/cubic_pro_resultado.webp",
     technicalSpecs: {
       productCode:
         "CU 5 / AC5050N / AC5051B / AC5052B / AC5055N / AC5054N / AC5001B / AC5001N / AC5002B / AC5002N / AC5003B / AC5003N / AC5430B / AC5430N / AC5431B / AC5431N / AC5432B / AC5432N / AC5433B / AC5433N",
@@ -5003,7 +5003,7 @@ const construlitaSuspendidosProducts = [
     finish: "Blanco / Negro",
     description:
       "Solucion suspendida de facil instalacion con iluminacion de alta calidad, alto IRC 90 y control anti deslumbramiento. Incluye opticas intercambiables para ajustar el angulo de apertura segun cada proyecto.",
-    image: "/catalogos/construlita/suspendido/focus_suspendido.png",
+    image: "/catalogos/construlita/suspendido/focus_suspendido_resultado.webp",
     technicalSpecs: {
       productCode:
         "CO8120BBCA / CO8120BBNA / CO8120NBCA / CO8120NBNA / CO8121BBCA / CO8121BBNA / CO8121NBCA / CO8121NBNA / CO8122BBCA / CO8122BBNA / CO8122NBCA / CO8122NBNA",
@@ -5047,7 +5047,7 @@ const construlitaDownlightProducts = [
     finish: "Blanco / Negro",
     description:
       "Familia de luminarias de acento con diseno sofisticado, alto confort visual e IRC 90. Su sistema de rotula direccionable permite orientar la luz en 360 grados para enfocar objetos o espacios en galerias, tiendas y areas de exhibicion.",
-    image: "/catalogos/construlita/downlight/canyon_pro.png",
+    image: "/catalogos/construlita/downlight/canyon_pro_resultado.webp",
     technicalSpecs: {
       productCode:
         "RE1091BBCA / RE1091BBNA / RE1091NBCA / RE1091NBNA / RE1092BBCA / RE1092BBNA / RE1092NBCA / RE1092NBNA / RE1093BBCA / RE1093BBNA / RE1093NBCA / RE1093NBNA",
@@ -5086,7 +5086,7 @@ const construlitaDownlightProducts = [
     finish: "Blanco / Negro",
     description:
       "Downlights para empotrar en plafon conformados con modulo base cuadrado. Ofrecen iluminacion de acento con potencias de 17 W y 44 W, alto IRC 90 y configuracion modular con LED integrado o lampara AR111.",
-    image: "/catalogos/construlita/downlight/modulare.png",
+    image: "/catalogos/construlita/downlight/modulare_resultado.webp",
     technicalSpecs: {
       productCode:
         "CO1162BBCA / CO1162NBCA / CO1625BBCA / CO1625BBNA / CO1629NBCA / CO1629NBNA / AC1068N",
@@ -5125,7 +5125,7 @@ const construlitaDownlightProducts = [
     finish: "Blanco",
     description:
       "Downlight compacto de aspecto elegante con reflector de aluminio al vacío para control preciso de la luz, alto confort visual y opciones fija o dirigible.",
-    image: "/catalogos/construlita/downlight/comfort_dot.png",
+    image: "/catalogos/construlita/downlight/comfort_dot_resultado.webp",
     technicalSpecs: {
       productCode: "RE1310BBCB / RE1311BBCB / RE1312BBCB / RE1313BBCB",
       luminousFlux: "1 580 lm",
@@ -5163,7 +5163,7 @@ const construlitaDownlightProducts = [
     finish: "Blanco / Negro",
     description:
       "Familia de downlights tipo espía para iluminación de acento o general, con cuerpo óptico dirigible hasta 90° para resaltar objetos y detalles en espacios comerciales, museográficos y de hospitalidad.",
-    image: "/catalogos/construlita/downlight/nova.png",
+    image: "/catalogos/construlita/downlight/nova_resultado.webp",
     technicalSpecs: {
       productCode:
         "CO1138BBCA / CO1138BBNA / CO1138NBCA / CO1138NBNA / CO1139BBCA / CO1139BBNA / CO1139NBCA / CO1139NBNA / CO1140BBCA / CO1140BBNA / CO1140NBCA / CO1140NBNA / CO1141BBCA / CO1141BBNA / CO1141NBCA / CO1141NBNA",
@@ -5204,7 +5204,7 @@ const construlitaDownlightProducts = [
     finish: "Blanco",
     description:
       "Luminario Downled de empotrar en bote integral o plafón, con cuerpo de inyección de aluminio, acabado blanco y refractor acrílico de alta transmitancia.",
-    image: "/catalogos/construlita/downlight/down_led.png",
+    image: "/catalogos/construlita/downlight/down_led_resultado.webp",
     technicalSpecs: {
       productCode:
         "RE1035BBCD / RE1035BBND / RE1212BBCD / RE1212BBND / RE1036BBCD / RE1036BBND / RE1041BBCD / RE1041BBND / RE1041BBCA / RE1041BBNA",
@@ -5245,7 +5245,7 @@ const construlitaDownlightProducts = [
     finish: "Blanco",
     description:
       "Downlight de alto montaje para dobles alturas, con alta potencia, control 0-10V y reflector de aluminio especular para control de la iluminación.",
-    image: "/catalogos/construlita/downlight/performa_pro.png",
+    image: "/catalogos/construlita/downlight/performa_pro_resultado.webp",
     technicalSpecs: {
       productCode:
         "CO1200BBCA / CO1200BBNA / CO1200BBFA / CO1214BBCA / CO1214BBNA / CO1214BBFA / CO1300BBCA / CO1300BBNA / CO1300BBFA",
@@ -5284,7 +5284,7 @@ const construlitaDownlightProducts = [
     finish: "Blanco",
     description:
       "Downlight de aspecto sobrio con reflector de aluminio al vacío para control preciso de la luz, alto confort visual y aplicación en comercios, oficinas y galerías.",
-    image: "/catalogos/construlita/downlight/comfort_soft.png",
+    image: "/catalogos/construlita/downlight/comfort_soft_resultado.webp",
     technicalSpecs: {
       productCode: "RE1047BBCB / RE1047BBNB / RE1049BBCB / RE1049BBNB",
       luminousFlux: "2 240 lm / 2 440 lm",
@@ -5322,7 +5322,7 @@ const construlitaDownlightProducts = [
     finish: "Blanco / Negro",
     description:
       "Downlight empotrable para iluminación general y oficinas, con diseño limpio, óptica de confort visual y opciones de acabado blanco o negro.",
-    image: "/catalogos/construlita/downlight/alfa.png",
+    image: "/catalogos/construlita/downlight/alfa_resultado.webp",
     technicalSpecs: {
       productCode:
         "RE1145BBCA / RE1145BBNA / RE1146BBCA / RE1146BBNA / RE1147BBCA / RE1147BBNA / RE1148BBCA / RE1148BBNA / RE1145NBCA / RE1145NBNA / RE1146NBCA / RE1146NBNA / RE1147NBCA / RE1147NBNA / RE1148NBCA / RE1148NBNA",
@@ -5368,7 +5368,7 @@ const construlitaTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED para interior de alta eficiencia, disponible en temperaturas 1800 K, 2700 K y 4000 K.",
-    image: "/catalogos/construlita/tiras_led/interior/RE6036.png",
+    image: "/catalogos/construlita/tiras_led/interior/RE6036_resultado.webp",
     technicalSpecs: {
       productCode: "RE6036AMG / RE6036BCG / RE6036BNG",
       luminousFlux: "7 400 lm / 7 780 lm",
@@ -5402,7 +5402,7 @@ const construlitaTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED para interior con luz uniforme, disponible en temperaturas 2700 K y 4000 K.",
-    image: "/catalogos/construlita/tiras_led/interior/RE6037.png",
+    image: "/catalogos/construlita/tiras_led/interior/RE6037_resultado.webp",
     technicalSpecs: {
       productCode: "RE6037BCG / RE6037BNG",
       luminousFlux: "6 700 lm / 7 150 lm",
@@ -5436,7 +5436,7 @@ const construlitaTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED para interior de confort visual, disponible en temperaturas 3000 K y 4000 K.",
-    image: "/catalogos/construlita/tiras_led/interior/RE6040.png",
+    image: "/catalogos/construlita/tiras_led/interior/RE6040_resultado.webp",
     technicalSpecs: {
       productCode: "RE6040BCG / RE6040BNG",
       luminousFlux: "2 500 lm",
@@ -5470,7 +5470,7 @@ const construlitaTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED para exterior a prueba de humedad, disponible en temperaturas 1800 K y 2700 K.",
-    image: "/catalogos/construlita/tiras_led/exterior/RE6039.png",
+    image: "/catalogos/construlita/tiras_led/exterior/RE6039_resultado.webp",
     technicalSpecs: {
       productCode: "RE6039AMG / RE6039BCG",
       luminousFlux: "6 000 lm / 8 150 lm",
@@ -5503,7 +5503,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver interior para tiras LED con potencia de 15 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7105S.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7105S_resultado.webp",
     technicalSpecs: {
       productCode: "AC7105S",
       power: "15 W",
@@ -5524,7 +5524,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver interior para tiras LED con potencia de 60 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7106S.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7106S_resultado.webp",
     technicalSpecs: {
       productCode: "AC7106S",
       power: "60 W",
@@ -5545,7 +5545,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver interior para tiras LED con potencia de 100 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7107S.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7107S_resultado.webp",
     technicalSpecs: {
       productCode: "AC7107S",
       power: "100 W",
@@ -5566,7 +5566,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver interior para tiras LED con potencia de 180 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7108S.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7108S_resultado.webp",
     technicalSpecs: {
       productCode: "AC7108S",
       power: "180 W",
@@ -5587,7 +5587,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver interior para tiras LED con potencia de 300 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7109S.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7109S_resultado.webp",
     technicalSpecs: {
       productCode: "AC7109S",
       power: "300 W",
@@ -5608,7 +5608,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver interior para tiras LED con potencia de 500 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7110S.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7110S_resultado.webp",
     technicalSpecs: {
       productCode: "AC7110S",
       power: "500 W",
@@ -5629,7 +5629,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Negro",
     description: "Driver exterior para tiras LED con potencia de 60 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7505G.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7505G_resultado.webp",
     technicalSpecs: {
       productCode: "AC7505G",
       power: "60 W",
@@ -5650,7 +5650,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Blanco",
     description: "Driver exterior para tiras LED con potencia de 150 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7515B.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7515B_resultado.webp",
     technicalSpecs: {
       productCode: "AC7515B",
       power: "150 W",
@@ -5671,7 +5671,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Blanco",
     description: "Driver exterior para tiras LED con potencia de 200 W y salida 12-16 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7200S.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7200S_resultado.webp",
     technicalSpecs: {
       productCode: "AC7200S",
       power: "200 W",
@@ -5692,7 +5692,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Blanco",
     description: "Driver exterior para tiras LED con potencia de 250 W y salida de 24 V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7525B.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7525B_resultado.webp",
     technicalSpecs: {
       productCode: "AC7525B",
       power: "250 W",
@@ -5713,7 +5713,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver exterior para tiras LED con potencia de 75 W, rango 24-56 VCD y control 0-10V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC7575G.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC7575G_resultado.webp",
     technicalSpecs: {
       productCode: "AC7575G",
       power: "75 W",
@@ -5735,7 +5735,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver exterior para tiras LED con potencia de 100 W, rango 24-56 VCD y control 0-10V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC75100G.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC75100G_resultado.webp",
     technicalSpecs: {
       productCode: "AC75100G",
       power: "100 W",
@@ -5757,7 +5757,7 @@ const construlitaTirasLedProducts = [
     application: "Drivers",
     finish: "Gris metálico",
     description: "Driver exterior para tiras LED con potencia de 250 W, rango 24-56 VCD y control 0-10V.",
-    image: "/catalogos/construlita/tiras_led/drivers/AC75240G.png",
+    image: "/catalogos/construlita/tiras_led/drivers/AC75240G_resultado.webp",
     technicalSpecs: {
       productCode: "AC75240G",
       power: "250 W",
@@ -5780,7 +5780,7 @@ const construlitaTirasLedProducts = [
     finish: "Satin",
     description:
       "Perfil para tira LED en acabado satin, para empotrar en muro o plafon.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC2200S.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC2200S_resultado.webp",
     technicalSpecs: {
       productCode: "AC2200S",
       dimensions: "3 m / 25 mm / 17.2 mm / 12.8 mm / 14.5 mm",
@@ -5806,7 +5806,7 @@ const construlitaTirasLedProducts = [
     finish: "Negro",
     description:
       "Perfil para tira LED en acabado negro con pantalla oscura, para empotrar en muro o plafon.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC2200N.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC2200N_resultado.webp",
     technicalSpecs: {
       productCode: "AC2200N",
       dimensions: "3 m / 25 mm / 17.2 mm / 12.8 mm / 14.5 mm",
@@ -5833,7 +5833,7 @@ const construlitaTirasLedProducts = [
     finish: "Satin",
     description:
       "Perfil para tira LED en acabado satin, para sobreponer en muro o plafon.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC6200S.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC6200S_resultado.webp",
     technicalSpecs: {
       productCode: "AC6200S",
       dimensions: "3 m / 17 mm / 12.5 mm / 14.5 mm",
@@ -5859,7 +5859,7 @@ const construlitaTirasLedProducts = [
     finish: "Negro",
     description:
       "Perfil para tira LED en acabado negro con pantalla oscura, para sobreponer en muro o plafon.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC6200N.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC6200N_resultado.webp",
     technicalSpecs: {
       productCode: "AC6200N",
       dimensions: "3 m / 17 mm / 12.5 mm / 14.5 mm",
@@ -5886,7 +5886,7 @@ const construlitaTirasLedProducts = [
     finish: "Satin",
     description:
       "Perfil esquinero para tira LED en acabado satin, para sobreponer.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC6210S.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC6210S_resultado.webp",
     technicalSpecs: {
       productCode: "AC6210S",
       dimensions: "3 m / 18.5 mm / 16.5 mm / 12 mm",
@@ -5912,7 +5912,7 @@ const construlitaTirasLedProducts = [
     finish: "Negro",
     description:
       "Perfil esquinero para tira LED en acabado negro con pantalla oscura, para sobreponer.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC6210N.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC6210N_resultado.webp",
     technicalSpecs: {
       productCode: "AC6210N",
       dimensions: "3 m / 18.5 mm / 16.5 mm / 12 mm",
@@ -5939,7 +5939,7 @@ const construlitaTirasLedProducts = [
     finish: "Satin",
     description:
       "Perfil para tira LED de empotrar para exteriores, para instalacion en madera o concreto.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC3200S.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC3200S_resultado.webp",
     technicalSpecs: {
       productCode: "AC3200S",
       dimensions: "3 m / 26 mm / 21 mm / 12 mm",
@@ -5964,7 +5964,7 @@ const construlitaTirasLedProducts = [
     finish: "Satin",
     description:
       "Perfil suspendido para tira LED, con accesorio de suspension venta por separado.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC8200S.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC8200S_resultado.webp",
     technicalSpecs: {
       productCode: "AC8200S",
       dimensions: "3 m / 21 mm / 30 mm",
@@ -5988,7 +5988,7 @@ const construlitaTirasLedProducts = [
     finish: "Satin",
     description:
       "Perfil para tira LED en acabado satin, para empotrar tipo wallwasher.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC6500S.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC6500S_resultado.webp",
     technicalSpecs: {
       productCode: "AC6500S",
       dimensions: "3 m / 22 mm / 20 mm / 14 mm / 12.4 mm",
@@ -6014,7 +6014,7 @@ const construlitaTirasLedProducts = [
     finish: "Negro",
     description:
       "Perfil para tira LED en acabado negro con pantalla oscura, para empotrar tipo wallwasher.",
-    image: "/catalogos/construlita/tiras_led/perfiles/AC6500N.png",
+    image: "/catalogos/construlita/tiras_led/perfiles/AC6500N_resultado.webp",
     technicalSpecs: {
       productCode: "AC6500N",
       dimensions: "3 m / 22 mm / 20 mm / 14 mm / 12.4 mm",
@@ -6043,7 +6043,7 @@ const construlitaEmergenciaProducts = [
     application: "Señalización",
     finish: "Blanco",
     description: "Luminario de emergencia para muro con bateria de respaldo de 90 minutos.",
-    image: "/catalogos/construlita/emergencia_senalizacion/CO6314BBFL.png",
+    image: "/catalogos/construlita/emergencia_senalizacion/CO6314BBFL_resultado.webp",
     technicalSpecs: {
       productCode: "CO6314BBFL",
       luminousFlux: "150 lm",
@@ -6071,7 +6071,7 @@ const construlitaEmergenciaProducts = [
     application: "Señalización",
     finish: "Blanco",
     description: "Señal de salida para muro con bateria de respaldo de 90 minutos.",
-    image: "/catalogos/construlita/emergencia_senalizacion/CO6315BVEL.png",
+    image: "/catalogos/construlita/emergencia_senalizacion/CO6315BVEL_resultado.webp",
     technicalSpecs: {
       productCode: "CO6315BVEL",
       luminousFlux: "150 lm",
@@ -6097,7 +6097,7 @@ const construlitaEmergenciaProducts = [
     application: "Señalización",
     finish: "Blanco",
     description: "Señal de salida para techo con bateria de respaldo de 90 minutos.",
-    image: "/catalogos/construlita/emergencia_senalizacion/CO6316BVEL.png",
+    image: "/catalogos/construlita/emergencia_senalizacion/CO6316BVEL_resultado.webp",
     technicalSpecs: {
       productCode: "CO6316BVEL",
       luminousFlux: "150 lm",
