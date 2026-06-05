@@ -38,9 +38,9 @@ export const homeHero = {
 };
 
 export const companyStats = [
-  { value: "+500", label: "Lámparas" },
-  { value: "11", label: "Marcas" },
-  { value: "9", label: "Proveedores" },
+  { value: "+500", label: "Referencias" },
+  { value: "LED", label: "Eficiencia" },
+  { value: "GT", label: "Cobertura" },
   { value: "+1,000", label: "Clientes satisfechos" },
 ];
 
@@ -75,20 +75,6 @@ export const collections = [
     detail: "Downlights, paneles y sistemas LED para precisión, eficiencia y confort.",
     image: "/proyectos/insigne/insigne1.jpeg",
   },
-];
-
-export const partnerBrands = [
-  { name: "Construlita", src: "/proveedores/construlita.png" },
-  { name: "Highlum", src: "/proveedores/highlum.png" },
-  { name: "Ilum", src: "/proveedores/ilum.png" },
-  { name: "Ilumitec", src: "/proveedores/ilumitec.png" },
-  { name: "Lighttec", src: "/proveedores/lighttec.png" },
-  { name: "OSRAM", src: "/proveedores/osram.png" },
-  { name: "Philips", src: "/proveedores/philips.png" },
-  { name: "Proelca", src: "/proveedores/proelca.png" },
-  { name: "Sunnovation", src: "/proveedores/sunnovation.png" },
-  { name: "Sylvania", src: "/proveedores/sylvania.png" },
-  { name: "Tecnolite", src: "/proveedores/tecnolite.png" },
 ];
 
 export const faqs = [

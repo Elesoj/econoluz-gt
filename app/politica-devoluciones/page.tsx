@@ -38,7 +38,7 @@ const policySections = [
   {
     title: "Artículos en oferta",
     content:
-      "Solo los artículos con precio regular pueden ser reembolsados. Los productos en oferta, promoción, descuento especial o liquidación no son reembolsables, salvo que exista un defecto confirmado según evaluación.",
+      "Solo los artículos elegibles bajo condiciones regulares pueden ser reembolsados. Los productos en oferta, promoción, descuento especial o liquidación no son reembolsables, salvo que exista un defecto confirmado según evaluación.",
   },
   {
     title: "Cambios",

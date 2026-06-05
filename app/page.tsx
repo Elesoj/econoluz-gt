@@ -2,7 +2,6 @@
 import Link from "next/link";
 import SiteFooter from "./components/SiteFooter";
 import AnimatedStat from "./components/AnimatedStat";
-import BrandsCarousel from "./components/BrandsCarousel";
 import ProjectSlider from "./components/ProjectSlider";
 import SectionHeader from "./components/SectionHeader";
 import SiteNavbar from "./components/SiteNavbar";
@@ -88,7 +87,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <BrandsCarousel />
       <section
         id="empresa"
         className="scroll-mt-20 px-5 py-16 sm:px-8 sm:py-20 lg:py-24"

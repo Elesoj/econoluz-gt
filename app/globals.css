@@ -37,14 +37,6 @@ body {
   display: none;
 }
 
-.brands-marquee {
-  animation: brands-marquee 28s linear infinite;
-}
-
-.brands-marquee:active {
-  animation-play-state: paused;
-}
-
 .product-drawer-scroll {
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable;
@@ -60,16 +52,6 @@ body {
   transition:
     opacity 180ms ease,
     transform 180ms ease;
-}
-
-@keyframes brands-marquee {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(calc(-50% - 0.5rem));
-  }
 }
 
 @keyframes catalog-stage-in {

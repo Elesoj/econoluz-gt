@@ -9,7 +9,6 @@ import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
 import {
   getApplicationLabel,
-  getFinishLabel,
   getProductTypeLabel,
   productTypeList,
   productTypes,
@@ -60,7 +59,7 @@ type CatalogHistoryState = {
   searchQuery: string;
   selectedCategory: string;
   selectedApplication: string;
-  selectedCollection: string;
+  showAllProducts: boolean;
 };
 
 const initialFormState: QuoteFormState = {
@@ -159,14 +158,14 @@ const clearTemporaryQuoteData = () => {
 const createCatalogHistoryState = (
   selectedCategory = "Todos",
   selectedApplication = "Todos",
-  selectedCollection = "Todos",
   searchQuery = "",
+  showAllProducts = false,
 ): CatalogHistoryState => ({
   econoluzCatalog: true,
   searchQuery,
   selectedCategory,
   selectedApplication,
-  selectedCollection,
+  showAllProducts,
 });
 
 const getCatalogBaseUrl = () => `${window.location.pathname}${window.location.search}`;
@@ -210,12 +209,10 @@ const buildProductSearchText = (product: Product) =>
 
 export default function Catalogo() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("Todos");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
-  const [selectedCollection, setSelectedCollection] = useState("Todos");
   const [selectedApplication, setSelectedApplication] = useState("Todos");
-  const [selectedFinish, setSelectedFinish] = useState("Todos");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isCatalogTransitioning, setIsCatalogTransitioning] = useState(false);
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
   const [isQuoteSessionReady, setIsQuoteSessionReady] = useState(false);
@@ -226,6 +223,7 @@ export default function Catalogo() {
   const [ledResultsSummary] = useState(getStoredLedResultsSummary);
   const catalogStageRef = useRef<HTMLDivElement>(null);
   const isApplyingBrowserHistoryRef = useRef(false);
+  const transitionTimeoutRef = useRef<number | null>(null);
   const searchableProducts = useMemo(
     () =>
       products.map((product) => ({
@@ -240,21 +238,17 @@ export default function Catalogo() {
 
     return searchableProducts
       .filter(({ product, searchText }) => {
-      const matchesBrand = selectedBrand === "Todos" || product.brand === selectedBrand;
       const matchesCategory =
-        selectedCategory === "Todos" || product.productType === selectedCategory;
+        showAllProducts || selectedCategory === "Todos" || product.productType === selectedCategory;
       const matchesApplication =
-        selectedApplication === "Todos" || product.application === selectedApplication;
-      const matchesFinish = selectedFinish === "Todos" || product.finish === selectedFinish;
+        showAllProducts || selectedApplication === "Todos" || product.application === selectedApplication;
       const matchesSearch =
         !normalizedSearch || searchText.includes(normalizedSearch);
 
       return (
         matchesSearch &&
-        matchesBrand &&
         matchesCategory &&
-        matchesApplication &&
-        matchesFinish
+        matchesApplication
       );
     })
       .map(({ product }) => product);
@@ -262,54 +256,71 @@ export default function Catalogo() {
     searchQuery,
     searchableProducts,
     selectedApplication,
-    selectedBrand,
     selectedCategory,
-    selectedFinish,
+    showAllProducts,
   ]);
 
-  const visibleProducts = filteredProducts.slice(0, visibleCount);
-  const hasMoreProducts = visibleCount < filteredProducts.length;
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const activePage = Math.min(currentPage, totalPages);
+  const visibleProducts = filteredProducts.slice(
+    (activePage - 1) * PAGE_SIZE,
+    activePage * PAGE_SIZE,
+  );
 
   const selectedApplications =
     selectedCategory === "Todos"
       ? []
       : productTypes[selectedCategory as ProductTypeId]?.applications ?? [];
+  const applicationCounts = useMemo(() => {
+    if (selectedCategory === "Todos") {
+      return new Map<string, number>();
+    }
+
+    return products.reduce((counts, product) => {
+      if (product.productType !== selectedCategory) {
+        return counts;
+      }
+
+      counts.set(product.application, (counts.get(product.application) ?? 0) + 1);
+      return counts;
+    }, new Map<string, number>());
+  }, [selectedCategory]);
   const activeFilters = [
     ["Buscar", searchQuery.trim()],
+    ["Vista", showAllProducts ? "Todos los productos" : ""],
     ["Tipo", selectedCategory === "Todos" ? selectedCategory : getProductTypeLabel(selectedCategory)],
     ["Aplicación", selectedApplication === "Todos" ? selectedApplication : getApplicationLabel(selectedApplication)],
-    ["Color", selectedFinish === "Todos" ? selectedFinish : getFinishLabel(selectedFinish)],
   ].filter(([, value]) => value && value !== "Todos");
   const shouldShowApplications =
+    !showAllProducts &&
     selectedCategory !== "Todos" &&
     selectedApplication === "Todos" &&
     !searchQuery.trim();
-  const shouldShowProducts = Boolean(searchQuery.trim()) || selectedApplication !== "Todos";
+  const shouldShowProducts = showAllProducts || Boolean(searchQuery.trim()) || selectedApplication !== "Todos";
   const breadcrumbItems = [
     "Catálogo",
+    showAllProducts ? "Todos los productos" : "",
     selectedCategory !== "Todos" ? getProductTypeLabel(selectedCategory) : "",
-    selectedApplication !== "Todos" ? getApplicationLabel(selectedApplication) : "",
+    !showAllProducts && selectedApplication !== "Todos" ? getApplicationLabel(selectedApplication) : "",
   ].filter(Boolean);
   const canGoBack =
+    showAllProducts ||
     selectedCategory !== "Todos" ||
     selectedApplication !== "Todos" ||
-    selectedCollection !== "Todos" ||
     Boolean(searchQuery.trim());
 
   const resetCatalogNavigation = useCallback(() => {
-    setVisibleCount(PAGE_SIZE);
+    setCurrentPage(1);
     setSearchQuery("");
-    setSelectedBrand("Todos");
     setSelectedCategory("Todos");
     setSelectedApplication("Todos");
-    setSelectedCollection("Todos");
-    setSelectedFinish("Todos");
+    setShowAllProducts(false);
   }, []);
 
-  const scrollCatalogStageIntoView = useCallback(() => {
+  const scrollCatalogStageIntoView = useCallback((behavior: ScrollBehavior = "smooth") => {
     window.requestAnimationFrame(() => {
       catalogStageRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior,
         block: "start",
       });
     });
@@ -317,11 +328,11 @@ export default function Catalogo() {
 
   const applyCatalogHistoryState = useCallback((catalogState: CatalogHistoryState) => {
     isApplyingBrowserHistoryRef.current = true;
-    setVisibleCount(PAGE_SIZE);
+    setCurrentPage(1);
     setSearchQuery(catalogState.searchQuery);
     setSelectedCategory(catalogState.selectedCategory);
     setSelectedApplication(catalogState.selectedApplication);
-    setSelectedCollection(catalogState.selectedCollection);
+    setShowAllProducts(catalogState.showAllProducts);
     setIsCatalogTransitioning(false);
     scrollCatalogStageIntoView();
 
@@ -330,18 +341,6 @@ export default function Catalogo() {
     }, 0);
   }, [scrollCatalogStageIntoView]);
 
-  const pushCatalogHistoryState = (catalogState: CatalogHistoryState) => {
-    if (isApplyingBrowserHistoryRef.current) {
-      return;
-    }
-
-    window.history.pushState(
-      catalogState,
-      "",
-      getCatalogBaseUrl(),
-    );
-  };
-
   const replaceCatalogHistoryState = useCallback(
     (catalogState: CatalogHistoryState, url = window.location.href) => {
       window.history.replaceState(catalogState, "", url);
@@ -349,51 +348,129 @@ export default function Catalogo() {
     [],
   );
 
-  const transitionCatalog = (
-    updateNavigation: () => void,
-    nextHistoryState?: CatalogHistoryState,
+  const syncCatalogHistoryState = useCallback((catalogState: CatalogHistoryState) => {
+    if (isApplyingBrowserHistoryRef.current) {
+      return;
+    }
+
+    replaceCatalogHistoryState(catalogState, getCatalogBaseUrl());
+  }, [replaceCatalogHistoryState]);
+
+  const transitionCatalog = useCallback((
+    nextHistoryState: CatalogHistoryState,
+    options: { animate?: boolean; scrollBehavior?: ScrollBehavior | false } = {},
   ) => {
+    if (transitionTimeoutRef.current) {
+      window.clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
+    }
+
     if (window.location.hash) {
       window.history.replaceState(
-        nextHistoryState ?? createCatalogHistoryState(
+        createCatalogHistoryState(
           selectedCategory,
           selectedApplication,
-          selectedCollection,
           searchQuery,
+          showAllProducts,
         ),
         "",
         getCatalogBaseUrl(),
       );
     }
 
+    const applyNextState = () => {
+      setCurrentPage(1);
+      setSearchQuery(nextHistoryState.searchQuery);
+      setSelectedCategory(nextHistoryState.selectedCategory);
+      setSelectedApplication(nextHistoryState.selectedApplication);
+      setShowAllProducts(nextHistoryState.showAllProducts);
+      syncCatalogHistoryState(nextHistoryState);
+
+      if (options.scrollBehavior !== false) {
+        scrollCatalogStageIntoView(options.scrollBehavior);
+      }
+    };
+
+    if (options.animate === false) {
+      setIsCatalogTransitioning(false);
+      applyNextState();
+      return;
+    }
+
     setIsCatalogTransitioning(true);
 
-    window.setTimeout(() => {
-      setVisibleCount(PAGE_SIZE);
-      updateNavigation();
-      if (nextHistoryState) {
-        pushCatalogHistoryState(nextHistoryState);
-      }
+    transitionTimeoutRef.current = window.setTimeout(() => {
+      transitionTimeoutRef.current = null;
+      applyNextState();
       setIsCatalogTransitioning(false);
-      scrollCatalogStageIntoView();
     }, 180);
-  };
+  }, [
+    syncCatalogHistoryState,
+    scrollCatalogStageIntoView,
+    searchQuery,
+    selectedApplication,
+    selectedCategory,
+    showAllProducts,
+  ]);
 
   const navigateBackInCatalog = () => {
-    window.history.back();
+    if (showAllProducts) {
+      transitionCatalog(createCatalogHistoryState(), {
+        animate: false,
+        scrollBehavior: false,
+      });
+      return;
+    }
+
+    if (searchQuery.trim()) {
+      transitionCatalog(
+        createCatalogHistoryState(selectedCategory, selectedApplication, "", false),
+        { animate: false, scrollBehavior: false },
+      );
+      return;
+    }
+
+    if (selectedApplication !== "Todos") {
+      transitionCatalog(createCatalogHistoryState(selectedCategory), {
+        animate: false,
+        scrollBehavior: false,
+      });
+      return;
+    }
+
+    if (selectedCategory !== "Todos") {
+      transitionCatalog(createCatalogHistoryState(), {
+        animate: false,
+        scrollBehavior: false,
+      });
+      return;
+    }
+
+    scrollCatalogStageIntoView();
   };
 
   const handleSearchSubmit = () => {
-    setVisibleCount(PAGE_SIZE);
-    pushCatalogHistoryState(
+    setCurrentPage(1);
+    syncCatalogHistoryState(
       createCatalogHistoryState(
         selectedCategory,
         selectedApplication,
-        selectedCollection,
         searchQuery,
+        showAllProducts,
       ),
     );
     scrollCatalogStageIntoView();
+  };
+
+  const goToProductPage = (page: number) => {
+    const nextPage = Math.min(Math.max(page, 1), totalPages);
+
+    if (nextPage === activePage) {
+      return;
+    }
+
+    setCurrentPage(nextPage);
+    scrollCatalogStageIntoView("auto");
   };
 
   const scrollAdviceFormIntoView = useCallback(() => {
@@ -432,6 +509,14 @@ export default function Catalogo() {
   }, [formState, ledResultsSummary, quoteItems]);
 
   const whatsappHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        window.clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const animationFrame = window.requestAnimationFrame(() => {
@@ -505,6 +590,11 @@ export default function Catalogo() {
 
   useEffect(() => {
     const handleCatalogReset = () => {
+      if (transitionTimeoutRef.current) {
+        window.clearTimeout(transitionTimeoutRef.current);
+        transitionTimeoutRef.current = null;
+      }
+
       resetCatalogNavigation();
       setIsCatalogTransitioning(false);
       replaceCatalogHistoryState(
@@ -661,7 +751,8 @@ export default function Catalogo() {
               <input
                 value={searchQuery}
                 onChange={(event) => {
-                  setVisibleCount(PAGE_SIZE);
+                  setCurrentPage(1);
+                  setShowAllProducts(false);
                   setSearchQuery(event.target.value);
                 }}
                 onKeyDown={(event) => {
@@ -671,7 +762,7 @@ export default function Catalogo() {
                     handleSearchSubmit();
                   }
                 }}
-                placeholder="Busca por nombre, código, serie, color o especificación"
+                placeholder="Busca por nombre, referencia, serie, color o especificación"
                 className="w-full border border-neutral-200 bg-white px-4 py-4 text-base font-semibold text-black outline-none transition placeholder:text-neutral-400 focus:border-black"
               />
             </label>
@@ -682,7 +773,7 @@ export default function Catalogo() {
 
       <section className="px-5 pb-20 pt-6 sm:px-8 sm:pb-24 lg:pb-32">
         <div ref={catalogStageRef} className="mx-auto scroll-mt-28 max-w-7xl">
-          {!searchQuery.trim() && selectedCategory === "Todos" && (
+          {!showAllProducts && !searchQuery.trim() && selectedCategory === "Todos" && (
             <div
               key="catalog-types"
               className={`catalog-stage ${isCatalogTransitioning ? "catalog-stage-out" : ""}`}
@@ -692,20 +783,27 @@ export default function Catalogo() {
                 title="¿Qué tipo de producto buscas?"
                 description="Elige una familia principal para entrar al catálogo de forma ordenada."
               />
+              <div className="mt-7">
+                <button
+                  type="button"
+                  onClick={() =>
+                    transitionCatalog(createCatalogHistoryState("Todos", "Todos", "", true))
+                  }
+                  disabled={isCatalogTransitioning}
+                  className="inline-flex rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Mostrar todos los productos
+                </button>
+              </div>
               <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {productTypeList.map((type) => (
                   <button
                     key={type.id}
                     type="button"
                     onClick={() =>
-                      transitionCatalog(() => {
-                        setSelectedCategory(type.id);
-                        setSelectedApplication("Todos");
-                        setSelectedCollection("Todos");
-                        setSelectedBrand("Todos");
-                        setSelectedFinish("Todos");
-                      }, createCatalogHistoryState(type.id))
+                      transitionCatalog(createCatalogHistoryState(type.id))
                     }
+                    disabled={isCatalogTransitioning}
                     className="group min-h-44 overflow-hidden border border-neutral-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] active:scale-[0.99]"
                   >
                     <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
@@ -747,25 +845,16 @@ export default function Catalogo() {
                         type="button"
                         onClick={() => {
                           if (index === 0) {
-                            transitionCatalog(
-                              resetCatalogNavigation,
-                              createCatalogHistoryState(),
-                            );
+                            transitionCatalog(createCatalogHistoryState());
                             return;
                           }
 
                           if (index === 1) {
-                            transitionCatalog(() => {
-                              setSelectedApplication("Todos");
-                              setSelectedCollection("Todos");
-                            }, createCatalogHistoryState(selectedCategory));
+                            transitionCatalog(createCatalogHistoryState(selectedCategory));
                             return;
                           }
-
-                          if (index === 2) {
-                            transitionCatalog(() => setSelectedCollection("Todos"));
-                          }
                         }}
+                        disabled={isCatalogTransitioning}
                         className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
                       >
                         {item}
@@ -791,6 +880,7 @@ export default function Catalogo() {
                 <button
                   type="button"
                   onClick={navigateBackInCatalog}
+                  disabled={isCatalogTransitioning}
                   className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
                 >
                   Volver
@@ -798,44 +888,33 @@ export default function Catalogo() {
                 <button
                   type="button"
                   onClick={() =>
-                    transitionCatalog(resetCatalogNavigation, createCatalogHistoryState())
+                    transitionCatalog(createCatalogHistoryState())
                   }
+                  disabled={isCatalogTransitioning}
                   className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                 >
                   Inicio del catálogo
                 </button>
               </div>
               <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {selectedApplications.map((application) => {
-                  const count = products.filter(
-                    (product) =>
-                      product.productType === selectedCategory &&
-                      product.application === application &&
-                      (selectedBrand === "Todos" || product.brand === selectedBrand) &&
-                      (selectedFinish === "Todos" || product.finish === selectedFinish),
-                  ).length;
-
-                  return (
-                    <button
-                      key={application}
-                      type="button"
-                      onClick={() =>
-                        transitionCatalog(() => {
-                          setSelectedApplication(application);
-                          setSelectedCollection("Todos");
-                        }, createCatalogHistoryState(selectedCategory, application))
-                      }
-                      className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
-                    >
-                      <span className="text-xl font-semibold">
-                        {getApplicationLabel(application)}
-                      </span>
-                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
-                        {count} ref.
-                      </span>
-                    </button>
-                  );
-                })}
+                {selectedApplications.map((application) => (
+                  <button
+                    key={application}
+                    type="button"
+                    onClick={() =>
+                      transitionCatalog(createCatalogHistoryState(selectedCategory, application))
+                    }
+                    disabled={isCatalogTransitioning}
+                    className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
+                  >
+                    <span className="text-xl font-semibold">
+                      {getApplicationLabel(application)}
+                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
+                      {applicationCounts.get(application) ?? 0} ref.
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -849,11 +928,13 @@ export default function Catalogo() {
                 <SectionHeader
                   eyebrow="Referencias para proyecto"
                   title={
-                    searchQuery.trim()
+                    showAllProducts
+                      ? "Todos los productos"
+                      : searchQuery.trim()
                       ? "Resultados de búsqueda"
                       : getApplicationLabel(selectedApplication)
                   }
-                  description={`${filteredProducts.length} referencias encontradas.`}
+                  description={`${filteredProducts.length} referencias encontradas. Página ${activePage} de ${totalPages}.`}
                 />
                 <div className="mt-6 grid gap-3">
                   <div className="flex flex-wrap items-center gap-2">
@@ -868,25 +949,20 @@ export default function Catalogo() {
                           type="button"
                           onClick={() => {
                             if (index === 0) {
-                              transitionCatalog(
-                                resetCatalogNavigation,
-                                createCatalogHistoryState(),
-                              );
+                              transitionCatalog(createCatalogHistoryState());
+                              return;
+                            }
+
+                            if (showAllProducts) {
                               return;
                             }
 
                             if (index === 1) {
-                              transitionCatalog(() => {
-                                setSelectedApplication("Todos");
-                                setSelectedCollection("Todos");
-                              }, createCatalogHistoryState(selectedCategory));
+                              transitionCatalog(createCatalogHistoryState(selectedCategory));
                               return;
                             }
-
-                            if (index === 2) {
-                              transitionCatalog(() => setSelectedCollection("Todos"));
-                            }
                           }}
+                          disabled={isCatalogTransitioning}
                           className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
                         >
                           {item}
@@ -913,6 +989,7 @@ export default function Catalogo() {
                     <button
                       type="button"
                       onClick={navigateBackInCatalog}
+                      disabled={isCatalogTransitioning}
                       className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
                     >
                       Volver
@@ -920,8 +997,9 @@ export default function Catalogo() {
                     <button
                       type="button"
                       onClick={() =>
-                        transitionCatalog(resetCatalogNavigation, createCatalogHistoryState())
+                        transitionCatalog(createCatalogHistoryState())
                       }
+                      disabled={isCatalogTransitioning}
                       className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                     >
                       Inicio del catálogo
@@ -958,14 +1036,8 @@ export default function Catalogo() {
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedBrand("Todos");
-                  setSelectedCategory("Todos");
-                  setSelectedCollection("Todos");
-                  setSelectedApplication("Todos");
-                  setSelectedFinish("Todos");
-                }}
+                onClick={() => transitionCatalog(createCatalogHistoryState())}
+                disabled={isCatalogTransitioning}
                 className="mt-4 rounded-full border border-black px-5 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
               >
                 Limpiar filtros
@@ -973,14 +1045,38 @@ export default function Catalogo() {
             </div>
           )}
 
-          {shouldShowProducts && hasMoreProducts && (
-            <div className="mt-10 flex justify-center">
+          {shouldShowProducts && filteredProducts.length > PAGE_SIZE && (
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
-                onClick={() => setVisibleCount((currentCount) => currentCount + PAGE_SIZE)}
-                className="rounded-full border border-black px-7 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
+                onClick={() => goToProductPage(activePage - 1)}
+                disabled={activePage === 1}
+                className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Cargar más ({filteredProducts.length - visibleProducts.length})
+                Anterior
+              </button>
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() => goToProductPage(page)}
+                  aria-current={page === activePage ? "page" : undefined}
+                  className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold transition ${
+                    page === activePage
+                      ? "border-black bg-black text-white"
+                      : "border-neutral-200 text-neutral-700 hover:border-black hover:text-black"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => goToProductPage(activePage + 1)}
+                disabled={activePage === totalPages}
+                className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Siguiente
               </button>
             </div>
           )}
