@@ -5,8 +5,8 @@ export const brands = {
 } as const;
 
 export const productTypes = {
-  industrial: {
-    id: "industrial",
+  iluminacion_industrial: {
+    id: "iluminacion_industrial",
     label: "Iluminación industrial",
     marker: "IND",
     description: "Luminarias para bodegas, plantas, producción y grandes alturas.",
@@ -18,60 +18,34 @@ export const productTypes = {
       "a_prueba_de_vapor",
     ],
   },
-  arquitectonica: {
-    id: "arquitectonica",
+  iluminacion_arquitectonica: {
+    id: "iluminacion_arquitectonica",
     label: "Iluminación arquitectónica",
     marker: "ARQ",
     description: "Soluciones para acento, integración y lectura espacial.",
     applications: [
-      "downlight",
-      "luminarios_para_riel",
+      "downlights",
+      "luminarios_riel",
       "magnetrack_pro",
       "suspendidos",
-      "empotrados_en_piso",
-      "arbotantes",
+      "empotrados_piso",
       "decorativos",
     ],
   },
-  exterior: {
-    id: "exterior",
+  iluminacion_exterior: {
+    id: "iluminacion_exterior",
     label: "Iluminación exterior",
     marker: "EXT",
     description: "Equipos para fachadas, perímetros, jardines y áreas abiertas.",
     applications: [
-      "wallpack",
-      "bronce",
-      "arbotantes",
-      "sumergibles",
-      "decorativos",
-      "postes",
-      "minipostes",
-      "luminarios_para_poste",
+      "wallpacks",
       "proyectores_gran_amplitud",
       "vialidades",
-    ],
-  },
-  residencial: {
-    id: "residencial",
-    label: "Iluminación residencial",
-    marker: "RES",
-    description: "Luz funcional y decorativa para vivienda e interiores.",
-    applications: ["downlight", "decorativos", "placas_apagadores"],
-  },
-  placas_accesorios: {
-    id: "placas_accesorios",
-    label: "Placas y accesorios eléctricos",
-    marker: "APL",
-    description: "Apagadores, contactos, conectividad y acabados de línea.",
-    applications: [
-      "placas_apagadores",
-      "contactos",
-      "usb_conectividad",
-      "datos_lan",
-      "tv_coaxial",
-      "atenuadores",
-      "timbres",
-      "tapas_ciegas",
+      "minipostes",
+      "luminarios_poste",
+      "postes",
+      "sumergibles",
+      "arbotantes",
     ],
   },
   tiras_led: {
@@ -79,35 +53,37 @@ export const productTypes = {
     label: "Tiras LED",
     marker: "LED",
     description: "Líneas flexibles para integración, detalle y luz indirecta.",
-    applications: ["interior", "exterior_tiras_led", "drivers", "perfiles"],
+    applications: ["tiras", "drivers", "perfiles"],
   },
-  tubos_led: {
-    id: "tubos_led",
-    label: "Tubos LED",
-    marker: "TUB",
-    description: "Tubos LED para iluminación interior lineal y retrofit.",
-    applications: ["tubos_led"],
-  },
-  lineal: {
-    id: "lineal",
-    label: "Iluminación lineal",
+  sistemas_lineales_tubos: {
+    id: "sistemas_lineales_tubos",
+    label: "Sistemas lineales y tubos",
     marker: "LIN",
-    description: "Barras lineales para integración exterior empotrada o sobrepuesta.",
-    applications: ["barras"],
+    description: "Tubos y barras lineales para integración interior, exterior o retrofit.",
+    applications: ["tubos_led", "barras_lineales"],
   },
-  lamparas: {
-    id: "lamparas",
-    label: "Lámparas",
-    marker: "LMP",
-    description: "Luminarios compactos para luz de cortesía e integración en muro.",
-    applications: ["luz_cortesia_muro"],
+  placas_accesorios: {
+    id: "placas_accesorios",
+    label: "Placas y accesorios",
+    marker: "APL",
+    description: "Apagadores, contactos, conectividad y acabados de línea.",
+    applications: [
+      "placas_apagadores",
+      "contactos",
+      "usb_conectividad",
+      "atenuadores",
+      "datos_lan",
+      "tv_coaxial",
+      "timbres",
+      "tapas_ciegas",
+    ],
   },
   emergencia_senalizacion: {
     id: "emergencia_senalizacion",
     label: "Emergencia y señalización",
     marker: "SEG",
     description: "Soluciones para rutas, respaldo y seguridad operativa.",
-    applications: ["senalizacion"],
+    applications: ["emergencia_senalizacion"],
   },
 } as const;
 
@@ -117,40 +93,40 @@ export const applications = {
   lineales_industriales: { id: "lineales_industriales", label: "Lineales industriales" },
   gabinetes: { id: "gabinetes", label: "Gabinetes" },
   a_prueba_de_vapor: { id: "a_prueba_de_vapor", label: "A prueba de vapor" },
-  downlight: { id: "downlight", label: "Downlights" },
-  luminarios_para_riel: { id: "luminarios_para_riel", label: "Luminarios para riel" },
+  downlights: { id: "downlights", label: "Downlights" },
+  luminarios_riel: { id: "luminarios_riel", label: "Luminarios para riel" },
   magnetrack_pro: { id: "magnetrack_pro", label: "Magnetrack Pro" },
   suspendidos: { id: "suspendidos", label: "Suspendidos" },
-  empotrados_en_piso: { id: "empotrados_en_piso", label: "Empotrados en piso" },
-  arbotantes: { id: "arbotantes", label: "Arbotantes" },
+  empotrados_piso: { id: "empotrados_piso", label: "Empotrados en piso" },
   decorativos: { id: "decorativos", label: "Decorativos" },
-  wallpack: { id: "wallpack", label: "Wallpacks" },
-  bronce: { id: "bronce", label: "Bronce" },
-  sumergibles: { id: "sumergibles", label: "Sumergibles" },
-  postes: { id: "postes", label: "Postes" },
-  minipostes: { id: "minipostes", label: "Minipostes" },
-  luminarios_para_poste: { id: "luminarios_para_poste", label: "Luminarios para poste" },
+  wallpacks: { id: "wallpacks", label: "Wallpacks" },
   proyectores_gran_amplitud: {
     id: "proyectores_gran_amplitud",
     label: "Proyectores de gran amplitud",
   },
   vialidades: { id: "vialidades", label: "Vialidades" },
+  minipostes: { id: "minipostes", label: "Minipostes" },
+  luminarios_poste: { id: "luminarios_poste", label: "Luminarios para poste" },
+  postes: { id: "postes", label: "Postes" },
+  sumergibles: { id: "sumergibles", label: "Sumergibles" },
+  arbotantes: { id: "arbotantes", label: "Arbotantes" },
+  tiras: { id: "tiras", label: "Tiras" },
+  drivers: { id: "drivers", label: "Drivers" },
+  perfiles: { id: "perfiles", label: "Perfiles" },
+  tubos_led: { id: "tubos_led", label: "Tubos LED" },
+  barras_lineales: { id: "barras_lineales", label: "Barras lineales" },
   placas_apagadores: { id: "placas_apagadores", label: "Placas y apagadores" },
   contactos: { id: "contactos", label: "Contactos" },
   usb_conectividad: { id: "usb_conectividad", label: "USB y conectividad" },
+  atenuadores: { id: "atenuadores", label: "Atenuadores" },
   datos_lan: { id: "datos_lan", label: "Datos / LAN" },
   tv_coaxial: { id: "tv_coaxial", label: "TV / coaxial" },
-  atenuadores: { id: "atenuadores", label: "Atenuadores" },
   timbres: { id: "timbres", label: "Timbres" },
   tapas_ciegas: { id: "tapas_ciegas", label: "Tapas ciegas" },
-  interior: { id: "interior", label: "Interior" },
-  exterior_tiras_led: { id: "exterior_tiras_led", label: "Exterior" },
-  tubos_led: { id: "tubos_led", label: "Tubos LED" },
-  drivers: { id: "drivers", label: "Drivers" },
-  perfiles: { id: "perfiles", label: "Perfiles" },
-  barras: { id: "barras", label: "Barras" },
-  luz_cortesia_muro: { id: "luz_cortesia_muro", label: "Luz de cortesía muro" },
-  senalizacion: { id: "senalizacion", label: "Señalización" },
+  emergencia_senalizacion: {
+    id: "emergencia_senalizacion",
+    label: "Emergencia y señalización",
+  },
 } as const;
 
 export const finishes = {
@@ -280,16 +256,34 @@ const applicationByLabel = labelLookup(applications);
 const finishByLabel = labelLookup(finishes);
 const seriesByLabel = labelLookup(series);
 
+const productTypeAliasesBySlug: Record<string, ProductTypeId> = {
+  iluminacion_lineal: "sistemas_lineales_tubos",
+  lamparas: "iluminacion_arquitectonica",
+  placas_y_accesorios_electricos: "placas_accesorios",
+  tubos_led: "sistemas_lineales_tubos",
+};
+
+const applicationAliasesBySlug: Record<string, ApplicationId> = {
+  barras: "barras_lineales",
+  bronce: "decorativos",
+  luz_de_cortesia_muro: "decorativos",
+  senalizacion: "emergencia_senalizacion",
+};
+
 export const productTypeList = Object.values(productTypes);
 
 export const getBrandId = (label = "") =>
   (brandByLabel[label.toLowerCase()] as BrandId | undefined) ?? slugify(label);
 
 export const getProductTypeId = (label = "") =>
-  (productTypeByLabel[label.toLowerCase()] as ProductTypeId | undefined) ?? slugify(label);
+  (productTypeByLabel[label.toLowerCase()] as ProductTypeId | undefined) ??
+  productTypeAliasesBySlug[slugify(label)] ??
+  slugify(label);
 
 export const getApplicationId = (label = "") =>
-  (applicationByLabel[label.toLowerCase()] as ApplicationId | undefined) ?? slugify(label);
+  (applicationByLabel[label.toLowerCase()] as ApplicationId | undefined) ??
+  applicationAliasesBySlug[slugify(label)] ??
+  slugify(label);
 
 export const getFinishId = (label = "") =>
   (finishByLabel[label.toLowerCase()] as FinishId | undefined) ?? slugify(label);

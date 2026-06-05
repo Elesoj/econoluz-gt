@@ -71,9 +71,12 @@ export default function ProductTechnicalDrawer({
     ["Frecuencia", specs?.frequency],
     ["Material", specs?.material],
     ["Dimensiones", specs?.dimensions],
+    ["Presentación", specs?.presentation],
+    ["Tamaño PCB", specs?.pcbSize],
     ["Acabado / color", specs?.finish ?? product.labels.finish],
     ["Salida USB", specs?.usbOutput],
     ["Soporte GFCI", specs?.gfciSupport],
+    ["Fijación", specs?.fixing],
     ["Aplicación", specs?.applicationType ?? product.labels.application],
     ["Instalación", specs?.installation],
   ].filter((row): row is [string, string | string[]] => Boolean(row[1]));
@@ -82,6 +85,7 @@ export default function ProductTechnicalDrawer({
     ["Protección", specs?.protection],
     ["Estándar", specs?.standard],
     ["Configuración", specs?.configuration],
+    ["Tipo LED", specs?.ledType],
     ["Velocidad de desconexión", specs?.disconnectSpeed],
     ["Operaciones", specs?.operatingTemperature],
     ["Humedad", specs?.humidity],
@@ -100,7 +104,6 @@ export default function ProductTechnicalDrawer({
     ["Ahorro", specs?.savings],
     ["Equivalente", specs?.equivalent],
     ["Certificados", specs?.certifications],
-    ["Garantía", specs?.warranty],
   ].filter((row): row is [string, string | string[]] => Boolean(row[1]));
 
   const specRows = [...baseSpecRows, ...extraSpecRows];
