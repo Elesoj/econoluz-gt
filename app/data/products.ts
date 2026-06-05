@@ -1170,7 +1170,7 @@ const highlumAltoMontajeProducts = [
     finish: "Negro",
     description:
       "Luminario LED de alto montaje tipo UFO para naves industriales, bodegas y espacios de gran altura, con alta eficiencia, proteccion IP65 y apertura amplia de 120 grados.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-alto-montaje-001.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-alto-montaje-001_resultado.webp",
     technicalSpecs: {
       power: "100 W / 150 W / 200 W",
       voltage: "AC 100-277 V",
@@ -1209,7 +1209,7 @@ const highlumAltoMontajeProducts = [
     finish: "Negro",
     description:
       "Luminario LED de alto montaje tipo UFO de 150 W para espacios industriales y comerciales de gran altura, con alta eficiencia, proteccion IP65 y apertura amplia de 120 grados.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-alto-montaje-002.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-alto-montaje-002_resultado.webp",
     technicalSpecs: {
       power: "150 W",
       voltage: "AC 100-277 V",
@@ -1246,7 +1246,7 @@ const highlumAltoMontajeProducts = [
     finish: "Negro",
     description:
       "Luminario LED de alto montaje con selector de potencia y selector de temperatura de color, ideal para ajustar la iluminacion en bodegas, naves industriales y areas de gran altura.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-alto-montaje-003.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-alto-montaje-003_resultado.webp",
     technicalSpecs: {
       power: "150/120/80 W o 240/200/150 W",
       voltage: "AC 100-277 V",
@@ -5148,7 +5148,7 @@ const highlumRielProducts = [
     finish: "Negro",
     description:
       "Luminario de acento para sobreponer en losa o superficies planas, con cuerpo de aluminio negro y haz concentrado para espacios arquitectonicos interiores.",
-    image: "/catalogos/highlum/lamparas_interior/eco-riel-001.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-riel-001_resultado.webp",
     technicalSpecs: {
       power: "20 W",
       voltage: "AC 120-270 V",
@@ -5189,7 +5189,7 @@ const highlumDecorativosProducts = [
     finish: "Blanco / Gris / Negro",
     description:
       "Lampara LED decorativa de pared para interior, con cuerpo de aluminio, luz calida y apertura amplia para iluminacion ambiental.",
-    image: "/catalogos/highlum/lamparas_interior/eco-decorativo-001.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-decorativo-001_resultado.webp",
     technicalSpecs: {
       power: "10 W",
       voltage: "AC 100-240 V",
@@ -5223,7 +5223,7 @@ const highlumDecorativosProducts = [
     finish: "Blanco",
     description:
       "Lampara LED decorativa de baja potencia para escaleras e interiores, con luz calida y formato compacto de 96 x 96 mm.",
-    image: "/catalogos/highlum/lamparas_interior/eco-decorativo-002.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-decorativo-002_resultado.webp",
     technicalSpecs: {
       power: "1.5 W",
       voltage: "AC 100-240 V",
@@ -5259,7 +5259,7 @@ const highlumExteriorProducts = [
     finish: "Blanco",
     description:
       "Luminario LED de pared para exterior con fotocelda integrada, proteccion IP65 y apertura amplia para iluminacion perimetral.",
-    image: "/catalogos/highlum/lamparas_interior/eco-arbotante-001.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-arbotante-001_resultado.webp",
     technicalSpecs: {
       power: "20 W",
       voltage: "AC 100-277 V",
@@ -5295,7 +5295,7 @@ const highlumExteriorProducts = [
     finish: "Blanco",
     description:
       "Luminario LED de pared para exterior de 45 W, con proteccion IP65, alto flujo luminoso y apertura de 90 grados para iluminacion perimetral.",
-    image: "/catalogos/highlum/lamparas_interior/eco-arbotante-002.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-arbotante-002_resultado.webp",
     technicalSpecs: {
       power: "45 W",
       voltage: "AC 100-277 V",
@@ -5331,7 +5331,7 @@ const highlumExteriorProducts = [
     finish: "Blanco",
     description:
       "Proyector LED para uso exterior, con proteccion IP66, conector impermeable aislado, cuerpo de aluminio de alta conductividad termica y amplio rango de potencias.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-proyector-001.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-proyector-001_resultado.webp",
     technicalSpecs: {
       power: "30 W / 50 W / 100 W / 150 W / 200 W / 300 W / 400 W / 500 W",
       voltage: "AC 85-265 V",
@@ -5368,7 +5368,7 @@ const highlumExteriorProducts = [
     finish: "Negro",
     description:
       "Proyector LED de alta potencia para iluminacion exterior de gran amplitud, con proteccion IP65, cuerpo de aluminio y vidrio, y opticas disponibles para distintos angulos de apertura.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-proyector-002.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-proyector-002_resultado.webp",
     technicalSpecs: {
       power: "300 W / 500 W",
       voltage: "AC 100-240 V",
@@ -5404,7 +5404,7 @@ const highlumExteriorProducts = [
     finish: "Negro",
     description:
       "Proyector LED tipo estadio para iluminacion exterior de gran alcance, con alta eficiencia, proteccion IP66 y opciones de apertura para proyectos deportivos, industriales o perimetrales.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-proyector-003.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-proyector-003_resultado.webp",
     technicalSpecs: {
       power: "250 W / 500 W / 750 W / 1000 W / 1250 W",
       voltage: "AC 100-277 V / AC 240-480 V",
@@ -5438,7 +5438,7 @@ const highlumExteriorProducts = [
     finish: "Negro",
     description:
       "Proyector LED solar para iluminacion exterior autonomo, con panel policristalino, bateria integrada, proteccion IP66 y apertura amplia para patios, estacionamientos, areas perimetrales y espacios sin acometida electrica.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-proyector-004.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-proyector-004_resultado.webp",
     technicalSpecs: {
       power: "200 W / 300 W / 400 W",
       colorTemperature: "2800-3500 K / 4100 K / 5500-6500 K",
@@ -5478,7 +5478,7 @@ const highlumExteriorProducts = [
     finish: "Negro",
     description:
       "Luminario LED para poste y areas exteriores, con proteccion IP65, alta eficiencia y apertura amplia para calles internas, estacionamientos, patios, vialidades privadas y zonas perimetrales.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-luminario-poste-001.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-luminario-poste-001_resultado.webp",
     technicalSpecs: {
       power: "80 W / 100 W / 150 W / 185 W / 240 W / 300 W / 400 W / 500 W",
       voltage: "AC 100-277 V",
@@ -5517,7 +5517,7 @@ const highlumExteriorProducts = [
     finish: "Negro",
     description:
       "Luminario solar para poste, disenado para alumbrado exterior autonomo en calles internas, estacionamientos, areas perimetrales y vialidades privadas, con panel policristalino, bateria integrada y proteccion IP66.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-luminario-poste-002.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-luminario-poste-002_resultado.webp",
     technicalSpecs: {
       power: "300 W / 400 W / 500 W",
       configuration: "300 W: 297 LED / 400 W: 418 LED / 500 W: 705 LED",
@@ -5558,7 +5558,7 @@ const highlumExteriorProducts = [
     finish: "Bronce",
     description:
       "Luminario LED para poste con selector de potencia y temperatura de color, disenado para alumbrado exterior en calles internas, estacionamientos, areas perimetrales y vialidades privadas.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-luminario-poste-003.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-luminario-poste-003_resultado.webp",
     technicalSpecs: {
       power: "200 W o 300 W",
       switchablePower: "200 W: 200/150/120 W / 300 W: 300/240/200 W",
@@ -5597,7 +5597,7 @@ const highlumExteriorProducts = [
     finish: "Negro",
     description:
       "Reflector LED solar portatil para uso exterior y actividades moviles, con proteccion IP65, bateria recargable y soporte plegable para instalacion temporal o traslado sencillo.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-reflector-solar-001.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-reflector-solar-001_resultado.webp",
     technicalSpecs: {
       power: "110 W",
       material: "ABS y PC",
@@ -5627,7 +5627,7 @@ const highlumExteriorProducts = [
     finish: "Negro",
     description:
       "Linterna LED portatil multifunciones para uso movil en camping, viajes, taller, hogar y automovil, con cuerpo ligero de aluminio, tres modos de iluminacion y alcance de hasta 150 m.",
-    image: "/catalogos/highlum/lamparas_exterior/eco-linterna-001.png",
+    image: "/catalogos/highlum/lamparas_exteriorwebp/eco-linterna-001_resultado.webp",
     technicalSpecs: {
       power: "3 W",
       luminousFlux: "180 lm",
@@ -6032,7 +6032,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Downlight de sobreponer para interior, con cuerpo de aluminio blanco, alta vida util y opciones de potencia para iluminacion general arquitectonica.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-001.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-001_resultado.webp",
     technicalSpecs: {
       power: "15 W / 25 W",
       efficiency: "90 lm/W",
@@ -6067,7 +6067,7 @@ const highlumDownlightProducts = [
     finish: "Negro",
     description:
       "Downlight LED de sobreponer para interior, con acabado negro, configuracion COB y distribucion de luz amplia para iluminacion arquitectonica general.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-002.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-002_resultado.webp",
     technicalSpecs: {
       power: "15 W",
       voltage: "AC 120-277 V",
@@ -6103,7 +6103,7 @@ const highlumDownlightProducts = [
     finish: "Negro",
     description:
       "Downlight LED de sobreponer para interior en acabado negro, con configuracion SMD 2835 y salida en temperatura fria para iluminacion arquitectonica general.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-003.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-003_resultado.webp",
     technicalSpecs: {
       power: "25 W",
       voltage: "AC 120-277 V",
@@ -6139,7 +6139,7 @@ const highlumDownlightProducts = [
     finish: "Negro",
     description:
       "Downlight LED de sobreponer para interior en acabado negro, con configuracion SMD 2835 y temperatura calida para iluminacion arquitectonica general.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-004.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-004_resultado.webp",
     technicalSpecs: {
       power: "25 W",
       voltage: "AC 120-277 V",
@@ -6176,7 +6176,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Familia de downlights SMD COB para interior, con opciones de potencia y temperatura de color para iluminacion arquitectonica general.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-005.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-005_resultado.webp",
     technicalSpecs: {
       power: "5 W / 12 W / 18 W / 30 W",
       voltage: "AC 90-240 V",
@@ -6213,7 +6213,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Downlight empotrable compacto para interior, con cuerpo de aluminio blanco, haz de acento y corte de instalacion de 75 mm.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-006.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-006_resultado.webp",
     technicalSpecs: {
       power: "11 W",
       configuration: "SMD 2835",
@@ -6250,7 +6250,7 @@ const highlumDownlightProducts = [
     finish: "Negro / Blanco",
     description:
       "Spotlight de techo para interior, con cuerpo de aluminio negro y blanco, haz de acento y opciones de potencia para iluminacion arquitectonica.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-007.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-007_resultado.webp",
     technicalSpecs: {
       power: "11 W / 25 W / 50 W doble",
       configuration: "SMD 2835",
@@ -6286,7 +6286,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Spotlight COB compacto para interior, con haz de acento, temperatura calida y opciones de control con dimmer TRIAC o sin dimmer.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-008.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-008_resultado.webp",
     technicalSpecs: {
       power: "5 W",
       efficiency: "100 lm/W",
@@ -6321,7 +6321,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED redondo para empotrar en cielo falso, con perfil delgado, material PC y aluminio, y opciones de potencia para iluminacion general interior.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-009.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-009_resultado.webp",
     technicalSpecs: {
       power: "6 W / 12 W / 15 W / 18 W / 24 W",
       voltage: "AC 100-240 V",
@@ -6360,7 +6360,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED redondo para sobreponer en interior, con cuerpo de PC y aluminio, perfil de 35 mm y opciones de potencia para iluminacion general.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-010.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-010_resultado.webp",
     technicalSpecs: {
       power: "6 W / 12 W / 18 W",
       voltage: "AC 100-240 V",
@@ -6397,7 +6397,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED redondo de sobreponer para interior en version de 24 W, con cuerpo de PC y aluminio, perfil de 35 mm y alta salida luminosa para iluminacion general.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-011.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-011_resultado.webp",
     technicalSpecs: {
       power: "24 W",
       voltage: "AC 100-300 V",
@@ -6431,7 +6431,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED cuadrado para empotrar en cielo falso, con perfil delgado, material PC y aluminio, y opciones de potencia para iluminacion general interior.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-012.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-012_resultado.webp",
     technicalSpecs: {
       power: "6 W / 12 W / 18 W",
       voltage: "AC 100-240 V",
@@ -6470,7 +6470,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED cuadrado para sobreponer en interior, con cuerpo de PC y aluminio, perfil de 35 mm y opciones de potencia para iluminacion general.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-013.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-013_resultado.webp",
     technicalSpecs: {
       power: "6 W / 12 W / 18 W",
       voltage: "AC 100-240 V",
@@ -6507,7 +6507,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED glass flat para empotrar en interior, disponible en presentacion cuadrada o redonda, con existencia limitada y opciones de potencia para iluminacion general.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-014.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-014_resultado.webp",
     technicalSpecs: {
       power: "6 W / 12 W / 18 W / 30 W",
       voltage: "AC 85-265 V (50/60 Hz)",
@@ -6546,7 +6546,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED back-lit 2x2 para interior, disenado para empotrar en cielo falso o suspender, con driver externo flicker free y control de deslumbramiento.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-015.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-015_resultado.webp",
     technicalSpecs: {
       power: "40 W",
       voltage: "AC 85-265 V (50/60 Hz)",
@@ -6585,7 +6585,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED back-lit 4x2 para interior, disenado para empotrar en cielo falso o colgantear, con driver externo flicker free y control de deslumbramiento.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-016.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-016_resultado.webp",
     technicalSpecs: {
       power: "72 W",
       voltage: "AC 85-265 V (50/60 Hz)",
@@ -6624,7 +6624,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED back-lit 2x2 serie BLD para interior, disenado para empotrar en cielo falso, con driver externo flicker free, lente PMMA y difusor PS.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-017.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-017_resultado.webp",
     technicalSpecs: {
       power: "40 W",
       voltage: "AC 100-277 V (50/60 Hz)",
@@ -6664,7 +6664,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED back-lit 2x2 serie BLD de 50 W para interior, disenado para empotrar en cielo falso, con driver externo flicker free, lente PMMA y difusor PS.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-018.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-018_resultado.webp",
     technicalSpecs: {
       power: "50 W",
       voltage: "AC 100-277 V (50/60 Hz)",
@@ -6704,7 +6704,7 @@ const highlumDownlightProducts = [
     finish: "Blanco",
     description:
       "Panel LED PMMA para empotrar en cielo falso, con cuerpo de aluminio, acrilico PMMA LGP y apertura amplia para iluminacion general interior.",
-    image: "/catalogos/highlum/lamparas_interior/eco-downlight-019.png",
+    image: "/catalogos/highlum/lamparas_interiorwebp/eco-downlight-019_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       voltage: "AC 100-240 V",
@@ -7419,7 +7419,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED SMD 2835 de 60 LED por metro en rollo de 5 metros para uso interior y aplicaciones con transformador 12 V o 24 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-001.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-001_resultado.webp",
     technicalSpecs: {
       power: "5 W/m 12 V / 5 W/m 24 V / 11.5 W/m 24 V High",
       voltage: "DC 12 V / DC 24 V / DC 24 V High",
@@ -7455,7 +7455,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED SMD 5730 de 60 LED por metro en rollo de 5 metros para uso interior con transformador 12 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-002.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-002_resultado.webp",
     technicalSpecs: {
       power: "10 W/m",
       voltage: "DC 12 V",
@@ -7490,7 +7490,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED SMD 2835 de 120 LED por metro en rollo de 5 metros para uso interior con transformador 12 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-003.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-003_resultado.webp",
     technicalSpecs: {
       power: "10 W/m",
       voltage: "DC 12 V",
@@ -7526,7 +7526,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED SMD 2835 de 120 a 126 LED por metro en rollo de 5 metros para uso interior con transformador 24 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-004.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-004_resultado.webp",
     technicalSpecs: {
       power: "10 W/m / 12.8 W/m High",
       voltage: "DC 24 V / DC 24 V High",
@@ -7562,7 +7562,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED SMD 2835 de 120 LED por metro en rollo de 50 metros para uso interior con transformador 24 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-005.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-005_resultado.webp",
     technicalSpecs: {
       power: "10 W/m",
       voltage: "DC 24 V",
@@ -7598,7 +7598,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED CTA SMD 2835 de 192 LED por metro para seleccionar luz calida o blanca mediante controlador especial.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-006.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-006_resultado.webp",
     technicalSpecs: {
       power: "14 W",
       voltage: "DC 24 V",
@@ -7636,7 +7636,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Running Strip LED SMD 2835 de 120 LED por metro en rollo de 10 metros para uso interior con controlador especial.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-007.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-007_resultado.webp",
     technicalSpecs: {
       power: "10 W",
       voltage: "DC 24 V",
@@ -7673,7 +7673,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Running Strip LED RGB SMD 5050 de 60 LED por metro en rollo de 10 metros para uso interior con controlador especial.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-008.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-008_resultado.webp",
     technicalSpecs: {
       power: "13 W",
       voltage: "DC 24 V",
@@ -7710,7 +7710,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED SMD 2835 de 160 LED por metro en rollo de 5 metros para uso interior con transformador 24 V High.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-009.jpg",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-009_resultado.webp",
     technicalSpecs: {
       power: "14.4 W/m",
       voltage: "DC 24 V High",
@@ -7747,7 +7747,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED SMD 2835 de alta densidad en rollo de 5 metros para uso interior con transformador 24 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-010.jpg",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-010_resultado.webp",
     technicalSpecs: {
       power: "11 W/m / 17 W/m",
       voltage: "DC 24 V",
@@ -7784,7 +7784,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED COB de 432 LED por metro en rollo de 5 metros para uso interior con transformador 24 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-011.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-011_resultado.webp",
     technicalSpecs: {
       power: "12 W/m",
       voltage: "DC 24 V",
@@ -7821,7 +7821,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED COB de 480 LED por metro en rollo de 5 metros para uso interior con transformador 24 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-012.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-012_resultado.webp",
     technicalSpecs: {
       power: "11 W/m / 16 W/m",
       voltage: "DC 24 V",
@@ -7858,7 +7858,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Manguera neon LED SMD 2835 en rollo de 10 metros para aplicaciones exteriores con transformador 24 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-013.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-013_resultado.webp",
     technicalSpecs: {
       power: "7 W/m",
       voltage: "DC 24 V",
@@ -7895,7 +7895,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Tira LED RGB SMD 5050 de 96 LED por metro en rollo de 5 metros para uso interior con transformador 24 V y kit controlador.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-014.jpg",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-014_resultado.webp",
     technicalSpecs: {
       power: "14 W/m",
       voltage: "DC 24 V",
@@ -7932,7 +7932,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Manguera LED SMD 2835 de 65 LED por metro en rollo de 30 metros para aplicaciones exteriores con transformador 48 V High.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-015.jpg",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-015_resultado.webp",
     technicalSpecs: {
       power: "270 W por rollo / 9 W/m",
       voltage: "DC 48 V High",
@@ -7969,7 +7969,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "Manguera LED SMD 2835 de 110 V en rollo de 100 metros para interiores y exteriores, con kit conector.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-016.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-016_resultado.webp",
     technicalSpecs: {
       power: "4.8 W/m / 9.6 W/m",
       voltage: "AC 110 V",
@@ -8001,7 +8001,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "LED Infinite D3 COB de 110 V en rollo de 50 metros para exteriores, con venta por metro y accesorios por separado.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-017.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-017_resultado.webp",
     technicalSpecs: {
       power: "11 W/m",
       voltage: "AC 110 V",
@@ -8034,7 +8034,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "LED Infinite D2 de 110 V en rollo de 50 metros para exteriores, con venta por metro y accesorios por separado.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-018.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-018_resultado.webp",
     technicalSpecs: {
       power: "9.5 W/m",
       voltage: "AC 110 V",
@@ -8067,7 +8067,7 @@ const highlumTirasLedProducts = [
     finish: "Transparente",
     description:
       "LED Infinite D5 Neon de 110 V en rollo de 50 metros para exteriores, con venta por metro y accesorios por separado.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-019.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-019_resultado.webp",
     technicalSpecs: {
       power: "8 W/m",
       voltage: "AC 110 V",
@@ -8100,7 +8100,7 @@ const highlumTirasLedProducts = [
     finish: "Blanco",
     description:
       "Modulo LED de 3 LEDs SMD 2835 y 5730 para rotulos, decoracion e iluminacion, con conexion a transformador 12 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-020.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-020_resultado.webp",
     technicalSpecs: {
       power: "0.40 W por modulo / 0.72 W por modulo",
       voltage: "DC 12 V",
@@ -8135,7 +8135,7 @@ const highlumTirasLedProducts = [
     finish: "Blanco",
     description:
       "Modulo LED HP SMD 3030 de alto flujo para cenefas, estanterias, rotulos e iluminacion indirecta con transformador 12 V.",
-    image: "/catalogos/highlum/tiras_led/eco-tira-021.png",
+    image: "/catalogos/highlum/tiras_ledwebp/eco-tira-021_resultado.webp",
     technicalSpecs: {
       power: "3 W por modulo",
       voltage: "DC 12 V",
@@ -8169,7 +8169,7 @@ const highlumTirasLedProducts = [
     finish: "Azul / Blanco",
     description:
       "Lampara decorativa suspendida con perfil de aluminio curvo, diseno iconico y difusor lineal para luz continua.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-001.jpg",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-001_resultado.webp",
     technicalSpecs: {
       material: "Perfil de aluminio con difusor",
       finish: "Azul / Blanco",
@@ -8194,7 +8194,7 @@ const highlumTirasLedProducts = [
     finish: "Azul / Blanco",
     description:
       "Lampara decorativa suspendida con perfil de aluminio curvo, difusor lineal y kit de suspension con accesorios para ajuste de altura.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-002.jpg",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-002_resultado.webp",
     technicalSpecs: {
       material: "Perfil de aluminio con difusor",
       finish: "Azul / Blanco",
@@ -8225,7 +8225,7 @@ const highlumTirasLedProducts = [
     finish: "Negro",
     description:
       "Lampara lineal suspendida de aluminio en acabado negro, con difusor lineal y luz continua para interiores.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-003.jpg",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-003_resultado.webp",
     technicalSpecs: {
       power: "40 W",
       voltage: "AC 100-277 V",
@@ -8263,7 +8263,7 @@ const highlumTirasLedProducts = [
     finish: "Negro",
     description:
       "Lampara lineal switch interconectable de aluminio en acabado negro, con watts y temperatura de color seleccionables.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-004.jpg",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-004_resultado.webp",
     technicalSpecs: {
       power: "40 W / 32 W / 24 W seleccionable",
       voltage: "AC 100-277 V",
@@ -8301,7 +8301,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para sobreponer en interiores, con cubierta para tira LED y accesorios de montaje.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-005.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-005_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver / Black / White",
@@ -8329,7 +8329,7 @@ const highlumTirasLedProducts = [
     finish: "Aluminio / Blanco",
     description:
       "Perfil de aluminio para sobreponer en interiores, con cubierta y accesorios de montaje para tiras LED.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-006.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-006_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta",
       finish: "Aluminio / Blanco",
@@ -8357,7 +8357,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio compacto para sobreponer en interiores, con cubierta para tira LED y accesorios de montaje opcionales.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-007.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-007_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver",
@@ -8387,7 +8387,7 @@ const highlumTirasLedProducts = [
     finish: "Blanco",
     description:
       "Perfil flexible para sobreponer en interiores, ideal para integrar tiras LED en recorridos curvos o superficies con formas organicas.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-008.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-008_resultado.webp",
     technicalSpecs: {
       material: "Perfil flexible con cubierta",
       finish: "Blanco",
@@ -8414,7 +8414,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para sobreponer en interiores, con cubierta para tira LED y accesorios de montaje opcionales.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-009.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-009_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver",
@@ -8443,7 +8443,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio redondeado para sobreponer en interiores, con cubierta para tira LED y accesorios de montaje opcionales.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-010.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-010_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver",
@@ -8471,7 +8471,7 @@ const highlumTirasLedProducts = [
     finish: "Blanco",
     description:
       "Perfil de aluminio compacto para empotrar en interiores, con cubierta para tira LED y tapas finales incluidas.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-011.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-011_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta",
       finish: "Blanco",
@@ -8498,7 +8498,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para sobreponer con proteccion IP65, cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-012.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-012_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver",
@@ -8527,7 +8527,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para sobreponer en interior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-013.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-013_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver",
@@ -8554,7 +8554,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio alto para sobreponer o suspender en interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-014.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-014_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver",
@@ -8581,7 +8581,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio sobrepuesto alto para instalacion colgante en interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-015.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-015_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver",
@@ -8608,7 +8608,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para sobreponer o suspender en interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-016.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-016_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver",
@@ -8636,7 +8636,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio alto para sobreponer o suspender en interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-017.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-017_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver / Black / White",
@@ -8664,7 +8664,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para empotrar en interior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-018.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-018_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver / Black / White",
@@ -8691,7 +8691,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio circular para instalacion suspendida en interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-019.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-019_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver / Black / White",
@@ -8719,7 +8719,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para sobreponer en piso interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-020.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-020_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver",
@@ -8745,7 +8745,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para zocalo interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-021.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-021_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver / Black / White",
@@ -8771,7 +8771,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para grada interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-022.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-022_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver",
@@ -8797,7 +8797,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para closet interior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-023.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-023_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver / Black / White",
@@ -8823,7 +8823,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para empotrar en interior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-024.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-024_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver / Black / White",
@@ -8850,7 +8850,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para sobreponer en interior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-025.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-025_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver / Black / White",
@@ -8877,7 +8877,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para empotrar en interior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-026.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-026_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver",
@@ -8904,7 +8904,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio cuadrado para sobreponer en interior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-027.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-027_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver",
@@ -8931,7 +8931,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para empotrar en exterior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-028.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-028_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver",
@@ -8959,7 +8959,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio disipador para tira LED en interior, con instalacion de sobreponer.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-029.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-029_resultado.webp",
     technicalSpecs: {
       material: "Aluminio",
       finish: "Silver",
@@ -8984,7 +8984,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para empotrar en interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-030.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-030_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver / Black / White",
@@ -9012,7 +9012,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para empotrar en interior, con cubierta curva para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-031.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-031_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver / Black / White",
@@ -9039,7 +9039,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para sobreponer en esquina interior, con cubierta para tira LED y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-032.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-032_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver / Black / White",
@@ -9066,7 +9066,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para empotrar en tablayeso interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-033.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-033_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver / Black / White",
@@ -9092,7 +9092,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para sobreponer en piso interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-034.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-034_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver",
@@ -9118,7 +9118,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para empotrar en tablayeso interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-035.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-035_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver / Black / White",
@@ -9144,7 +9144,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para esquina en cenefa interior, con cubierta para tira LED y accesorios compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-036.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-036_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Silver / Black / White",
@@ -9170,7 +9170,7 @@ const highlumTirasLedProducts = [
     finish: "Silver / Black / White",
     description:
       "Perfil de aluminio para pared interior con iluminacion en ambos sentidos y accesorios de montaje compatibles.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-037.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-037_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver / Black / White",
@@ -9198,7 +9198,7 @@ const highlumTirasLedProducts = [
     finish: "Black",
     description:
       "Perfil de aluminio para lampara lineal en acabado negro, con cubierta para tira LED e instalacion interior.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-038.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-038_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Black",
@@ -9224,7 +9224,7 @@ const highlumTirasLedProducts = [
     finish: "Black",
     description:
       "Perfil de aluminio para lampara lineal en acabado negro, con difusor y cubierta tipo honeycomb para instalacion interior.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-039.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-039_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC / PMMA",
       finish: "Black",
@@ -9251,7 +9251,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio para instalacion suspendida en interior, con cubierta para tira LED y accesorios incluidos.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-040.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-040_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver",
@@ -9280,7 +9280,7 @@ const highlumTirasLedProducts = [
     finish: "Silver",
     description:
       "Perfil de aluminio lineal para empotrar en interior, con cubierta para tira LED y accesorios incluidos.",
-    image: "/catalogos/highlum/perfiles_aluminio/eco-perfil-041.png",
+    image: "/catalogos/highlum/perfiles_aluminiowebp/eco-perfil-041_resultado.webp",
     technicalSpecs: {
       material: "Aluminio con cubierta PC",
       finish: "Silver",
@@ -9390,7 +9390,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED interconectable para interiores, con conector inicial, abrazaderas y unión para conectar entre tubos. Permite unir hasta 10 tubos lineales.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-001.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-001_resultado.webp",
     technicalSpecs: {
       power: "9 W",
       dimensions: "60 cm",
@@ -9428,7 +9428,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 120 cm interconectable para interiores, con conector inicial, abrazaderas y union para conectar entre tubos. Permite unir hasta 10 tubos lineales.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-002.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-002_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       dimensions: "120 cm",
@@ -9466,7 +9466,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 120 cm interconectable para interiores, con conector inicial, abrazaderas y union para conectar entre tubos. Permite unir hasta 10 tubos lineales.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-003.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-003_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       dimensions: "120 cm",
@@ -9504,7 +9504,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 60 cm para interiores, con instalacion G13 con pines.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-004.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-004_resultado.webp",
     technicalSpecs: {
       power: "9 W",
       dimensions: "60 cm",
@@ -9535,7 +9535,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 60 cm para interiores, con instalacion G13 con pines.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-005.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-005_resultado.webp",
     technicalSpecs: {
       power: "9 W",
       dimensions: "60 cm",
@@ -9566,7 +9566,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 120 cm para interiores, con instalacion G13 con pines. Disponible bajo pedido.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-006.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-006_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       dimensions: "120 cm",
@@ -9598,7 +9598,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 120 cm para interiores, con instalacion G13 con pines.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-007.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-007_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       dimensions: "120 cm",
@@ -9629,7 +9629,7 @@ const highlumTubosLedProducts = [
     finish: "Transparente",
     description:
       "Tubo LED T8 de 120 cm para interiores, con instalacion G13 con pines y acabado transparente.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-008.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-008_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       dimensions: "120 cm",
@@ -9660,7 +9660,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 60 cm linea Econoline para interiores, con instalacion G13 con pines.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-009.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-009_resultado.webp",
     technicalSpecs: {
       power: "9 W",
       dimensions: "60 cm",
@@ -9691,7 +9691,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 120 cm linea Econoline para interiores, con instalacion G13 con pines.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-010.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-010_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       dimensions: "120 cm",
@@ -9722,7 +9722,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 de 120 cm para interiores con sensor de movimiento. Disponible bajo pedido.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-011.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-011_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       dimensions: "120 cm",
@@ -9758,7 +9758,7 @@ const highlumTubosLedProducts = [
     finish: "Blanco",
     description:
       "Tubo LED T8 exterior de 120 cm con proteccion IP65. Disponible bajo pedido.",
-    image: "/catalogos/highlum/tubos_led/eco-tubo-012.png",
+    image: "/catalogos/highlum/tubos_ledwebp/eco-tubo-012_resultado.webp",
     technicalSpecs: {
       power: "18 W",
       dimensions: "120 cm",
