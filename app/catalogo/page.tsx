@@ -1,6 +1,15 @@
 "use client";
 
-import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type FormEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import ProductCard from "../components/ProductCard";
 import ProductTechnicalDrawer from "../components/ProductTechnicalDrawer";
 import QuoteDrawer from "../components/QuoteDrawer";
@@ -75,6 +84,66 @@ const initialFormState: QuoteFormState = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const quoteSessionStorageKey = "econoluz_catalog_quote";
+
+// Orden de tabulación de los campos obligatorios, para saber a cuál llevar el
+// foco cuando la validación falla.
+const requiredQuoteFields = ["fullName", "phone", "email"] as const;
+
+type RequiredQuoteField = (typeof requiredQuoteFields)[number];
+
+const quoteFieldLabels: Record<RequiredQuoteField, string> = {
+  fullName: "Nombre completo",
+  phone: "Teléfono",
+  email: "Email",
+};
+
+// Los navegadores in-app de Facebook e Instagram suelen ignorar target="_blank"
+// y, con él, el salto a la app de WhatsApp. Ahí conviene navegar en la misma
+// pestaña, que sí consigue abrirla. Detectar por user agent es imperfecto, pero
+// no hay otra señal disponible; y como el lead ya se guardó antes del salto,
+// equivocarse solo cuesta la pestaña del formulario, no la solicitud.
+const isMetaInAppBrowser = () =>
+  typeof navigator !== "undefined" &&
+  /FBAN|FBAV|FB_IAB|Instagram/i.test(navigator.userAgent);
+
+// El user agent no cambia durante la vida de la página, así que no hay nada a
+// lo que suscribirse. Se lee con useSyncExternalStore para que el servidor
+// renderice siempre `false` y el cliente corrija tras hidratar, sin desajuste.
+const subscribeToUserAgent = () => () => {};
+
+// Envía el lead sin bloquear la navegación del enlace a WhatsApp.
+//
+// Nunca se espera esta promesa antes de dejar que el enlace navegue: hacerlo
+// consumiría la activación de usuario y el navegador bloquearía el salto.
+// `keepalive` mantiene viva la petición aunque la página se descargue.
+// Cuando la navegación ocurre en la misma pestaña, `sendBeacon` da una garantía
+// de entrega mejor, a costa de no poder leer la respuesta.
+const postLead = (
+  payload: Record<string, unknown>,
+  navigatesAwayFromPage: boolean,
+): Promise<{ ok: boolean; confirmed: boolean }> => {
+  const body = JSON.stringify(payload);
+
+  if (navigatesAwayFromPage && typeof navigator.sendBeacon === "function") {
+    const queued = navigator.sendBeacon(
+      "/api/leads",
+      new Blob([body], { type: "application/json" }),
+    );
+
+    if (queued) {
+      return Promise.resolve({ ok: true, confirmed: false });
+    }
+  }
+
+  return fetch("/api/leads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+    keepalive: true,
+  })
+    .then((response) => ({ ok: response.ok, confirmed: true }))
+    .catch(() => ({ ok: false, confirmed: true }));
+};
 
 const getStoredQuoteSession = (): StoredQuoteSession => {
   if (typeof window === "undefined") {
@@ -221,6 +290,17 @@ export default function Catalogo() {
   const [formState, setFormState] = useState<QuoteFormState>(buildInitialFormState);
   const [formErrors, setFormErrors] = useState<QuoteFormErrors>({});
   const [ledResultsSummary] = useState(getStoredLedResultsSummary);
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const opensInSameTab = useSyncExternalStore(
+    subscribeToUserAgent,
+    isMetaInAppBrowser,
+    () => false,
+  );
+  const requiredFieldRefs = useRef<
+    Record<RequiredQuoteField, HTMLInputElement | null>
+  >({ fullName: null, phone: null, email: null });
   const catalogStageRef = useRef<HTMLDivElement>(null);
   const isApplyingBrowserHistoryRef = useRef(false);
   const transitionTimeoutRef = useRef<number | null>(null);
@@ -509,6 +589,19 @@ export default function Catalogo() {
   }, [formState, ledResultsSummary, quoteItems]);
 
   const whatsappHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+  // Vía alternativa cuando WhatsApp no es una opción: el mismo mensaje, ya
+  // redactado, en el cliente de correo del usuario.
+  const mailtoHref = `mailto:${contact.email}?subject=${encodeURIComponent(
+    "Solicitud de asesoría ECONOLUZ GT",
+  )}&body=${encodeURIComponent(whatsappMessage)}`;
+
+  const invalidFieldLabels = requiredQuoteFields
+    .filter((field) => formErrors[field])
+    .map((field) => quoteFieldLabels[field]);
+  const validationAnnouncement =
+    invalidFieldLabels.length > 0
+      ? `No se pudo enviar. Revisa ${invalidFieldLabels.length === 1 ? "el campo" : "los campos"}: ${invalidFieldLabels.join(", ")}.`
+      : "";
 
   useEffect(() => {
     return () => {
@@ -680,6 +773,11 @@ export default function Catalogo() {
   const updateFormField = (field: keyof QuoteFormState, value: string) => {
     setFormState((currentForm) => ({ ...currentForm, [field]: value }));
     setFormErrors((currentErrors) => ({ ...currentErrors, [field]: undefined }));
+    // Al retocar los datos tras un envío, el formulario vuelve a estar activo
+    // para poder mandar la versión corregida.
+    setSubmitStatus((currentStatus) =>
+      currentStatus === "saved" || currentStatus === "error" ? "idle" : currentStatus,
+    );
   };
 
   const validateQuoteForm = () => {
@@ -701,17 +799,83 @@ export default function Catalogo() {
 
     setFormErrors(nextErrors);
 
-    return Object.keys(nextErrors).length === 0;
+    return nextErrors;
   };
 
-  const handleQuoteSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const focusFirstInvalidField = (errors: QuoteFormErrors) => {
+    const firstInvalid = requiredQuoteFields.find((field) => errors[field]);
+    const input = firstInvalid ? requiredFieldRefs.current[firstInvalid] : null;
 
-    if (!validateQuoteForm()) {
+    if (!input) {
       return;
     }
 
-    window.open(whatsappHref, "_blank", "noopener,noreferrer");
+    // Se centra a mano porque el scroll automático del foco deja el campo
+    // debajo de la barra de navegación fija.
+    input.focus({ preventScroll: true });
+    input.scrollIntoView({ block: "center" });
+  };
+
+  // Manda el lead al servidor sin esperar la respuesta, para no interponerse
+  // entre el clic del usuario y la navegación a WhatsApp.
+  const deliverLead = (navigatesAwayFromPage: boolean) => {
+    setSubmitStatus("saving");
+
+    postLead(
+      {
+        fullName: formState.fullName,
+        phone: formState.phone,
+        email: formState.email,
+        projectType: formState.projectType,
+        estimatedArea: formState.estimatedArea,
+        budgetRange: formState.budgetRange,
+        lightingType: formState.lightingType,
+        message: formState.message,
+        ledSummary: ledResultsSummary,
+        products: quoteItems.map(
+          (item) =>
+            `${item.product.publicName} - Ref. ${item.product.econoluzReference} - Cantidad: ${item.quantity}`,
+        ),
+        source: opensInSameTab ? "in-app" : "navegador",
+        website: "",
+      },
+      navigatesAwayFromPage,
+    ).then((result) => {
+      setSubmitStatus(result.ok ? "saved" : "error");
+    });
+  };
+
+  // Se dispara desde el enlace de WhatsApp. Todo lo que hay aquí es síncrono a
+  // propósito: en cuanto esta función devuelve, el navegador sigue con la
+  // navegación del enlace. Ni un solo `await` antes de ese punto, porque eso
+  // consumiría la activación de usuario y el salto quedaría bloqueado.
+  const handleQuoteSubmit = (event: MouseEvent<HTMLAnchorElement>) => {
+    const errors = validateQuoteForm();
+
+    if (Object.keys(errors).length > 0) {
+      event.preventDefault();
+      focusFirstInvalidField(errors);
+      return;
+    }
+
+    deliverLead(opensInSameTab);
+  };
+
+  // Pulsar Enter dentro de un campo sigue enviando el formulario. Ese camino no
+  // puede usar el enlace, así que navega en la misma pestaña: una navegación
+  // normal nunca la bloquea el navegador, a diferencia de un popup.
+  const handleQuoteFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const errors = validateQuoteForm();
+
+    if (Object.keys(errors).length > 0) {
+      focusFirstInvalidField(errors);
+      return;
+    }
+
+    deliverLead(true);
+    window.location.href = whatsappHref;
   };
 
   return (
@@ -1160,7 +1324,7 @@ export default function Catalogo() {
           </div>
 
           <form
-            onSubmit={handleQuoteSubmit}
+            onSubmit={handleQuoteFormSubmit}
             noValidate
             className="self-start border border-white/12 bg-white p-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8"
           >
@@ -1181,17 +1345,20 @@ export default function Catalogo() {
                 <span className="text-sm font-semibold">Nombre completo</span>
                 <input
                   required
+                  ref={(element) => {
+                    requiredFieldRefs.current.fullName = element;
+                  }}
                   value={formState.fullName}
                   onChange={(event) => updateFormField("fullName", event.target.value)}
                   aria-invalid={Boolean(formErrors.fullName)}
                   aria-describedby={formErrors.fullName ? "quote-full-name-error" : undefined}
                   className={`border px-4 py-3 outline-none transition focus:border-black ${
-                    formErrors.fullName ? "border-black bg-neutral-50" : "border-neutral-200"
+                    formErrors.fullName ? "border-error bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="Nombre y apellido"
                 />
                 {formErrors.fullName && (
-                  <span id="quote-full-name-error" className="text-xs font-medium text-neutral-600">
+                  <span id="quote-full-name-error" className="text-xs font-semibold text-error">
                     {formErrors.fullName}
                   </span>
                 )}
@@ -1202,17 +1369,20 @@ export default function Catalogo() {
                 <input
                   required
                   type="tel"
+                  ref={(element) => {
+                    requiredFieldRefs.current.phone = element;
+                  }}
                   value={formState.phone}
                   onChange={(event) => updateFormField("phone", event.target.value)}
                   aria-invalid={Boolean(formErrors.phone)}
                   aria-describedby={formErrors.phone ? "quote-phone-error" : undefined}
                   className={`border px-4 py-3 outline-none transition focus:border-black ${
-                    formErrors.phone ? "border-black bg-neutral-50" : "border-neutral-200"
+                    formErrors.phone ? "border-error bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="+502 0000 0000"
                 />
                 {formErrors.phone && (
-                  <span id="quote-phone-error" className="text-xs font-medium text-neutral-600">
+                  <span id="quote-phone-error" className="text-xs font-semibold text-error">
                     {formErrors.phone}
                   </span>
                 )}
@@ -1223,17 +1393,20 @@ export default function Catalogo() {
                 <input
                   required
                   type="email"
+                  ref={(element) => {
+                    requiredFieldRefs.current.email = element;
+                  }}
                   value={formState.email}
                   onChange={(event) => updateFormField("email", event.target.value)}
                   aria-invalid={Boolean(formErrors.email)}
                   aria-describedby={formErrors.email ? "quote-email-error" : undefined}
                   className={`border px-4 py-3 outline-none transition focus:border-black ${
-                    formErrors.email ? "border-black bg-neutral-50" : "border-neutral-200"
+                    formErrors.email ? "border-error bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="correo@empresa.com"
                 />
                 {formErrors.email && (
-                  <span id="quote-email-error" className="text-xs font-medium text-neutral-600">
+                  <span id="quote-email-error" className="text-xs font-semibold text-error">
                     {formErrors.email}
                   </span>
                 )}
@@ -1317,16 +1490,105 @@ export default function Catalogo() {
               </label>
             </div>
 
-            <button
-              type="submit"
-              className="mt-7 flex w-full items-center justify-center rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
-            >
-              Enviar información por WhatsApp
-            </button>
-            <p className="mt-4 text-xs leading-5 text-neutral-500">
-              Los datos del formulario y productos seleccionados se enviarán por WhatsApp
-              al asesor disponible.
+            {/* Trampa para bots. Invisible y fuera del orden de tabulación:
+                una persona nunca lo rellena, los formularios automáticos sí. */}
+            <div aria-hidden="true" className="hidden">
+              <label>
+                No rellenar
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value=""
+                  onChange={() => {}}
+                />
+              </label>
+            </div>
+
+            <p aria-live="assertive" className="sr-only">
+              {validationAnnouncement}
             </p>
+
+            {submitStatus === "saved" ? (
+              <div
+                role="status"
+                className="mt-7 grid gap-3 border border-neutral-200 bg-neutral-50 p-5"
+              >
+                <p className="text-base font-semibold">Recibimos tu solicitud.</p>
+                <p className="text-sm leading-6 text-neutral-600">
+                  Queda guardada con tus datos y las luminarias seleccionadas. Un asesor
+                  te contacta en horario de oficina: {contact.hours.toLowerCase()}.
+                </p>
+                <p className="mt-1 text-sm font-semibold">¿No se abrió WhatsApp?</p>
+                <div className="grid gap-2 text-sm leading-6">
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-black underline underline-offset-4"
+                  >
+                    Reintentar por WhatsApp
+                  </a>
+                  <a
+                    href={contact.phoneHref}
+                    className="text-neutral-600 underline underline-offset-4 hover:text-black"
+                  >
+                    {contact.phoneLabel}
+                  </a>
+                  <a
+                    href={mailtoHref}
+                    className="text-neutral-600 underline underline-offset-4 hover:text-black"
+                  >
+                    {contact.email}
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-7 grid gap-4">
+                {validationAnnouncement && (
+                  <p className="border border-error px-4 py-3 text-sm font-semibold text-error">
+                    Revisa los campos marcados antes de enviar.
+                  </p>
+                )}
+
+                {submitStatus === "error" && (
+                  <div role="alert" className="grid gap-2 border border-error p-4">
+                    <p className="text-sm font-semibold text-error">
+                      No pudimos guardar tu solicitud.
+                    </p>
+                    <p className="text-sm leading-6 text-neutral-600">
+                      Tus datos siguen escritos aquí. Puedes reintentar con el botón, o
+                      escribirnos a{" "}
+                      <a
+                        href={mailtoHref}
+                        className="font-semibold text-black underline underline-offset-4"
+                      >
+                        {contact.email}
+                      </a>{" "}
+                      y llegamos igual.
+                    </p>
+                  </div>
+                )}
+
+                <a
+                  href={whatsappHref}
+                  target={opensInSameTab ? undefined : "_blank"}
+                  rel="noopener noreferrer"
+                  onClick={handleQuoteSubmit}
+                  aria-busy={submitStatus === "saving"}
+                  className="flex w-full items-center justify-center rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
+                >
+                  {submitStatus === "saving"
+                    ? "Enviando…"
+                    : "Enviar información por WhatsApp"}
+                </a>
+
+                <p className="text-xs leading-5 text-neutral-500">
+                  Guardamos tu solicitud antes de abrir WhatsApp, así que llega al equipo
+                  aunque el mensaje no se llegue a enviar.
+                </p>
+              </div>
+            )}
           </form>
         </div>
       </section>
