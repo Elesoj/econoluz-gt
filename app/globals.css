@@ -3,18 +3,57 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  /* Rojo de marca, aquí en su papel de color de error del sistema.
-     No codifica pista de negocio: solo se usa para retroalimentación de
-     formularios, nunca como relleno de un botón de acción. */
+
+  /* ---------------------------------------------------------------------
+     Colores de marca, nombrados por la pista de negocio que codifican.
+     La regla está en CLAUDE.md §3: el color no decora, identifica el
+     recorrido. Azul marino = proyectos (B2B). Rojo = tienda (B2C).
+     Los nombres son deliberados: escribir `bg-tienda` en un botón de
+     especificación se lee mal de inmediato, que es justo lo que se busca.
+     --------------------------------------------------------------------- */
+  --proyectos: #001b59;
+  --proyectos-fuerte: #001240;
+  --tienda: #e11133;
+  --tienda-fuerte: #b80d28;
+
+  /* Variantes de pantalla para fondo oscuro. Solo texto, iconos y bordes:
+     nunca relleno de botón, o convivirían dos rojos de marca distintos. */
+  --proyectos-claro: #5b7fd4;
+  --tienda-claro: #f2415f;
+
+  /* Color de error del sistema. Coincide con el rojo de marca, pero no
+     codifica pista: es retroalimentación de formulario y nunca rellena un
+     botón de acción. */
   --error: #e11133;
+
+  /* Indicador de foco. #5B7FD4 es el único de la paleta que pasa 3:1 sobre
+     los cuatro fondos del sitio (blanco 3.87, #FAFAFA 3.70, #0A0A0A 5.12 y
+     el propio azul marino 4.17), así que sirve en secciones claras y
+     oscuras sin tener que cambiarlo por contexto. */
+  --foco: #5b7fd4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-error: var(--error);
+  --color-proyectos: var(--proyectos);
+  --color-proyectos-fuerte: var(--proyectos-fuerte);
+  --color-proyectos-claro: var(--proyectos-claro);
+  --color-tienda: var(--tienda);
+  --color-tienda-fuerte: var(--tienda-fuerte);
+  --color-tienda-claro: var(--tienda-claro);
+  --color-foco: var(--foco);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Foco visible en todo el sitio. Antes cada control dependía del anillo por
+   defecto del navegador, y los campos del formulario lo anulaban con
+   `outline-none` dejando solo un cambio de borde. */
+:focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
 }
 
 body {
