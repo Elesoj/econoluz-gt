@@ -3,11 +3,16 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Rojo de marca, aquí en su papel de color de error del sistema.
+     No codifica pista de negocio: solo se usa para retroalimentación de
+     formularios, nunca como relleno de un botón de acción. */
+  --error: #e11133;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-error: var(--error);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

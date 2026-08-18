@@ -256,8 +256,12 @@ entrenamiento. Antes de escribir código, consulta la guía correspondiente en
   (ver "Deuda técnica conocida").
 - Accesibilidad: contraste suficiente, textos alternativos en imágenes,
   navegación por teclado funcional.
-- Rendimiento: las imágenes de proyecto son pesadas — usar `next/image`
-  con dimensiones y `sizes` correctos siempre.
+- Rendimiento: las imágenes **ya están optimizadas** (430 archivos, 24 MB en total,
+  ninguna supera 210 KB) y los `sizes` actuales son correctos. No hace falta
+  recomprimir nada. Al añadir imágenes nuevas, mantener `next/image` con `sizes`
+  coherentes con el layout real, y **nunca cargar rutas crudas de `/public`
+  saltándose el optimizador** (es lo que hace hoy el precargado de `ProjectSlider`,
+  que descarga cada foto dos veces).
 - Mobile first. En Guatemala la mayoría del tráfico llega desde celular.
 
 ---
