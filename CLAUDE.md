@@ -60,11 +60,13 @@ ofrece integrado con iluminación. Debe tener presencia propia, no quedar escond
 
 Lo que hay construido hoy es solo pista B: catálogo guiado, ficha técnica, lista de
 cotización y salida por WhatsApp. De la pista A no hay nada: **ni precios, ni carrito,
-ni checkout, ni pasarela de pago, ni autenticación, ni base de datos.**
+ni checkout, ni pasarela de pago, ni autenticación.**
 
-El sitio es estático. Todos los datos viven en `app/data/*.ts` y la única salida de
-cualquier formulario es un mensaje de WhatsApp. **Toda la tienda B2C está por construir**,
-y con ella los requisitos operativos de la sección 8 (FEL, pago, inventario, marco legal).
+El sitio es estático salvo una excepción: `POST /api/leads`, que guarda las solicitudes
+de asesoría en Postgres (Neon). Esa es toda la base de datos que existe hoy — una tabla
+`leads` y nada más; no hay productos, pedidos ni inventario en base de datos. El resto
+de los datos vive en `app/data/*.ts`. **Toda la tienda B2C está por construir**, y con
+ella los requisitos operativos de la sección 8 (FEL, pago, inventario, marco legal).
 
 ---
 
@@ -273,9 +275,21 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
 1. **Los contadores del home muestran cero** ("+0 Referencias", "0 Eficiencia",
    "0 Cobertura", "+0 Clientes satisfechos"). Además, métricas como "Eficiencia: 0%"
    no comunican nada — reemplazar por datos duros y verificables.
-2. **No hay captura de leads.** El formulario de asesoría solo arma un mensaje de
-   WhatsApp. Si el usuario cancela o no tiene WhatsApp, el lead se pierde sin dejar
-   registro. Debe guardarse primero (base de datos o correo) y luego abrir WhatsApp.
+2. **Captura de leads: resuelta, con el aviso por correo pendiente.** El formulario
+   de asesoría ya guarda el lead en Postgres (Neon) mediante `POST /api/leads` antes
+   de abrir WhatsApp, así que deja de perderse si el usuario no tiene WhatsApp, si el
+   salto falla o si nunca llega a pulsar enviar.
+
+   **Pendiente: la notificación por correo.** El envío con Resend está implementado
+   pero desactivado, porque el dominio del correo corporativo lo controla un tercero
+   al que no tenemos acceso y no se puede verificar el remitente. Mientras falten
+   `RESEND_API_KEY`, `LEADS_EMAIL_FROM` y `LEADS_EMAIL_TO`, el envío se omite, queda
+   constancia en el log del servidor y **el lead se guarda igual**: el usuario ve la
+   confirmación normal, no un error. Cuando se recupere el control del dominio basta
+   con definir esas tres variables en Vercel; no hay que tocar código.
+
+   Hasta entonces, las solicitudes solo se ven consultando la tabla `leads`. Conviene
+   revisarla a diario o el lead se guarda pero nadie se entera.
 3. **Falta `og:image`** y el `twitter:card` está en `summary` en lugar de
    `summary_large_image`. Casi todo se comparte por WhatsApp en Guatemala.
 4. **Regresión de SEO.** El sitio viejo posiciona para "lámparas LED Guatemala".

@@ -111,6 +111,10 @@ const saveToDatabase = async (lead: LeadRecord, userAgent: string) => {
   return { attempted: true, ok: true };
 };
 
+// El aviso por correo es opcional a propósito: hoy no se puede verificar el
+// dominio del remitente en Resend porque lo controla un tercero. Mientras las
+// credenciales no existan, el envío se omite y solo queda constancia en el log.
+// La base de datos es la que decide si el lead se guardó.
 const notifyByEmail = async (lead: LeadRecord, userAgent: string) => {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.LEADS_EMAIL_FROM;
@@ -209,6 +213,7 @@ export async function POST(request: Request) {
 
   const databaseOk = database.status === "fulfilled" && database.value.ok;
   const emailOk = email.status === "fulfilled" && email.value.ok;
+  const emailSkipped = email.status === "fulfilled" && !email.value.attempted;
 
   if (database.status === "rejected") {
     console.error("[leads] fallo al guardar en base de datos:", database.reason);
@@ -218,9 +223,22 @@ export async function POST(request: Request) {
     console.error("[leads] fallo al notificar por correo:", email.reason);
   }
 
+  // Que el correo esté sin configurar no es un fallo: se deja constancia y se
+  // sigue. Solo se convierte en problema si tampoco hay base de datos.
+  if (emailSkipped) {
+    console.info(
+      "[leads] aviso por correo omitido: faltan RESEND_API_KEY, LEADS_EMAIL_FROM o " +
+        "LEADS_EMAIL_TO. Pendiente hasta poder verificar el dominio del remitente.",
+    );
+  }
+
   // Si al menos un destino aceptó el lead, para el usuario está guardado.
   if (databaseOk || emailOk) {
-    return Response.json({ ok: true, stored: databaseOk ? "db" : "email" });
+    return Response.json({
+      ok: true,
+      stored: databaseOk ? "db" : "email",
+      emailed: emailOk,
+    });
   }
 
   const nothingConfigured =
