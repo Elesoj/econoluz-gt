@@ -558,6 +558,48 @@ test("rapid category and navbar reset clicks keep only the newest legal state", 
   await expect(page.getByRole("button", { name: /Downlights/i })).toBeVisible();
 });
 
+for (const resetArea of ["nav", "footer"] as const) {
+  test(`a repeated ${resetArea} reset reconciles pending root history with the rendered product view`, async ({
+    page,
+  }) => {
+    await openDownlights(page);
+    await searchInput(page).fill("borrador antes del reset repetido");
+    await page.clock.install();
+    const initialHistoryLength = await page.evaluate(() => window.history.length);
+
+    await page.evaluate((area) => {
+      const rootButton = [...document.querySelectorAll("button")].find(
+        (button) => button.textContent?.trim() === "Inicio del catálogo",
+      );
+      const resetLink = document.querySelector<HTMLAnchorElement>(
+        `${area} a[href="/catalogo"]`,
+      );
+
+      rootButton?.click();
+      resetLink?.click();
+    }, resetArea);
+    await page.clock.fastForward(181);
+
+    await expect(rootHeading(page)).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Iluminaci.n arquitect.nica/i }),
+    ).toBeEnabled();
+    await expect(searchInput(page)).toHaveValue("");
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            (window.history.state as Record<string, unknown>)
+              .econoluzCatalog as Record<string, unknown>
+          ).view,
+      ),
+    ).toBe("categories");
+    expect(await page.evaluate(() => window.history.length)).toBe(
+      initialHistoryLength + 1,
+    );
+  });
+}
+
 test("navbar and footer Catalogo links share a predictable root reset with reversible history", async ({
   page,
 }) => {
@@ -605,6 +647,52 @@ test("guided navigation and navbar/footer reset discard unsubmitted search draft
   await page.locator("footer").getByRole("link", { name: "Catálogo" }).click();
   await expect(rootHeading(page)).toBeVisible();
   await expect(searchInput(page)).toHaveValue("");
+});
+
+test("initial history normalization does not erase a search draft entered before passive effects", async ({
+  page,
+}) => {
+  await page.goto("/catalogo", { waitUntil: "commit" });
+  await page.evaluate(
+    (draft) =>
+      new Promise<void>((resolve) => {
+        const seedDraft = () => {
+          const input = document.querySelector<HTMLInputElement>(
+            'input[placeholder^="Busca por nombre"]',
+          );
+
+          if (!input) {
+            return false;
+          }
+
+          input.value = draft;
+          observer.disconnect();
+          resolve();
+          return true;
+        };
+        const observer = new MutationObserver(seedDraft);
+
+        observer.observe(document, { childList: true, subtree: true });
+        seedDraft();
+      }),
+    "ECO-IND-0048",
+  );
+  await page.waitForLoadState("load");
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (
+            (window.history.state as Record<string, unknown>)
+              ?.econoluzCatalog as Record<string, unknown> | undefined
+          )?.version,
+      ),
+    )
+    .toBe(1);
+
+  await expect(searchInput(page)).toHaveValue("ECO-IND-0048");
+  await searchInput(page).press("Enter");
+  await expect(page.getByText("Ref. ECO-IND-0048", { exact: true })).toBeVisible();
 });
 
 test("modified and non-primary catalog links preserve native navbar/footer behavior", async ({
@@ -884,7 +972,7 @@ test("pagination pushes history and scrolls to the catalog product region instea
   await expect(page.getByText(/gina 2 de/i)).toBeVisible();
 });
 
-test("reduced motion applies catalog transitions immediately and avoids smooth scrolling", async ({
+test("reduced motion applies transitions immediately and scrolls instantly to the catalog region", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -892,16 +980,25 @@ test("reduced motion applies catalog transitions immediately and avoids smooth s
   await expect(rootHeading(page)).toBeVisible();
   await page.evaluate(() => {
     const originalScrollIntoView = Element.prototype.scrollIntoView;
-    const scrollBehaviors: (ScrollBehavior | undefined)[] = [];
+    const scrollCalls: {
+      behavior: ScrollBehavior | undefined;
+      block: ScrollLogicalPosition | undefined;
+      targetId: string;
+    }[] = [];
 
-    (window as typeof window & { __task3ScrollBehaviors?: (ScrollBehavior | undefined)[] })
-      .__task3ScrollBehaviors = scrollBehaviors;
+    (
+      window as typeof window & {
+        __task3ReducedMotionScrollCalls?: typeof scrollCalls;
+      }
+    ).__task3ReducedMotionScrollCalls = scrollCalls;
     Element.prototype.scrollIntoView = function scrollIntoView(
       options?: boolean | ScrollIntoViewOptions,
     ) {
-      scrollBehaviors.push(
-        typeof options === "object" ? options.behavior : undefined,
-      );
+      scrollCalls.push({
+        behavior: typeof options === "object" ? options.behavior : undefined,
+        block: typeof options === "object" ? options.block : undefined,
+        targetId: this.id,
+      });
       return originalScrollIntoView.call(this, options);
     };
   });
@@ -912,14 +1009,36 @@ test("reduced motion applies catalog transitions immediately and avoids smooth s
   await expect(page.getByRole("button", { name: /Downlights/i })).toBeVisible({
     timeout: 120,
   });
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __task3ReducedMotionScrollCalls?: unknown[];
+            }
+          ).__task3ReducedMotionScrollCalls?.length ?? 0,
+      ),
+    )
+    .toBe(1);
   expect(
     await page.evaluate(
       () =>
         (window as typeof window & {
-          __task3ScrollBehaviors?: (ScrollBehavior | undefined)[];
-        }).__task3ScrollBehaviors,
+          __task3ReducedMotionScrollCalls?: {
+            behavior: ScrollBehavior | undefined;
+            block: ScrollLogicalPosition | undefined;
+            targetId: string;
+          }[];
+        }).__task3ReducedMotionScrollCalls,
     ),
-  ).not.toContain("smooth");
+  ).toEqual([
+    {
+      behavior: "instant",
+      block: "start",
+      targetId: "catalog-product-region",
+    },
+  ]);
 });
 
 test("search and clear reset pagination and transient series without leaking series outside products", async ({

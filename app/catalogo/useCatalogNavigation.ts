@@ -295,11 +295,11 @@ export default function useCatalogNavigation({
       window.location.hash.length === 0;
 
     if (isAlreadyRoot) {
+      const rootLocation = createCategoriesLocation();
+
       cancelScheduledWork();
-      setIsTransitioning(false);
-      onLocationCommittedRef.current(createCategoriesLocation());
-      onResetTransientRef.current();
-      scheduleScroll("top");
+      onLocationCommittedRef.current(rootLocation);
+      applyLocation(rootLocation, true, "top", "smooth");
       return;
     }
 
@@ -307,7 +307,7 @@ export default function useCatalogNavigation({
       animate: false,
       scroll: "top",
     });
-  }, [cancelScheduledWork, scheduleScroll, transitionTo]);
+  }, [applyLocation, cancelScheduledWork, transitionTo]);
 
   useEffect(() => {
     const hasAdviceHash = window.location.hash === "#asesoria-proyecto";
@@ -323,7 +323,6 @@ export default function useCatalogNavigation({
       );
 
     entryRef.current = initialEntry;
-    onLocationCommittedRef.current(initialEntry);
     replaceEntry(initialEntry, window.location.href);
     let initializationPending = true;
 
