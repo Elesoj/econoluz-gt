@@ -1,0 +1,2202 @@
+{
+  "productCount": 313,
+  "publicCanonicalSha256": "34c8c64fb279deb2068bf48c96083d0b8bf6b37521b63918e57029a6280c1a03",
+  "internalCanonicalSha256": "2aa7e0cbd73f91934b58d1efd4b24b2c6e5ef93e514b101945cdfe148c814be6",
+  "referenceMapSha256": "e5a0a7788e3a86be9c2e6936c242608dcd4884b94a7781c9d8b75af32e73bb8c",
+  "productHashMapSha256": "3d238e8fc944bf4b697d90515e0a1753e0e69010de751b708d8054b72dbf466c",
+  "references": [
+    "ECO-ELE-0001",
+    "ECO-ELE-0002",
+    "ECO-ELE-0003",
+    "ECO-ELE-0004",
+    "ECO-ELE-0005",
+    "ECO-ELE-0006",
+    "ECO-ELE-0007",
+    "ECO-ELE-0008",
+    "ECO-ELE-0009",
+    "ECO-ELE-0010",
+    "ECO-ELE-0011",
+    "ECO-ELE-0012",
+    "ECO-ELE-0013",
+    "ECO-ELE-0014",
+    "ECO-ELE-0015",
+    "ECO-ELE-0016",
+    "ECO-ELE-0017",
+    "ECO-ELE-0018",
+    "ECO-ELE-0019",
+    "ECO-ELE-0020",
+    "ECO-ELE-0021",
+    "ECO-ELE-0022",
+    "ECO-ELE-0023",
+    "ECO-ELE-0024",
+    "ECO-ELE-0025",
+    "ECO-ELE-0026",
+    "ECO-ELE-0027",
+    "ECO-ELE-0028",
+    "ECO-ELE-0029",
+    "ECO-ELE-0030",
+    "ECO-ELE-0031",
+    "ECO-ELE-0032",
+    "ECO-ELE-0033",
+    "ECO-ELE-0034",
+    "ECO-ELE-0035",
+    "ECO-ELE-0036",
+    "ECO-ELE-0037",
+    "ECO-ELE-0038",
+    "ECO-ELE-0039",
+    "ECO-ELE-0040",
+    "ECO-ELE-0041",
+    "ECO-IND-0042",
+    "ECO-IND-0043",
+    "ECO-IND-0044",
+    "ECO-IND-0045",
+    "ECO-IND-0046",
+    "ECO-IND-0047",
+    "ECO-IND-0048",
+    "ECO-IND-0049",
+    "ECO-IND-0050",
+    "ECO-IND-0051",
+    "ECO-IND-0052",
+    "ECO-IND-0053",
+    "ECO-IND-0054",
+    "ECO-IND-0055",
+    "ECO-IND-0056",
+    "ECO-CAT-0057",
+    "ECO-CAT-0058",
+    "ECO-CAT-0059",
+    "ECO-CAT-0060",
+    "ECO-CAT-0061",
+    "ECO-CAT-0062",
+    "ECO-CAT-0063",
+    "ECO-CAT-0064",
+    "ECO-CAT-0065",
+    "ECO-CAT-0066",
+    "ECO-CAT-0067",
+    "ECO-CAT-0068",
+    "ECO-CAT-0069",
+    "ECO-CAT-0070",
+    "ECO-CAT-0071",
+    "ECO-CAT-0072",
+    "ECO-CAT-0073",
+    "ECO-CAT-0074",
+    "ECO-CAT-0075",
+    "ECO-CAT-0076",
+    "ECO-CAT-0077",
+    "ECO-CAT-0078",
+    "ECO-CAT-0079",
+    "ECO-CAT-0080",
+    "ECO-CAT-0081",
+    "ECO-CAT-0082",
+    "ECO-CAT-0083",
+    "ECO-CAT-0084",
+    "ECO-CAT-0085",
+    "ECO-CAT-0086",
+    "ECO-CAT-0087",
+    "ECO-CAT-0088",
+    "ECO-CAT-0089",
+    "ECO-CAT-0090",
+    "ECO-CAT-0091",
+    "ECO-CAT-0092",
+    "ECO-CAT-0093",
+    "ECO-CAT-0094",
+    "ECO-CAT-0095",
+    "ECO-CAT-0096",
+    "ECO-CAT-0097",
+    "ECO-CAT-0098",
+    "ECO-CAT-0099",
+    "ECO-CAT-0100",
+    "ECO-CAT-0101",
+    "ECO-CAT-0102",
+    "ECO-CAT-0103",
+    "ECO-CAT-0104",
+    "ECO-CAT-0105",
+    "ECO-CAT-0106",
+    "ECO-CAT-0107",
+    "ECO-CAT-0108",
+    "ECO-CAT-0109",
+    "ECO-CAT-0110",
+    "ECO-CAT-0111",
+    "ECO-CAT-0112",
+    "ECO-CAT-0113",
+    "ECO-CAT-0114",
+    "ECO-CAT-0115",
+    "ECO-CAT-0116",
+    "ECO-CAT-0117",
+    "ECO-CAT-0118",
+    "ECO-CAT-0119",
+    "ECO-CAT-0120",
+    "ECO-IND-0121",
+    "ECO-IND-0122",
+    "ECO-IND-0123",
+    "ECO-IND-0124",
+    "ECO-IND-0125",
+    "ECO-IND-0126",
+    "ECO-IND-0127",
+    "ECO-IND-0128",
+    "ECO-IND-0129",
+    "ECO-IND-0130",
+    "ECO-IND-0131",
+    "ECO-CAT-0132",
+    "ECO-CAT-0133",
+    "ECO-CAT-0134",
+    "ECO-CAT-0135",
+    "ECO-CAT-0136",
+    "ECO-CAT-0137",
+    "ECO-CAT-0138",
+    "ECO-CAT-0139",
+    "ECO-CAT-0140",
+    "ECO-CAT-0141",
+    "ECO-CAT-0142",
+    "ECO-CAT-0143",
+    "ECO-CAT-0144",
+    "ECO-CAT-0145",
+    "ECO-CAT-0146",
+    "ECO-CAT-0147",
+    "ECO-CAT-0148",
+    "ECO-CAT-0149",
+    "ECO-CAT-0150",
+    "ECO-CAT-0151",
+    "ECO-CAT-0152",
+    "ECO-CAT-0153",
+    "ECO-CAT-0154",
+    "ECO-CAT-0155",
+    "ECO-CAT-0156",
+    "ECO-CAT-0157",
+    "ECO-CAT-0158",
+    "ECO-CAT-0159",
+    "ECO-CAT-0160",
+    "ECO-CAT-0161",
+    "ECO-CAT-0162",
+    "ECO-CAT-0163",
+    "ECO-CAT-0164",
+    "ECO-CAT-0165",
+    "ECO-CAT-0166",
+    "ECO-CAT-0167",
+    "ECO-CAT-0168",
+    "ECO-CAT-0169",
+    "ECO-CAT-0170",
+    "ECO-CAT-0171",
+    "ECO-CAT-0172",
+    "ECO-CAT-0173",
+    "ECO-CAT-0174",
+    "ECO-CAT-0175",
+    "ECO-CAT-0176",
+    "ECO-CAT-0177",
+    "ECO-CAT-0178",
+    "ECO-CAT-0179",
+    "ECO-CAT-0180",
+    "ECO-CAT-0181",
+    "ECO-CAT-0182",
+    "ECO-CAT-0183",
+    "ECO-CAT-0184",
+    "ECO-CAT-0185",
+    "ECO-CAT-0186",
+    "ECO-CAT-0187",
+    "ECO-CAT-0188",
+    "ECO-CAT-0189",
+    "ECO-CAT-0190",
+    "ECO-CAT-0191",
+    "ECO-CAT-0192",
+    "ECO-CAT-0193",
+    "ECO-CAT-0194",
+    "ECO-CAT-0195",
+    "ECO-CAT-0196",
+    "ECO-CAT-0197",
+    "ECO-CAT-0198",
+    "ECO-CAT-0199",
+    "ECO-CAT-0200",
+    "ECO-CAT-0201",
+    "ECO-CAT-0202",
+    "ECO-CAT-0203",
+    "ECO-CAT-0204",
+    "ECO-CAT-0205",
+    "ECO-CAT-0206",
+    "ECO-CAT-0207",
+    "ECO-CAT-0208",
+    "ECO-CAT-0209",
+    "ECO-CAT-0210",
+    "ECO-CAT-0211",
+    "ECO-CAT-0212",
+    "ECO-CAT-0213",
+    "ECO-CAT-0214",
+    "ECO-CAT-0215",
+    "ECO-CAT-0216",
+    "ECO-CAT-0217",
+    "ECO-CAT-0218",
+    "ECO-CAT-0219",
+    "ECO-CAT-0220",
+    "ECO-CAT-0221",
+    "ECO-CAT-0222",
+    "ECO-CAT-0223",
+    "ECO-CAT-0224",
+    "ECO-CAT-0225",
+    "ECO-CAT-0226",
+    "ECO-CAT-0227",
+    "ECO-CAT-0228",
+    "ECO-CAT-0229",
+    "ECO-CAT-0230",
+    "ECO-CAT-0231",
+    "ECO-CAT-0232",
+    "ECO-CAT-0233",
+    "ECO-CAT-0234",
+    "ECO-CAT-0235",
+    "ECO-CAT-0236",
+    "ECO-CAT-0237",
+    "ECO-CAT-0238",
+    "ECO-CAT-0239",
+    "ECO-CAT-0240",
+    "ECO-CAT-0241",
+    "ECO-CAT-0242",
+    "ECO-CAT-0243",
+    "ECO-CAT-0244",
+    "ECO-CAT-0245",
+    "ECO-CAT-0246",
+    "ECO-CAT-0247",
+    "ECO-CAT-0248",
+    "ECO-CAT-0249",
+    "ECO-CAT-0250",
+    "ECO-CAT-0251",
+    "ECO-CAT-0252",
+    "ECO-CAT-0253",
+    "ECO-CAT-0254",
+    "ECO-CAT-0255",
+    "ECO-CAT-0256",
+    "ECO-CAT-0257",
+    "ECO-CAT-0258",
+    "ECO-CAT-0259",
+    "ECO-CAT-0260",
+    "ECO-CAT-0261",
+    "ECO-CAT-0262",
+    "ECO-CAT-0263",
+    "ECO-CAT-0264",
+    "ECO-CAT-0265",
+    "ECO-CAT-0266",
+    "ECO-CAT-0267",
+    "ECO-CAT-0268",
+    "ECO-CAT-0269",
+    "ECO-CAT-0270",
+    "ECO-CAT-0271",
+    "ECO-CAT-0272",
+    "ECO-CAT-0273",
+    "ECO-CAT-0274",
+    "ECO-CAT-0275",
+    "ECO-CAT-0276",
+    "ECO-CAT-0277",
+    "ECO-CAT-0278",
+    "ECO-CAT-0279",
+    "ECO-CAT-0280",
+    "ECO-CAT-0281",
+    "ECO-CAT-0282",
+    "ECO-CAT-0283",
+    "ECO-CAT-0284",
+    "ECO-CAT-0285",
+    "ECO-CAT-0286",
+    "ECO-CAT-0287",
+    "ECO-CAT-0288",
+    "ECO-CAT-0289",
+    "ECO-CAT-0290",
+    "ECO-CAT-0291",
+    "ECO-CAT-0292",
+    "ECO-CAT-0293",
+    "ECO-CAT-0294",
+    "ECO-CAT-0295",
+    "ECO-CAT-0296",
+    "ECO-CAT-0297",
+    "ECO-CAT-0298",
+    "ECO-CAT-0299",
+    "ECO-CAT-0300",
+    "ECO-CAT-0301",
+    "ECO-TUB-0302",
+    "ECO-TUB-0303",
+    "ECO-TUB-0304",
+    "ECO-TUB-0305",
+    "ECO-TUB-0306",
+    "ECO-TUB-0307",
+    "ECO-TUB-0308",
+    "ECO-TUB-0309",
+    "ECO-TUB-0310",
+    "ECO-TUB-0311",
+    "ECO-TUB-0312",
+    "ECO-TUB-0313"
+  ],
+  "products": [
+    {
+      "id": "apl-001",
+      "econoluzReference": "ECO-ELE-0001",
+      "contentSha256": "ea4bfb23e85c13a6d516c9c1b5dcd6757aa4b89a2463877c26ca6640bf38bc5f",
+      "technicalSpecsSha256": "75c08e8083fa5f33993e89f189e193e69f819d5fa6a5915d7b2e631b88f37e9b"
+    },
+    {
+      "id": "apl-002",
+      "econoluzReference": "ECO-ELE-0002",
+      "contentSha256": "deb1c4229765a9b5a95a504dd55399e67fd6cd11d7581228f1b5584d854567f3",
+      "technicalSpecsSha256": "cbb3377a86d16182c2e68a3696fbd0cdbedc8dc145f29be5ce60adf520a58e9e"
+    },
+    {
+      "id": "apl-101",
+      "econoluzReference": "ECO-ELE-0003",
+      "contentSha256": "17487da1dbfd50299d1daf50ac10c84aa76f0fe552e8226252864d1dce019944",
+      "technicalSpecsSha256": "3cd41e452e8a3e3bca5fa9ea546a4fef9224179d2b5b3ae14ce15cc71f3ee4c1"
+    },
+    {
+      "id": "apl-102",
+      "econoluzReference": "ECO-ELE-0004",
+      "contentSha256": "a303dc5f7b55554d41984080c87625130bc235cddcd7d766aa0b3a60aef2bfdf",
+      "technicalSpecsSha256": "cfd6ca86b9979c3feb588f9c94b2dccc8bb99d77944d68de0f7bb53fe67d10e3"
+    },
+    {
+      "id": "apl-103",
+      "econoluzReference": "ECO-ELE-0005",
+      "contentSha256": "565907e6fd1b47ab3e6b80a2a298651c2ea639b063f7f05d578961a0b6eb7875",
+      "technicalSpecsSha256": "86b0b481ff5a57fc525fa68fea204171534f0db40f2a8f27a40a9e2bc69440c2"
+    },
+    {
+      "id": "apl-104",
+      "econoluzReference": "ECO-ELE-0006",
+      "contentSha256": "2a84e3a2b2ca070084754689f9ed1c6cda990fbd5876730bbabc1e8719831d1f",
+      "technicalSpecsSha256": "69003cbe64069a5dadf988872f0ddae60d2bcea24f7333c6cf667554d7638cae"
+    },
+    {
+      "id": "apl-105",
+      "econoluzReference": "ECO-ELE-0007",
+      "contentSha256": "170aad7dc70b2d2961bfb08dfbea520b6c765f854ee09e6c1c61a7e29a6ff4db",
+      "technicalSpecsSha256": "449119428213932ccb7a0618939d12dce50885fd045da3f411ce80a90490f480"
+    },
+    {
+      "id": "apl-106",
+      "econoluzReference": "ECO-ELE-0008",
+      "contentSha256": "de6765f79c724fe1428d2dd75c67b60029a9c857f8337ad6289341302fe705d9",
+      "technicalSpecsSha256": "b76fad6fd02400cb2ccfeb4db4ab427fa201ae6744adba1f764197e89f8da118"
+    },
+    {
+      "id": "apl-107",
+      "econoluzReference": "ECO-ELE-0009",
+      "contentSha256": "1ccd8e584e30cd52abe70c49c211899d31ffd729cb7bf10705a4c29c8ba353a5",
+      "technicalSpecsSha256": "172c7d7a453a475c785a572b6849eb6a6e416dad4e4c8eba8adfe7ba977e4b00"
+    },
+    {
+      "id": "apl-108",
+      "econoluzReference": "ECO-ELE-0010",
+      "contentSha256": "1125b78fb9ea723e0eb9721607ee6991bfb7d0c735795791954761d649cdf0ae",
+      "technicalSpecsSha256": "a674c0b11593fa413bb6bd77b368a9b6a8a1ec102522f4d6f58f26639afedaaf"
+    },
+    {
+      "id": "apl-109",
+      "econoluzReference": "ECO-ELE-0011",
+      "contentSha256": "449a33e162d55dbcf7addb26aa1056bd76ceca2510860a886b005a235a0a6a8c",
+      "technicalSpecsSha256": "d55630690cf72662fcee6b4f0d7fb952f61e0ce487da9e03bcdedab546ad7324"
+    },
+    {
+      "id": "apl-110",
+      "econoluzReference": "ECO-ELE-0012",
+      "contentSha256": "44669e8269dea01a88e1b2523c9c89d6feba93eb4187d775036adff8dcfccf18",
+      "technicalSpecsSha256": "83331021576faffebd908c1de8dbb2c66b46e6d5c4334e36cca3efb3a3383c7f"
+    },
+    {
+      "id": "apl-111",
+      "econoluzReference": "ECO-ELE-0013",
+      "contentSha256": "09c23e996432010eb6ef0e7d186b5bf90eae7682a69e06029a3d0a4c7cad3bdc",
+      "technicalSpecsSha256": "c3aaaa028f6d1a525d66f78bc0b575eed0dca1393bed5c991215e57bb271e4a4"
+    },
+    {
+      "id": "apl-112",
+      "econoluzReference": "ECO-ELE-0014",
+      "contentSha256": "64c7687b5918ba3d6c194f912af34cb98a75a415f4bf154a567c24d7e373f739",
+      "technicalSpecsSha256": "b489f75cd776b8476590ad3ceb4db6bd8db11eef39e30616434f3d6c50a79ac9"
+    },
+    {
+      "id": "apl-113",
+      "econoluzReference": "ECO-ELE-0015",
+      "contentSha256": "216b4fe5327fc5e1b71506af9ec963f3e8c186a3cdd2ff632086fa7849e52cc3",
+      "technicalSpecsSha256": "b44abbcfcdf6343224424b13b29addc8866941621724e55fb092e5621257e91a"
+    },
+    {
+      "id": "apl-201",
+      "econoluzReference": "ECO-ELE-0016",
+      "contentSha256": "6e7367f76e3f64a509b52ee9aed808ed364921f51a449e88ba2ab312c7cf6727",
+      "technicalSpecsSha256": "e8e8c51476ecf451dcad37a4c32598f12387444accca3f7957fee813d5fb5ef0"
+    },
+    {
+      "id": "apl-202",
+      "econoluzReference": "ECO-ELE-0017",
+      "contentSha256": "4656a9bade3e37a2005fbaedca9750d24c8041f698547d706dbf40c35d0cd490",
+      "technicalSpecsSha256": "8b1d626b4ff07a7b03865f7e4eec77f6c014ed6dce5c117dbbfa557109a635cc"
+    },
+    {
+      "id": "apl-203",
+      "econoluzReference": "ECO-ELE-0018",
+      "contentSha256": "22476e405eaa6cb9b8e2b61c321c9f440df93b95c9b35ac3ed2cafb490167c92",
+      "technicalSpecsSha256": "2172a95dd483d96729b00520e6d0e8fcde6d035b2604466430752c886044dbcc"
+    },
+    {
+      "id": "apl-204",
+      "econoluzReference": "ECO-ELE-0019",
+      "contentSha256": "c0099a4db99e09a8a8e8731aec37121276960330c0ec19118b06b2139e7d47c0",
+      "technicalSpecsSha256": "982d204155290d6f0a9244f9a99454f857a9695a3b1724375b454b8658fffddf"
+    },
+    {
+      "id": "apl-205",
+      "econoluzReference": "ECO-ELE-0020",
+      "contentSha256": "2bfdec91c09b8f45f781a9c137f361f6e8b1411085ecf8d74cca4aa78bc31855",
+      "technicalSpecsSha256": "4c03b8a81de81e02865e5ff5efea991ee48e9af25812636691ebc94df71cd5bc"
+    },
+    {
+      "id": "apl-206",
+      "econoluzReference": "ECO-ELE-0021",
+      "contentSha256": "dd1ce83a3f6da6713ee786e2199508786a1edd8f82177a4c824eec20d8b18089",
+      "technicalSpecsSha256": "c09aa45ce0e38486efad3729d8a584b9afd1f7346b31ae97257208a55a016407"
+    },
+    {
+      "id": "apl-207",
+      "econoluzReference": "ECO-ELE-0022",
+      "contentSha256": "eb0848685b748a29b305a712f0a2135f0f746fe592740b53c44a1ecc96ffc4b7",
+      "technicalSpecsSha256": "59ae2619e5b039fdfed49f3dfe5d9754b6734600ae93a7a3fef547e2b27c2e31"
+    },
+    {
+      "id": "apl-208",
+      "econoluzReference": "ECO-ELE-0023",
+      "contentSha256": "669ad5467da5d6259ee1ca232d77009d1df8b82e4b69c48f0ed308af553315e3",
+      "technicalSpecsSha256": "829c9eb4ce0e2b444f382bea5414ef1b9565e8e911aa42d61a69b4d164287109"
+    },
+    {
+      "id": "apl-209",
+      "econoluzReference": "ECO-ELE-0024",
+      "contentSha256": "356b9425b6846d2a0c9eb788f490e91620c3c336de760e180ca9bd47ab956ca5",
+      "technicalSpecsSha256": "b61a3f6aecc25d401fa5da8773d3ef298a0e0814d4950ea8f68b8eac43ebc6d6"
+    },
+    {
+      "id": "apl-210",
+      "econoluzReference": "ECO-ELE-0025",
+      "contentSha256": "c31da55bac6e8aa95f9f2fdbf311dc046b059992b9f78c050a2b471885093e7e",
+      "technicalSpecsSha256": "caf18b8487b0fcd05b2e63885abe9fabb1c99838e031d3373bddfb6aba13a0bc"
+    },
+    {
+      "id": "apl-211",
+      "econoluzReference": "ECO-ELE-0026",
+      "contentSha256": "209a5340c90d159e4ccc6664b3b608f822400b653240ba8978b935f0285a11a1",
+      "technicalSpecsSha256": "ed3a2bfb703fdf176ff01bcfc5976d8b08e7c39cda764837a94df89b0b8b8925"
+    },
+    {
+      "id": "apl-212",
+      "econoluzReference": "ECO-ELE-0027",
+      "contentSha256": "5622871f99b122b5b6bf58f73b2f20e7834aa10b1ffd45ca17e9dca3a213735c",
+      "technicalSpecsSha256": "b3ed1eec10bef8870f16f9cf2645f587ac0da0dcad3e6b3c8c895bc30831d15c"
+    },
+    {
+      "id": "apl-213",
+      "econoluzReference": "ECO-ELE-0028",
+      "contentSha256": "8a59beb2eb6682954dd4e6e247c65095ca33ffbc5bbb5b9fbe5e14a54cd7b5ba",
+      "technicalSpecsSha256": "a23c091ff0d5f1df01f0d4224fab9a3f3d5f8819a28c94fca84666d01c15cf63"
+    },
+    {
+      "id": "apl-301",
+      "econoluzReference": "ECO-ELE-0029",
+      "contentSha256": "b28553046948d11b59bfe85083ba83a0222b66fc0ceed268b7defa35fa72fadb",
+      "technicalSpecsSha256": "ad390c1643d166b121bc10cc45771fe22a17f6f7f92f98024e94abca202f0054"
+    },
+    {
+      "id": "apl-302",
+      "econoluzReference": "ECO-ELE-0030",
+      "contentSha256": "78180f02bf49e43350890627e4e6f4502a831e49a4a4dbaa4540eb1b7924318b",
+      "technicalSpecsSha256": "1bcb71b14dc5441260756ac3dff1d66d66e36f833170531ba4a4318ad9d2f7bb"
+    },
+    {
+      "id": "apl-303",
+      "econoluzReference": "ECO-ELE-0031",
+      "contentSha256": "e14c834807f5bf0f81cd24fc158a08a861c8220c5e4c682758a92c32d0640ebc",
+      "technicalSpecsSha256": "6c56b750cca43d066f35e7fdaa837795c5a96210d75b7485f808b0d54c8e6472"
+    },
+    {
+      "id": "apl-304",
+      "econoluzReference": "ECO-ELE-0032",
+      "contentSha256": "63fb68d2cc8afab1b164f7576450fdcc74969d8f4fae181e72beeef99e53fc34",
+      "technicalSpecsSha256": "0a35e0ea62cfd6c6edda5cbd4238660dd7a6bb82271376f8feb0cce747b3a0ed"
+    },
+    {
+      "id": "apl-305",
+      "econoluzReference": "ECO-ELE-0033",
+      "contentSha256": "46c2d95f6acb740d1041a515f2d9a772a121d43aab49d549946fb13b08ba1410",
+      "technicalSpecsSha256": "cc4dfa906d366f98c094e4f14812d760ba8bb8cf6436e3e7d79f0b96745ab987"
+    },
+    {
+      "id": "apl-306",
+      "econoluzReference": "ECO-ELE-0034",
+      "contentSha256": "124ef95aa6d1b76b100e2f59612c6d0878ddd436a38a0993a5b418ff04876e14",
+      "technicalSpecsSha256": "e82d37d551b6e1a30de485751bfa0071f84c8bbf81d2f8784640c74ec1d2cfc0"
+    },
+    {
+      "id": "apl-307",
+      "econoluzReference": "ECO-ELE-0035",
+      "contentSha256": "b739ccd7a5e2fb765cff3462059903b17028bd07698e00212bab92b54232e716",
+      "technicalSpecsSha256": "0a5afa4ccad02952ad0e155418033ed2b7732c0cece0c40f55b106847c2cfeb9"
+    },
+    {
+      "id": "apl-308",
+      "econoluzReference": "ECO-ELE-0036",
+      "contentSha256": "4c001c1a4680a2a9797d8e2998253bc884b7c42171db9c636c7a9ae64539a7b7",
+      "technicalSpecsSha256": "397fcac6081c64688f59d3949d9d3b7d96ecced3f00464bdf8c5e01220bd241b"
+    },
+    {
+      "id": "apl-309",
+      "econoluzReference": "ECO-ELE-0037",
+      "contentSha256": "0604a94e2eddceaf8ef43bdbc05c997d1d98690257497144cabbc368da96dfec",
+      "technicalSpecsSha256": "883c492133294eb55a0bdc7a9bf4c3c9335d7b5f6fe9dcdf2fad76b76eb5522f"
+    },
+    {
+      "id": "apl-310",
+      "econoluzReference": "ECO-ELE-0038",
+      "contentSha256": "e1d08565b9d61c4fc5e6fb49c249baea58e8b59462684dae84be93a984b8e0c5",
+      "technicalSpecsSha256": "1a3690f5e9187a1650a17d9a61a3128c47b521a4898ca7d1930ee74b7dcfbea4"
+    },
+    {
+      "id": "apl-311",
+      "econoluzReference": "ECO-ELE-0039",
+      "contentSha256": "9eed05e488542d67086123460843aa767addbeded1349789034a8affe23ebec5",
+      "technicalSpecsSha256": "fa4e05735acd5e105bd81a47bf0ca2ce6c47fe2a056bbed3aa2c59868e6f22bd"
+    },
+    {
+      "id": "apl-312",
+      "econoluzReference": "ECO-ELE-0040",
+      "contentSha256": "4ce1041871560209a8799f04cb22985c8f15c0d055e7a71220fc89326d10daca",
+      "technicalSpecsSha256": "ce176ec9359c3663f8940d29884091b7856d6c595358432a49c913af59d9cd2a"
+    },
+    {
+      "id": "apl-313",
+      "econoluzReference": "ECO-ELE-0041",
+      "contentSha256": "20c47f9216d432b08a7b8c5ecf518f0276a78df73d740dc15d39156bd230bea3",
+      "technicalSpecsSha256": "ef6e4dd93913579d32cc3efe77975fbfc2221f3178e5ad4dcd3aae57b890e835"
+    },
+    {
+      "id": "construlita-cuasar",
+      "econoluzReference": "ECO-IND-0042",
+      "contentSha256": "93507a1c2a5230df3e0bacda9c203f73a94be686ac8d61aad79dea0265f45c7b",
+      "technicalSpecsSha256": "3e562d739e0f3b0ab1be68ca552ee6305881fc7b72b917b00d9930b6b5ed39c5"
+    },
+    {
+      "id": "construlita-hb-pure",
+      "econoluzReference": "ECO-IND-0043",
+      "contentSha256": "6d81d33d15574bcf1baaa4653ebd01fd2d6f1513cb74c81d47db388973a16217",
+      "technicalSpecsSha256": "8ce2d5a93c72a3f239889fde4270f527346b236f28923a71ca0a466d79b59a9d"
+    },
+    {
+      "id": "construlita-hb-steel",
+      "econoluzReference": "ECO-IND-0044",
+      "contentSha256": "c531c9f9331b9304f80677ebb8b85af2b41cb078395db240eedb9280d0947ed8",
+      "technicalSpecsSha256": "e4231a9dd6c1f296e9d424b9d390940901c549b00f5e5148720e81c940786a79"
+    },
+    {
+      "id": "construlita-highlens",
+      "econoluzReference": "ECO-IND-0045",
+      "contentSha256": "b81203fdee13f3a1bebe9718499ab870204828b11b65e0a4c7ff4e3367eccc2e",
+      "technicalSpecsSha256": "965b745f6709441f53983c15bbdb9d3943b760da4e91266e01cb3cdf7d472021"
+    },
+    {
+      "id": "construlita-supreme",
+      "econoluzReference": "ECO-IND-0046",
+      "contentSha256": "13cd7c6adfff462fdbbb1d125d4772446c3914426a05f1d7666904c03280ca17",
+      "technicalSpecsSha256": "3cb738ebc4d1cbccd8256911ea5d68c315652baf114dfb650a8b8cdba2acf09e"
+    },
+    {
+      "id": "construlita-paneled-highbay",
+      "econoluzReference": "ECO-IND-0047",
+      "contentSha256": "746b6be55290cff7d79b1ed9c8c4501c8b4edf6fdd964918b6cf4eb405fd2045",
+      "technicalSpecsSha256": "3e1399beeb65b927c7d2aca3ee29dc0ada54f935263942b60a78ff3277a53f21"
+    },
+    {
+      "id": "highlum-alto-montaje-ufo",
+      "econoluzReference": "ECO-IND-0048",
+      "contentSha256": "916f25cd8c5f17b14c4586fc3db09aedc1904bfdf5bdd6356d370d2e7822f610",
+      "technicalSpecsSha256": "bb395edca437fc35fc44475617d040ca8356fe977516de81fdeb3bdedfa79377"
+    },
+    {
+      "id": "highlum-alto-montaje-ufo-light-power",
+      "econoluzReference": "ECO-IND-0049",
+      "contentSha256": "76609caf7ce43062a421153cca571108e7794dd3c83d1e0ccc8b7c7f548752da",
+      "technicalSpecsSha256": "3b90ce60d1c65204f83e350803d808ea6e3da950f280449fd4e5d67a8f740cf6"
+    },
+    {
+      "id": "highlum-alto-montaje-switchable",
+      "econoluzReference": "ECO-IND-0050",
+      "contentSha256": "55446cab2a56a8fc45c139f8603f9d7e8434db822b778c8501459f18eab5a95a",
+      "technicalSpecsSha256": "4ae803ad095bf5f48679fa28030ba6753744dce63e3373473a1e82da5a01419c"
+    },
+    {
+      "id": "construlita-canopy-cct-in1854ncca",
+      "econoluzReference": "ECO-IND-0051",
+      "contentSha256": "3a30bcca0a9b78efb952142ed5ea76fc8871ab8b589792733c099c975df0a6e4",
+      "technicalSpecsSha256": "0e9346f01f601d00302630ae96e86b7ba540068e253f9a9808bda7ba33fd2de9"
+    },
+    {
+      "id": "construlita-canopy-cct-in1855ncca",
+      "econoluzReference": "ECO-IND-0052",
+      "contentSha256": "7196a7582e97ca9739316c376a3d383de5299251d1e2f0632e69cd5d5121858e",
+      "technicalSpecsSha256": "4be8ac971f86e42f5b6669907c01d70575784b3a5fb0b1d05f9ae1a3fd58fbfa"
+    },
+    {
+      "id": "construlita-lowbay-in1955bbfa",
+      "econoluzReference": "ECO-IND-0053",
+      "contentSha256": "29a4f4570b5e392b3c3c3b20dc1398deaab2462c345cb36b650c6e9a67596ad1",
+      "technicalSpecsSha256": "c7d782659dafd19ee91d8fcbeb85ce46f5c626c849e50dc90aa61ba3756a653f"
+    },
+    {
+      "id": "construlita-lowbay-in4955bbfa",
+      "econoluzReference": "ECO-IND-0054",
+      "contentSha256": "11e5c765bd98e2093124500b886b4190ee532a24dc8b075a5ea1bf7ad914eca0",
+      "technicalSpecsSha256": "ace73fcf12074079a8faecf62e03747c1d77dec311d92a5198d37cca4d24dc3c"
+    },
+    {
+      "id": "construlita-artic",
+      "econoluzReference": "ECO-IND-0055",
+      "contentSha256": "f99b39111235f4277c3718658c0140ebe8c3306537faf756c266eacb3f9a0236",
+      "technicalSpecsSha256": "988b6206867dd509d52a21f5455223eaab7ff1d20f7581122d4b6c85d8451257"
+    },
+    {
+      "id": "construlita-ocean",
+      "econoluzReference": "ECO-IND-0056",
+      "contentSha256": "06520edd4538ed4a9ff246352c6dc1f6c4c4a3d91bae4839efb2c25a2b2e9f5f",
+      "technicalSpecsSha256": "b9d06ffb7fb3d47800a345f89baae07cd945d4bd789f0ac399f5e4103cc0f37c"
+    },
+    {
+      "id": "construlita-wallpack",
+      "econoluzReference": "ECO-CAT-0057",
+      "contentSha256": "a78c3e9e99c34f2d9798034053da2061b22faf7818fd9fc9c34eb249aaf32bef",
+      "technicalSpecsSha256": "f5d4082008d96fea6eed95137f732e4abda12fa318014f3a9890f84b599c6d33"
+    },
+    {
+      "id": "construlita-wallpack-cct",
+      "econoluzReference": "ECO-CAT-0058",
+      "contentSha256": "dd447f7932bb9daa8269da8a14c772ffe2c5a1d1e2f01c9663bb6ae26b27be47",
+      "technicalSpecsSha256": "b0e683fd5d12f41dd1b7813faf30bc23ec01f865437dae1abb7f550ce5fb307e"
+    },
+    {
+      "id": "construlita-bronce-ou2001c00k",
+      "econoluzReference": "ECO-CAT-0059",
+      "contentSha256": "f14ee60838675d9128aff62109dde04ef77ed5c2578190cb1eb13fc405c7eb98",
+      "technicalSpecsSha256": "d23c1c50b77d1b668fa4023ef40925da8c89ff0d53b8491375c0e8b6dba69067"
+    },
+    {
+      "id": "construlita-bronce-ou6026c00k",
+      "econoluzReference": "ECO-CAT-0060",
+      "contentSha256": "5e231248f8f9a8aa706ed6c0ea8bf58fd0e451898cb6f93f62dab3aeffc1c75a",
+      "technicalSpecsSha256": "26a744f054942e49c4355eee6ed4fcfa50979c7e3148a6a911bf6b8b1650ac6b"
+    },
+    {
+      "id": "construlita-bronce-ou3022c00k",
+      "econoluzReference": "ECO-CAT-0061",
+      "contentSha256": "9e68be3f25c5ac3ed54a1260cf7a7ade4073ccc5c65affa62b6ef0f57507e4f8",
+      "technicalSpecsSha256": "96194bcf5dee6f34a1b28ff7c7ad145de2204e407882f4f374bf3b6cbddaf2dd"
+    },
+    {
+      "id": "construlita-bronce-ou3023c00k",
+      "econoluzReference": "ECO-CAT-0062",
+      "contentSha256": "bdd84efc76958766b415911f235791c0956ae23aba0b2df66db9274ca71ba3e3",
+      "technicalSpecsSha256": "b6bde9c6feae3fd72991c971b61f08d148dc2842e990e4bae052a3276ef9161a"
+    },
+    {
+      "id": "construlita-bronce-ou7012c00k",
+      "econoluzReference": "ECO-CAT-0063",
+      "contentSha256": "0266a2de86570d7c3a94801c317b340b4823cc2f77bd37fd6ca99c4b9f7d87db",
+      "technicalSpecsSha256": "bf9e139f0a6740ec2f56a0d446e8c8c02c2602457bf13dbe8e16f4fa51e4b1d6"
+    },
+    {
+      "id": "construlita-bronce-ou7014c00k",
+      "econoluzReference": "ECO-CAT-0064",
+      "contentSha256": "2240c67f29e55d2aa0e030dfd37d907d4f4e1f13aa8cd41b23e737e6a447a3b7",
+      "technicalSpecsSha256": "7de77ffcf19a97c7e19c9f583b495a2021bf96986cd30f4a983204d7e447cac8"
+    },
+    {
+      "id": "construlita-bronce-re8200c00k",
+      "econoluzReference": "ECO-CAT-0065",
+      "contentSha256": "c0678ab2d21d9d5341b66db445265431e220aa29734688dac4b82aae635b0727",
+      "technicalSpecsSha256": "c7c4380a901c82c204c47dbad39ef709afd9d0fd675f11e0a8301febe769f2a7"
+    },
+    {
+      "id": "construlita-bronce-re8201c00k",
+      "econoluzReference": "ECO-CAT-0066",
+      "contentSha256": "ff6e5f2c50b6f2a51fa590758c149ac2f9b6bed39b1fba3c7ac47f11b9f98f72",
+      "technicalSpecsSha256": "2554d427780717dd1e72a5bbe720ca18f5e37aefb418347ac0571f3e1ad85d82"
+    },
+    {
+      "id": "construlita-bronce-ou9010c00k",
+      "econoluzReference": "ECO-CAT-0067",
+      "contentSha256": "b8135edac3caef720c9aad42c349543bcda4dbd3b2682f41d01d7987d55f55ba",
+      "technicalSpecsSha256": "224457b6370674c9048b0d85b3d8e589a6adce62a6e45fc85793eb63622813d2"
+    },
+    {
+      "id": "construlita-bronce-ou9011cbcf",
+      "econoluzReference": "ECO-CAT-0068",
+      "contentSha256": "ebd84719b7b275eefcd442a4d08583cdedc2d7921528decaf297c4b7778c102e",
+      "technicalSpecsSha256": "f738f451855efd02c4d7ab51bd25e59716aacd849e8e0c9623c4038c7aa3eaf3"
+    },
+    {
+      "id": "construlita-bronce-ou9012c00k",
+      "econoluzReference": "ECO-CAT-0069",
+      "contentSha256": "8455f05050de4acd6b975cc13d6dbf932a77ebea9d4788b1882e70b6806ec06d",
+      "technicalSpecsSha256": "acea979dc2b7101c2af3fad1d0efb03e53fe803dcac06e63123ca5bde179eab9"
+    },
+    {
+      "id": "construlita-bronce-ac7600c",
+      "econoluzReference": "ECO-CAT-0070",
+      "contentSha256": "3720a78a923cd47140ebe163138dedb3027eabad0468b65635fe0cc156fc905a",
+      "technicalSpecsSha256": "a336d2b10123807691b2a51b9032988d328861d1bf22f08d57eb96f863122e85"
+    },
+    {
+      "id": "construlita-sombra",
+      "econoluzReference": "ECO-CAT-0071",
+      "contentSha256": "6daa7b2a8c8f9232074402c3214fdacc544e43a253e9dfe714a3b2e454b36071",
+      "technicalSpecsSha256": "7a72f8bdc98fd3ed81be04f5547728f9c4ee26aee7658aec357b7c8a7e3a517b"
+    },
+    {
+      "id": "construlita-landscape",
+      "econoluzReference": "ECO-CAT-0072",
+      "contentSha256": "4f04e1bc38987f866e4520fbb89d506db603a13d75c45cde48667fbaf3b9c79a",
+      "technicalSpecsSha256": "0dfeaba24380f4f0221e990a75d79f77bd06a4eea02b484144b3def38f8aeb60"
+    },
+    {
+      "id": "construlita-corvus-luminario-para-poste",
+      "econoluzReference": "ECO-CAT-0073",
+      "contentSha256": "45c8560dd343ff2147507eeb398f01f05126dc425aadd35ee8fca1c2bf9afef9",
+      "technicalSpecsSha256": "471c9c66c7e091538cbb53753a4d389e865ddcbf826ce70e66af1c3c23d0cee9"
+    },
+    {
+      "id": "construlita-bright",
+      "econoluzReference": "ECO-CAT-0074",
+      "contentSha256": "7c4358d149bd09d44dd5242c8e808bb77e0bbbff353660e2279374a1daee4ca9",
+      "technicalSpecsSha256": "5c034126a8647d0303a5fa49074e46f03304640e9500e7071a641fa6ebc42075"
+    },
+    {
+      "id": "construlita-urban-city-ou9086-ou9087-ou9100",
+      "econoluzReference": "ECO-CAT-0075",
+      "contentSha256": "ac6056e3830865af090defe777690173a09714e2dafccff4440916b7143cc438",
+      "technicalSpecsSha256": "eac0dcb414d1f503034319fa94a49a825a034ee4ba17da366637070c3c0d0c2c"
+    },
+    {
+      "id": "construlita-urban-city-ou9021fbna",
+      "econoluzReference": "ECO-CAT-0076",
+      "contentSha256": "5800a030cd6d1904da4e54abf5dc6ab959b827023289c622bf6406db67c90d45",
+      "technicalSpecsSha256": "08f6f17fefa8280ce7239cf186b755cf89d38cca68c6b9d5a473736356dfa8d8"
+    },
+    {
+      "id": "construlita-faroled-colonial-ou9035-ou9036",
+      "econoluzReference": "ECO-CAT-0077",
+      "contentSha256": "15ae5d21202fa2dc8b88afcdcd98a0bad96ff55c607d33c68404f917c2b4443f",
+      "technicalSpecsSha256": "8dd23e39c8d5bf46f3d1067089445099c1e25181cce3372e4abf313207b4016e"
+    },
+    {
+      "id": "construlita-faroled-colonial-ou9906nbca",
+      "econoluzReference": "ECO-CAT-0078",
+      "contentSha256": "fd0448921bc31e61215947ce0d9336ce81edf871c8b09d5adfc887a10e11f8bf",
+      "technicalSpecsSha256": "99f468b6846bb5192345739801f50f0afb480e4e9f374fafba46714134c8e703"
+    },
+    {
+      "id": "construlita-poste-cubic",
+      "econoluzReference": "ECO-CAT-0079",
+      "contentSha256": "e35a9d902b00fcf2b8a9ba54958cec44ba2ff22e55d4ec7b7cc3ec0d342cfc93",
+      "technicalSpecsSha256": "72bd8c185f04fe4ac264cae8692819877c31984d92da1159fc4bf083b49d3003"
+    },
+    {
+      "id": "construlita-cubic-bolardo",
+      "econoluzReference": "ECO-CAT-0080",
+      "contentSha256": "d3bb1469c93f55060e3bfbbe800a22708c9aa63837486554c51e25e79fb7ac74",
+      "technicalSpecsSha256": "52d79339600c91a649db66f57ffebf2c33d4097c57d29e2cde624316d3d39edd"
+    },
+    {
+      "id": "construlita-softglow",
+      "econoluzReference": "ECO-CAT-0081",
+      "contentSha256": "603b5720dce1bba9b017be11d641c7f6ebea23ce09162c44170c71b8d59133c9",
+      "technicalSpecsSha256": "c7216e8ff0738b685bb4c27ae73d3bd0b0cad64f679d5ddbc84eadf7055c0f67"
+    },
+    {
+      "id": "construlita-corvus-miniposte-ou9093cbca",
+      "econoluzReference": "ECO-CAT-0082",
+      "contentSha256": "45fea978b0b11e5d902e52b889b9ba8815e9a90fc89567b5c4090963cfeb3536",
+      "technicalSpecsSha256": "0582c52c73de7c7203cd3e167e5b7642a217c53d7e97b9f72c1a78f9f544ab03"
+    },
+    {
+      "id": "construlita-corvus-miniposte-ou9092cbca",
+      "econoluzReference": "ECO-CAT-0083",
+      "contentSha256": "69028f86254248a9b0053ffd5fdb13ab98bfee0902c3e9e64431bbbd522dde56",
+      "technicalSpecsSha256": "e5daacf64c3f85b5fea7ebdef840b5ad82f776bbbe945ebea114476e956ad35c"
+    },
+    {
+      "id": "construlita-corvus-miniposte-ou9089sbcb",
+      "econoluzReference": "ECO-CAT-0084",
+      "contentSha256": "ea57facf18a7e33953571f75a2f4bc42d796d2ef571cc485b7568813c320bbb2",
+      "technicalSpecsSha256": "5160062c8ec7280cd7f7fc1e5fa4674a61d039f973b9095bcd333686cd0da27d"
+    },
+    {
+      "id": "construlita-bollard-ou9090fbnb",
+      "econoluzReference": "ECO-CAT-0085",
+      "contentSha256": "4027b4111fbcb55d8f85987a57d7ef167f97f8aff74330bf654dfdc68f2f4999",
+      "technicalSpecsSha256": "87178682b4e9e8232b30a1cd6c6a709660c9a003839ded402f2b3f0993883ef0"
+    },
+    {
+      "id": "construlita-bollard-ou9091fbnb",
+      "econoluzReference": "ECO-CAT-0086",
+      "contentSha256": "a3ce8868011b421bf80274282fd4fed6734115f1b25da9970ac3664464d3f5e5",
+      "technicalSpecsSha256": "df0e5576b7a66b5d9053f5eb24900245110a587667968a8ae46b74e730e9695b"
+    },
+    {
+      "id": "construlita-evolight",
+      "econoluzReference": "ECO-CAT-0087",
+      "contentSha256": "9e53b3fb41e61122c9258993f685559e679c3a53704b31034ddb92d3beae198d",
+      "technicalSpecsSha256": "ffb46d734e27ab857fd46ddae3855125177e6e3b401757a46588680c6c9586c3"
+    },
+    {
+      "id": "construlita-nanovia-v0040un2m50",
+      "econoluzReference": "ECO-CAT-0088",
+      "contentSha256": "d03c9a787b91f5845d580c9ad5ce33d5cccf26a1357de794bfb4b914263f4c16",
+      "technicalSpecsSha256": "e5c1fc245e90e72d3c5bd97a19d706103b154df29a3ca2444b08d7b7966de129"
+    },
+    {
+      "id": "construlita-nanovia-v0052un2m50",
+      "econoluzReference": "ECO-CAT-0089",
+      "contentSha256": "c658fc49e4abaa5b63d041a9c65f09520e28ee73ac715d37061abaf08ba3ffbb",
+      "technicalSpecsSha256": "324a1ba3fd9fbaef3959976826516ad920458ee826d3c07b2e2486ce50bde95e"
+    },
+    {
+      "id": "construlita-nanovia-v0100un2m",
+      "econoluzReference": "ECO-CAT-0090",
+      "contentSha256": "b60c28cab4e5bf1d234a5cf52f75097b9b20c6aa7d45d58f1d4619ff476525ed",
+      "technicalSpecsSha256": "982cc1e47a4fb4d616b2ba81be912449436dd19a6cc19f033d773441f48902b4"
+    },
+    {
+      "id": "construlita-nanovia-ul-u0040un2m",
+      "econoluzReference": "ECO-CAT-0091",
+      "contentSha256": "3f489d04077c4ab47b2a623655419e1cd1f75fe1e5eb3e74e908285f4e170edf",
+      "technicalSpecsSha256": "6f2d8a7d9c3853b51c0e34a13b32f84c5d9f79270cf94993ea367be6179e2609"
+    },
+    {
+      "id": "construlita-vialed-v1050un2m",
+      "econoluzReference": "ECO-CAT-0092",
+      "contentSha256": "7efcea01ae4bfc32f4e59d18c0e9b0879d866f359f8c96629ae36fd4f1ab09a3",
+      "technicalSpecsSha256": "2ca4e7e0e3929acc6cc846c712340b087082fe094359e6e74f75fdb431bcc8b6"
+    },
+    {
+      "id": "construlita-vialed-v1070un2m",
+      "econoluzReference": "ECO-CAT-0093",
+      "contentSha256": "405c756119df19e74536f187238481bbecee3fc75f75bf0987652ce02ca7a207",
+      "technicalSpecsSha256": "7b859b398a80b5213d0965799965f2dbfeb2437456f2378c2a3b73e4dfe6bb9f"
+    },
+    {
+      "id": "construlita-vialed-v2100un2m",
+      "econoluzReference": "ECO-CAT-0094",
+      "contentSha256": "14baa7865d57d8961b85fd4d2f768b0c643d2888be89560bb4385d0d504d1cb4",
+      "technicalSpecsSha256": "3f857634c571ab41db439fa2d0fbb699fc4fdc25d1996a6219484cc7fe893596"
+    },
+    {
+      "id": "construlita-vialed-v2130un2m",
+      "econoluzReference": "ECO-CAT-0095",
+      "contentSha256": "f78319267148963ec9ad297069d868b3c86b2360ae5c45c44c7a721bccd5c0d1",
+      "technicalSpecsSha256": "913f375d863ad0194788f1f88de662e806d5ba2bbecf9d8a2bd88880d7e6aece"
+    },
+    {
+      "id": "construlita-vialed-v3160un2m",
+      "econoluzReference": "ECO-CAT-0096",
+      "contentSha256": "5313eb2be52d6cb79b4c93674357e8ac59ca03009c33cec51995635318a8105e",
+      "technicalSpecsSha256": "0fc31a79bab0e5ef06c67a683218135c8216192df7bcef845a52ffbef4f57fc6"
+    },
+    {
+      "id": "construlita-vialed-ul-u1050un2m",
+      "econoluzReference": "ECO-CAT-0097",
+      "contentSha256": "d4607c2e7fd1c5c8f8bf3f25369ad17f49ff7bb51ec467f2284a18db4551f935",
+      "technicalSpecsSha256": "b3c8d66e3dc39531a2d308ff483890a4c3296644cbab1358d163b296fe75a74c"
+    },
+    {
+      "id": "construlita-vialed-ul-u1070un2m",
+      "econoluzReference": "ECO-CAT-0098",
+      "contentSha256": "05b0ded9eab9f5b745f6bf12d37c5d59ddbcb0dac688748c09d8dbc3e6733dd3",
+      "technicalSpecsSha256": "c0603e1c17266797022cd3d1ddf3e36a78f36c022fd5a5e59226dd0a4c5a80e4"
+    },
+    {
+      "id": "construlita-vialed-ul-u1090un2m",
+      "econoluzReference": "ECO-CAT-0099",
+      "contentSha256": "b4405f016ac095e6278ce2941de9f02869689fe7b659e6e52fe62f088ef52bb7",
+      "technicalSpecsSha256": "47cec5d2399106a22b3308af91f288efe1f0fe1debee74cea97078c0c0d5aa69"
+    },
+    {
+      "id": "construlita-module-configurable",
+      "econoluzReference": "ECO-CAT-0100",
+      "contentSha256": "54f7254c4e16fc7ca39d42d3c931fd30209aac858528631be01702d6174a6876",
+      "technicalSpecsSha256": "97b6cdf5f62625fa0c37a78bff3adb4a21008a02e97e82a6f6f380400c64b1be"
+    },
+    {
+      "id": "construlita-module-45w",
+      "econoluzReference": "ECO-CAT-0101",
+      "contentSha256": "f5994534c6c8c8af5b6f832393832dc1b2cad62a0be676a39b1a9a51450eebad",
+      "technicalSpecsSha256": "ad677ddf9530aaabd1286ec6344056f3ce23fc756f54f0fa90c71868a90a48ab"
+    },
+    {
+      "id": "construlita-module-90w",
+      "econoluzReference": "ECO-CAT-0102",
+      "contentSha256": "4e594b992ae8c4e8bdb02d7ea699ad561c4ff33ad5fb7ed86073090266d7ee29",
+      "technicalSpecsSha256": "bf5e75f1096890f6b2d9f153f51d5657fbf95c544015f674a22f8b1da477a595"
+    },
+    {
+      "id": "construlita-module-135w",
+      "econoluzReference": "ECO-CAT-0103",
+      "contentSha256": "135c120a54fa036ddf84728489a0133bc42527ceb2d17cafe962d96904f6877e",
+      "technicalSpecsSha256": "5dc8a3c9c4357f673fe51e9afd4b90e487623a28fbc6457e27dc62daf331efc9"
+    },
+    {
+      "id": "construlita-module-180w",
+      "econoluzReference": "ECO-CAT-0104",
+      "contentSha256": "2f42281191a5638a7e87ceb585561e4ff45c096b658b32d77eca91dd259037f7",
+      "technicalSpecsSha256": "3f418d939a3786a7afddf0af7b023c4632e1caea239c72c2cb713d547d089547"
+    },
+    {
+      "id": "construlita-module-270w",
+      "econoluzReference": "ECO-CAT-0105",
+      "contentSha256": "1aafce5ebefafdf51fdb1689b4e8f0ac5896e1b1ccbb80ef964150a193a61583",
+      "technicalSpecsSha256": "04261d20361f0d197569b8c225ae80c506f009390870d447cf6e90fed3f0e6a1"
+    },
+    {
+      "id": "construlita-module-360w",
+      "econoluzReference": "ECO-CAT-0106",
+      "contentSha256": "ad3bfc522051a9d09e616aee5aa084cc3c31426269dea0f24b4c4e7cde452209",
+      "technicalSpecsSha256": "a85b01c60e3e1c11c905a93c3d7ed45029c42453456deaeb6ec25082b80f1a75"
+    },
+    {
+      "id": "construlita-module-540w",
+      "econoluzReference": "ECO-CAT-0107",
+      "contentSha256": "b6f09591a1422dde6de515e35cc166483529b533d9f06905f26249c44631c3ca",
+      "technicalSpecsSha256": "26c6a4fa1c6563d41502aec52335f8ad082eaa793bb30ba916b8763af899b59b"
+    },
+    {
+      "id": "construlita-sumergible-ou7056sbcg",
+      "econoluzReference": "ECO-CAT-0108",
+      "contentSha256": "e36b96cd17e5511c8a0eb691be9718da9c1cee59650e181c9f657195340038b4",
+      "technicalSpecsSha256": "d3e48a808e8e22888ca692546a50ac6ef366c0fe004d8161e55eed3d2947d7ad"
+    },
+    {
+      "id": "construlita-sumergible-ou7057sbcg",
+      "econoluzReference": "ECO-CAT-0109",
+      "contentSha256": "36dc9b9ce259dd1cf677486f4bf567f756018de933226139d859e82423571f4a",
+      "technicalSpecsSha256": "294c5e29e3f1364bb2a1d8a3f60d9542518d8a5b1f8adf4e1e555d3f41ab6342"
+    },
+    {
+      "id": "construlita-sumergible-ou7058sbcg",
+      "econoluzReference": "ECO-CAT-0110",
+      "contentSha256": "e94dee3c61c475f009fb1ec6826b3784b6f5637fdf97fb6d1619c23a897c5a6c",
+      "technicalSpecsSha256": "05e987ed61eb3973272a734113ebc69ec6e0cc40872c943dabc81464fb3c08cb"
+    },
+    {
+      "id": "construlita-sumergible-ou7059sbcg",
+      "econoluzReference": "ECO-CAT-0111",
+      "contentSha256": "178b05ca6d027679efaeadc72a0501c35289458b620031aeba55ab6f58bccb88",
+      "technicalSpecsSha256": "6fb240407fa6281b71f93ec75059335f15d976c83dd0f53f0605d42e7d2028d2"
+    },
+    {
+      "id": "construlita-uplights-dirigibles",
+      "econoluzReference": "ECO-CAT-0112",
+      "contentSha256": "12430caabe935d2f0ecbfa30e345e2d4a26273478569de0abb9994c270260d6d",
+      "technicalSpecsSha256": "ff186320a7124423d7712cd2367861907f398371b05c3626edbf7b4b4bc045ce"
+    },
+    {
+      "id": "construlita-fragata-pro",
+      "econoluzReference": "ECO-CAT-0113",
+      "contentSha256": "776214b05eb1b392634328b862ee0a4b7762d63a13821ab9ceaa0270cfbab265",
+      "technicalSpecsSha256": "751836718b7a8dc1e58f800f7a0cf1b0994c91558aad75e6d78018d7b36f3a71"
+    },
+    {
+      "id": "construlita-goleta-pro",
+      "econoluzReference": "ECO-CAT-0114",
+      "contentSha256": "040046f6e06f8cf02c25192fba043ed0e7971ff9639de1e95baef12eccdeac9b",
+      "technicalSpecsSha256": "ff5f1342792195f37951465aa18ec763674797dd971b38088c823c7c341577e4"
+    },
+    {
+      "id": "construlita-roadlight",
+      "econoluzReference": "ECO-CAT-0115",
+      "contentSha256": "0620006dd035c684c1c3f262bb40f091862d195f18c27fadc2d833ffb2efb878",
+      "technicalSpecsSha256": "690e1bec11b4676822c6ce6fb6e0c2706e63a30b24b4a3bae0f51de935c2c107"
+    },
+    {
+      "id": "construlita-walklights",
+      "econoluzReference": "ECO-CAT-0116",
+      "contentSha256": "590ebf7e04a62c91435d85bdf3091833d38c3f327bacbaf9eb64630d3144407b",
+      "technicalSpecsSha256": "b3121cae1168117e6e4a4fdb3104c6c497b39ab756acb69357a25bcea87ad537"
+    },
+    {
+      "id": "construlita-barra-pro",
+      "econoluzReference": "ECO-CAT-0117",
+      "contentSha256": "552f69e7fa08bcfeeec41f33630a53c2e8f57152a138c501a1ba2e50170bc17e",
+      "technicalSpecsSha256": "968a3f6cf0f107c14bc3ed764a69c66d084924bfd49fb1ff691b41905e47e54d"
+    },
+    {
+      "id": "construlita-uplight-lineal",
+      "econoluzReference": "ECO-CAT-0118",
+      "contentSha256": "e28bdb663a4e5950378d79fd2b57abb22dc3c4406f030c3e1a77a7d51cd73547",
+      "technicalSpecsSha256": "a934242d0cd85fb6f25c42470b6dd5d976c00a391c77cdd50673d244dda2304c"
+    },
+    {
+      "id": "construlita-uplight-lineal-dirigible",
+      "econoluzReference": "ECO-CAT-0119",
+      "contentSha256": "5151b08661f060038d772309acaadd7fdb8b7217aafa0fa78fba0d6a2984ecdd",
+      "technicalSpecsSha256": "c10033452e1b3e0ffcbd1e5516e774414c0b5c3062bfcb4681a40071b52ed9d9"
+    },
+    {
+      "id": "construlita-metroled",
+      "econoluzReference": "ECO-CAT-0120",
+      "contentSha256": "db9750d467f4fa90960e4c6ce3381234e1432f2382acb211fd10014ecf822483",
+      "technicalSpecsSha256": "a20974abe337a887fa8354fdcf4d9e01d7cd7cfc440d898e5d81d7da5464f003"
+    },
+    {
+      "id": "construlita-hb-infinity",
+      "econoluzReference": "ECO-IND-0121",
+      "contentSha256": "a1cd99293b8e57b7221f409022e2af297e81b2a44b66a267a0e6fd488755c528",
+      "technicalSpecsSha256": "4089d0b142b15e1e720df6ebac6e3d44f4a152336e13a91f63b44d283d4518c1"
+    },
+    {
+      "id": "construlita-trazzo",
+      "econoluzReference": "ECO-IND-0122",
+      "contentSha256": "cd1d99b952b5986a5bd533aad277ca58a66ac146fea01556f39d0bcb93ec0014",
+      "technicalSpecsSha256": "52409993c6bec238d2815fe4bfda932103e19af5541c87605f27eaf79269186d"
+    },
+    {
+      "id": "construlita-slim",
+      "econoluzReference": "ECO-IND-0123",
+      "contentSha256": "399ce5a9cd43fe38a2b6407a7700f3e18ca36fd91b0a5ebffc0756336cd5dec9",
+      "technicalSpecsSha256": "56a8e34b04237f122444505a38fec0aac60e796fbce347867850e9123f394e7d"
+    },
+    {
+      "id": "construlita-lynlight",
+      "econoluzReference": "ECO-IND-0124",
+      "contentSha256": "9174e18ec26f0a425b265c3d6f04da4859cda4d54c83b0c7cbe9a1b29706a33b",
+      "technicalSpecsSha256": "5c8f15231ca099d0840ab253c008ecc2b865392be05ce471788bb3de745bf947"
+    },
+    {
+      "id": "construlita-vector-system",
+      "econoluzReference": "ECO-IND-0125",
+      "contentSha256": "818747d9d443b544a1ad009d666c14879a26690da404fbad7a01ac918048c817",
+      "technicalSpecsSha256": "a9ffb4cec3a84796ee5c678705077a1d3d033ac1fa17164ee6fcf5c616af7f10"
+    },
+    {
+      "id": "construlita-microsystem",
+      "econoluzReference": "ECO-IND-0126",
+      "contentSha256": "1d90561f30c056e42c7555bc2980b226900758ce9d4346766a4dab6d83de044e",
+      "technicalSpecsSha256": "dffad5a1e798b091c38902d9fe95b7a82de9cc88e54bffc69ded919de36f4a11"
+    },
+    {
+      "id": "construlita-aurora",
+      "econoluzReference": "ECO-IND-0127",
+      "contentSha256": "6b864032f5f5fe24670087f2c1e900f8a43c0d334f46732dd12ab136b8df33d1",
+      "technicalSpecsSha256": "14062340112ebd742dd4340ba2a437e2afcaa3618fc7e04099c6333a2f7afa49"
+    },
+    {
+      "id": "construlita-paneled-603",
+      "econoluzReference": "ECO-IND-0128",
+      "contentSha256": "554fca1ad2ec5f6c66305b9b72d4115f8838806c1bc0fe9fd089b62e7ad777e6",
+      "technicalSpecsSha256": "f6512fad8fce37aa82eb28f45f0258a0773004350c27674c90c0ed63a32e9c1a"
+    },
+    {
+      "id": "construlita-paneled-1213",
+      "econoluzReference": "ECO-IND-0129",
+      "contentSha256": "8b9d995e570e07b6ec170f50879e6d24ccf10ebf6b2f88d7aa5840bfbcdf1622",
+      "technicalSpecsSha256": "8f11d0ec4e6f8d20ef5d3961e0f40f66379d7abaedd956d033940a978af9bc61"
+    },
+    {
+      "id": "construlita-alba-of1838bcca",
+      "econoluzReference": "ECO-IND-0130",
+      "contentSha256": "86cefc06a5586929d242283fcbd001581181af4d8bd73b922c164fed64c5761d",
+      "technicalSpecsSha256": "ff197aaa3cc5c86c06cbcab442026d7815e7ace1e1e44d60f50e2d54ca3393c7"
+    },
+    {
+      "id": "construlita-alba-of1840bcca",
+      "econoluzReference": "ECO-IND-0131",
+      "contentSha256": "5d2f9ab1c2c01ff3b78421a7a816c31e71ea4c2bb11a908d570132f1212289a2",
+      "technicalSpecsSha256": "6b7ec76a8e4cda249fc512977b18beeddc92204135ca7cc640141b8528aae898"
+    },
+    {
+      "id": "construlita-magnetrack-pro-linear",
+      "econoluzReference": "ECO-CAT-0132",
+      "contentSha256": "231abfc08c7134c0552a306eb5dea438e73b45d650073deca9afb05c898fb4f7",
+      "technicalSpecsSha256": "a3074db0c8891f686c06ee3763c4744144809dee94d08e99f908e0b5e980d251"
+    },
+    {
+      "id": "construlita-magnetrack-pro-multispot",
+      "econoluzReference": "ECO-CAT-0133",
+      "contentSha256": "3dc1ba677bf51913ea8e2369c7c869f4fe8e5e68e77292b65e4f85ef46d5571e",
+      "technicalSpecsSha256": "f62efb235440ab5b526f788d5744efe45b3208f6e2d1581c5c5dea46eb6ce409"
+    },
+    {
+      "id": "construlita-magnetrack-pro-grazer",
+      "econoluzReference": "ECO-CAT-0134",
+      "contentSha256": "c1eddd5f7a1dbcdc6528ffb05c46b05dd182db402967cd7d0634c2a6230e91a2",
+      "technicalSpecsSha256": "15e0810e9fa34bf6a8381967490f4ddcc0676a3acae666044a844c1aff0f16bb"
+    },
+    {
+      "id": "construlita-magnetrack-pro-washer",
+      "econoluzReference": "ECO-CAT-0135",
+      "contentSha256": "d72bc3cd84e58ddab0db7a17ed71632712891c7e333d69864fd705bc418f9620",
+      "technicalSpecsSha256": "be434a8ad0794477bcb8c8a8d29481d6622348dd1b18619786d3974c3c0d260b"
+    },
+    {
+      "id": "construlita-magnetrack-pro-spot",
+      "econoluzReference": "ECO-CAT-0136",
+      "contentSha256": "2ed09ed7a210d815ba080adacc20033f6b60f2de3965d4fdcd80ff459f3dc195",
+      "technicalSpecsSha256": "3d0e939f2b726bc2506541e1f821054d754b88b2527c53bc637f85492dc92c3f"
+    },
+    {
+      "id": "construlita-magnetrack-pro-pipe",
+      "econoluzReference": "ECO-CAT-0137",
+      "contentSha256": "ce235d17b84cf79f736b9daa6d1e73a9501e5f56b7b93859ca1b9679ee7bf8e3",
+      "technicalSpecsSha256": "e0481f524d35b4107acdb712f3a2a81829c2365f78b3becc516b2a292d30c613"
+    },
+    {
+      "id": "construlita-magnetrack-pro-moon",
+      "econoluzReference": "ECO-CAT-0138",
+      "contentSha256": "8b686bd0bc32f8475eb829e18a217a8675aa0491bfd92e7df9ebffa39dfd4bb0",
+      "technicalSpecsSha256": "0e4401c2d77d2a5b007cdbab6af40c2bd02262bea833b5afde543a4a6e9d317b"
+    },
+    {
+      "id": "construlita-magnetrack-pro-microrriel",
+      "econoluzReference": "ECO-CAT-0139",
+      "contentSha256": "dac1d4440957c33ae4ba65f0f014efc1a0bcd2c0fe1fccd000386366499e4539",
+      "technicalSpecsSha256": "2fc82799125c785cb33afd0398f8d73a3b028f62eabae869d67318c98115df09"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5610n-conector-codo-empotrable",
+      "econoluzReference": "ECO-CAT-0140",
+      "contentSha256": "5681981530e78e8f3d1346ee5eb7d1df5449b73ea7701c80ce5b48025a031b0d",
+      "technicalSpecsSha256": "2d5c3e1ee58f6407597e35a3deb77cf6790007c7179c351c72e3abd61cb5e533"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5611n-codo-interno-empotrable",
+      "econoluzReference": "ECO-CAT-0141",
+      "contentSha256": "e29d126efdbc1acb1ac32beac4f6c70d40d2a471fefc42aff509b8b9d7f6d20e",
+      "technicalSpecsSha256": "4d7d28ee836dccaecc073420b18963eb4d2f09c68c20223a21d50dda8776aea1"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5612n-codo-externo-empotrable",
+      "econoluzReference": "ECO-CAT-0142",
+      "contentSha256": "bcd6d991a0df0a128e8aee06e26f4eeb9e7f929975662ab4ada742ba255a8e66",
+      "technicalSpecsSha256": "e6b851b4d9423a791ccfd7d368f197cc41f8d2f66dab87c2ed52f39c0912023f"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5639n-conector-t-empotrable",
+      "econoluzReference": "ECO-CAT-0143",
+      "contentSha256": "07dc48eba6a230c2d158f84f913f4ff1ee8c04411a5428f87abb6ddf92ec40aa",
+      "technicalSpecsSha256": "d2a6e92136361fcc256e7931b761e233652518d9a177bb1fe3789e87893c0448"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5640n-conector-x-empotrable",
+      "econoluzReference": "ECO-CAT-0144",
+      "contentSha256": "d949522e1d9d0c6d97e2bdedfd92f9cc7fd5b6ad966b34a20b906c2571623781",
+      "technicalSpecsSha256": "ba7685e2a39a14ee94a4ad7038aa1309f46fde351d4b10911b0cffdbaeb72fce"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5630n-conector-codo-empotrable",
+      "econoluzReference": "ECO-CAT-0145",
+      "contentSha256": "2d56354c537b7365515d365807aece962a7a66ab2f15932f2c00d87368ea8297",
+      "technicalSpecsSha256": "2ad0b911f15f90a80f19910157f70cb31bb61d1207680c84e559d4b8857ba8c3"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5637n-conector-t-suspendido-sobrepuesto",
+      "econoluzReference": "ECO-CAT-0146",
+      "contentSha256": "74cfea9159430b91e4ae560a7dc1cf4308b9480ce3ed8314845a4d4bbf7a55f3",
+      "technicalSpecsSha256": "e03997afa6b7f3c43b7f64849d96aea9ad5245fddf91cf3710da01e592ad7a2f"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5638n-conector-x-suspendido-sobrepuesto",
+      "econoluzReference": "ECO-CAT-0147",
+      "contentSha256": "2a9823caaee57153f0146ce463cb655a28d7d08053b87a1625e0ecd7373011f6",
+      "technicalSpecsSha256": "bcc0bf556c394a5a987e22ae98a7b3c93d485ede334454bad0cc5d4193ef25c1"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5710n-conector-codo-suspendido-sobrepuesto",
+      "econoluzReference": "ECO-CAT-0148",
+      "contentSha256": "f6eb49aa7e15f8e79881996fde5898de91df8f5c2d6e44866d1a9b09137b05fd",
+      "technicalSpecsSha256": "834e4a4b07e2b676e3cc67fdd251a7345ed090eda68e5927f47e25c2a6b0e2ca"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5711n-codo-interno-suspendido-sobrepuesto",
+      "econoluzReference": "ECO-CAT-0149",
+      "contentSha256": "449a21d33715aff8d5c7ab09c94b13909e87e2d9b32e65a30c84e159c7ebce8e",
+      "technicalSpecsSha256": "d6964a465aa3c9e3917b9da6ca02c4ba8105d0bf178dbaf0d4ee5b90423023fe"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5712n-codo-externo-suspendido-sobrepuesto",
+      "econoluzReference": "ECO-CAT-0150",
+      "contentSha256": "2cbbfabf5b2b95c5550b2c6c3caf7bccdc8a28c3865f2617c726c30cf4283a70",
+      "technicalSpecsSha256": "d631bcf2de372f0a0d55b87bdb7c97dc4e2d2bd86f699802bb66925a01043dd3"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5730n-tapa-riel-suspendido-sobrepuesto",
+      "econoluzReference": "ECO-CAT-0151",
+      "contentSha256": "369fbd649d0abcc2f58d223fd6b202858c4570f700e06f937429fd376f936de2",
+      "technicalSpecsSha256": "6e3250eb9be70745d8f87a528d751b1b85d9d1884a25aaaa2d551b01afc24c43"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5530-interconector-flex",
+      "econoluzReference": "ECO-CAT-0152",
+      "contentSha256": "323ee228814305a3b8e4445eb7e59875379cccc78ae66d715778155d8a58a53e",
+      "technicalSpecsSha256": "1c09c3e9f87f6cc2d94a6f12d8c4b1ab5ae7641f43456b1f7b631284497c3c38"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5635n-interconector-t",
+      "econoluzReference": "ECO-CAT-0153",
+      "contentSha256": "4e064907c2757b970c6859c2026476e62af97cafc56851e0c287ea660235dc04",
+      "technicalSpecsSha256": "3a8c0e84de47d6f69ca9563b9ca356677cc734b622ca11acdbbaf85429e14482"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5631n-interconector-lineal",
+      "econoluzReference": "ECO-CAT-0154",
+      "contentSha256": "f8546f16c0d56ad4ba25494eba2dcf62b961a97eaa2dbd2fcef8a7d9efdd813a",
+      "technicalSpecsSha256": "c68b885792287e73d6c2c8987474294f6d863de9ed97efd65afba36ad91daa45"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5633n-placa-interconexion-mecanica",
+      "econoluzReference": "ECO-CAT-0155",
+      "contentSha256": "c06fdbcf69f7badd8e4247e94b55ef788df209a3bf23f780dca636c3ad5af5a3",
+      "technicalSpecsSha256": "438e6b025a4f7690d5af7b2ac92712a8d737ef48c4a3ee931115305915df293a"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5632n-arnes-sobreponer-microrriel",
+      "econoluzReference": "ECO-CAT-0156",
+      "contentSha256": "924d929835e24bd378692853bfae59a714a2ac6ce8c140e4ec9e8ae64a1c3f41",
+      "technicalSpecsSha256": "6cab18c5865ea57426842aaf020c83ec86c5b7b5a2e1b69c26d6e4c932057bba"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac5745-kit-suspension-microrriel",
+      "econoluzReference": "ECO-CAT-0157",
+      "contentSha256": "bb81b356123ce8dfa3e505d9defe0dbb3af160c97fe8d8d8b4f1e51e50b9871f",
+      "technicalSpecsSha256": "c178dc06ce5a9b1cc530fd5af5bafc5e25ed784736fb581f7cbecc03c650c953"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac78150-driver-150w",
+      "econoluzReference": "ECO-CAT-0158",
+      "contentSha256": "859805d4fe6c663345b381e97477fce8fd6b5663e55b2174f5853f7f44e50367",
+      "technicalSpecsSha256": "887589d7ee54da92a336d614c6640a2e03eb278c189f4bdfaca7a9d1a08e29ef"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac78200-driver-200w",
+      "econoluzReference": "ECO-CAT-0159",
+      "contentSha256": "3a85f60b0aaa75df71b8a79227cb31ee22d408bd3046a8713d09a84311cbb21f",
+      "technicalSpecsSha256": "778e571543f36123cd979ddddedf41f6c1622a6b6bb665aadb6ffbc8385e0fcf"
+    },
+    {
+      "id": "construlita-magnetrack-pro-ac78350-driver-350w",
+      "econoluzReference": "ECO-CAT-0160",
+      "contentSha256": "edf3f43fb2da37658e3edd9125e3cc208528acc01af1c742a1c66a995d4f8b5a",
+      "technicalSpecsSha256": "8a95d6a28c9433a2e058c1d231cfa0839b08a2097d9791dca8179093df6cd82d"
+    },
+    {
+      "id": "construlita-focus-riel",
+      "econoluzReference": "ECO-CAT-0161",
+      "contentSha256": "af9d08025f8aa50c4175637e8c55030dfab383d2641b59fda8d9a47a8634bef7",
+      "technicalSpecsSha256": "cf1c6973a69e7190e2b6ab3457e2111e180b85d42d4b39211079d9a7a875a76c"
+    },
+    {
+      "id": "construlita-sphere-riel",
+      "econoluzReference": "ECO-CAT-0162",
+      "contentSha256": "a2cb498508ab54cf1c8fcbaad24c3c24b06378f23412d5c4a21c0690b3afefbf",
+      "technicalSpecsSha256": "f0d13d102765478758bd4c9ad43aa70665a4953558e3f9cc37c47a6a97a427cf"
+    },
+    {
+      "id": "construlita-skylight-riel",
+      "econoluzReference": "ECO-CAT-0163",
+      "contentSha256": "fe0e39a5794ad89d4e81bb11fd67d0e1db998184e3dc6c1428d31dbc989f88d5",
+      "technicalSpecsSha256": "d0a2f3a550e1e65a247763625fdc97dadfaf011f13878219b97baa170ebf968c"
+    },
+    {
+      "id": "construlita-walltrack-riel",
+      "econoluzReference": "ECO-CAT-0164",
+      "contentSha256": "b22556b16c84305ff9d6282ea4221603e288f94db24ed1d62ceeffc97368d95e",
+      "technicalSpecsSha256": "b89ea1beab3ca27c696722c62f1231d54ac38d396d1807f1a8f6f92ea6c4e1e5"
+    },
+    {
+      "id": "construlita-cylinder-riel",
+      "econoluzReference": "ECO-CAT-0165",
+      "contentSha256": "5b44310b3df3d1e9ab06d10c27460362e217dd27f581af8b4e750f19421a29ca",
+      "technicalSpecsSha256": "6ace0be2586fd11e3add19ad8d810f29efd16fb9fa41ceed56ee127afcfed134"
+    },
+    {
+      "id": "construlita-cylinder-pro-riel",
+      "econoluzReference": "ECO-CAT-0166",
+      "contentSha256": "cbdf9d33b5e8ddbebe715dcad283d77dc63804d41a8d3e6d130a4b0541e413c9",
+      "technicalSpecsSha256": "61a0b79e7ce0d5685c5e8d0fe5401889c2319a6b86b4d1be5627f5bdaf147592"
+    },
+    {
+      "id": "construlita-cubic-pro-riel",
+      "econoluzReference": "ECO-CAT-0167",
+      "contentSha256": "22bdfa2adc4a318505d5e52424fcf08e778233b4acef65a9273c71aefc4632dc",
+      "technicalSpecsSha256": "cf36473fd9ad10e23a9b49cd751ac6f05dfa1054fa49ee2d5acc4c2afe7f696a"
+    },
+    {
+      "id": "highlum-luminario-riel-sobreponer-20w",
+      "econoluzReference": "ECO-CAT-0168",
+      "contentSha256": "e63c344d746196a114fcc11f26f7ee15bee2222bb1a4df408899c4fca8629cb4",
+      "technicalSpecsSha256": "738f0a4eb7be9404391abf4e5682057e7dee4fa29646a8924a3cd30c4c18e362"
+    },
+    {
+      "id": "highlum-lampara-pared-lw15-002",
+      "econoluzReference": "ECO-CAT-0169",
+      "contentSha256": "8430a07dcec579f58a899824b7a0e15901e9bf9f770d7b9e0ce481c86b239167",
+      "technicalSpecsSha256": "bfeeb0dfec1095bafec8336084e58450d0e5db0603f0008cafdb4f2562827d37"
+    },
+    {
+      "id": "highlum-lampara-escaleras-lw15-004",
+      "econoluzReference": "ECO-CAT-0170",
+      "contentSha256": "764451ae35c3278a004797ad820f99a3d1383e930e1c4776a0bd3fe50ae87c08",
+      "technicalSpecsSha256": "b36a7031f2c7738e75cc7deb655f9de60d3b32b8f2d2961971405650d669c91b"
+    },
+    {
+      "id": "highlum-arbotante-pared-lwpl20-003",
+      "econoluzReference": "ECO-CAT-0171",
+      "contentSha256": "c2bb4ae6068eb475ac752dccc93958e485893ba287c9781a9df9d3ab50763749",
+      "technicalSpecsSha256": "fa26829f20ad21a9d35c766bec56860f369f6590debae316376cf5b30b5d2541"
+    },
+    {
+      "id": "highlum-arbotante-pared-lwpl45-004",
+      "econoluzReference": "ECO-CAT-0172",
+      "contentSha256": "890fc4350c4cbc92c4c6577c81b1b16d6e55c5fa850345fef54cc2af2ee30a71",
+      "technicalSpecsSha256": "6ce57d8c313064d1cea80c034daec9ec48c3c791a7d72999c92828f1faba6a4d"
+    },
+    {
+      "id": "highlum-proyector-fl5-exterior",
+      "econoluzReference": "ECO-CAT-0173",
+      "contentSha256": "a13a0e095af21613cf27b0d7d26f038160fafe175e3bfb3b4d5295d827b312ac",
+      "technicalSpecsSha256": "9da651f28cbfdd1595a29c1f98d6aba778e952d9d7f982d425499257c1a26195"
+    },
+    {
+      "id": "highlum-proyector-alta-potencia-exterior",
+      "econoluzReference": "ECO-CAT-0174",
+      "contentSha256": "106c389fea41a260c2bcfdca59fbdc869861ee802d1a914bbf633f0dbdc07bdb",
+      "technicalSpecsSha256": "8963099d213747e7b9fc877bdb2fc3ea8cd6991dfda8dbc6e3e032348cc9f127"
+    },
+    {
+      "id": "highlum-proyector-estadio-exterior",
+      "econoluzReference": "ECO-CAT-0175",
+      "contentSha256": "fb9376cbc470fda6e738c69d457d144e98aeaf0aa1ab4d3032d567ade14feccc",
+      "technicalSpecsSha256": "278856ab4024da9d7595659626681c8688db5f8f6ce10d04192cddf53153f258"
+    },
+    {
+      "id": "highlum-proyector-solar-exterior",
+      "econoluzReference": "ECO-CAT-0176",
+      "contentSha256": "92cfdd4e9b55928a5ba782ff146123d2d35e3635d44dd1f22b407d58cab72ece",
+      "technicalSpecsSha256": "7a1406d6e5eb5988a6d66b0d35f864a63c1dd354fff2af404d514c0321130292"
+    },
+    {
+      "id": "highlum-luminario-poste-street-area",
+      "econoluzReference": "ECO-CAT-0177",
+      "contentSha256": "52d06c1dc83cf63feedb4872815dfbed4b1a5261d7c6f8db0010fae5d76d1dd3",
+      "technicalSpecsSha256": "37e692888b79f2ae62530162425f036fdd00d76a93900015712b2b834ef9f9c1"
+    },
+    {
+      "id": "highlum-luminario-poste-solar-street",
+      "econoluzReference": "ECO-CAT-0178",
+      "contentSha256": "77ca1d634e0a07b57ab9e37fbefdc09d44f550458dcff841a2c9b60afca96a6a",
+      "technicalSpecsSha256": "757ad860c0f91f814a64117f537f97996c9af27f4e06fa84a2ea599f25304511"
+    },
+    {
+      "id": "highlum-luminario-poste-switchable",
+      "econoluzReference": "ECO-CAT-0179",
+      "contentSha256": "8b5a41b2212632d4831c89cdfdf3cbfa44860159a98255d8e6233846f6d92954",
+      "technicalSpecsSha256": "f93162460a05a064d9caea3f5e454ee1913a52889986d190a5eff1cd540dc18d"
+    },
+    {
+      "id": "highlum-reflector-portatil-solar",
+      "econoluzReference": "ECO-CAT-0180",
+      "contentSha256": "ec92d61ba6be0b8029c97a36cd88fd57c2f6b2b416cad894dfc49d7ab4e03790",
+      "technicalSpecsSha256": "67192f52413617e3196175c04a77d4b916b26a8cb2fcf44ecb49496b0fff1dd2"
+    },
+    {
+      "id": "highlum-linterna-multifunciones",
+      "econoluzReference": "ECO-CAT-0181",
+      "contentSha256": "1f6e4cdb1fda1a6c7c780e69cae38f6c4b37b9829aad2a74fa3514fc09f10775",
+      "technicalSpecsSha256": "5cf379e1f138ed013e48d422a90412e3160e80c8d2f396ae1fc6702cc9b368e8"
+    },
+    {
+      "id": "construlita-focus",
+      "econoluzReference": "ECO-CAT-0182",
+      "contentSha256": "602ffab0aba77830c0ff4aad6925ed04f61fcf73eb1f27b302441440cdbdba23",
+      "technicalSpecsSha256": "09d690965b76217244db2560c3797e784a70cb4bec4dce09be1a4eafe65b2c4b"
+    },
+    {
+      "id": "construlita-canyon-pro",
+      "econoluzReference": "ECO-CAT-0183",
+      "contentSha256": "285e090dfabd0df7d7c213a991a36d76f64aa0081d55b933b54b831fa8c52fb7",
+      "technicalSpecsSha256": "c7043429a78339dd5ff36985c09bfd7678a61dc591e15a04caee06783faab522"
+    },
+    {
+      "id": "construlita-modulare",
+      "econoluzReference": "ECO-CAT-0184",
+      "contentSha256": "9ba9aecb357ae1abda7e619a53d64bf93c381210836fcc05ec21fedc51575d01",
+      "technicalSpecsSha256": "566a6d58f3847eb7d77ccb17aeaad7bf3d38720a855c24b722aa0ebb7eab99c4"
+    },
+    {
+      "id": "construlita-comfort-dot",
+      "econoluzReference": "ECO-CAT-0185",
+      "contentSha256": "23ae72b3d34e3e5c96136fa4000943a11d7e046a5e4c89e159d696526d72f43b",
+      "technicalSpecsSha256": "cc1ab758455c300f81150fde7cea57aeda8af33e5ad940b47e92490196e1149c"
+    },
+    {
+      "id": "construlita-nova",
+      "econoluzReference": "ECO-CAT-0186",
+      "contentSha256": "e17e12fb48e1db2f2f8547b02d2c386711c7b5a023a2c1c208188e75c46f244e",
+      "technicalSpecsSha256": "9924e78f5af61af343922a26a29653223d26534a1427883b820d01d4ecaa70f0"
+    },
+    {
+      "id": "construlita-downled",
+      "econoluzReference": "ECO-CAT-0187",
+      "contentSha256": "88a796b7ba4e0b6e7c7d174619c8c17cab2853e4dfcc1c1bf655b926abfa7ee4",
+      "technicalSpecsSha256": "9e37245378934d1c13730aa92bc6919cc0a3cc40b29ee85ec362c285384653cb"
+    },
+    {
+      "id": "construlita-performa-pro",
+      "econoluzReference": "ECO-CAT-0188",
+      "contentSha256": "b8ac47f223316905785556a6498ff543980916207ca6906565896022122e0ff3",
+      "technicalSpecsSha256": "30c7834c343330d2387893c016525e2e72192c438796c1841fecef97fe2e93ff"
+    },
+    {
+      "id": "construlita-comfort-soft",
+      "econoluzReference": "ECO-CAT-0189",
+      "contentSha256": "fd881b008eb848fafd3b881f0ff9e99aaecea7aaffa7c13615238277dc44331b",
+      "technicalSpecsSha256": "b175cc5d558869d670f8e079d2e6f9150e25e2c02efd52f8be5e761d9f3b6892"
+    },
+    {
+      "id": "construlita-alfa",
+      "econoluzReference": "ECO-CAT-0190",
+      "contentSha256": "1382b7e29e1cea066c2cc7e1c27247ec2149df3b3c59f38ea47cfb627372b837",
+      "technicalSpecsSha256": "9a0cf65f555ca8a63aab08f7c52f21ca374617b998540dcc501b86904c253377"
+    },
+    {
+      "id": "highlum-downlight-sobreponer",
+      "econoluzReference": "ECO-CAT-0191",
+      "contentSha256": "c4dcb135635af5235c4382c8a82beebdce261abd56d8f76ca22ac28d90dd471b",
+      "technicalSpecsSha256": "7e6dc5bfcc092360a9cc8977262756ce3bbc450957b85621fd2f1e8b229036d9"
+    },
+    {
+      "id": "highlum-downlight-led-sobreponer-negro",
+      "econoluzReference": "ECO-CAT-0192",
+      "contentSha256": "d3118b07a732826643da78ef5cfd555744d71799fcb95655539b0c6a385f1275",
+      "technicalSpecsSha256": "374925e5bfca5c6b3d26f6d3f5351924e91180ed90adc5196976290eaec96d26"
+    },
+    {
+      "id": "highlum-downlight-led-sobreponer-negro-25w",
+      "econoluzReference": "ECO-CAT-0193",
+      "contentSha256": "5aa8977d5c0340a319b18e7d7d54c71e877c48cc039d37f83a4986672333a511",
+      "technicalSpecsSha256": "61a39fa81345ca933d9705572309d9db6eb91b3dd9ddb819bc8e275f5972e8d1"
+    },
+    {
+      "id": "highlum-downlight-led-sobreponer-negro-25w-calido",
+      "econoluzReference": "ECO-CAT-0194",
+      "contentSha256": "0a3e39edc9e483e8e411bd8ab587a4ff194245c225f6f8e51f8131ad3c048ebd",
+      "technicalSpecsSha256": "557feddebd987f678b8cc2b3a61b5404902d98657cd702c32236e73cddd92066"
+    },
+    {
+      "id": "highlum-downlight-smd-cob",
+      "econoluzReference": "ECO-CAT-0195",
+      "contentSha256": "f465d072e08f7642bc4f54ec211db2618e23d0e22af2bbd5a7c0b2f9956c7381",
+      "technicalSpecsSha256": "e3743041b4a1726a172df317869e484921e5a18604ce574474847ded535fec86"
+    },
+    {
+      "id": "highlum-downlight-trunk-light-11w",
+      "econoluzReference": "ECO-CAT-0196",
+      "contentSha256": "31e502aca00d6b7df2e82024a9328e6857985999dea56123cbb5dd18a523ce95",
+      "technicalSpecsSha256": "64c6a4ea9cedc4aa8745ef5a17fba057bd4a3198e68ab67b2d9f78b2715897a7"
+    },
+    {
+      "id": "highlum-downlight-pull-out-spotlight",
+      "econoluzReference": "ECO-CAT-0197",
+      "contentSha256": "5382cd2355838b5a1165e61c21b95ae711522c8f7537f907911678a07016073d",
+      "technicalSpecsSha256": "1c7a3123290bcee2ea2ca7af1ce67ccf1f73e352c354dc0a82c95dc06df561e1"
+    },
+    {
+      "id": "highlum-downlight-spotlight-cob-5w",
+      "econoluzReference": "ECO-CAT-0198",
+      "contentSha256": "3f27b985e4e8241b06abd9374a94f90347aa781e9d9d2956877b6086db54709a",
+      "technicalSpecsSha256": "9e9039d297f4d611c5dd6ce94fc27b64667e0ae95dd0ca6d59240526db24e4bf"
+    },
+    {
+      "id": "highlum-downlight-flat-panel-redondo-empotrable",
+      "econoluzReference": "ECO-CAT-0199",
+      "contentSha256": "0bb20a64a2a5c90b5fa34ecee30f591cfdb03158152c1b9a82ce59064abbf500",
+      "technicalSpecsSha256": "fdb99f3e573d11ff9b6e3982dd493af03e1beaad1d311ccd753d9f626d1dab2b"
+    },
+    {
+      "id": "highlum-downlight-flat-panel-redondo-sobreponer",
+      "econoluzReference": "ECO-CAT-0200",
+      "contentSha256": "b3ad9eef7697e7c69d2620deed3f0cb9f059f00cbac3b56e8ad4b2127b240b29",
+      "technicalSpecsSha256": "a42f68acb57f19ab550107b278c684a5a2770a1cd2b770f8b9910d1dca65c9bb"
+    },
+    {
+      "id": "highlum-downlight-flat-panel-redondo-sobreponer-24w",
+      "econoluzReference": "ECO-CAT-0201",
+      "contentSha256": "eed9bc28375b0d93a9d401cb186c17917b17490e75219febbb723609ae81f999",
+      "technicalSpecsSha256": "9493b6accbbb979c0189554e66f1cb00b9d105ac7142fd2354036aa0b6bded51"
+    },
+    {
+      "id": "highlum-downlight-flat-panel-cuadrada-empotrable",
+      "econoluzReference": "ECO-CAT-0202",
+      "contentSha256": "2bece1390002338cced9c5af9ec24b429df764006f1af6d94bf49ce5804a4610",
+      "technicalSpecsSha256": "8cd9d911b9a00e0a5883e93d478e7365b12945d6b8e04a1c897a07bd6880fc0b"
+    },
+    {
+      "id": "highlum-downlight-flat-panel-cuadrada-sobreponer",
+      "econoluzReference": "ECO-CAT-0203",
+      "contentSha256": "8d3caed56e44fa96761cc12f07c0d323a3c1e36624b6a27d3598bfbaf50b9bec",
+      "technicalSpecsSha256": "ad70520bf81fcebdb639727b9a676dada5fe0ec2e21731887afddfa385fb065b"
+    },
+    {
+      "id": "highlum-downlight-glass-flat-panel",
+      "econoluzReference": "ECO-CAT-0204",
+      "contentSha256": "001c1384ff90c979193ff33f38b1eb59ad8a0d2e6aa9581ff94ba946c33a2e2d",
+      "technicalSpecsSha256": "1268df6b99d994cf726098d1589c9243fc94a8917370fda74d67e974b5c62bba"
+    },
+    {
+      "id": "highlum-downlight-back-lit-led-panel-2x2",
+      "econoluzReference": "ECO-CAT-0205",
+      "contentSha256": "ab3e2b3dae85aa3fe50b59e24365cb4f7573e11385f3272cd56a478de2bb3756",
+      "technicalSpecsSha256": "512aedd2b7f5ba2859553d657e1be65e63263f949e4e56b3485f6e8987e90b95"
+    },
+    {
+      "id": "highlum-downlight-back-lit-led-panel-4x2",
+      "econoluzReference": "ECO-CAT-0206",
+      "contentSha256": "2911a8533eda03e35486ad919a27afd15a0059b4b19c1028f798f2cb72cb61b4",
+      "technicalSpecsSha256": "322c5ef1b43448817f15d5865ae4ae3811ca8c44c0a0d880142787cdd260efe0"
+    },
+    {
+      "id": "highlum-downlight-back-lit-led-panel-bld-2x2",
+      "econoluzReference": "ECO-CAT-0207",
+      "contentSha256": "8adff3f68663a2d5af7eb49ac0f2f4b9d0ce1171fb58322006563e653685341e",
+      "technicalSpecsSha256": "e600d2d4449b2218d2299f97278b6eb31540db3d8bab4b5106308e5225e4dfe5"
+    },
+    {
+      "id": "highlum-downlight-back-lit-led-panel-bld-2x2-50w",
+      "econoluzReference": "ECO-CAT-0208",
+      "contentSha256": "1e9dca5826526054bd830c3163d0906ea77ef0b456021c17bac096a40b5754b9",
+      "technicalSpecsSha256": "94bb4052060dc8a50033083d2002b0b68ab29a97172053e2d06d319ffa8d8e93"
+    },
+    {
+      "id": "highlum-downlight-flat-panel-pmma-18w",
+      "econoluzReference": "ECO-CAT-0209",
+      "contentSha256": "61f4e1383c8d50a7b2d53e16ab38249c7302858e54b20c1d094f68563e032f78",
+      "technicalSpecsSha256": "806147b812e03feb711e8f66314a4218f49ccd60051f614d7247963ef827dac6"
+    },
+    {
+      "id": "construlita-tira-led-re6036",
+      "econoluzReference": "ECO-CAT-0210",
+      "contentSha256": "4c14a9d1a779cc2ac46be50341ac58f6d52a575ceacba6ac3c7399c62d52a4d8",
+      "technicalSpecsSha256": "bac2b5afa3bec5adb1fc8bba77d6e08e66763f1229428fe008745a06a1e09866"
+    },
+    {
+      "id": "construlita-tira-led-re6037",
+      "econoluzReference": "ECO-CAT-0211",
+      "contentSha256": "65df1032b80bdd039c3ce24ffeb8ef6d047bb610961ff27c775ce42aea5d5425",
+      "technicalSpecsSha256": "2fa54555e64d60f1de8bd0ad9097e708114f7b13f66d2c535074bca2cf6840c3"
+    },
+    {
+      "id": "construlita-tira-led-re6040",
+      "econoluzReference": "ECO-CAT-0212",
+      "contentSha256": "d195c6d9e3c2905731c0f98b4f3aca4b159bfcf3b7e9100dcd26a0b9121fe112",
+      "technicalSpecsSha256": "9d60be6c69800ea719cf1672daf3afb118c3b4bcd51da3b9425d2a90bf7629f9"
+    },
+    {
+      "id": "construlita-tira-led-re6039",
+      "econoluzReference": "ECO-CAT-0213",
+      "contentSha256": "10aeef91ca10649a14263dbc5051eedd816ace8052a0eeee7ad67d80f24330d6",
+      "technicalSpecsSha256": "d3619c03b2d5c9a185d937299182b19b07f7af74b11d9247e22af0936f5688ee"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7105s",
+      "econoluzReference": "ECO-CAT-0214",
+      "contentSha256": "c2cd4a91a89903e51c96281ec122e2f4d9adefe55ad4d674238600ea82303f49",
+      "technicalSpecsSha256": "c9e7f3f6c06296b9cd2f6bc38f840d4108c469d35395a63eccfa06455f5af140"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7106s",
+      "econoluzReference": "ECO-CAT-0215",
+      "contentSha256": "ca8ac67f2bf8b14e43de310b1f7af923a40aea1e8134b82d7a418e90a70fd814",
+      "technicalSpecsSha256": "38b6d28bdd9489dda55f6699a6b068c7633ea6bc9e72b000d35ebe7ec3eb158b"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7107s",
+      "econoluzReference": "ECO-CAT-0216",
+      "contentSha256": "db03910011fe8f96cf65a39602797b8bb84331085c24592722b0d813b1bd5fd9",
+      "technicalSpecsSha256": "63e9dd8913565073f671b5b74b82ab0e860c78ef78397c668b3ae93adc2cba39"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7108s",
+      "econoluzReference": "ECO-CAT-0217",
+      "contentSha256": "ade006d32c025fee0f69214afd92369d5e9a8443551eddedf512207d7dbc1eef",
+      "technicalSpecsSha256": "2634a5209f76647b774b30c7bed7b87e376b7b7e892db7d7538c4f599385e740"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7109s",
+      "econoluzReference": "ECO-CAT-0218",
+      "contentSha256": "a48eaedddd68979006c86d8cb31e952bd18caf9f85ee3a240d21db1755979aee",
+      "technicalSpecsSha256": "ae53b2ab658e6e834468a7e5d23c6d6871ecac2aa349d39479f27187b201af99"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7110s",
+      "econoluzReference": "ECO-CAT-0219",
+      "contentSha256": "cc1b716cc52ca910e466f3baf0f7f17a34b27c112782a9fd61c2d29c8569a521",
+      "technicalSpecsSha256": "43ff6a963f043f87021c3e7595d8b558f3e436a6bd905fdd4606a37f84894745"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7505g",
+      "econoluzReference": "ECO-CAT-0220",
+      "contentSha256": "383337e05046f3ccfd0252ca6b7587e94fcb6641df1675514739eda16f031205",
+      "technicalSpecsSha256": "65017d1fd8498989ec655e0744817e979c9f06cf81e9dac188af13f4fe0caaa9"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7515b",
+      "econoluzReference": "ECO-CAT-0221",
+      "contentSha256": "3bdeed389885dbb9a23041302e08a56b5cc5b7ca516497fe3183a4ea17f44a5b",
+      "technicalSpecsSha256": "df223b377c0639997718ee67d2338f62f7a592cb810c3bd76dffe6beed770c54"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7200s",
+      "econoluzReference": "ECO-CAT-0222",
+      "contentSha256": "7806e4f3a25cb0868e527465749560d69e71d4e890e285dfe49f80fe5943c5e6",
+      "technicalSpecsSha256": "bf8f8eb2546f639174b4f3361728a228de177e40bfc00e61df6fe40fe16e67f4"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7525b",
+      "econoluzReference": "ECO-CAT-0223",
+      "contentSha256": "71d4560d55eb59d26d0dc672c48509f76e23492f77fc93946fe54aecc022e991",
+      "technicalSpecsSha256": "2a0b9a9ecffe22ef8371dff5305c1a6a8d7fcbca37959d7e3eda0bf9b08ff5ad"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac7575g",
+      "econoluzReference": "ECO-CAT-0224",
+      "contentSha256": "ebc330a8b75fba4983cd967425ae190bd25e691b25e9ca6e2958cdffea849e04",
+      "technicalSpecsSha256": "5c4d64730b0e46fb33750f0f0e1c2d4df765277f091ae9ec8ae4d50a4f7ef6eb"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac75100g",
+      "econoluzReference": "ECO-CAT-0225",
+      "contentSha256": "5cc9711ed8b5a44173d16f52566c021dad2023e702e09780cdfc0c37a80ff62f",
+      "technicalSpecsSha256": "580bb82478497dea5dad4a9fbcee1b491d210733e25da3c06e905603ce410eb7"
+    },
+    {
+      "id": "construlita-driver-tiras-led-ac75240g",
+      "econoluzReference": "ECO-CAT-0226",
+      "contentSha256": "192491d90c789550a9e5d515a58c89e83cdd723a011e0dd5dd954d14bc260f14",
+      "technicalSpecsSha256": "33470d8b0a9e6638e86bc6842ad72f159a61e3a22f1b076010245a799c37d976"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac2200s",
+      "econoluzReference": "ECO-CAT-0227",
+      "contentSha256": "689cc974e8d5100bd40f426fc7d56c8e8b9c6e4d455f67f53c664780cfd83ea4",
+      "technicalSpecsSha256": "9f15fc9f309b3ba2d393a2ac16607111f79f543e660b8f438da3ac9e5c81e68d"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac2200n",
+      "econoluzReference": "ECO-CAT-0228",
+      "contentSha256": "036afe3b49d8ffbe0b092eb0993f68af88e53a741be4cee647ce4de772e3ef4b",
+      "technicalSpecsSha256": "6236c0bbe8d1538a939c71d3e666ad301f576a5faec8ecb876bf4729ede96b29"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac6200s",
+      "econoluzReference": "ECO-CAT-0229",
+      "contentSha256": "241abd0d645f3ba8a70d0001f473642d01e3b30268e0cd1af8c769750a42f35a",
+      "technicalSpecsSha256": "81822aa652c3c9d08f5ab01b1064ed3064de07c719e040b70a12a8f986dac06d"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac6200n",
+      "econoluzReference": "ECO-CAT-0230",
+      "contentSha256": "2cd3c74fa1c621ea99f05c6359a1e155282f3e710003aa46ee0b84cee97b75cd",
+      "technicalSpecsSha256": "e63f62aff9cfdb5efc98d70df59fe8de4157c1343381bd5ff1bb8f44a33132f8"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac6210s",
+      "econoluzReference": "ECO-CAT-0231",
+      "contentSha256": "4c10f08d77faa345bb4e21f6b08d888e9656ab80f2edfe6e9a0f6da0d6983ce1",
+      "technicalSpecsSha256": "bcc4e4bf89d966e18df560eab1433dd4cb21421d139fd982b724ba70652cde4a"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac6210n",
+      "econoluzReference": "ECO-CAT-0232",
+      "contentSha256": "5a7e487bbe2462b95c8a2e55478655c0ebfd60ab36a3021f90c2cf49d848de86",
+      "technicalSpecsSha256": "860336e82f583ae1f5bf38a86e4815bd66984621eb0fc82bb16b52fac88334ac"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac3200s",
+      "econoluzReference": "ECO-CAT-0233",
+      "contentSha256": "07801dfa204636ade394b49b0351bbc9ba54bf028b58d25824660632c78aaed9",
+      "technicalSpecsSha256": "90feb82bccc620d8851eeb4627c1d82d70fa2e048f93e0316c2975ad3bd1de35"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac8200s",
+      "econoluzReference": "ECO-CAT-0234",
+      "contentSha256": "b6ae644e42c75d2c9cd1276ccf05a473d0063d9d8e75a62efc0175795301e656",
+      "technicalSpecsSha256": "6ac25d1484316462838b82648a02fb4f21af76a21271c342404298eafaff9fe3"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac6500s",
+      "econoluzReference": "ECO-CAT-0235",
+      "contentSha256": "5d191eb56d4dd5938a358f9b1dbdc6a4f2595ed75273e5c301151e664ea9aa1b",
+      "technicalSpecsSha256": "b3a664aadbbed99d69a5f26288f9d6ed2c8f17fddd8d0a8c8816be731fc78eb4"
+    },
+    {
+      "id": "construlita-perfil-tiras-led-ac6500n",
+      "econoluzReference": "ECO-CAT-0236",
+      "contentSha256": "e53bbe3483cfe1b3d39b611e9eac4a7a849401eed49c943ed7d2725e2976093b",
+      "technicalSpecsSha256": "461f1a538d95ed545d38c4c0f4e8aa3f3192e6863a8e5f679f46ab9a528a8dd8"
+    },
+    {
+      "id": "highlum-tira-led-60-led-m-smd-2835",
+      "econoluzReference": "ECO-CAT-0237",
+      "contentSha256": "7e3f49210d6206c2a47d88d944f2d67dba48dac0ded7dcd4a62dcf082b3afee1",
+      "technicalSpecsSha256": "e7aa8e5225232d490a7e8980a27ad3909e544c40d84011373e019004d81854a8"
+    },
+    {
+      "id": "highlum-tira-led-60-led-m-12v-smd-5730",
+      "econoluzReference": "ECO-CAT-0238",
+      "contentSha256": "84add8604cb647cfbc30f9341a859c5caeec7131a9f2552ec080f5e6f526a0bd",
+      "technicalSpecsSha256": "8982c9c4be4b3b15199a78f2869ef79defd488e2afd2e4129c47fba40c1c98e9"
+    },
+    {
+      "id": "highlum-tira-led-120-led-m-12v-smd-2835",
+      "econoluzReference": "ECO-CAT-0239",
+      "contentSha256": "2a7c2c8b0ae4ab764a80865e81f88e0632d1d9d621ea94a2a6eafef86ad4f321",
+      "technicalSpecsSha256": "126eae4955acfe7a1ed1b8a17aecd2db472403f45462974a1d497930e3fc7808"
+    },
+    {
+      "id": "highlum-tira-led-120-126-led-m-24v-smd-2835",
+      "econoluzReference": "ECO-CAT-0240",
+      "contentSha256": "1d85279bed0cd8cbef833f7eebbcfe66251a4c203573403d285df103851e2d1d",
+      "technicalSpecsSha256": "c67a5bca1e0df37d8530ace10eeb6a9b38078efaf6015d406b8a8509aeb26659"
+    },
+    {
+      "id": "highlum-tira-led-120-led-m-24v-smd-2835-rollo-50m",
+      "econoluzReference": "ECO-CAT-0241",
+      "contentSha256": "13969aea3891c289fb23c8c186d9e3d1f917206324569846544bfc0478fa3bfa",
+      "technicalSpecsSha256": "616e57370e1bad67e398daab1a856924375ae710415ef6cbb3640c15278738e6"
+    },
+    {
+      "id": "highlum-tira-led-cta-192-led-m-24v-smd-2835",
+      "econoluzReference": "ECO-CAT-0242",
+      "contentSha256": "cfc0ab57744ac5996b7a3a2efefbccc8a40334290680eb50f6c1ffa0b4468098",
+      "technicalSpecsSha256": "e6e6b5eaf80ea8ce27809a7a17da12fab2b60ed3a9350dc0015551a46bc978f9"
+    },
+    {
+      "id": "highlum-running-strip-led-120-led-m-24v-smd-2835",
+      "econoluzReference": "ECO-CAT-0243",
+      "contentSha256": "c4681a508c2450df9da37b5ee6a34ef553ed2314822cd3d607c0b0a55cb3c53a",
+      "technicalSpecsSha256": "7c8b07577c66e7887cfc848c48c0a404147e4690d09a35ed59636c74675e1a64"
+    },
+    {
+      "id": "highlum-running-strip-led-rgb-60-led-m-24v-smd-5050",
+      "econoluzReference": "ECO-CAT-0244",
+      "contentSha256": "642f648e24b1355128a66a78059c8ae70c455da770bf76e7f0631aa093465c1d",
+      "technicalSpecsSha256": "2ea792a7be473f248ed1f7ca0db5dc7b8c05f92715c7e667231edd677cd1bca1"
+    },
+    {
+      "id": "highlum-tira-led-160-224-led-m-24v-high-smd-2835",
+      "econoluzReference": "ECO-CAT-0245",
+      "contentSha256": "402d1dd260c6d91a0a0d308f4aad650a869ed0c84dd35a6ac665a0dbf102ee63",
+      "technicalSpecsSha256": "1b7fb7ceb425e0d9b1f07af780f641c523690544233fce5f8fec1ca332bbc3fd"
+    },
+    {
+      "id": "highlum-tira-led-168-238-led-m-24v-smd-2835",
+      "econoluzReference": "ECO-CAT-0246",
+      "contentSha256": "abe1b06ead66657a92ca86fc40ab2caa80060cca3b5c26a5103ac3288357cfd4",
+      "technicalSpecsSha256": "845fa5d21ab707d06fc1d5f36684e4ab58a6cbbbf827c1a485f9a8fe7c5153ab"
+    },
+    {
+      "id": "highlum-tira-led-432-led-m-24v-cob",
+      "econoluzReference": "ECO-CAT-0247",
+      "contentSha256": "0c66d3a08f091f8d7e4c8f5384737698f132a9ffba87d69d1976ae94f90b3c79",
+      "technicalSpecsSha256": "31d3836eeb21942c5800c0fdb6c0ca94224c5464f83b33e5ce0df13803bd72f3"
+    },
+    {
+      "id": "highlum-tira-led-480-led-m-24v-cob",
+      "econoluzReference": "ECO-CAT-0248",
+      "contentSha256": "52615e2570129a30ed53ceb9d869b51e157c783abd49f9b6eea8e69efcc14c9c",
+      "technicalSpecsSha256": "80b316b880f32499fa03af511cafb16b3234bcd741690a3f5fcc28243a48b77d"
+    },
+    {
+      "id": "highlum-manguera-neon-120-led-m-24v-smd-2835",
+      "econoluzReference": "ECO-CAT-0249",
+      "contentSha256": "49243c374e703e69218e2bcbc565aafeb2dd32fe19f634fecc27f7cb28242b70",
+      "technicalSpecsSha256": "41054c45272dad0b60c233e55e594379bf85f155132cae4670a04e8fc644b5ad"
+    },
+    {
+      "id": "highlum-tira-led-rgb-96-led-m-24v-smd-5050",
+      "econoluzReference": "ECO-CAT-0250",
+      "contentSha256": "2c60a82294d493de1a38df319e228e6de502b31db84044113e5d6f6bdd73c9ed",
+      "technicalSpecsSha256": "c93709d4f3414014bb70a293ea3f93921dc87037f06d7394ded9ab75434226ea"
+    },
+    {
+      "id": "highlum-manguera-65-led-m-48v-high-smd-2835",
+      "econoluzReference": "ECO-CAT-0251",
+      "contentSha256": "6282b5b49121b56b631517e1fb7b160bb80ec4674c9956103613bf51222acced",
+      "technicalSpecsSha256": "a5f26a31020f1f59c847e83e18a1d323666cb1a8daddaa66490c788fb6561c26"
+    },
+    {
+      "id": "highlum-manguera-led-110v-smd-2835",
+      "econoluzReference": "ECO-CAT-0252",
+      "contentSha256": "4458d1d4f832334aa5fc56f9bbb938acf08e03b266becf6cc2119f1a0b5c93ea",
+      "technicalSpecsSha256": "6bf59bcafe97e776c58b20b7ed2ccebadf47bd39e2f39caa7f584d8e8fc124eb"
+    },
+    {
+      "id": "highlum-led-infinite-d3-cob-110v",
+      "econoluzReference": "ECO-CAT-0253",
+      "contentSha256": "09df89761086419d0732d95ad17f4f003e540d47237b2f6abc88b3bb5b37d2b0",
+      "technicalSpecsSha256": "0354ecc48c2618009e82bb8170c423382940b3ac7cfe056f931ecb12b9fe71f9"
+    },
+    {
+      "id": "highlum-led-infinite-d2-110v",
+      "econoluzReference": "ECO-CAT-0254",
+      "contentSha256": "254dac09d6ddbc3602f4680294863c7173802f4ce5bbda28808f0a9ba7e99c1a",
+      "technicalSpecsSha256": "cdb0b99c35e83d4db08a04738a29b9cad3b9dbbc74154b8ec0aa23c176bfda10"
+    },
+    {
+      "id": "highlum-led-infinite-d5-neon-110v",
+      "econoluzReference": "ECO-CAT-0255",
+      "contentSha256": "b7f48cde2c2ade7e898547b6ba08faa8a7c30714f4bf270cd4b4a8ea5f6f3790",
+      "technicalSpecsSha256": "93694e2c36b6d0d185ff15d2a2835c9d344100ddc2068d129a0ba500c2966d80"
+    },
+    {
+      "id": "highlum-modulo-3-led-smd-2835-5730",
+      "econoluzReference": "ECO-CAT-0256",
+      "contentSha256": "b727d3b1b7ce2d079c09a6ce58e77593be396fe9eea698e68d62965595933cbd",
+      "technicalSpecsSha256": "37237b9b45346cdc7a6727fdb7b7adcc598d62fd002bb11911e4f8ee1dfcf0d1"
+    },
+    {
+      "id": "highlum-modulo-led-hp-smd-3030",
+      "econoluzReference": "ECO-CAT-0257",
+      "contentSha256": "1d911aad315b8f457850f99cc5ffcf4825d9784025b6083360214e3c92965fa6",
+      "technicalSpecsSha256": "43e9a1248f749f4a59ce1516cde6e27d9e685db1f4e870cc0b0129f970dcda0e"
+    },
+    {
+      "id": "highlum-perfil-aluminio-lampara-decorativa-iconica",
+      "econoluzReference": "ECO-CAT-0258",
+      "contentSha256": "e3483039e1d43b16feb42646972228e94130d3a976c1e2a1501844f9e562a112",
+      "technicalSpecsSha256": "3453f27dd3034100cedf7424ff38cf4695af06342771764f4830754bbd56caab"
+    },
+    {
+      "id": "highlum-perfil-aluminio-lampara-decorativa-iconica-kit",
+      "econoluzReference": "ECO-CAT-0259",
+      "contentSha256": "78510a6174f9d3237047cd738c67a9b2f3ee00e36df6e5d1ab3b3b647c8a8669",
+      "technicalSpecsSha256": "f87861695e656fdfcaf2938602a7b51fd96bbdcd2e1651f56235706d9a0764ff"
+    },
+    {
+      "id": "highlum-perfil-aluminio-lampara-lineal-1200",
+      "econoluzReference": "ECO-CAT-0260",
+      "contentSha256": "3f9e814229d3e6d738c6c517280986e280ae6f2c6b57a13328f5255081199b12",
+      "technicalSpecsSha256": "aa8958ce446d38834e8705db92598555ff4fd7509e2b1ece35f42297160326a5"
+    },
+    {
+      "id": "highlum-perfil-aluminio-lampara-lineal-switch",
+      "econoluzReference": "ECO-CAT-0261",
+      "contentSha256": "5d107ee4262b343eab3fb44b51b167484b82b66c419f98d27856e5adddfdf3d5",
+      "technicalSpecsSha256": "c704833f5023a79034feada7b1a1d1f36d1ed50634468d5bfdca2bf2eb941d81"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-interior",
+      "econoluzReference": "ECO-CAT-0262",
+      "contentSha256": "4a7a8ef5e2ef195ebd4db15d5dbb2cd1df98a9b1e42343d1569fcf9766085f05",
+      "technicalSpecsSha256": "31d6db9d9c11c1e731a752ae6a48ca9e3ad175945093e5c55478a23afea54094"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-ancho-interior",
+      "econoluzReference": "ECO-CAT-0263",
+      "contentSha256": "37b0d9763368b8aeb0aee80dbbd4e1fc072dcfb2d565adc148119b7a24c56022",
+      "technicalSpecsSha256": "d2c0fdf2e8d80c01957973dc0c267b66c32cb7a10935f63a6a435f11f77d8479"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-compacto-interior",
+      "econoluzReference": "ECO-CAT-0264",
+      "contentSha256": "77ce6dce7bfc2d4251dcaefb9370ffce622c084e3362d418a287d8995853a05d",
+      "technicalSpecsSha256": "ace2e10062ab8f988e024b6ce1b55f3e03d649720ff5f98ab264b8d2e36b6a24"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-flexible-interior",
+      "econoluzReference": "ECO-CAT-0265",
+      "contentSha256": "261cd860a0ee25af3587d69dacc3c98b4c8f86b7c22982e0461169fed62f5ffa",
+      "technicalSpecsSha256": "11e7bc14948aabc34f6a9b7baedc0467a0ed65652834c9353dabc06f0ede7f98"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-alto-interior",
+      "econoluzReference": "ECO-CAT-0266",
+      "contentSha256": "19b26bd3070f36f608fc3395b3637fbaecc50bc0bf70d5983c2f249cb2e1568a",
+      "technicalSpecsSha256": "3f7b4051ff84ad1eeac530c22a5d8bb5fe0793f377012993d112edd5bd2471bf"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-redondo-interior",
+      "econoluzReference": "ECO-CAT-0267",
+      "contentSha256": "ca442557326f2d58f97ccaf4a4fffd22b2df1cfae9d56c71fa77db9ae0dd945b",
+      "technicalSpecsSha256": "5a507064434e6ec51039d8dae278b4226ff1b9707462fac065cb149bb0f67070"
+    },
+    {
+      "id": "highlum-perfil-aluminio-empotrar-compacto-interior",
+      "econoluzReference": "ECO-CAT-0268",
+      "contentSha256": "4534fb796dee815dc07bd0c989b967c7862ee7e7c5cae69b1efb2c4f54a568e1",
+      "technicalSpecsSha256": "8bfd7ae69cc9a42195b4c2047abab2be8bad848b63b7b54f65bdbf08d0035436"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-ip65",
+      "econoluzReference": "ECO-CAT-0269",
+      "contentSha256": "aa0cbb71d88464b7933172436aa83808607c3d65d0a5f5e43ee2f999a8e175c6",
+      "technicalSpecsSha256": "1e7324e60c7333aaab43c72c232ba28e492dfa26b6e42f1a3b5ab77112aa17cd"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-ancho-bajo-interior",
+      "econoluzReference": "ECO-CAT-0270",
+      "contentSha256": "c8f45e2674e516020146d3c027a4aa186f245678dc987448a3a0e1c57e95ceac",
+      "technicalSpecsSha256": "994ab584d5084cab886ec7a3f221b4906fb730e9ae96e39961056055237c8405"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-alto-suspendido-interior",
+      "econoluzReference": "ECO-CAT-0271",
+      "contentSha256": "098d41c2a9d2445404dbba5940b2147423930255e3413297993893b8f4ed8fa5",
+      "technicalSpecsSha256": "77a478d09a7f40466728d0d9f3579a3d9cd2a24bcbed565fe19dd1d8b0810c9e"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobrepuesto-alto-colgante-interior",
+      "econoluzReference": "ECO-CAT-0272",
+      "contentSha256": "496e26c4502e577d1b5c53804d2ffa0f67d5d36af979167e4a2fdbc2481470f1",
+      "technicalSpecsSha256": "4fb3d22f2251a172bb2affeb19435fcb94140accd684304872095fa15919ac99"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-suspendido-interior",
+      "econoluzReference": "ECO-CAT-0273",
+      "contentSha256": "9dc394fdbafbb5f11ec460450296d4f648c1511d35979cf43d78520c80a866da",
+      "technicalSpecsSha256": "7258193e3a0ad615450bfbc0e60a2daa0a1160414d25ea607a7bcb9601fd3979"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-alto-profundo-interior",
+      "econoluzReference": "ECO-CAT-0274",
+      "contentSha256": "e45958c32763b44c3766662c6e830a04ad7f823c18db31c3c0d46f4df2f91482",
+      "technicalSpecsSha256": "f8fc9af4ad5b37489ee94e36302bb8e74cd8a30c2e3f5faa48a0abcc9c110c87"
+    },
+    {
+      "id": "highlum-perfil-aluminio-empotrar-ancho-interior",
+      "econoluzReference": "ECO-CAT-0275",
+      "contentSha256": "8796b26d390fc8d0ce19a8060658574068afd2077a8cd2947c480ca65d535a02",
+      "technicalSpecsSha256": "f2fb4fdbffff39584030d6a9d87243cbf60c9242ccdf0542fa224f0b1e5d9920"
+    },
+    {
+      "id": "highlum-perfil-aluminio-circular-suspendido-interior",
+      "econoluzReference": "ECO-CAT-0276",
+      "contentSha256": "403a38f3b2aeb044f621db498e08c4822ef281dcd882ced697a307bcf28e4728",
+      "technicalSpecsSha256": "40c6e8e9cca3a0563b4ceb53e5831c15acdc261e7152a5a705b53009bb75fabd"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-piso-interior",
+      "econoluzReference": "ECO-CAT-0277",
+      "contentSha256": "63ba95272364a0b6facb09a111d4bd3aeeabde7725d66c33be2616681d14fccc",
+      "technicalSpecsSha256": "d4bc090a7703d2ba1221ad279b89114aec48d34c367ec7500e485146677b0811"
+    },
+    {
+      "id": "highlum-perfil-aluminio-zocalo-interior",
+      "econoluzReference": "ECO-CAT-0278",
+      "contentSha256": "5f37a5a4c429b099b862d66176cbb54e172cf5876c1a2da3bc107cab1720ee73",
+      "technicalSpecsSha256": "ee40d519e2980a8f6ec3c7e36fa703e5cc2561b8dc4683a0fac34303b636bdd8"
+    },
+    {
+      "id": "highlum-perfil-aluminio-grada-interior",
+      "econoluzReference": "ECO-CAT-0279",
+      "contentSha256": "10180a1c34836f2356c83be735e8720693d5a107dee5c6ddd01cc2d9833844ef",
+      "technicalSpecsSha256": "e646951f7bc97a7355950b3428002e088cfa5a2e3139934ab86a82f29f0b674e"
+    },
+    {
+      "id": "highlum-perfil-aluminio-closet-interior",
+      "econoluzReference": "ECO-CAT-0280",
+      "contentSha256": "e4e58fc34fdceafc83d359b65b7b5a11bfe215209b4eb94f3c2f8fde2861860f",
+      "technicalSpecsSha256": "69147da5fa8ab9e8494b1a314dc78f8b55c2e60b72098d1817dff48d5c1115ab"
+    },
+    {
+      "id": "highlum-perfil-aluminio-empotrar-estrecho-interior",
+      "econoluzReference": "ECO-CAT-0281",
+      "contentSha256": "d284b85a94921d8e8cd17cf9ed6b2436cd9bd6834097bebfa65642030647d28f",
+      "technicalSpecsSha256": "d87a12e03b310b878106edcd26feed18fe9b64463b2eec67e1eb93f7ff5b29da"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-estrecho-interior",
+      "econoluzReference": "ECO-CAT-0282",
+      "contentSha256": "db5c632c0c8a3cf4a1ca2dd029487eba486303be9ab621f212c2241f4f0fe010",
+      "technicalSpecsSha256": "b6ed3a51b1d06c94460d5a1b35dc7f415606a7c3885335f316698766a4a47471"
+    },
+    {
+      "id": "highlum-perfil-aluminio-empotrar-ancho-bajo-interior",
+      "econoluzReference": "ECO-CAT-0283",
+      "contentSha256": "4a6b43032d7fe6492d0e0abf2d6417ffc15ed66790dedeb3363039c6a6208d89",
+      "technicalSpecsSha256": "9d72c4ad982ff631487c5f3b0a5b08d064fe31315736635f82d36f742277eccc"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-cuadrado-interior",
+      "econoluzReference": "ECO-CAT-0284",
+      "contentSha256": "ff7cd98729a001f96d1d292b55db1d128b38d0e81c05b03b94e805713871a67b",
+      "technicalSpecsSha256": "9d0deab2fa28f87b37d37f4e26ff80ba259be0543ee9ba652a772de9786a0139"
+    },
+    {
+      "id": "highlum-perfil-aluminio-empotrar-exterior-estrecho",
+      "econoluzReference": "ECO-CAT-0285",
+      "contentSha256": "a0104d52f1697054d47b527766bc237d409e771bbaa94a06656a9f921c095d59",
+      "technicalSpecsSha256": "50db33238055a9b7a074752fc904227e055b1a4e9fcab50f8635f39260f005dd"
+    },
+    {
+      "id": "highlum-perfil-aluminio-disipador-interior",
+      "econoluzReference": "ECO-CAT-0286",
+      "contentSha256": "7bab26c8c8468692edfc5990bc50cd3635713455cb384a54b9af8a3f27f74bea",
+      "technicalSpecsSha256": "95df81c01a2fa586124f08d928afdccf0c8757615699a2d01f5a613171a2eeba"
+    },
+    {
+      "id": "highlum-perfil-aluminio-empotrar-ancho-suspendido-interior",
+      "econoluzReference": "ECO-CAT-0287",
+      "contentSha256": "7fc21cf753b70ea6e25ab3e7f2976760e66586625bf700f8773fd0c43b8f1985",
+      "technicalSpecsSha256": "489b3b39aba2edadb2b1c6a1da8051e8ed040b589d747d96ac6e35ee17b54afe"
+    },
+    {
+      "id": "highlum-perfil-aluminio-empotrar-curvo-interior",
+      "econoluzReference": "ECO-CAT-0288",
+      "contentSha256": "dbd043f7a6e93e596b809f493b8e0b4ad34150789afe49257ef8710afe5cb414",
+      "technicalSpecsSha256": "12142eedd7b6d01317d5eaeb9e93280ae411b9fb492e575c6b9b863b80b2fce5"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-esquina-interior",
+      "econoluzReference": "ECO-CAT-0289",
+      "contentSha256": "32f3eb422137fbee63bf585e0007cf5996af70893cf4598f38527cc719a620f4",
+      "technicalSpecsSha256": "08388d0ae678aa29827d235adb3abe44d6a6e8687a843128f24845a9631353c0"
+    },
+    {
+      "id": "highlum-perfil-aluminio-empotrar-tablayeso-interior",
+      "econoluzReference": "ECO-CAT-0290",
+      "contentSha256": "c6e43622e386f16006d3e6359b6ff3f2163f0fc50a6c1fd0be62bba5ccba133f",
+      "technicalSpecsSha256": "2607005e7bd07ac5c7eceb940437a64e92d83f10459c57e7f8bb3c310d7675ef"
+    },
+    {
+      "id": "highlum-perfil-aluminio-sobreponer-piso-bajo-interior",
+      "econoluzReference": "ECO-CAT-0291",
+      "contentSha256": "02351a93dd46db0f868d49f3e53073e1d6132da26d1e9ae5ae86564490bc5582",
+      "technicalSpecsSha256": "6b99b02339362f0742c16949e91be4d0650ac7b9c821f1d11d0031da9a7ca521"
+    },
+    {
+      "id": "highlum-perfil-aluminio-tablayeso-ancho-interior",
+      "econoluzReference": "ECO-CAT-0292",
+      "contentSha256": "64e8e2b10d8394b5582436ee42faf9e6ec09267419bda3f4f43e179ed81df4ff",
+      "technicalSpecsSha256": "fe20c16de421c1eebc94af36dabb28cf02e645ae69b9b106727aca8c65e060cc"
+    },
+    {
+      "id": "highlum-perfil-aluminio-esquina-cenefa-interior",
+      "econoluzReference": "ECO-CAT-0293",
+      "contentSha256": "bf294b66e9ea1fc61228fa8f98ed1dfcfbe6433cb22830bf94876422ff6b7686",
+      "technicalSpecsSha256": "818448e5a42b14811ae1439fb38f0d70fb636f3dcc21d0c6a77056a7578ec72e"
+    },
+    {
+      "id": "highlum-perfil-aluminio-pared-doble-sentido-interior",
+      "econoluzReference": "ECO-CAT-0294",
+      "contentSha256": "b480703f854b8289b53e5d78de833b2137573598b7f083d707148796294d0435",
+      "technicalSpecsSha256": "f3306cd09468baecd98a09177c161ff9e020b42e1564d4b4348beb422deda0c0"
+    },
+    {
+      "id": "highlum-perfil-aluminio-lampara-lineal-negro-interior",
+      "econoluzReference": "ECO-CAT-0295",
+      "contentSha256": "3438421f4b592935990893f4b04cc51beef3519915f8ce41836bba35f5004806",
+      "technicalSpecsSha256": "180251861ae99a37309774ba01b7630d1b43fbb88da0fc97836270f3127d29ae"
+    },
+    {
+      "id": "highlum-perfil-aluminio-lampara-lineal-negro-honeycomb-interior",
+      "econoluzReference": "ECO-CAT-0296",
+      "contentSha256": "43226e2e49a3308b542f4cb8d868bd945dc01ae96b47af8699438f2e83f81822",
+      "technicalSpecsSha256": "36030d72df5b0c6ae7cb4bacbb353749ee9c3f56cdb653bcfefd2e0f0f462f86"
+    },
+    {
+      "id": "highlum-perfil-aluminio-suspendido-ancho-interior",
+      "econoluzReference": "ECO-CAT-0297",
+      "contentSha256": "a4af60b0d68ec038eb822d229cdc9ffb16a45b268bbf028e3f13c9c7e4452304",
+      "technicalSpecsSha256": "4d1e3042d331314358d09854386edec6a493bcdaab224ba2f97c54d953611d48"
+    },
+    {
+      "id": "highlum-perfil-aluminio-lineal-empotrar-ancho-interior",
+      "econoluzReference": "ECO-CAT-0298",
+      "contentSha256": "c2b9235699bb4fc7cacfa96b8a4624c4843e460e74c05713d53c645659cc9ad5",
+      "technicalSpecsSha256": "ea9ffdc2a07fc27e9993dad37cf5756bb872857e4cbac34aa46e757ae4517187"
+    },
+    {
+      "id": "construlita-emergencia-co6314bbfl",
+      "econoluzReference": "ECO-CAT-0299",
+      "contentSha256": "cdd713b69580e9ed2c731941768fb2987d58715dcd4512f8413f0895888e872c",
+      "technicalSpecsSha256": "da678552e8f73de4490abfa032e536eb34023d6cb99568d4da00be26305ed830"
+    },
+    {
+      "id": "construlita-senalizacion-co6315bvel",
+      "econoluzReference": "ECO-CAT-0300",
+      "contentSha256": "c7800006e286bbdf35c51bacb442bdd981be260f70e9f5e5b6de62c0abec029c",
+      "technicalSpecsSha256": "2583236b56e130bed88a580c5eac6ab41f7c6721373b9b0596ce7d3b39f8d212"
+    },
+    {
+      "id": "construlita-senalizacion-co6316bvel",
+      "econoluzReference": "ECO-CAT-0301",
+      "contentSha256": "f7c61a10766ad76a1ac6f0e1190fa6c8ef9ca3f82500dd563eab274cf73785c6",
+      "technicalSpecsSha256": "da79a8bc48b9f877509845aad96c8723765d613fec4b1267813c7ccf6fc33457"
+    },
+    {
+      "id": "highlum-tubo-led-t8-9w",
+      "econoluzReference": "ECO-TUB-0302",
+      "contentSha256": "e51bc8926181706449af971306001b908432c1ba04cbc2d85879ab36095c9af2",
+      "technicalSpecsSha256": "4b3acbb3d5c9a22c9beb201956f3c02418622655c9ac3090ea6c186dd157b53f"
+    },
+    {
+      "id": "highlum-tubo-led-t8-18w",
+      "econoluzReference": "ECO-TUB-0303",
+      "contentSha256": "31478935f3863bc4590da444c8abf47d0353e5e7a5c278e43a03839daa7e493d",
+      "technicalSpecsSha256": "8180f343309a68245757287cc981f35419ffdc17ed6d4f805d67f48f4f0ec49b"
+    },
+    {
+      "id": "highlum-tubo-led-t8-18w-mejorado",
+      "econoluzReference": "ECO-TUB-0304",
+      "contentSha256": "885c1227f3aef0fb886b7944c7e9a9237f1ce1e48fdf50ea55e5df3d809e865a",
+      "technicalSpecsSha256": "21fd9a232ce6565348f6b64812131719345afa459429080556ad14c39ef42644"
+    },
+    {
+      "id": "highlum-tubo-led-t8-9w-pines",
+      "econoluzReference": "ECO-TUB-0305",
+      "contentSha256": "6de7f2760c8553bc1578c34410e6d1e2ede862493bc1909a624aedea6e57c8e8",
+      "technicalSpecsSha256": "10062399ba270f33ccd08e4e3fa210dbe494340800255adc4ebae5acbcb04d2d"
+    },
+    {
+      "id": "highlum-tubo-led-t8-9w-pines-6000k",
+      "econoluzReference": "ECO-TUB-0306",
+      "contentSha256": "fe20016cf7b999d78cb4d8f72dbaed79533964b1c34a650d88962cb403118f97",
+      "technicalSpecsSha256": "3783830fae2d594fb625f180da1127c1977a9167cf621cef32e89d191a2f4e76"
+    },
+    {
+      "id": "highlum-tubo-led-t8-18w-pines",
+      "econoluzReference": "ECO-TUB-0307",
+      "contentSha256": "ecf9ab3155345ec93fd957689a1504beb45a22196bdd5785dd6a1ecb67af54f2",
+      "technicalSpecsSha256": "e5fda478894fed93431bc4cd232e0648c045b02c62312880035c85736ce24b9b"
+    },
+    {
+      "id": "highlum-tubo-led-t8-18w-pines-6000k",
+      "econoluzReference": "ECO-TUB-0308",
+      "contentSha256": "72631893c6a224127330212b7e2af87cdb5d6b303fabbc174da64a809e87374a",
+      "technicalSpecsSha256": "ece350e9873ecec306672e24eea8a6ea058e82049570c065d2e4727fc5be17c4"
+    },
+    {
+      "id": "highlum-tubo-led-t8-18w-pines-transparente",
+      "econoluzReference": "ECO-TUB-0309",
+      "contentSha256": "add694319d5641685f62bef37ce2883305f60b8456d09e52247e81a56dd752a6",
+      "technicalSpecsSha256": "72dd063850029121ef56991c76596af21b3c7afebca020165e7f8a128a9bd580"
+    },
+    {
+      "id": "highlum-tubo-led-t8-9w-pines-econoline",
+      "econoluzReference": "ECO-TUB-0310",
+      "contentSha256": "159ea81e144e739ea93e59b17c681e705e5075fef9b5c8f5a69de69d8a8c05a8",
+      "technicalSpecsSha256": "9e4013456860d3ca2e21f0a0d82151862671e9c9baa0058b3a7b71b5934c1273"
+    },
+    {
+      "id": "highlum-tubo-led-t8-18w-pines-econoline",
+      "econoluzReference": "ECO-TUB-0311",
+      "contentSha256": "99c6a324c1ec2678bf8e90bf91beeb7e52cabc44070457ac1581040d02f19d64",
+      "technicalSpecsSha256": "9d4f3b2e41d4db82d1dabca08ddeec60cfe5b0797e9008d50b8c6b4325f8c308"
+    },
+    {
+      "id": "highlum-tubo-led-t8-18w-sensor-radar",
+      "econoluzReference": "ECO-TUB-0312",
+      "contentSha256": "35c78023219fdc28e517dffbf716f8d441d1db3a489afcd0767ad5d51dc38b23",
+      "technicalSpecsSha256": "6bae08597453b5be5fed8702df0761c1b92ddee1c566be1d82d92ad8cad0913b"
+    },
+    {
+      "id": "highlum-tubo-led-t8-18w-exterior",
+      "econoluzReference": "ECO-TUB-0313",
+      "contentSha256": "4c0af2cd24271b06f393179e68caa8c97b9895b1c27241ce678f7a8a26898187",
+      "technicalSpecsSha256": "a4375f5816304d70af6178a07dbd068fc822f2e2777e5d21232e1e1b8eda22a6"
+    }
+  ]
+}
