@@ -1,6 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import baseline from "./fixtures/catalog-baseline.json";
 import { products } from "../app/data/products";
 import nextConfig from "../next.config";
@@ -113,24 +111,6 @@ const collectKeys = (value: unknown, keys = new Set<string>()) => {
   }
 
   return keys;
-};
-
-type CatalogImageRoutingModule = {
-  createCatalogImageRewrites: (
-    catalog: readonly Record<string, unknown>[],
-  ) => { source: string; destination: string }[];
-  validateCatalogImageRewrites: (
-    rewrites: readonly { source: string; destination: string }[],
-    assetExists: (destination: string) => boolean,
-  ) => void;
-};
-
-const loadCatalogImageRouting = async (): Promise<CatalogImageRoutingModule | null> => {
-  try {
-    return await import("../app/data/catalogImageRouting");
-  } catch {
-    return null;
-  }
 };
 
 test("keeps every ECONOLUZ reference permanently keyed by internal product identity", async () => {
@@ -313,86 +293,23 @@ test("defensively omits applications that have no products", () => {
   ]);
 });
 
-test("projects only neutral deterministic image aliases", async () => {
+test("preserves the unchanged physical image paths in the public projection", async () => {
   const publicProductModule = await loadPublicProductModule();
 
   expect(publicProductModule).not.toBeNull();
 
   for (const internal of products) {
     const projected = publicProductModule?.toPublicProduct(internal as never) as {
-      econoluzReference: string;
       image: string;
       images?: string[];
     };
-    const expectedImages = (internal.images?.length ? internal.images : [internal.image]).map(
-      (_image, index) =>
-        `/media/catalogo/${internal.econoluzReference}/${index + 1}.webp`,
-    );
+    const expectedImages = internal.images?.length ? internal.images : [internal.image];
 
-    expect(projected.image).toBe(expectedImages[0]);
+    expect(projected.image).toBe(internal.image);
     expect(projected.images ?? [projected.image]).toEqual(expectedImages);
-    expect(JSON.stringify(projected)).not.toMatch(/\/catalogos\/(?:artlite|construlita|highlum)/i);
   }
 });
 
-test("builds exact validated rewrites for every public image alias", async () => {
-  const imageRouting = await loadCatalogImageRouting();
-
-  expect(imageRouting).not.toBeNull();
-
-  const rewrites = imageRouting?.createCatalogImageRewrites(
-    products as unknown as readonly Record<string, unknown>[],
-  ) ?? [];
-  const sources = rewrites.map(({ source }) => source);
-
-  expect(rewrites).toHaveLength(327);
-  expect(new Set(sources).size).toBe(327);
-  expect(sources.every((source) => /^\/media\/catalogo\/ECO-[A-Z]+-\d{4}\/\d+\.webp$/.test(source))).toBe(true);
-  expect(sources.some((source) => source.includes(":") || source.includes("*"))).toBe(false);
-  expect(() =>
-    imageRouting?.validateCatalogImageRewrites(
-      rewrites,
-      (destination) => existsSync(join(process.cwd(), "public", destination)),
-    ),
-  ).not.toThrow();
-
-  expect(() =>
-    imageRouting?.validateCatalogImageRewrites(
-      [rewrites[0], { ...rewrites[1], source: rewrites[0].source }],
-      () => true,
-    ),
-  ).toThrow(`duplicate catalog image alias ${rewrites[0].source}`);
-  expect(() =>
-    imageRouting?.validateCatalogImageRewrites(
-      [
-        {
-          source: "/media/catalogo/ECO-CAT-9999/1.webp",
-          destination: "/catalogos/missing.webp",
-        },
-      ],
-      () => false,
-    ),
-  ).toThrow("missing catalog image destination /catalogos/missing.webp");
-});
-
-test("configures only exact afterFiles catalog image rewrites", async () => {
-  const configuredRewrites = await nextConfig.rewrites?.();
-
-  expect(configuredRewrites).toBeDefined();
-  expect(configuredRewrites).not.toBeInstanceOf(Array);
-
-  const rewriteGroups = configuredRewrites as {
-    beforeFiles?: unknown[];
-    afterFiles?: { source: string; destination: string }[];
-    fallback?: unknown[];
-  };
-  expect(rewriteGroups.beforeFiles ?? []).toEqual([]);
-  expect(rewriteGroups.fallback ?? []).toEqual([]);
-  expect(rewriteGroups.afterFiles).toHaveLength(327);
-  expect(
-    rewriteGroups.afterFiles?.every(
-      ({ source, destination }) =>
-        source.startsWith("/media/catalogo/") && destination.startsWith("/catalogos/"),
-    ),
-  ).toBe(true);
+test("does not configure public catalog image rewrites", () => {
+  expect(nextConfig.rewrites).toBeUndefined();
 });

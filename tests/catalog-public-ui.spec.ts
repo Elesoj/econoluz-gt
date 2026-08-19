@@ -56,27 +56,3 @@ test("renders technical values that the old drawer omitted", async ({ page }) =>
   await expect(page.getByText("Protección contra sobretensión", { exact: true })).toBeVisible();
   await expect(page.getByText("Regulador de voltaje 4 V", { exact: true })).toBeVisible();
 });
-
-test("serves neutral image aliases and optimized variants without redirecting", async ({
-  request,
-}) => {
-  const alias = "/media/catalogo/ECO-ELE-0001/1.webp";
-  const direct = await request.get(alias, { maxRedirects: 0 });
-
-  expect(direct.status()).toBe(200);
-  expect(direct.headers()["content-type"]).toMatch(/^image\//);
-  expect(direct.headers().location).toBeUndefined();
-
-  const optimized = await request.get(
-    `/_next/image?url=${encodeURIComponent(alias)}&w=640&q=75`,
-    { maxRedirects: 0 },
-  );
-  expect(optimized.status()).toBe(200);
-  expect(optimized.headers()["content-type"]).toMatch(/^image\//);
-  expect(optimized.headers().location).toBeUndefined();
-
-  const missing = await request.get("/media/catalogo/ECO-ELE-9999/1.webp", {
-    maxRedirects: 0,
-  });
-  expect(missing.status()).toBe(404);
-});

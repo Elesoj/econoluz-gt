@@ -1,6 +1,5 @@
 import type { InternalProduct } from "./products";
 import { getApplicationLabel } from "./catalogTaxonomy";
-import { getNeutralCatalogImageUrl } from "./catalogImageRouting";
 
 export const PUBLIC_TECHNICAL_SPEC_REGISTRY = [
   { key: "acrylic", label: "Acrílico" },
@@ -134,11 +133,7 @@ export const toPublicProduct = (product: InternalProduct): PublicProduct => {
     econoluzReference: product.econoluzReference,
     publicName: product.publicName,
     publicDescription: product.publicDescription,
-    image: getNeutralCatalogImageUrl(
-      product.econoluzReference,
-      1,
-      product.image,
-    ),
+    image: product.image,
     productType: product.productType,
     application,
     series: product.series,
@@ -153,9 +148,7 @@ export const toPublicProduct = (product: InternalProduct): PublicProduct => {
   };
 
   if (product.images?.length) {
-    publicProduct.images = product.images.map((image, index) =>
-      getNeutralCatalogImageUrl(product.econoluzReference, index + 1, image),
-    );
+    publicProduct.images = [...product.images];
   }
 
   return publicProduct;
