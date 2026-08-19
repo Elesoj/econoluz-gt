@@ -36,6 +36,7 @@ type TransitionOptions = {
 type UseCatalogNavigationOptions = {
   products: readonly PublicProduct[];
   catalogStageRef: RefObject<HTMLDivElement | null>;
+  onLocationCommitted: (location: CatalogLocation) => void;
   onResetTransient: () => void;
 };
 
@@ -53,6 +54,7 @@ const createSessionId = () =>
 export default function useCatalogNavigation({
   products,
   catalogStageRef,
+  onLocationCommitted,
   onResetTransient,
 }: UseCatalogNavigationOptions) {
   const [location, setLocation] = useState<CatalogLocation>(
@@ -62,11 +64,13 @@ export default function useCatalogNavigation({
   const entryRef = useRef<CatalogHistoryEntry | null>(null);
   const transitionTimeoutRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const onLocationCommittedRef = useRef(onLocationCommitted);
   const onResetTransientRef = useRef(onResetTransient);
 
   useEffect(() => {
+    onLocationCommittedRef.current = onLocationCommitted;
     onResetTransientRef.current = onResetTransient;
-  }, [onResetTransient]);
+  }, [onLocationCommitted, onResetTransient]);
 
   const cancelScheduledWork = useCallback(() => {
     if (transitionTimeoutRef.current !== null) {
@@ -170,6 +174,7 @@ export default function useCatalogNavigation({
         getCatalogUrl(),
       );
       entryRef.current = nextEntry;
+      onLocationCommittedRef.current(nextEntry);
 
       const resetTransient = options.resetTransient ?? true;
       const scroll = options.scroll ?? "catalog";
@@ -219,6 +224,7 @@ export default function useCatalogNavigation({
     );
 
     entryRef.current = fallbackEntry;
+    onLocationCommittedRef.current(fallbackEntry);
     replaceEntry(fallbackEntry, getCatalogUrl());
     applyLocation(fallbackLocation, true, "catalog", "smooth");
   }, [applyLocation, cancelScheduledWork, location, replaceEntry]);
@@ -252,17 +258,24 @@ export default function useCatalogNavigation({
         return;
       }
 
-      transitionTo(createSearchLocation(normalizedSearch, location));
+      transitionTo(
+        createSearchLocation(
+          normalizedSearch,
+          entryRef.current ?? location,
+        ),
+      );
     },
     [location, transitionTo],
   );
 
   const clearSearch = useCallback(() => {
-    if (location.view !== "search") {
+    const currentLocation = entryRef.current ?? location;
+
+    if (currentLocation.view !== "search") {
       return;
     }
 
-    transitionTo(location.returnTo, { animate: false });
+    transitionTo(currentLocation.returnTo, { animate: false });
   }, [location, transitionTo]);
 
   const goToPage = useCallback(
@@ -284,6 +297,7 @@ export default function useCatalogNavigation({
     if (isAlreadyRoot) {
       cancelScheduledWork();
       setIsTransitioning(false);
+      onLocationCommittedRef.current(createCategoriesLocation());
       onResetTransientRef.current();
       scheduleScroll("top");
       return;
@@ -309,6 +323,7 @@ export default function useCatalogNavigation({
       );
 
     entryRef.current = initialEntry;
+    onLocationCommittedRef.current(initialEntry);
     replaceEntry(initialEntry, window.location.href);
     let initializationPending = true;
 
@@ -348,6 +363,7 @@ export default function useCatalogNavigation({
         );
 
       entryRef.current = hashEntry;
+      onLocationCommittedRef.current(hashEntry);
       replaceEntry(hashEntry, window.location.href);
       setLocation(hashEntry);
       animationFrameRef.current = window.requestAnimationFrame(() => {
@@ -378,12 +394,14 @@ export default function useCatalogNavigation({
         );
 
         entryRef.current = normalizedEntry;
+        onLocationCommittedRef.current(normalizedEntry);
         replaceEntry(normalizedEntry, window.location.href);
         applyLocation(normalizedEntry, true, "catalog", "auto");
         return;
       }
 
       entryRef.current = restored;
+      onLocationCommittedRef.current(restored);
       applyLocation(restored, true, "catalog", "smooth");
     };
 

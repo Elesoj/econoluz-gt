@@ -66,8 +66,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isPositiveInteger = (value: unknown): value is number =>
   typeof value === "number" && Number.isInteger(value) && value > 0;
 
-const isValidCategory = (category: unknown): category is string =>
-  typeof category === "string" && category in productTypes;
+const isValidCategory = (category: unknown): category is ProductTypeId =>
+  typeof category === "string" &&
+  Object.prototype.hasOwnProperty.call(productTypes, category);
 
 const isLegalApplication = (
   category: string,

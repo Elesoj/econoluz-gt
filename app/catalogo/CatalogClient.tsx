@@ -27,6 +27,7 @@ import {
 import type { PublicProduct } from "../data/publicProduct";
 import {
   CATALOG_PAGE_SIZE,
+  type CatalogLocation,
   filterCatalogProducts,
 } from "./catalogState";
 import useCatalogNavigation from "./useCatalogNavigation";
@@ -246,6 +247,12 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     Record<RequiredQuoteField, HTMLInputElement | null>
   >({ fullName: null, phone: null, email: null });
   const catalogStageRef = useRef<HTMLDivElement>(null);
+  const syncSearchDraftToLocation = useCallback((location: CatalogLocation) => {
+    if (searchInputRef.current) {
+      searchInputRef.current.value =
+        location.view === "search" ? location.search : "";
+    }
+  }, []);
   const resetTransientCatalogFilters = useCallback(() => {
     setSelectedSeries("Todos");
   }, []);
@@ -263,6 +270,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
   } = useCatalogNavigation({
     products,
     catalogStageRef,
+    onLocationCommitted: syncSearchDraftToLocation,
     onResetTransient: resetTransientCatalogFilters,
   });
   const searchQuery =

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
+import { isUnmodifiedPrimaryClick } from "./isUnmodifiedPrimaryClick";
 
 type NavItem = {
   label: string;
@@ -158,14 +159,24 @@ export default function SiteNavbar({
     setIsMobileMenuOpen(false);
 
     const hash = getHash(href);
+    const shouldHandleInCurrentPage =
+      event && isUnmodifiedPrimaryClick(event.nativeEvent);
 
-    if (pathname === "/catalogo" && href === "/catalogo") {
-      event?.preventDefault();
+    if (
+      shouldHandleInCurrentPage &&
+      pathname === "/catalogo" &&
+      href === "/catalogo"
+    ) {
+      event.preventDefault();
       window.dispatchEvent(new Event("econoluz-catalog-reset"));
       return;
     }
 
-    if (hash && (href.startsWith("#") || href.startsWith("/#"))) {
+    if (
+      shouldHandleInCurrentPage &&
+      hash &&
+      (href.startsWith("#") || href.startsWith("/#"))
+    ) {
       activeHrefRef.current = hash;
       setActiveHref(hash);
     }

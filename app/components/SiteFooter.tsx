@@ -5,11 +5,16 @@ import Link from "next/link";
 import { type MouseEvent } from "react";
 import { usePathname } from "next/navigation";
 import { contact, mainNavItems } from "../data/siteData";
+import { isUnmodifiedPrimaryClick } from "./isUnmodifiedPrimaryClick";
 
 export default function SiteFooter() {
   const pathname = usePathname();
 
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!isUnmodifiedPrimaryClick(event.nativeEvent)) {
+      return;
+    }
+
     if (pathname === "/catalogo" && href === "/catalogo") {
       event.preventDefault();
       window.dispatchEvent(new Event("econoluz-catalog-reset"));
