@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { extname, join, relative } from "node:path";
 import { products } from "../app/data/products";
@@ -42,6 +43,36 @@ const knownPhysicalImagePaths = [
     ),
   ),
 ].sort((left, right) => right.length - left.length);
+
+const CAPTURED_PHYSICAL_IMAGE_PATH_COUNT = 326;
+const CAPTURED_PHYSICAL_IMAGE_PATH_SHA256 =
+  "75aeb25adffde0a579118a00a4097a2ac5594e6432a885b27b86d1771fca0d24";
+
+const getPhysicalImagePathFingerprint = (imagePaths: readonly string[]) => {
+  const canonicalPaths = [...new Set(imagePaths)].sort();
+
+  return {
+    count: canonicalPaths.length,
+    sha256: createHash("sha256")
+      .update(JSON.stringify(canonicalPaths))
+      .digest("hex"),
+  };
+};
+
+const validateCapturedPhysicalImagePaths = (imagePaths: readonly string[]) => {
+  const fingerprint = getPhysicalImagePathFingerprint(imagePaths);
+
+  if (
+    fingerprint.count !== CAPTURED_PHYSICAL_IMAGE_PATH_COUNT ||
+    fingerprint.sha256 !== CAPTURED_PHYSICAL_IMAGE_PATH_SHA256
+  ) {
+    throw new Error(
+      `captured catalog image path fingerprint mismatch: expected ${CAPTURED_PHYSICAL_IMAGE_PATH_COUNT}/${CAPTURED_PHYSICAL_IMAGE_PATH_SHA256}, received ${fingerprint.count}/${fingerprint.sha256}`,
+    );
+  }
+};
+
+validateCapturedPhysicalImagePaths(knownPhysicalImagePaths);
 
 const expandInternalCode = (value: string) => {
   const parts = value
@@ -288,37 +319,6 @@ const expectedApprovedInternalTokenCollisions = [
   },
 ] as const;
 
-const approvedCollisionContexts = [
-  ...new Set(
-    expectedApprovedInternalTokenCollisions.flatMap(
-      ({ token, publicReference, publicField, value }) => {
-        if (value !== token) {
-          return [value];
-        }
-
-        const fieldName = publicField.split(".").at(-1)?.replace(/\[\d+\]$/, "");
-        const publicProduct = toPublicProduct(
-          products.find(
-            (product) => product.econoluzReference === publicReference,
-          )!,
-        );
-        const serializedFieldContexts = [
-          `"${fieldName}":"${value}"`,
-          `\\"${fieldName}\\":\\"${value}\\"`,
-        ];
-        const publicSeriesRegistryContext =
-          fieldName === "series"
-            ? `${publicProduct.series}:{id:"${publicProduct.series}",label:"${publicProduct.labels.series}"}`
-            : undefined;
-
-        return publicSeriesRegistryContext
-          ? [...serializedFieldContexts, publicSeriesRegistryContext]
-          : serializedFieldContexts;
-      },
-    ),
-  ),
-].sort((left, right) => right.length - left.length);
-
 const forbiddenFieldNames = [
   "supplierCode",
   "supplierBrand",
@@ -369,6 +369,140 @@ const stripExactValues = (content: string, values: readonly string[], marker: st
   return { classified, stripped };
 };
 
+type PublicArtifactScope = "catalog-payload" | "static";
+
+const PHYSICAL_IMAGE_MARKER = "<known-catalog-image-path>";
+const PUBLIC_COLLISION_MARKER = "<approved-public-value>";
+
+type ApprovedSerializedCollisionContext = {
+  scope: PublicArtifactScope;
+  publicReference: string;
+  publicField: string;
+  token: string;
+  serialized: string;
+};
+
+const approvedSerializedCollisionContexts: ApprovedSerializedCollisionContext[] =
+  expectedApprovedInternalTokenCollisions.flatMap(
+    ({ token, publicReference, publicField }) => {
+      const internalProduct = products.find(
+        (product) => product.econoluzReference === publicReference,
+      );
+
+      if (!internalProduct) {
+        throw new Error(`missing collision product ${publicReference}`);
+      }
+
+      const publicProduct = toPublicProduct(internalProduct);
+      const serializedProduct = JSON.stringify(publicProduct);
+      const catalogPayloadContexts = [
+        serializedProduct,
+        JSON.stringify(serializedProduct).slice(1, -1),
+        serializedProduct
+          .replace(/&/g, "\\u0026")
+          .replace(/>/g, "\\u003e")
+          .replace(/</g, "\\u003c")
+          .replace(/"/g, '\\"'),
+      ].map((serialized) => ({
+        scope: "catalog-payload" as const,
+        publicReference,
+        publicField,
+        token,
+        serialized: stripExactValues(
+          serialized,
+          knownPhysicalImagePaths,
+          PHYSICAL_IMAGE_MARKER,
+        ).stripped,
+      }));
+      const seriesRegistryContext =
+        publicField === "series" || publicField === "labels.series"
+          ? [
+              {
+                scope: "static" as const,
+                publicReference,
+                publicField,
+                token,
+                serialized: `${publicProduct.series}:{id:"${publicProduct.series}",label:"${publicProduct.labels.series}"}`,
+              },
+            ]
+          : [];
+
+      return [...catalogPayloadContexts, ...seriesRegistryContext];
+    },
+  );
+
+const stripCapturedPhysicalImagePaths = (
+  content: string,
+  imagePaths: readonly string[] = knownPhysicalImagePaths,
+) => {
+  validateCapturedPhysicalImagePaths(imagePaths);
+  return stripExactValues(content, imagePaths, PHYSICAL_IMAGE_MARKER);
+};
+
+const stripApprovedPublicCollisionContexts = (
+  content: string,
+  scope: PublicArtifactScope,
+) => {
+  const serializedContexts = [
+    ...new Set(
+      approvedSerializedCollisionContexts
+        .filter((context) => context.scope === scope)
+        .map(({ serialized }) => serialized),
+    ),
+  ].sort((left, right) => right.length - left.length);
+
+  return stripExactValues(content, serializedContexts, PUBLIC_COLLISION_MARKER);
+};
+
+test("does not exempt a longer collision in the wrong reference, field, or artifact", () => {
+  const approvedValue = "Conectores tipo I: YS-I/B, YS-I/N, YS-I/S";
+  const mutations: { scope: PublicArtifactScope; content: string }[] = [
+    {
+      scope: "catalog-payload",
+      content: JSON.stringify({
+        econoluzReference: "ECO-CAT-9999",
+        technicalSpecs: { specialFeatures: [approvedValue] },
+      }),
+    },
+    {
+      scope: "catalog-payload",
+      content: JSON.stringify({
+        econoluzReference: "ECO-CAT-0161",
+        publicDescription: approvedValue,
+      }),
+    },
+    {
+      scope: "static",
+      content: JSON.stringify({
+        econoluzReference: "ECO-CAT-0161",
+        technicalSpecs: { specialFeatures: [approvedValue] },
+      }),
+    },
+  ];
+
+  for (const mutation of mutations) {
+    const result = stripApprovedPublicCollisionContexts(
+      mutation.content,
+      mutation.scope,
+    );
+
+    expect(result.stripped).toBe(mutation.content);
+    expect(containsExactToken(result.stripped, "YS-I")).toBe(true);
+  }
+});
+
+test("rejects a changed physical image path before using it as an exemption", () => {
+  const changedImagePaths = [...knownPhysicalImagePaths];
+  changedImagePaths[0] = changedImagePaths[0].replace(
+    /\.webp$/,
+    "-changed.webp",
+  );
+
+  expect(() =>
+    stripCapturedPhysicalImagePaths(changedImagePaths[0], changedImagePaths),
+  ).toThrow("captured catalog image path fingerprint mismatch");
+});
+
 test("does not publish a catalog rewrite table in static build artifacts", () => {
   const staticFiles = publicStaticFiles();
   const findings = staticFiles.flatMap((path) => {
@@ -402,15 +536,12 @@ test("keeps exhaustive internal fields and known codes out of public artifacts",
   const findings = textArtifactFiles.flatMap((path) => {
     const content = readFileSync(path, "utf8");
     const relativePath = relative(process.cwd(), path);
-    const imageClassification = stripExactValues(
-      content,
-      knownPhysicalImagePaths,
-      "<known-catalog-image-path>",
-    );
-    const publicCollisionClassification = stripExactValues(
+    const imageClassification = stripCapturedPhysicalImagePaths(content);
+    const publicCollisionClassification = stripApprovedPublicCollisionContexts(
       imageClassification.stripped,
-      approvedCollisionContexts,
-      "<approved-public-value>",
+      path.startsWith(join(process.cwd(), ".next", "static"))
+        ? "static"
+        : "catalog-payload",
     );
 
     classifiedImagePaths.push(
