@@ -539,6 +539,7 @@ const stripApprovedPublicCollisionContexts = (
 };
 
 type StaticArtifact = { file: string; content: string };
+type ArtifactClassification = ReturnType<typeof stripExactValues>;
 
 const stripApprovedStaticSeriesCollisionContexts = (
   artifacts: readonly StaticArtifact[],
@@ -592,10 +593,10 @@ const stripApprovedStaticSeriesCollisionContexts = (
 
   const expectedArtifactFile = expectedArtifacts[0].file;
 
-  return new Map(
-    artifacts.map(({ file, content }) => {
+  return new Map<string, ArtifactClassification>(
+    artifacts.map(({ file, content }): readonly [string, ArtifactClassification] => {
       if (file !== expectedArtifactFile) {
-        return [file, { classified: [], stripped: content }] as const;
+        return [file, { classified: [], stripped: content }];
       }
 
       const classified: { value: string; occurrences: number }[] = [];
@@ -610,7 +611,7 @@ const stripApprovedStaticSeriesCollisionContexts = (
         classified.push({ value: serialized, occurrences: 1 });
       }
 
-      return [file, { classified, stripped }] as const;
+      return [file, { classified, stripped }];
     }),
   );
 };

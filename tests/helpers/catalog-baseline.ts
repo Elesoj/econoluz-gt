@@ -34,7 +34,7 @@ type CatalogProduct = {
   series: string;
   finish: string;
   labels: Record<string, string>;
-  technicalSpecs?: Record<string, string | string[]>;
+  technicalSpecs?: Record<string, string | string[] | undefined>;
 };
 
 type CatalogTaxonomy = {

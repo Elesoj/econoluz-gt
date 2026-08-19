@@ -27,7 +27,9 @@ const verificationBaseline = {
   },
 } as unknown as CatalogBaseline;
 
-const issuesFor = (catalog = products) =>
+type CatalogUnderTest = Parameters<typeof validateCatalog>[0]["catalog"];
+
+const issuesFor = (catalog: CatalogUnderTest = products) =>
   validateCatalog({
     catalog,
     taxonomy,
