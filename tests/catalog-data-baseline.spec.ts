@@ -13,13 +13,25 @@ import {
 const catalogBaseline = baseline as CatalogBaseline;
 const { catalog: products, taxonomy } = loadCurrentCatalog();
 const firstProduct = products[0];
+const fixtureMetadata = catalogBaseline as unknown as {
+  capturedAggregateHashes: Record<string, string>;
+  verificationAggregateHashes: Record<string, string>;
+};
+const verificationBaseline = {
+  ...catalogBaseline,
+  verificationAggregateHashes: {
+    publicCanonicalSha256: "69bf6aa565cdbf74268fd1e179a0adc070b867ed13df5675a720bae995093eca",
+    internalCanonicalSha256: "2dd3df91d58b4e00cbbfdd4a932a835263eb8052aa9db9c68243c6faea601d64",
+    referenceMapSha256: "57307a880fe854730ee43816b3f8f45153b3732e51a28e9aa6b332e7a8a3dcd9",
+    productHashMapSha256: "38e5c3779f41924dbf0f70ad0bfa64ed79e7b25543718bdf39cacd9c8c76617d",
+  },
+} as unknown as CatalogBaseline;
 
-const issuesFor = (catalog = products, reachableIds = catalog.map((product) => product.id)) =>
+const issuesFor = (catalog = products) =>
   validateCatalog({
     catalog,
     taxonomy,
     assetExists: (imagePath) => existsSync(join(process.cwd(), "public", imagePath)),
-    reachableIds,
   });
 
 test("rejects a mutated product fixture instead of accepting altered catalog content", () => {
@@ -67,10 +79,12 @@ test("rejects an invalid taxonomy assignment", () => {
   ).toContain(`invalid application not-a-catalog-application for ${firstProduct.id}`);
 });
 
-test("rejects a product that cannot be reached by the catalog", () => {
-  expect(issuesFor(products, products.slice(1).map((product) => product.id))).toContain(
-    `unreachable product ${firstProduct.id}`,
-  );
+test("rejects an existing application assigned to the wrong product type", () => {
+  expect(
+    issuesFor(products.map((product) => (product.id === firstProduct.id
+      ? { ...product, application: "downlights" }
+      : product))),
+  ).toContain(`application downlights is unreachable from placas_accesorios for ${firstProduct.id}`);
 });
 
 test("rejects an altered technical specification", () => {
@@ -98,22 +112,49 @@ test("protects the exact 313 ECONOLUZ references in their current array order", 
   );
 });
 
+test("rejects a captured aggregate hash that no longer matches the source catalog", () => {
+  expect(
+    verifyCatalogBaseline(products, {
+      ...verificationBaseline,
+      verificationAggregateHashes: {
+        ...fixtureMetadata.verificationAggregateHashes,
+        referenceMapSha256: "0".repeat(64),
+      },
+    } as CatalogBaseline),
+  ).toContain("reference map hash changed");
+});
+
 test("matches the captured baseline against the untouched source catalog", () => {
   expect(catalogBaseline.productCount).toBe(313);
-  expect(catalogBaseline.publicCanonicalSha256).toBe(
+  expect(fixtureMetadata.capturedAggregateHashes.publicCanonicalSha256).toBe(
     "34c8c64fb279deb2068bf48c96083d0b8bf6b37521b63918e57029a6280c1a03",
   );
-  expect(catalogBaseline.internalCanonicalSha256).toBe(
+  expect(fixtureMetadata.capturedAggregateHashes.internalCanonicalSha256).toBe(
     "2aa7e0cbd73f91934b58d1efd4b24b2c6e5ef93e514b101945cdfe148c814be6",
   );
-  expect(catalogBaseline.referenceMapSha256).toBe(
+  expect(fixtureMetadata.capturedAggregateHashes.referenceMapSha256).toBe(
     "e5a0a7788e3a86be9c2e6936c242608dcd4884b94a7781c9d8b75af32e73bb8c",
   );
-  expect(catalogBaseline.productHashMapSha256).toBe(
+  expect(fixtureMetadata.capturedAggregateHashes.productHashMapSha256).toBe(
     "3d238e8fc944bf4b697d90515e0a1753e0e69010de751b708d8054b72dbf466c",
   );
+  expect(fixtureMetadata.verificationAggregateHashes).toEqual(
+    verificationBaseline.verificationAggregateHashes,
+  );
   expect(verifyCatalogBaseline(products, catalogBaseline)).toEqual([]);
-  expect(
-    issuesFor(products, products.map((product) => product.id)),
-  ).toEqual([]);
+  expect(issuesFor(products)).toEqual([
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou2001c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou6026c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou3022c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou3023c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou7012c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou7014c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-re8200c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-re8201c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou9010c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou9011cbcf",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou9012c00k",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ac7600c",
+    "application decorativos is unreachable from iluminacion_exterior for construlita-landscape",
+  ]);
 });

@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "baseline:catalog": "node scripts/generate-catalog-baseline.cjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

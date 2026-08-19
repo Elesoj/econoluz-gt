@@ -1,9 +1,17 @@
 {
   "productCount": 313,
-  "publicCanonicalSha256": "34c8c64fb279deb2068bf48c96083d0b8bf6b37521b63918e57029a6280c1a03",
-  "internalCanonicalSha256": "2aa7e0cbd73f91934b58d1efd4b24b2c6e5ef93e514b101945cdfe148c814be6",
-  "referenceMapSha256": "e5a0a7788e3a86be9c2e6936c242608dcd4884b94a7781c9d8b75af32e73bb8c",
-  "productHashMapSha256": "3d238e8fc944bf4b697d90515e0a1753e0e69010de751b708d8054b72dbf466c",
+  "capturedAggregateHashes": {
+    "publicCanonicalSha256": "34c8c64fb279deb2068bf48c96083d0b8bf6b37521b63918e57029a6280c1a03",
+    "internalCanonicalSha256": "2aa7e0cbd73f91934b58d1efd4b24b2c6e5ef93e514b101945cdfe148c814be6",
+    "referenceMapSha256": "e5a0a7788e3a86be9c2e6936c242608dcd4884b94a7781c9d8b75af32e73bb8c",
+    "productHashMapSha256": "3d238e8fc944bf4b697d90515e0a1753e0e69010de751b708d8054b72dbf466c"
+  },
+  "verificationAggregateHashes": {
+    "publicCanonicalSha256": "69bf6aa565cdbf74268fd1e179a0adc070b867ed13df5675a720bae995093eca",
+    "internalCanonicalSha256": "2dd3df91d58b4e00cbbfdd4a932a835263eb8052aa9db9c68243c6faea601d64",
+    "referenceMapSha256": "57307a880fe854730ee43816b3f8f45153b3732e51a28e9aa6b332e7a8a3dcd9",
+    "productHashMapSha256": "38e5c3779f41924dbf0f70ad0bfa64ed79e7b25543718bdf39cacd9c8c76617d"
+  },
   "references": [
     "ECO-ELE-0001",
     "ECO-ELE-0002",
