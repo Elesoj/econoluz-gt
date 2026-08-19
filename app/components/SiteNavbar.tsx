@@ -161,7 +161,6 @@ export default function SiteNavbar({
 
     if (pathname === "/catalogo" && href === "/catalogo") {
       event?.preventDefault();
-      window.history.replaceState(window.history.state, "", "/catalogo");
       window.dispatchEvent(new Event("econoluz-catalog-reset"));
       return;
     }

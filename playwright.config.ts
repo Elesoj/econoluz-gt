@@ -10,6 +10,7 @@ export default defineConfig({
     "catalog-public-boundary.spec.ts",
     "catalog-public-ui.spec.ts",
     "catalog-production-boundary.spec.ts",
+    "catalog-navigation.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,

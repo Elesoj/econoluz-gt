@@ -10,6 +10,12 @@ export default function SiteFooter() {
   const pathname = usePathname();
 
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (pathname === "/catalogo" && href === "/catalogo") {
+      event.preventDefault();
+      window.dispatchEvent(new Event("econoluz-catalog-reset"));
+      return;
+    }
+
     if (!href.startsWith("/#") || pathname !== "/") {
       return;
     }

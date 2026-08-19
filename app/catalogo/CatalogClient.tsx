@@ -26,14 +26,17 @@ import {
 } from "../data/catalogTaxonomy";
 import type { PublicProduct } from "../data/publicProduct";
 import {
+  CATALOG_PAGE_SIZE,
+  filterCatalogProducts,
+} from "./catalogState";
+import useCatalogNavigation from "./useCatalogNavigation";
+import {
   contact,
   mainNavItems,
   quoteBudgetRanges,
   quoteLightingTypes,
   quoteProjectTypes,
 } from "../data/siteData";
-
-const PAGE_SIZE = 40;
 
 type QuoteItem = {
   product: PublicProduct;
@@ -62,14 +65,6 @@ type StoredQuoteSession = {
     econoluzReference?: string;
     quantity?: number;
   }[];
-};
-
-type CatalogHistoryState = {
-  econoluzCatalog: true;
-  searchQuery: string;
-  selectedCategory: string;
-  selectedApplication: string;
-  showAllProducts: boolean;
 };
 
 const initialFormState: QuoteFormState = {
@@ -225,67 +220,13 @@ const clearTemporaryQuoteData = () => {
   window.dispatchEvent(new Event("econoluz-quote-updated"));
 };
 
-const createCatalogHistoryState = (
-  selectedCategory = "Todos",
-  selectedApplication = "Todos",
-  searchQuery = "",
-  showAllProducts = false,
-): CatalogHistoryState => ({
-  econoluzCatalog: true,
-  searchQuery,
-  selectedCategory,
-  selectedApplication,
-  showAllProducts,
-});
-
-const getCatalogBaseUrl = () => `${window.location.pathname}${window.location.search}`;
-
-const isCatalogHistoryState = (state: unknown): state is CatalogHistoryState =>
-  Boolean(
-    state &&
-      typeof state === "object" &&
-      "econoluzCatalog" in state &&
-      (state as CatalogHistoryState).econoluzCatalog,
-  );
-
-const getPublicTechnicalSpecValues = (product: PublicProduct) => {
-  if (!product.technicalSpecs) {
-    return [];
-  }
-
-  return Object.values(product.technicalSpecs).flat();
-};
-
-const buildProductSearchText = (product: PublicProduct) =>
-  [
-    product.publicName,
-    product.econoluzReference,
-    product.productType,
-    product.application,
-    product.finish,
-    product.labels.productType,
-    product.labels.application,
-    product.labels.series,
-    product.labels.finish,
-    product.publicDescription,
-    ...getPublicTechnicalSpecValues(product),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
 type CatalogClientProps = {
   products: PublicProduct[];
 };
 
 export default function CatalogClient({ products }: CatalogClientProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Todos");
-  const [selectedApplication, setSelectedApplication] = useState("Todos");
-  const [showAllProducts, setShowAllProducts] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [selectedSeries, setSelectedSeries] = useState("Todos");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isCatalogTransitioning, setIsCatalogTransitioning] = useState(false);
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
   const [isQuoteSessionReady, setIsQuoteSessionReady] = useState(false);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
@@ -305,43 +246,35 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     Record<RequiredQuoteField, HTMLInputElement | null>
   >({ fullName: null, phone: null, email: null });
   const catalogStageRef = useRef<HTMLDivElement>(null);
-  const isApplyingBrowserHistoryRef = useRef(false);
-  const transitionTimeoutRef = useRef<number | null>(null);
-  const searchableProducts = useMemo(
-    () =>
-      products.map((product) => ({
-        product,
-        searchText: buildProductSearchText(product),
-      })),
-    [products],
-  );
+  const resetTransientCatalogFilters = useCallback(() => {
+    setSelectedSeries("Todos");
+  }, []);
+  const {
+    location: catalogLocation,
+    isTransitioning: isCatalogTransitioning,
+    clearSearch,
+    goBack: navigateBackInCatalog,
+    goToPage,
+    goToRoot,
+    selectApplication,
+    selectCategory,
+    showAllProducts: navigateToAllProducts,
+    submitSearch,
+  } = useCatalogNavigation({
+    products,
+    catalogStageRef,
+    onResetTransient: resetTransientCatalogFilters,
+  });
+  const searchQuery =
+    catalogLocation.view === "search" ? catalogLocation.search : "";
+  const selectedCategory = catalogLocation.category ?? "Todos";
+  const selectedApplication = catalogLocation.application ?? "Todos";
+  const showAllProducts = catalogLocation.view === "all";
+  const currentPage = catalogLocation.page;
 
   const matchingProductsBeforeSeries = useMemo(() => {
-    const normalizedSearch = searchQuery.trim().toLowerCase();
-
-    return searchableProducts
-      .filter(({ product, searchText }) => {
-      const matchesCategory =
-        showAllProducts || selectedCategory === "Todos" || product.productType === selectedCategory;
-      const matchesApplication =
-        showAllProducts || selectedApplication === "Todos" || product.application === selectedApplication;
-      const matchesSearch =
-        !normalizedSearch || searchText.includes(normalizedSearch);
-
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesApplication
-      );
-    })
-      .map(({ product }) => product);
-  }, [
-    searchQuery,
-    searchableProducts,
-    selectedApplication,
-    selectedCategory,
-    showAllProducts,
-  ]);
+    return filterCatalogProducts(products, catalogLocation);
+  }, [catalogLocation, products]);
 
   const seriesCounts = useMemo(
     () =>
@@ -361,11 +294,14 @@ export default function CatalogClient({ products }: CatalogClientProps) {
           (product) => product.series === selectedSeries,
         );
 
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / CATALOG_PAGE_SIZE),
+  );
   const activePage = Math.min(currentPage, totalPages);
   const visibleProducts = filteredProducts.slice(
-    (activePage - 1) * PAGE_SIZE,
-    activePage * PAGE_SIZE,
+    (activePage - 1) * CATALOG_PAGE_SIZE,
+    activePage * CATALOG_PAGE_SIZE,
   );
 
   const selectedApplications =
@@ -411,171 +347,18 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     selectedApplication !== "Todos" ||
     Boolean(searchQuery.trim());
 
-  const resetCatalogNavigation = useCallback(() => {
-    setCurrentPage(1);
-    setSearchQuery("");
-    setSelectedCategory("Todos");
-    setSelectedApplication("Todos");
-    setSelectedSeries("Todos");
-    setShowAllProducts(false);
-  }, []);
-
-  const scrollCatalogStageIntoView = useCallback((behavior: ScrollBehavior = "smooth") => {
-    window.requestAnimationFrame(() => {
-      catalogStageRef.current?.scrollIntoView({
-        behavior,
-        block: "start",
-      });
-    });
-  }, []);
-
-  const applyCatalogHistoryState = useCallback((catalogState: CatalogHistoryState) => {
-    isApplyingBrowserHistoryRef.current = true;
-    setCurrentPage(1);
-    setSearchQuery(catalogState.searchQuery);
-    setSelectedCategory(catalogState.selectedCategory);
-    setSelectedApplication(catalogState.selectedApplication);
-    setSelectedSeries("Todos");
-    setShowAllProducts(catalogState.showAllProducts);
-    setIsCatalogTransitioning(false);
-    scrollCatalogStageIntoView();
-
-    window.setTimeout(() => {
-      isApplyingBrowserHistoryRef.current = false;
-    }, 0);
-  }, [scrollCatalogStageIntoView]);
-
-  const replaceCatalogHistoryState = useCallback(
-    (catalogState: CatalogHistoryState, url = window.location.href) => {
-      window.history.replaceState(catalogState, "", url);
-    },
-    [],
-  );
-
-  const syncCatalogHistoryState = useCallback((catalogState: CatalogHistoryState) => {
-    if (isApplyingBrowserHistoryRef.current) {
-      return;
-    }
-
-    replaceCatalogHistoryState(catalogState, getCatalogBaseUrl());
-  }, [replaceCatalogHistoryState]);
-
-  const transitionCatalog = useCallback((
-    nextHistoryState: CatalogHistoryState,
-    options: { animate?: boolean; scrollBehavior?: ScrollBehavior | false } = {},
-  ) => {
-    if (transitionTimeoutRef.current) {
-      window.clearTimeout(transitionTimeoutRef.current);
-      transitionTimeoutRef.current = null;
-    }
-
-    if (window.location.hash) {
-      window.history.replaceState(
-        createCatalogHistoryState(
-          selectedCategory,
-          selectedApplication,
-          searchQuery,
-          showAllProducts,
-        ),
-        "",
-        getCatalogBaseUrl(),
-      );
-    }
-
-    const applyNextState = () => {
-      setCurrentPage(1);
-      setSearchQuery(nextHistoryState.searchQuery);
-      setSelectedCategory(nextHistoryState.selectedCategory);
-      setSelectedApplication(nextHistoryState.selectedApplication);
-      setSelectedSeries("Todos");
-      setShowAllProducts(nextHistoryState.showAllProducts);
-      syncCatalogHistoryState(nextHistoryState);
-
-      if (options.scrollBehavior !== false) {
-        scrollCatalogStageIntoView(options.scrollBehavior);
-      }
-    };
-
-    if (options.animate === false) {
-      setIsCatalogTransitioning(false);
-      applyNextState();
-      return;
-    }
-
-    setIsCatalogTransitioning(true);
-
-    transitionTimeoutRef.current = window.setTimeout(() => {
-      transitionTimeoutRef.current = null;
-      applyNextState();
-      setIsCatalogTransitioning(false);
-    }, 180);
-  }, [
-    syncCatalogHistoryState,
-    scrollCatalogStageIntoView,
-    searchQuery,
-    selectedApplication,
-    selectedCategory,
-    showAllProducts,
-  ]);
-
-  const navigateBackInCatalog = () => {
-    if (showAllProducts) {
-      transitionCatalog(createCatalogHistoryState(), {
-        animate: false,
-        scrollBehavior: false,
-      });
-      return;
-    }
-
-    if (searchQuery.trim()) {
-      transitionCatalog(
-        createCatalogHistoryState(selectedCategory, selectedApplication, "", false),
-        { animate: false, scrollBehavior: false },
-      );
-      return;
-    }
-
-    if (selectedApplication !== "Todos") {
-      transitionCatalog(createCatalogHistoryState(selectedCategory), {
-        animate: false,
-        scrollBehavior: false,
-      });
-      return;
-    }
-
-    if (selectedCategory !== "Todos") {
-      transitionCatalog(createCatalogHistoryState(), {
-        animate: false,
-        scrollBehavior: false,
-      });
-      return;
-    }
-
-    scrollCatalogStageIntoView();
-  };
-
   const handleSearchSubmit = () => {
-    setCurrentPage(1);
-    syncCatalogHistoryState(
-      createCatalogHistoryState(
-        selectedCategory,
-        selectedApplication,
-        searchQuery,
-        showAllProducts,
-      ),
-    );
-    scrollCatalogStageIntoView();
+    submitSearch(searchInputRef.current?.value ?? "");
   };
 
-  const goToProductPage = (page: number) => {
+  const goToProductPage = (page: number, scroll = true) => {
     const nextPage = Math.min(Math.max(page, 1), totalPages);
 
     if (nextPage === activePage) {
       return;
     }
 
-    setCurrentPage(nextPage);
-    scrollCatalogStageIntoView("auto");
+    goToPage(nextPage, scroll);
   };
 
   const scrollAdviceFormIntoView = useCallback(() => {
@@ -627,14 +410,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     invalidFieldLabels.length > 0
       ? `No se pudo enviar. Revisa ${invalidFieldLabels.length === 1 ? "el campo" : "los campos"}: ${invalidFieldLabels.join(", ")}.`
       : "";
-
-  useEffect(() => {
-    return () => {
-      if (transitionTimeoutRef.current) {
-        window.clearTimeout(transitionTimeoutRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const animationFrame = window.requestAnimationFrame(() => {
@@ -705,58 +480,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
       window.removeEventListener("beforeunload", clearTemporaryQuoteData);
     };
   }, []);
-
-  useEffect(() => {
-    const handleCatalogReset = () => {
-      if (transitionTimeoutRef.current) {
-        window.clearTimeout(transitionTimeoutRef.current);
-        transitionTimeoutRef.current = null;
-      }
-
-      resetCatalogNavigation();
-      setIsCatalogTransitioning(false);
-      replaceCatalogHistoryState(
-        createCatalogHistoryState(),
-        getCatalogBaseUrl(),
-      );
-      window.requestAnimationFrame(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-    };
-
-    window.addEventListener("econoluz-catalog-reset", handleCatalogReset);
-
-    return () => {
-      window.removeEventListener("econoluz-catalog-reset", handleCatalogReset);
-    };
-  }, [replaceCatalogHistoryState, resetCatalogNavigation]);
-
-  useEffect(() => {
-    const hasAdviceHash = window.location.hash === "#asesoria-proyecto";
-
-    replaceCatalogHistoryState(createCatalogHistoryState(), getCatalogBaseUrl());
-
-    if (hasAdviceHash) {
-      window.requestAnimationFrame(() => {
-        document.getElementById("asesoria-proyecto")?.scrollIntoView({
-          behavior: "auto",
-          block: "start",
-        });
-      });
-    }
-
-    const handlePopState = (event: PopStateEvent) => {
-      if (isCatalogHistoryState(event.state)) {
-        applyCatalogHistoryState(event.state);
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [applyCatalogHistoryState, replaceCatalogHistoryState]);
 
   const addToQuote = (product: PublicProduct, openQuote = true) => {
     setQuoteItems((currentItems) => {
@@ -937,24 +660,31 @@ export default function CatalogClient({ products }: CatalogClientProps) {
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
                 Buscar en catálogo
               </span>
-              <input
-                value={searchQuery}
-                onChange={(event) => {
-                  setCurrentPage(1);
-                  setShowAllProducts(false);
-                  setSelectedSeries("Todos");
-                  setSearchQuery(event.target.value);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    event.currentTarget.blur();
-                    handleSearchSubmit();
-                  }
-                }}
-                placeholder="Busca por nombre, referencia, serie, color o especificación"
-                className="w-full border border-neutral-200 bg-white px-4 py-4 text-base font-semibold text-black outline-none transition placeholder:text-neutral-400 focus:border-black"
-              />
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  key={searchQuery}
+                  ref={searchInputRef}
+                  defaultValue={searchQuery}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      event.currentTarget.blur();
+                      handleSearchSubmit();
+                    }
+                  }}
+                  placeholder="Busca por nombre, referencia, serie, color o especificación"
+                  className="w-full border border-neutral-200 bg-white px-4 py-4 text-base font-semibold text-black outline-none transition placeholder:text-neutral-400 focus:border-black"
+                />
+                {catalogLocation.view === "search" && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="shrink-0 rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
+                  >
+                    Limpiar búsqueda
+                  </button>
+                )}
+              </div>
             </label>
 
           </div>
@@ -962,7 +692,11 @@ export default function CatalogClient({ products }: CatalogClientProps) {
       </section>
 
       <section className="px-5 pb-20 pt-6 sm:px-8 sm:pb-24 lg:pb-32">
-        <div ref={catalogStageRef} className="mx-auto scroll-mt-28 max-w-7xl">
+        <div
+          id="catalog-product-region"
+          ref={catalogStageRef}
+          className="mx-auto scroll-mt-28 max-w-7xl"
+        >
           {!showAllProducts && !searchQuery.trim() && selectedCategory === "Todos" && (
             <div
               key="catalog-types"
@@ -976,9 +710,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
               <div className="mt-7">
                 <button
                   type="button"
-                  onClick={() =>
-                    transitionCatalog(createCatalogHistoryState("Todos", "Todos", "", true))
-                  }
+                  onClick={navigateToAllProducts}
                   disabled={isCatalogTransitioning}
                   className="inline-flex rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
@@ -990,9 +722,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   <button
                     key={type.id}
                     type="button"
-                    onClick={() =>
-                      transitionCatalog(createCatalogHistoryState(type.id))
-                    }
+                    onClick={() => selectCategory(type.id)}
                     disabled={isCatalogTransitioning}
                     className="group min-h-44 overflow-hidden border border-neutral-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] active:scale-[0.99]"
                   >
@@ -1035,12 +765,12 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                         type="button"
                         onClick={() => {
                           if (index === 0) {
-                            transitionCatalog(createCatalogHistoryState());
+                            goToRoot();
                             return;
                           }
 
                           if (index === 1) {
-                            transitionCatalog(createCatalogHistoryState(selectedCategory));
+                            selectCategory(selectedCategory);
                             return;
                           }
                         }}
@@ -1077,9 +807,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
-                    transitionCatalog(createCatalogHistoryState())
-                  }
+                  onClick={goToRoot}
                   disabled={isCatalogTransitioning}
                   className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                 >
@@ -1092,7 +820,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     key={application}
                     type="button"
                     onClick={() =>
-                      transitionCatalog(createCatalogHistoryState(selectedCategory, application))
+                      selectApplication(selectedCategory, application)
                     }
                     disabled={isCatalogTransitioning}
                     className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
@@ -1139,7 +867,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                           type="button"
                           onClick={() => {
                             if (index === 0) {
-                              transitionCatalog(createCatalogHistoryState());
+                              goToRoot();
                               return;
                             }
 
@@ -1148,7 +876,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                             }
 
                             if (index === 1) {
-                              transitionCatalog(createCatalogHistoryState(selectedCategory));
+                              selectCategory(selectedCategory);
                               return;
                             }
                           }}
@@ -1186,9 +914,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     </button>
                     <button
                       type="button"
-                      onClick={() =>
-                        transitionCatalog(createCatalogHistoryState())
-                      }
+                      onClick={goToRoot}
                       disabled={isCatalogTransitioning}
                       className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                     >
@@ -1209,7 +935,9 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                       count={matchingProductsBeforeSeries.length}
                       isActive={selectedSeries === "Todos"}
                       onToggle={() => {
-                        setCurrentPage(1);
+                        if (activePage !== 1) {
+                          goToProductPage(1, false);
+                        }
                         setSelectedSeries("Todos");
                       }}
                     />
@@ -1220,7 +948,9 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                         count={seriesCounts.get(series)}
                         isActive={selectedSeries === series}
                         onToggle={() => {
-                          setCurrentPage(1);
+                          if (activePage !== 1) {
+                            goToProductPage(1, false);
+                          }
                           setSelectedSeries((current) =>
                             current === series ? "Todos" : series,
                           );
@@ -1259,7 +989,9 @@ export default function CatalogClient({ products }: CatalogClientProps) {
               </p>
               <button
                 type="button"
-                onClick={() => transitionCatalog(createCatalogHistoryState())}
+                onClick={() =>
+                  catalogLocation.view === "search" ? clearSearch() : goToRoot()
+                }
                 disabled={isCatalogTransitioning}
                 className="mt-4 rounded-full border border-black px-5 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
               >
@@ -1268,7 +1000,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
             </div>
           )}
 
-          {shouldShowProducts && filteredProducts.length > PAGE_SIZE && (
+          {shouldShowProducts && filteredProducts.length > CATALOG_PAGE_SIZE && (
             <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
