@@ -30,7 +30,9 @@ import {
   type CatalogLocation,
   filterCatalogProducts,
 } from "./catalogState";
+import { buildPublicProductLine } from "./publicQuoteMessage";
 import useCatalogNavigation from "./useCatalogNavigation";
+import useQuoteSelection from "./useQuoteSelection";
 import {
   contact,
   mainNavItems,
@@ -38,11 +40,6 @@ import {
   quoteLightingTypes,
   quoteProjectTypes,
 } from "../data/siteData";
-
-type QuoteItem = {
-  product: PublicProduct;
-  quantity: number;
-};
 
 type QuoteFormState = {
   fullName: string;
@@ -61,13 +58,6 @@ type StoredLedResults = {
   summary?: string;
 };
 
-type StoredQuoteSession = {
-  items?: {
-    econoluzReference?: string;
-    quantity?: number;
-  }[];
-};
-
 const initialFormState: QuoteFormState = {
   fullName: "",
   phone: "",
@@ -80,8 +70,6 @@ const initialFormState: QuoteFormState = {
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const quoteSessionStorageKey = "econoluz_catalog_quote";
-
 // Orden de tabulación de los campos obligatorios, para saber a cuál llevar el
 // foco cuando la validación falla.
 const requiredQuoteFields = ["fullName", "phone", "email"] as const;
@@ -142,24 +130,6 @@ const postLead = (
     .catch(() => ({ ok: false, confirmed: true }));
 };
 
-const getStoredQuoteSession = (): StoredQuoteSession => {
-  if (typeof window === "undefined") {
-    return {};
-  }
-
-  const storedQuote = window.sessionStorage.getItem(quoteSessionStorageKey);
-
-  if (!storedQuote) {
-    return {};
-  }
-
-  try {
-    return JSON.parse(storedQuote) as StoredQuoteSession;
-  } catch {
-    return {};
-  }
-};
-
 const getStoredLedResultsSummary = () => {
   if (typeof window === "undefined") {
     return "";
@@ -192,33 +162,8 @@ const buildInitialFormState = () => {
   };
 };
 
-const buildInitialQuoteItems = (products: readonly PublicProduct[]): QuoteItem[] => {
-  const storedItems = getStoredQuoteSession().items ?? [];
-  const productsByReference = new Map(
-    products.map((product) => [product.econoluzReference, product]),
-  );
-
-  return storedItems
-    .map((item) => {
-      if (!item.econoluzReference) {
-        return null;
-      }
-
-      const product = productsByReference.get(item.econoluzReference);
-      const quantity =
-        typeof item.quantity === "number" && Number.isFinite(item.quantity)
-          ? Math.max(1, Math.floor(item.quantity))
-          : 1;
-
-      return product ? { product, quantity } : null;
-    })
-    .filter((item): item is QuoteItem => Boolean(item));
-};
-
 const clearTemporaryQuoteData = () => {
-  window.localStorage.removeItem("econoluz_quote_context");
   window.localStorage.removeItem("econoluz_led_results");
-  window.dispatchEvent(new Event("econoluz-quote-updated"));
 };
 
 type CatalogClientProps = {
@@ -228,8 +173,6 @@ type CatalogClientProps = {
 export default function CatalogClient({ products }: CatalogClientProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [selectedSeries, setSelectedSeries] = useState("Todos");
-  const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
-  const [isQuoteSessionReady, setIsQuoteSessionReady] = useState(false);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
   const [technicalProduct, setTechnicalProduct] = useState<PublicProduct | null>(null);
   const [formState, setFormState] = useState<QuoteFormState>(buildInitialFormState);
@@ -238,6 +181,14 @@ export default function CatalogClient({ products }: CatalogClientProps) {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
+  const {
+    items: quoteItems,
+    quoteCount,
+    add: addQuoteProduct,
+    decrease: decreaseQuoteProduct,
+    remove: removeQuoteProduct,
+    setQuantity: setQuoteQuantity,
+  } = useQuoteSelection(products);
   const opensInSameTab = useSyncExternalStore(
     subscribeToUserAgent,
     isMetaInAppBrowser,
@@ -379,13 +330,8 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     });
   }, []);
 
-  const quoteCount = quoteItems.reduce((total, item) => total + item.quantity, 0);
-
   const whatsappMessage = useMemo(() => {
-    const selectedProducts = quoteItems.map(
-      (item) =>
-        `${item.product.publicName} - Ref. ${item.product.econoluzReference} - Cantidad: ${item.quantity}`,
-    );
+    const selectedProducts = quoteItems.map(buildPublicProductLine);
     const details = [
       formState.fullName ? `Nombre: ${formState.fullName}` : "",
       formState.phone ? `Teléfono: ${formState.phone}` : "",
@@ -420,68 +366,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
       : "";
 
   useEffect(() => {
-    const animationFrame = window.requestAnimationFrame(() => {
-      setQuoteItems(buildInitialQuoteItems(products));
-      setIsQuoteSessionReady(true);
-    });
-
-    return () => {
-      window.cancelAnimationFrame(animationFrame);
-    };
-  }, [products]);
-
-  useEffect(() => {
-    if (!isQuoteSessionReady) {
-      return;
-    }
-
-    if (quoteItems.length === 0) {
-      window.sessionStorage.removeItem(quoteSessionStorageKey);
-      return;
-    }
-
-    window.sessionStorage.setItem(
-      quoteSessionStorageKey,
-      JSON.stringify({
-        items: quoteItems.map((item) => ({
-          econoluzReference: item.product.econoluzReference,
-          quantity: item.quantity,
-        })),
-      }),
-    );
-  }, [isQuoteSessionReady, quoteItems]);
-
-  useEffect(() => {
-    const hasQuoteContext =
-      quoteItems.length > 0 ||
-      formState.fullName ||
-      formState.projectType ||
-      formState.estimatedArea ||
-      formState.budgetRange;
-
-    if (!hasQuoteContext) {
-      window.localStorage.removeItem("econoluz_quote_context");
-      window.dispatchEvent(new Event("econoluz-quote-updated"));
-      return;
-    }
-
-    window.localStorage.setItem(
-      "econoluz_quote_context",
-      JSON.stringify({
-        clientName: formState.fullName,
-        projectType: formState.projectType,
-        estimatedArea: formState.estimatedArea,
-        budgetRange: formState.budgetRange,
-        products: quoteItems.map(
-          (item) =>
-            `${item.product.publicName} - Ref. ${item.product.econoluzReference} - Cantidad: ${item.quantity}`,
-        ),
-      }),
-    );
-    window.dispatchEvent(new Event("econoluz-quote-updated"));
-  }, [formState, quoteItems]);
-
-  useEffect(() => {
     window.addEventListener("beforeunload", clearTemporaryQuoteData);
 
     return () => {
@@ -490,40 +374,19 @@ export default function CatalogClient({ products }: CatalogClientProps) {
   }, []);
 
   const addToQuote = (product: PublicProduct, openQuote = true) => {
-    setQuoteItems((currentItems) => {
-      const existingItem = currentItems.find((item) => item.product.id === product.id);
-
-      if (existingItem) {
-        return currentItems.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
-        );
-      }
-
-      return [...currentItems, { product, quantity: 1 }];
-    });
+    addQuoteProduct(product);
 
     if (openQuote) {
       setIsQuoteOpen(true);
     }
   };
 
-  const removeFromQuote = (productId: string) => {
-    setQuoteItems((currentItems) =>
-      currentItems.filter((item) => item.product.id !== productId),
-    );
+  const removeFromQuote = (econoluzReference: string) => {
+    removeQuoteProduct(econoluzReference);
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity < 1) {
-      removeFromQuote(productId);
-      return;
-    }
-
-    setQuoteItems((currentItems) =>
-      currentItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item,
-      ),
-    );
+  const updateQuantity = (econoluzReference: string, quantity: number) => {
+    setQuoteQuantity(econoluzReference, quantity);
   };
 
   const updateFormField = (field: keyof QuoteFormState, value: string) => {
@@ -588,10 +451,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         lightingType: formState.lightingType,
         message: formState.message,
         ledSummary: ledResultsSummary,
-        products: quoteItems.map(
-          (item) =>
-            `${item.product.publicName} - Ref. ${item.product.econoluzReference} - Cantidad: ${item.quantity}`,
-        ),
+        products: quoteItems.map(buildPublicProductLine),
         source: opensInSameTab ? "in-app" : "navegador",
         website: "",
       },
@@ -971,7 +831,11 @@ export default function CatalogClient({ products }: CatalogClientProps) {
 
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                 {visibleProducts.map((product) => {
-                  const selectedItem = quoteItems.find((item) => item.product.id === product.id);
+                  const selectedItem = quoteItems.find(
+                    (item) =>
+                      item.product.econoluzReference ===
+                      product.econoluzReference,
+                  );
 
                   return (
                     <ProductCard
@@ -980,7 +844,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                       quantity={selectedItem?.quantity}
                       onAdd={() => addToQuote(product, false)}
                       onDecrease={() =>
-                        updateQuantity(product.id, (selectedItem?.quantity ?? 1) - 1)
+                        decreaseQuoteProduct(product.econoluzReference)
                       }
                       onViewDetails={() => setTechnicalProduct(product)}
                     />
@@ -1419,15 +1283,18 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         product={technicalProduct}
         quantity={
           technicalProduct
-            ? quoteItems.find((item) => item.product.id === technicalProduct.id)?.quantity ?? 0
+            ? quoteItems.find(
+                (item) =>
+                  item.product.econoluzReference ===
+                  technicalProduct.econoluzReference,
+              )?.quantity ?? 0
             : 0
         }
         onAdd={(product) => {
           addToQuote(product, false);
         }}
         onDecrease={(product) => {
-          const selectedItem = quoteItems.find((item) => item.product.id === product.id);
-          updateQuantity(product.id, (selectedItem?.quantity ?? 1) - 1);
+          decreaseQuoteProduct(product.econoluzReference);
         }}
         onClose={() => setTechnicalProduct(null)}
         onViewQuote={() => {

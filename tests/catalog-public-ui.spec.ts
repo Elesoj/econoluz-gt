@@ -1,13 +1,19 @@
 import { expect, test } from "@playwright/test";
 
-test("initializes quote restoration from the public catalog without client errors", async ({
+test("restores an actual stable-reference quote from the public catalog", async ({
   page,
 }) => {
   const pageErrors: string[] = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem(
+      "econoluz_catalog_quote",
+      '{"items":[{"econoluzReference":"ECO-IND-0048","quantity":2}]}',
+    );
+  });
 
   await page.goto("/catalogo");
-  await page.waitForTimeout(100);
+  await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("2");
 
   expect(pageErrors).toEqual([]);
 });

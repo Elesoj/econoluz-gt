@@ -1,63 +1,39 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import {
+  getFloatingQuoteServerSnapshot,
+  getFloatingQuoteSnapshot,
+  subscribeToFloatingQuote,
+} from "../catalogo/floatingQuoteStore";
 import { contact } from "../data/siteData";
 
-type StoredQuote = {
-  clientName?: string;
-  projectType?: string;
-  estimatedArea?: string;
-  budgetRange?: string;
-  products?: string[];
-};
-
-const buildMessage = (quote: StoredQuote | null) => {
-  if (!quote) {
-    return contact.whatsappDefaultMessage;
-  }
-
-  const details = [
-    quote.clientName ? `Nombre: ${quote.clientName}` : "",
-    quote.projectType ? `Tipo de proyecto: ${quote.projectType}` : "",
-    quote.estimatedArea ? `Área estimada: ${quote.estimatedArea} m²` : "",
-    quote.budgetRange ? `Presupuesto: ${quote.budgetRange}` : "",
-    quote.products?.length ? `Productos: ${quote.products.join(", ")}` : "",
-  ].filter(Boolean);
-
-  if (details.length === 0) {
-    return contact.whatsappDefaultMessage;
-  }
-
-  return `${contact.whatsappDefaultMessage}\n${details.join("\n")}`;
-};
+const legacyQuoteContextKey = "econoluz_quote_context";
+let hasAttemptedLegacyContextCleanup = false;
 
 export default function FloatingWhatsApp() {
-  const [message, setMessage] = useState(contact.whatsappDefaultMessage);
+  const message = useSyncExternalStore(
+    subscribeToFloatingQuote,
+    getFloatingQuoteSnapshot,
+    getFloatingQuoteServerSnapshot,
+  );
 
   useEffect(() => {
-    const syncQuote = () => {
-      const storedQuote = window.localStorage.getItem("econoluz_quote_context");
+    if (hasAttemptedLegacyContextCleanup) {
+      return;
+    }
 
-      if (!storedQuote) {
-        setMessage(contact.whatsappDefaultMessage);
-        return;
+    hasAttemptedLegacyContextCleanup = true;
+
+    try {
+      const storage = window.localStorage;
+
+      if (storage.getItem(legacyQuoteContextKey) !== null) {
+        storage.removeItem(legacyQuoteContextKey);
       }
-
-      try {
-        setMessage(buildMessage(JSON.parse(storedQuote) as StoredQuote));
-      } catch {
-        setMessage(contact.whatsappDefaultMessage);
-      }
-    };
-
-    syncQuote();
-    window.addEventListener("storage", syncQuote);
-    window.addEventListener("econoluz-quote-updated", syncQuote);
-
-    return () => {
-      window.removeEventListener("storage", syncQuote);
-      window.removeEventListener("econoluz-quote-updated", syncQuote);
-    };
+    } catch {
+      // El almacenamiento puede estar bloqueado en navegadores internos.
+    }
   }, []);
 
   return (

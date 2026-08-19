@@ -14,8 +14,8 @@ type QuoteDrawerProps = {
   items: QuoteDrawerItem[];
   onClose: () => void;
   onCompleteAdvice: () => void;
-  onRemove: (productId: string) => void;
-  onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemove: (econoluzReference: string) => void;
+  onUpdateQuantity: (econoluzReference: string, quantity: number) => void;
 };
 
 export default function QuoteDrawer({
@@ -81,7 +81,7 @@ export default function QuoteDrawer({
                     </div>
                     <button
                       type="button"
-                      onClick={() => onRemove(item.product.id)}
+                      onClick={() => onRemove(item.product.econoluzReference)}
                       className="text-sm font-semibold text-neutral-500 transition hover:text-black"
                     >
                       Quitar
@@ -91,7 +91,12 @@ export default function QuoteDrawer({
                     <div className="inline-flex items-center rounded-full border border-neutral-200">
                       <button
                         type="button"
-                        onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
+                        onClick={() =>
+                          onUpdateQuantity(
+                            item.product.econoluzReference,
+                            item.quantity - 1,
+                          )
+                        }
                         className="h-9 w-9 text-lg transition hover:bg-neutral-100"
                       >
                         -
@@ -101,7 +106,12 @@ export default function QuoteDrawer({
                       </span>
                       <button
                         type="button"
-                        onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
+                        onClick={() =>
+                          onUpdateQuantity(
+                            item.product.econoluzReference,
+                            item.quantity + 1,
+                          )
+                        }
                         className="h-9 w-9 text-lg transition hover:bg-neutral-100"
                       >
                         +
@@ -130,7 +140,7 @@ export default function QuoteDrawer({
             Completar asesoría
           </button>
           <p className="mt-4 text-xs leading-5 text-neutral-500">
-            Lista temporal en el navegador. No se guarda información ni se procesa ningún pago.
+            La selección se guarda temporalmente en esta pestaña durante la sesión. No se procesa ningún pago.
           </p>
         </div>
       </aside>

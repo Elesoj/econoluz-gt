@@ -11,6 +11,7 @@ export default defineConfig({
     "catalog-public-ui.spec.ts",
     "catalog-production-boundary.spec.ts",
     "catalog-navigation.spec.ts",
+    "catalog-quote.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,
