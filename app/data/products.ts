@@ -1,8 +1,6 @@
 import {
   getApplicationId,
   getApplicationLabel,
-  getBrandId,
-  getBrandLabel,
   getFinishId,
   getFinishLabel,
   getProductTypeId,
@@ -10,6 +8,11 @@ import {
   getSeriesId,
   getSeriesLabel,
 } from "./catalogTaxonomy";
+import { getBrandId, getBrandLabel } from "./catalogBrands.internal";
+import {
+  getPermanentReference,
+  validatePermanentReferences,
+} from "./productReferences";
 
 type RawProduct = {
   id: string;
@@ -25,12 +28,6 @@ type RawProduct = {
   image: string;
   images?: string[];
   technicalSpecs?: Record<string, string | string[] | undefined>;
-};
-
-const publicReferencePrefixes: Record<string, string> = {
-  "Iluminación industrial": "IND",
-  "Placas y accesorios eléctricos": "ELE",
-  "Tubos LED": "TUB",
 };
 
 const supplierBrandPattern = /\b(ARTLITE|Artlite|Construlita|CONSTRULITA|Highlum|HIGHLUM)\b/g;
@@ -112,10 +109,6 @@ const buildPublicName = ({
   return `Luminaria ${application.toLowerCase()}`;
 };
 
-const buildEconoluzReference = (category: string, index: number) => {
-  const prefix = publicReferencePrefixes[category] ?? "CAT";
-  return `ECO-${prefix}-${String(index + 1).padStart(4, "0")}`;
-};
 const artlitePlateCodes = [
   "APL-001",
   "APL-002",
@@ -9824,7 +9817,7 @@ const normalizeProduct = ({
   application,
   finish = "",
   ...product
-}: RawProduct, index: number) => {
+}: RawProduct) => {
   const brandId = getBrandId(brand);
   const productTypeId = getProductTypeId(category);
   const applicationId = getApplicationId(application);
@@ -9838,7 +9831,7 @@ const normalizeProduct = ({
     publicName: buildPublicName({ category, application, subcategory }),
     publicDescription: sanitizeSupplierText(product.description),
     technicalSpecs: publicTechnicalSpecs,
-    econoluzReference: buildEconoluzReference(category, index),
+    econoluzReference: getPermanentReference(product.id),
     supplierCode: product.sku,
     supplierBrand: brandId,
     brand: brandId,
@@ -9857,7 +9850,10 @@ const normalizeProduct = ({
   };
 };
 
-export const products = rawProducts.map((product, index) => normalizeProduct(product, index));
+validatePermanentReferences(rawProducts.map((product) => product.id));
 
-export type Product = (typeof products)[number];
+export const products = rawProducts.map((product) => normalizeProduct(product));
+
+export type InternalProduct = (typeof products)[number];
+export type Product = InternalProduct;
 

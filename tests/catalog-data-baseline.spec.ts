@@ -142,19 +142,5 @@ test("matches the captured baseline against the untouched source catalog", () =>
     verificationBaseline.verificationAggregateHashes,
   );
   expect(verifyCatalogBaseline(products, catalogBaseline)).toEqual([]);
-  expect(issuesFor(products)).toEqual([
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou2001c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou6026c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou3022c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou3023c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou7012c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou7014c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-re8200c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-re8201c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou9010c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou9011cbcf",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ou9012c00k",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-bronce-ac7600c",
-    "application decorativos is unreachable from iluminacion_exterior for construlita-landscape",
-  ]);
+  expect(issuesFor(products)).toEqual([]);
 });

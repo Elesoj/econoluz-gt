@@ -5,7 +5,12 @@ const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: "./tests",
-  testMatch: "catalog-data-baseline.spec.ts",
+  testMatch: [
+    "catalog-data-baseline.spec.ts",
+    "catalog-public-boundary.spec.ts",
+    "catalog-public-ui.spec.ts",
+    "catalog-production-boundary.spec.ts",
+  ],
   fullyParallel: false,
   workers: 1,
   reporter: "list",

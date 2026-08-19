@@ -1,9 +1,3 @@
-export const brands = {
-  artlite: { id: "artlite", label: "Artlite" },
-  construlita: { id: "construlita", label: "Construlita" },
-  highlum: { id: "highlum", label: "Highlum" },
-} as const;
-
 export const productTypes = {
   iluminacion_industrial: {
     id: "iluminacion_industrial",
@@ -46,6 +40,7 @@ export const productTypes = {
       "postes",
       "sumergibles",
       "arbotantes",
+      "decorativos",
     ],
   },
   tiras_led: {
@@ -229,7 +224,6 @@ export const series = {
   walltrack: { id: "walltrack", label: "Walltrack" },
 } as const;
 
-export type BrandId = keyof typeof brands;
 export type ProductTypeId = keyof typeof productTypes;
 export type ApplicationId = keyof typeof applications;
 export type FinishId = keyof typeof finishes;
@@ -250,7 +244,6 @@ const labelLookup = <T extends Record<string, { label: string }>>(items: T) =>
     Object.entries(items).map(([id, item]) => [item.label.toLowerCase(), id]),
   ) as Record<string, keyof T>;
 
-const brandByLabel = labelLookup(brands);
 const productTypeByLabel = labelLookup(productTypes);
 const applicationByLabel = labelLookup(applications);
 const finishByLabel = labelLookup(finishes);
@@ -272,9 +265,6 @@ const applicationAliasesBySlug: Record<string, ApplicationId> = {
 
 export const productTypeList = Object.values(productTypes);
 
-export const getBrandId = (label = "") =>
-  (brandByLabel[label.toLowerCase()] as BrandId | undefined) ?? slugify(label);
-
 export const getProductTypeId = (label = "") =>
   (productTypeByLabel[label.toLowerCase()] as ProductTypeId | undefined) ??
   productTypeAliasesBySlug[slugify(label)] ??
@@ -291,10 +281,35 @@ export const getFinishId = (label = "") =>
 export const getSeriesId = (label = "") =>
   (seriesByLabel[label.toLowerCase()] as SeriesId | undefined) ?? slugify(label);
 
-export const getBrandLabel = (id: string) => brands[id as BrandId]?.label ?? id;
 export const getProductTypeLabel = (id: string) =>
   productTypes[id as ProductTypeId]?.label ?? id;
 export const getApplicationLabel = (id: string) =>
   applications[id as ApplicationId]?.label ?? id;
 export const getFinishLabel = (id: string) => finishes[id as FinishId]?.label ?? id;
 export const getSeriesLabel = (id: string) => series[id as keyof typeof series]?.label ?? id;
+
+type TaxonomyProduct = {
+  productType: string;
+  application: string;
+};
+
+export const getPopulatedApplicationIds = (
+  productTypeId: string,
+  catalog: readonly TaxonomyProduct[],
+) => {
+  const productType = productTypes[productTypeId as ProductTypeId];
+
+  if (!productType) {
+    return [];
+  }
+
+  const populatedApplications = new Set(
+    catalog
+      .filter((product) => product.productType === productTypeId)
+      .map((product) => product.application),
+  );
+
+  return productType.applications.filter((application) =>
+    populatedApplications.has(application),
+  );
+};

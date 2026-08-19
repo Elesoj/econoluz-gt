@@ -1,8 +1,8 @@
 import Image from "next/image";
-import type { Product } from "../data/products";
+import type { PublicProduct } from "../data/publicProduct";
 
 type ProductCardProps = {
-  product: Product;
+  product: PublicProduct;
   quantity?: number;
   onAdd: () => void;
   onDecrease: () => void;

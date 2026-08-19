@@ -1,12 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import type { Product } from "../data/products";
+import {
+  PUBLIC_TECHNICAL_SPEC_REGISTRY,
+  type PublicProduct,
+  type PublicTechnicalSpecValue,
+} from "../data/publicProduct";
 import { useEffect } from "react";
 
-type TechnicalProduct = Product;
+type TechnicalProduct = PublicProduct;
 
-type SpecRow = [string, string | string[] | undefined];
+type SpecRow = {
+  key: string;
+  label: string;
+  value: PublicTechnicalSpecValue;
+};
 
 type ProductTechnicalDrawerProps = {
   product: TechnicalProduct | null;
@@ -65,48 +73,18 @@ export default function ProductTechnicalDrawer({
 
   const specs = product.technicalSpecs;
   const productImages = product.images?.length ? product.images : [product.image];
-  const baseSpecRows: SpecRow[] = [
-    ["Voltaje", specs?.voltage],
-    ["Amperaje", specs?.amperage],
-    ["Frecuencia", specs?.frequency],
-    ["Material", specs?.material],
-    ["Dimensiones", specs?.dimensions],
-    ["Presentación", specs?.presentation],
-    ["Tamaño PCB", specs?.pcbSize],
-    ["Acabado / color", specs?.finish ?? product.labels.finish],
-    ["Salida USB", specs?.usbOutput],
-    ["Soporte GFCI", specs?.gfciSupport],
-    ["Fijación", specs?.fixing],
-    ["Aplicación", specs?.applicationType ?? product.labels.application],
-    ["Instalación", specs?.installation],
-  ].filter((row): row is [string, string | string[]] => Boolean(row[1]));
+  const specRows = PUBLIC_TECHNICAL_SPEC_REGISTRY.flatMap(({ key, label }) => {
+    if (key === "specialFeatures") {
+      return [];
+    }
 
-  const extraSpecRows: SpecRow[] = [
-    ["Protección", specs?.protection],
-    ["Estándar", specs?.standard],
-    ["Configuración", specs?.configuration],
-    ["Tipo LED", specs?.ledType],
-    ["Velocidad de desconexión", specs?.disconnectSpeed],
-    ["Operaciones", specs?.operatingTemperature],
-    ["Humedad", specs?.humidity],
-    ["Voltaje dieléctrico", specs?.dielectricVoltage],
-    ["SCCR", specs?.shortCircuitCurrent],
-    ["Nivel de conmutación", specs?.switchingLevel],
-    ["Flujo luminoso", specs?.luminousFlux],
-    ["Potencia", specs?.power],
-    ["Eficiencia", specs?.efficiency],
-    ["Atenuación", specs?.dimming],
-    ["TCC", specs?.colorTemperature],
-    ["IRC", specs?.cri],
-    ["Ángulo", specs?.beamAngle],
-    ["IK", specs?.impactRating],
-    ["Vida útil", specs?.lifetime],
-    ["Ahorro", specs?.savings],
-    ["Equivalente", specs?.equivalent],
-    ["Certificados", specs?.certifications],
-  ].filter((row): row is [string, string | string[]] => Boolean(row[1]));
+    const value =
+      specs?.[key] ??
+      (key === "finish" ? product.labels.finish : undefined) ??
+      (key === "applicationType" ? product.labels.application : undefined);
 
-  const specRows = [...baseSpecRows, ...extraSpecRows];
+    return value ? [{ key, label, value }] satisfies SpecRow[] : [];
+  });
   const specialFeatures = Array.isArray(specs?.specialFeatures)
     ? specs.specialFeatures
     : [];
@@ -192,9 +170,9 @@ export default function ProductTechnicalDrawer({
                 Información técnica
               </h3>
               <div className="mt-4 grid border border-neutral-200 sm:grid-cols-2">
-                {specRows.map(([label, value]) => (
+                {specRows.map(({ key, label, value }) => (
                   <div
-                    key={label}
+                    key={key}
                     className="border-b border-neutral-200 p-4 last:border-b-0 even:sm:border-l sm:last:border-b-0 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
                   >
                     <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
