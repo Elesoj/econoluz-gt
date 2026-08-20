@@ -9,10 +9,14 @@ type AnimatedStatProps = {
 
 const parseStatValue = (value: string) => {
   const prefix = value.startsWith("+") ? "+" : "";
-  const numericValue = Number(value.replace(/[^\d]/g, ""));
+  const digits = value.replace(/[^\d]/g, "");
+  const numericValue = Number(digits);
 
   return {
     prefix,
+    // Un valor sin dígitos («LED», «GT») no se puede contar. Se marca aquí para
+    // mostrarlo tal cual en vez de dejar el contador clavado en cero.
+    isCountable: digits.length > 0,
     numericValue: Number.isFinite(numericValue) ? numericValue : 0,
   };
 };
@@ -21,12 +25,19 @@ const formatStatValue = (value: number, prefix: string) =>
   `${prefix}${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value)}`;
 
 export default function AnimatedStat({ value, label }: AnimatedStatProps) {
-  const { prefix, numericValue } = useMemo(() => parseStatValue(value), [value]);
+  const { prefix, numericValue, isCountable } = useMemo(
+    () => parseStatValue(value),
+    [value],
+  );
   const [displayValue, setDisplayValue] = useState(0);
   const statRef = useRef<HTMLDivElement>(null);
   const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
+    if (!isCountable) {
+      return;
+    }
+
     let animationFrame = 0;
     let startTime = 0;
     const duration = 1800;
@@ -75,12 +86,12 @@ export default function AnimatedStat({ value, label }: AnimatedStatProps) {
       window.cancelAnimationFrame(animationFrame);
       observer.disconnect();
     };
-  }, [numericValue]);
+  }, [isCountable, numericValue]);
 
   return (
     <div ref={statRef} className="px-6 py-7 text-center sm:px-8 lg:py-9">
       <p className="text-5xl font-semibold leading-none tracking-normal sm:text-6xl">
-        {formatStatValue(displayValue, prefix)}
+        {isCountable ? formatStatValue(displayValue, prefix) : value}
       </p>
       <p className="mt-4 text-xs font-semibold uppercase tracking-[0.24em] text-white/62">
         {label}

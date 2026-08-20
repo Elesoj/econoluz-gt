@@ -38,9 +38,9 @@ export const homeHero = {
 };
 
 export const companyStats = [
-  { value: "+500", label: "Referencias" },
-  { value: "LED", label: "Eficiencia" },
-  { value: "GT", label: "Cobertura" },
+  { value: "+500", label: "Lámparas" },
+  { value: "11", label: "Marcas" },
+  { value: "9", label: "Proveedores" },
   { value: "+1,000", label: "Clientes satisfechos" },
 ];
 
