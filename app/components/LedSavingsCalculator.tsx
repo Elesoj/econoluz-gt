@@ -118,7 +118,7 @@ export default function LedSavingsCalculator() {
     <div className="grid gap-8">
       <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
         <div className="border border-neutral-200 bg-white p-5 sm:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-tienda">
             Datos del proyecto
           </p>
 
@@ -167,7 +167,7 @@ export default function LedSavingsCalculator() {
                 key={result.label}
                 className="border border-neutral-200 p-6 transition duration-300 hover:border-proyectos"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tienda">
                   {result.label}
                 </p>
                 <p className="mt-4 text-3xl font-semibold leading-none">{result.value}</p>
@@ -202,7 +202,7 @@ export default function LedSavingsCalculator() {
 
       <div className="grid gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-proyectos sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-tienda">
             Siguiente paso
           </p>
           <h2 className="mt-3 text-3xl font-semibold leading-tight">
@@ -216,7 +216,7 @@ export default function LedSavingsCalculator() {
         <Link
           href="/catalogo#asesoria-proyecto"
           onClick={saveResultsForQuote}
-          className="inline-flex w-full items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte sm:w-auto"
+          className="inline-flex w-full items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte sm:w-auto"
         >
           Solicitar asesoría
         </Link>

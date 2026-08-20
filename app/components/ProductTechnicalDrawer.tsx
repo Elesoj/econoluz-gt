@@ -101,13 +101,13 @@ export default function ProductTechnicalDrawer({
       <aside className="absolute inset-x-0 bottom-0 flex h-[92dvh] w-full max-w-full flex-col overflow-hidden bg-white text-black shadow-2xl sm:inset-x-auto sm:inset-y-0 sm:right-0 sm:h-full sm:max-w-2xl">
         <div className="z-10 flex shrink-0 items-start justify-between border-b border-neutral-200 bg-white p-5 sm:p-7">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-tienda">
               Ficha técnica
             </p>
             <h2 className="mt-2 text-3xl font-semibold leading-tight sm:text-4xl">
               {product.publicName}
             </h2>
-            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-tienda">
               Ref. {product.econoluzReference}
             </p>
           </div>
@@ -147,7 +147,7 @@ export default function ProductTechnicalDrawer({
           <div className="grid gap-7 p-5 sm:p-7">
             <div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-tienda">
                   {product.labels.productType}
                 </p>
                 {product.labels.finish && (
@@ -166,7 +166,7 @@ export default function ProductTechnicalDrawer({
             </div>
 
             <section>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-neutral-500">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-tienda">
                 Información técnica
               </h3>
               <div className="mt-4 grid border border-neutral-200 sm:grid-cols-2">
@@ -175,7 +175,7 @@ export default function ProductTechnicalDrawer({
                     key={key}
                     className="border-b border-neutral-200 p-4 last:border-b-0 even:sm:border-l sm:last:border-b-0 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
                   >
-                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
+                    <p className="text-xs uppercase tracking-[0.18em] text-tienda">
                       {label}
                     </p>
                     <p className="mt-2 font-semibold">
@@ -186,7 +186,7 @@ export default function ProductTechnicalDrawer({
               </div>
               {specialFeatures.length > 0 && (
                 <div className="mt-5 border border-neutral-200 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tienda">
                     Características especiales
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -243,7 +243,7 @@ export default function ProductTechnicalDrawer({
                 <button
                   type="button"
                   onClick={onViewQuote}
-                  className="flex items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte"
+                  className="flex items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte"
                 >
                   Ver cotización
                 </button>
@@ -253,7 +253,7 @@ export default function ProductTechnicalDrawer({
             <button
               type="button"
               onClick={addProduct}
-              className="flex w-full items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte"
+              className="flex w-full items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte"
             >
               Agregar a cotización
             </button>

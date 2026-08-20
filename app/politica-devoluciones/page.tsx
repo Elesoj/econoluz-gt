@@ -90,7 +90,7 @@ export default function PoliticaDevoluciones() {
       <section className="px-5 py-20 sm:px-8 sm:py-24 lg:py-32">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.7fr_1.3fr]">
           <aside className="lg:sticky lg:top-28 lg:self-start">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-tienda">
               Información importante
             </p>
             <h2 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">

@@ -54,7 +54,7 @@ export default function Home() {
             <div className="mt-9 flex w-full max-w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <Link
                 href={homeHero.primaryCta.href}
-                className="inline-flex w-full items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-200 sm:w-auto"
+                className="inline-flex w-full items-center justify-center rounded-full bg-tienda px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte sm:w-auto"
               >
                 {homeHero.primaryCta.label}
               </Link>
@@ -93,7 +93,7 @@ export default function Home() {
       >
         <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-tienda">
               Empresa
             </p>
             <h2 className="mt-4 text-3xl font-semibold leading-tight sm:text-5xl">
@@ -121,7 +121,7 @@ export default function Home() {
       <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
         <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-proyectos sm:p-8 lg:grid-cols-[0.9fr_1fr_auto] lg:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-tienda">
               Calculadora LED
             </p>
             <h2 className="mt-3 text-3xl font-semibold leading-tight sm:text-4xl">
@@ -232,7 +232,7 @@ export default function Home() {
             <div className="mt-8 grid gap-3">
               <Link
                 href="/catalogo#asesoria-proyecto"
-                className="inline-flex items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-200"
+                className="inline-flex items-center justify-center rounded-full bg-tienda px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte"
               >
                 Preparar cotización
               </Link>

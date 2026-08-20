@@ -49,7 +49,7 @@ export default function ContactCTA({
             className={`mt-8 inline-flex rounded-full px-7 py-3 text-sm font-semibold transition ${
               isDark
                 ? "bg-white text-black hover:bg-neutral-200"
-                : "bg-proyectos text-white hover:bg-proyectos-fuerte"
+                : "bg-tienda text-white hover:bg-tienda-fuerte"
             }`}
           >
             {label}

@@ -183,7 +183,7 @@ export default function SiteNavbar({
   };
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-proyectos/90 text-white backdrop-blur-xl">
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white/92 text-proyectos backdrop-blur-xl">
       <div className="relative mx-auto grid h-20 w-full max-w-7xl grid-cols-[auto_auto] items-center justify-between px-5 sm:px-8 md:grid-cols-[auto_1fr_auto] md:gap-8">
         <Link
           href="/#inicio"
@@ -196,7 +196,7 @@ export default function SiteNavbar({
             alt="ECONOLUZ GT"
             width={180}
             height={52}
-            className="h-10 w-auto brightness-0 invert"
+            className="h-10 w-auto"
             priority
           />
           <span className="hidden text-xs font-semibold uppercase tracking-[0.28em] sm:inline">
@@ -205,7 +205,7 @@ export default function SiteNavbar({
         </Link>
 
         <div
-          className="hidden items-center justify-center gap-6 text-[0.9rem] font-medium text-white/62 md:flex lg:gap-8"
+          className="hidden items-center justify-center gap-6 text-[0.9rem] font-medium text-neutral-600 md:flex lg:gap-8"
           style={{
             left: "50%",
             position: "absolute",
@@ -218,13 +218,13 @@ export default function SiteNavbar({
               key={item.href}
               href={item.href}
               onClick={(event) => handleLinkClick(item.href, event)}
-              className={`relative py-7 transition hover:text-white ${
-                isActive(item.href) ? "text-white" : ""
+              className={`relative py-7 transition hover:text-proyectos ${
+                isActive(item.href) ? "text-proyectos" : ""
               }`}
             >
               {item.label}
               <span
-                className={`absolute inset-x-0 bottom-0 h-px bg-white transition ${
+                className={`absolute inset-x-0 bottom-0 h-px bg-tienda transition ${
                   isActive(item.href) ? "opacity-100" : "opacity-0"
                 }`}
               />
@@ -236,7 +236,7 @@ export default function SiteNavbar({
           {ctaHref && ctaLabel && (
             <Link
               href={ctaHref}
-              className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-neutral-200"
+              className="rounded-full bg-tienda px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-tienda-fuerte"
             >
               {ctaLabel}
             </Link>
@@ -247,33 +247,33 @@ export default function SiteNavbar({
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen((isOpen) => !isOpen)}
-            className="group flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-white/18 transition hover:bg-white/10"
+            className="group flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-neutral-300 transition hover:border-proyectos hover:bg-neutral-50"
             aria-expanded={isMobileMenuOpen}
             aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
           >
             <span className="relative block h-3.5 w-4">
               <span
-                className={`absolute left-0 h-px w-4 bg-white transition ${
+                className={`absolute left-0 h-px w-4 bg-proyectos transition ${
                   isMobileMenuOpen ? "top-1.5 rotate-45" : "top-0"
                 }`}
               />
               <span
-                className={`absolute left-0 h-px w-4 bg-white transition ${
+                className={`absolute left-0 h-px w-4 bg-proyectos transition ${
                   isMobileMenuOpen ? "bottom-2 -rotate-45" : "bottom-0"
                 }`}
               />
             </span>
           </button>
           {isMobileMenuOpen && (
-          <div className="absolute right-0 top-14 w-[min(86vw,22rem)] border border-white/10 bg-proyectos p-4 shadow-2xl">
+          <div className="absolute right-0 top-14 w-[min(86vw,22rem)] border border-neutral-200 bg-white p-4 shadow-2xl">
             <div className="grid gap-1">
               {items.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={(event) => handleLinkClick(item.href, event)}
-                  className={`px-3 py-3 text-base transition hover:bg-white/[0.08] hover:text-white ${
-                    isActive(item.href) ? "bg-white text-black" : "text-white/78"
+                  className={`px-3 py-3 text-base transition hover:bg-neutral-100 hover:text-proyectos ${
+                    isActive(item.href) ? "bg-proyectos text-white" : "text-neutral-700"
                   }`}
                 >
                   {item.label}
@@ -284,7 +284,7 @@ export default function SiteNavbar({
               <Link
                 href={ctaHref}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="mt-4 flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200"
+                className="mt-4 flex items-center justify-center rounded-full bg-tienda px-5 py-3 text-sm font-semibold text-white transition hover:bg-tienda-fuerte"
               >
                 {mobileCtaLabel}
               </Link>

@@ -525,7 +525,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-6 border-b border-neutral-200 pb-8">
             <label className="grid gap-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-tienda">
                 Buscar en catálogo
               </span>
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -785,7 +785,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
 
               {seriesOptions.length > 0 && (
                 <section className="mb-8 border-y border-neutral-200 py-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tienda">
                     Filtrar por serie
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -983,7 +983,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
           >
             {ledResultsSummary && (
               <div className="mb-6 border border-neutral-200 bg-neutral-50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-tienda">
                   Resultados LED adjuntos
                 </p>
                 <p className="mt-3 text-sm leading-6 text-neutral-600">
@@ -1229,7 +1229,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   rel="noopener noreferrer"
                   onClick={handleQuoteSubmit}
                   aria-busy={submitStatus === "saving"}
-                  className="flex w-full items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte"
+                  className="flex w-full items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte"
                 >
                   {submitStatus === "saving"
                     ? "Enviando…"
@@ -1250,7 +1250,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         <button
           type="button"
           onClick={() => setIsQuoteOpen(true)}
-          className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full bg-proyectos px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:bg-proyectos-fuerte sm:bottom-8 sm:right-8"
+          className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full bg-tienda px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:bg-tienda-fuerte sm:bottom-8 sm:right-8"
         >
           Ver selección
           <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">

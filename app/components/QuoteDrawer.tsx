@@ -41,7 +41,7 @@ export default function QuoteDrawer({
       <aside className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-white text-black shadow-2xl">
         <div className="flex items-start justify-between border-b border-neutral-200 p-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-tienda">
               Proyecto
             </p>
             <h2 className="mt-2 text-3xl font-semibold">Referencias seleccionadas</h2>
@@ -127,7 +127,7 @@ export default function QuoteDrawer({
 
         <div className="border-t border-neutral-200 p-6">
           <div className="flex items-center justify-between">
-            <p className="text-sm uppercase tracking-[0.18em] text-neutral-500">
+            <p className="text-sm uppercase tracking-[0.18em] text-tienda">
               Modalidad
             </p>
             <p className="text-2xl font-semibold">Por cotizar</p>
@@ -135,7 +135,7 @@ export default function QuoteDrawer({
           <button
             type="button"
             onClick={onCompleteAdvice}
-            className="mt-5 flex items-center justify-center rounded-full bg-proyectos px-6 py-3 text-sm font-semibold text-white transition hover:bg-proyectos-fuerte"
+            className="mt-5 flex items-center justify-center rounded-full bg-tienda px-6 py-3 text-sm font-semibold text-white transition hover:bg-tienda-fuerte"
           >
             Completar asesoría
           </button>

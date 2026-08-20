@@ -119,50 +119,60 @@ iconos y bordes** sobre fondo oscuro, nunca como relleno de botón. Sobre seccio
 oscuras los botones primarios van en blanco o con borde, para no tener dos rojos de marca
 distintos conviviendo en la misma pantalla.
 
-Hoy **no hay ningún token de marca definido en el proyecto**: el código es blanco, negro y
-escala `neutral`. Ni el rojo ni el azul marino se usan todavía en ninguna parte.
+Los dos colores están definidos como tokens en `app/globals.css` (`--proyectos`,
+`--tienda`, sus variantes fuertes y claras, más `--error` y `--foco`) y se usan en todo
+el sitio. El azul marino sustituyó al negro como color oscuro; el rojo marca la acción
+principal y los acentos.
 
-### Regla de uso del color
+### Cuánto color, y dónde no
 
-Azul marino y rojo son **colores de acento y de acción**. Ninguno de los dos es fondo
-dominante. La base del sitio es neutra: blanco y negro con la escala `neutral`.
+El blanco sigue siendo el fondo dominante y la fotografía de obra sigue siendo la
+protagonista: en iluminación arquitectónica, las imágenes venden más que cualquier
+superficie de color.
 
-- Sí: botones, estados hover, subrayados, indicadores activos, filetes, iconografía,
-  encabezados de ficha, detalles.
-- No: fondos de sección completos, bloques grandes, headers sólidos —
-  ni en rojo ni en azul marino.
+- El **azul marino admite superficie**: barras, franjas de datos, secciones completas.
+  Es oscuro y de baja luminosidad, así que se comporta casi como un neutro y deja
+  respirar la fotografía. El sitio original lo usa exactamente así.
+- El **rojo va siempre en piezas pequeñas**: el botón principal de cada pantalla, las
+  etiquetas en mayúsculas, los filetes, los iconos, el ítem activo del menú. Nunca como
+  fondo de una sección ni de un bloque grande.
 
-**Razón:** en iluminación arquitectónica premium, la fotografía de obra es el protagonista.
-Un fondo neutro deja respirar las imágenes y hace que el color de marca resalte más
-precisamente por usarse poco. Cualquiera de los dos en grandes áreas saturadas compite
-con las fotos y abarata la percepción de la marca. Que ahora haya dos colores no es
-permiso para usar el doble de color: es el mismo presupuesto de color, repartido.
+Que haya dos colores no es permiso para usar el doble de color. Una pantalla con tres
+botones rojos no tiene una acción principal: tiene tres, que es lo mismo que ninguna.
 
-El azul marino admite algo más de superficie que el rojo — una barra, un pie de ficha,
-una franja de datos técnicos — porque es oscuro y de baja luminosidad, más cercano a un
-neutro. El rojo no: siempre en piezas pequeñas.
+**Excepción sobre fotografía:** los velos y degradados que oscurecen una imagen se
+quedan en negro con transparencia (`bg-black/55`, `rgba(0,0,0,…)`). Teñirlos de azul
+le daría un tinte de color a las fotos de obra.
 
-### El color codifica la pista, no decora
+### Reparto del color, tomado del sitio original
 
-Regla funcional, no estética. Cada color de marca pertenece a una de las dos pistas
-de la sección 2:
+Regla vigente desde que se decidió replicar la identidad de `econoluzgt.com`. Su
+hoja de estilos usa exactamente los mismos dos hex que este documento ya fijaba
+(`#E11133` 29 veces, `#001B59` 19 veces), así que el reparto de abajo no es una
+interpretación: es el del sitio que la empresa ya tenía.
 
-- **Rojo `#E11133` → pista A (TIENDA).** Comprar, precio, agregar al carrito, checkout,
-  cualquier acción transaccional B2C.
-- **Azul marino `#001B59` → pista B (PROYECTOS).** Ficha técnica, especificación,
-  agregar a la lista, solicitar cotización, asesoría, techo tensado.
+- **Blanco `#FFFFFF`** — el fondo. Es el color dominante y no se discute.
+- **Azul marino `#001B59`** — títulos grandes, fondos de sección oscuros, la barra
+  de navegación en su estado normal, contornos, estados seleccionados, contadores
+  y acciones secundarias.
+- **Rojo `#E11133`** — la acción principal de cada pantalla (una sola por vista),
+  las etiquetas en mayúsculas sobre fondo claro, los filetes bajo los títulos, los
+  iconos y el ítem activo del menú.
 
-Un botón rojo siempre lleva a comprar; uno azul marino siempre lleva a cotizar.
-El usuario debe poder aprender ese código en la primera pantalla y confiar en él después.
+En el original el rojo aparece de las dos formas: como relleno del botón principal
+con texto blanco, y como color de texto en botones secundarios sin fondo. Ambas
+son legítimas aquí.
 
-Consecuencias prácticas:
+**Sustituye a la regla anterior**, que reservaba el rojo para una pista de tienda
+B2C y el azul marino para la de proyectos. Esa separación se descartó: la tienda no
+existe, y mantener el rojo apagado hasta que existiera dejaba el sitio sin la mitad
+de su identidad. El código funcional lo lleva ahora el texto del botón, no su color.
 
-- Si un componente necesita los dos colores a la vez, probablemente esté mezclando las
-  dos pistas y hay que separarlo.
-- Los neutros son el vehículo compartido: todo lo que sirve a ambas pistas
-  (navegación, tipografía, tarjetas, fondos) se resuelve en neutro.
-- El color no puede ser el único indicador de la pista. Debe ir acompañado de texto
-  ("Comprar" / "Cotizar") para que funcione en daltonismo rojo-verde y en escala de grises.
+**Límite de contraste que sigue vigente:** el rojo sobre azul marino da 3.33:1, así
+que **nunca hay texto rojo sobre una sección azul marino**. Un botón rojo sí puede
+ir sobre azul marino, porque como bloque sólido le basta con 3:1 y el texto blanco
+encima da 4.85:1. Sobre secciones oscuras, el texto blanco no baja de `white/52`
+(5.17:1 sobre azul marino); `white/46` se queda en 4.30:1 y no cumple.
 
 ### Tono visual
 

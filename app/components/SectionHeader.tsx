@@ -28,14 +28,14 @@ export default function SectionHeader({
       <div>
         <h2
           className={`text-4xl font-semibold leading-tight sm:text-5xl ${
-            invert ? "text-white" : "text-black"
+            invert ? "text-white" : "text-proyectos"
           }`}
         >
           {title}
         </h2>
         <p
           className={`mt-4 text-xs font-semibold uppercase tracking-[0.28em] ${
-            invert ? "text-white/46" : "text-neutral-500"
+            invert ? "text-white/52" : "text-tienda"
           }`}
         >
           {eyebrow}

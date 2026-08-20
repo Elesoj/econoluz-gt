@@ -79,7 +79,7 @@ export default function CalculadoraLed() {
             </article>
 
             <article className="bg-white p-7 text-black">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-tienda">
                 Después LED
               </p>
               <h3 className="mt-4 text-3xl font-semibold">Eficiencia con mejor intención visual.</h3>

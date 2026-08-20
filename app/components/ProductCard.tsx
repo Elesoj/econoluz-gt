@@ -43,7 +43,7 @@ export default function ProductCard({
       </button>
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-tienda">
           {product.labels.productType}
         </p>
         <button type="button" onClick={onViewDetails} className="mt-2 text-left">
@@ -90,7 +90,7 @@ export default function ProductCard({
             <button
               type="button"
               onClick={onAdd}
-              className="inline-flex h-9 w-full items-center justify-center rounded-full bg-proyectos px-3 text-xs font-semibold text-white transition hover:bg-proyectos-fuerte"
+              className="inline-flex h-9 w-full items-center justify-center rounded-full bg-tienda px-3 text-xs font-semibold text-white transition hover:bg-tienda-fuerte"
             >
               Agregar
             </button>
