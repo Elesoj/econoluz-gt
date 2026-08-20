@@ -579,7 +579,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 <button
                   type="button"
                   onClick={navigateToAllProducts}
-                  disabled={isCatalogTransitioning}
                   className="inline-flex rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Mostrar todos los productos
@@ -591,7 +590,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     key={type.id}
                     type="button"
                     onClick={() => selectCategory(type.id)}
-                    disabled={isCatalogTransitioning}
                     className="group min-h-44 overflow-hidden border border-neutral-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] active:scale-[0.99]"
                   >
                     <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
@@ -642,7 +640,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                             return;
                           }
                         }}
-                        disabled={isCatalogTransitioning}
                         className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
                       >
                         {item}
@@ -668,7 +665,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 <button
                   type="button"
                   onClick={navigateBackInCatalog}
-                  disabled={isCatalogTransitioning}
                   className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
                 >
                   Volver
@@ -676,7 +672,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 <button
                   type="button"
                   onClick={goToRoot}
-                  disabled={isCatalogTransitioning}
                   className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                 >
                   Inicio del catálogo
@@ -690,7 +685,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     onClick={() =>
                       selectApplication(selectedCategory, application)
                     }
-                    disabled={isCatalogTransitioning}
                     className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
                   >
                     <span className="text-xl font-semibold">
@@ -748,7 +742,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                               return;
                             }
                           }}
-                          disabled={isCatalogTransitioning}
                           className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
                         >
                           {item}
@@ -775,7 +768,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     <button
                       type="button"
                       onClick={navigateBackInCatalog}
-                      disabled={isCatalogTransitioning}
                       className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
                     >
                       Volver
@@ -783,7 +775,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     <button
                       type="button"
                       onClick={goToRoot}
-                      disabled={isCatalogTransitioning}
                       className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
                     >
                       Inicio del catálogo
@@ -864,7 +855,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 onClick={() =>
                   catalogLocation.view === "search" ? clearSearch() : goToRoot()
                 }
-                disabled={isCatalogTransitioning}
                 className="mt-4 rounded-full border border-black px-5 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
               >
                 Limpiar filtros

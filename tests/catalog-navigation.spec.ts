@@ -1060,3 +1060,52 @@ test("search and clear reset pagination and transient series without leaking ser
   await expect(page.getByText(/gina 1 de 8/i)).toBeVisible();
   await expect(aplSeries).toHaveAttribute("aria-pressed", "false");
 });
+
+test("a second category tap during the exit transition is live and wins", async ({
+  page,
+}) => {
+  const initialHistoryLength = await page.evaluate(() => window.history.length);
+
+  // Durante los 180 ms de la transición de salida, los botones de la vista
+  // anterior siguen en pantalla con aspecto normal: misma opacidad y mismo
+  // cursor. Si además están inertes, el usuario toca una categoría, no ve
+  // reacción, toca otra y aterriza en la primera.
+  const secondTap = await page.evaluate(async () => {
+    const findButton = (pattern: string) =>
+      [...document.querySelectorAll("button")].find((button) =>
+        new RegExp(pattern, "i").test(button.innerText),
+      );
+
+    findButton("iluminaci.n arquitect.nica")?.click();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 80);
+    });
+
+    const second = findButton("iluminaci.n exterior");
+
+    if (!second) {
+      return { stillOnScreen: false, disabled: null as boolean | null };
+    }
+
+    const disabled = second.disabled;
+    second.click();
+
+    return { stillOnScreen: true, disabled };
+  });
+
+  expect(secondTap.stillOnScreen).toBe(true);
+  expect(secondTap.disabled).toBe(false);
+
+  // Gana el último toque: el usuario aterriza donde pulsó al final.
+  await expect(
+    page.getByRole("heading", { name: /Iluminaci.n exterior/i }),
+  ).toBeVisible();
+
+  // Cada toque deja su propia entrada, igual que un reset de navbar durante una
+  // transición pendiente. Es la semántica que ya fija
+  // "rapid category and navbar reset clicks keep only the newest legal state":
+  // el destino descartado sigue siendo un paso real del historial.
+  expect(await page.evaluate(() => window.history.length)).toBe(
+    initialHistoryLength + 2,
+  );
+});

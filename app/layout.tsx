@@ -46,6 +46,12 @@ export default function RootLayout({
   return (
     <html
       lang="es"
+      // Next 16 dejó de anular `scroll-behavior` durante la navegación: sin este
+      // atributo, `scroll-smooth` hace que cada cambio de ruta anime el
+      // desplazamiento en lugar de saltar, y el framework lo avisa por consola.
+      // Con el atributo, Next vuelve a desactivarlo mientras navega y el scroll
+      // suave se conserva solo donde interesa, en los enlaces de ancla.
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
       <body className="flex min-h-full w-full max-w-full flex-col overflow-x-hidden">
