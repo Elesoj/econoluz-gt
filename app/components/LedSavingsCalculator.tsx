@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -7,14 +7,55 @@ import { formatCurrency, formatNumber } from "../lib/formatters";
 const daysPerMonth = 30;
 const monthsPerYear = 12;
 
+// El formulario arranca vacío a propósito: cada dato lo introduce el cliente.
+// Los valores viven como texto para que el input pueda quedarse en blanco, algo
+// que un `number` no permite sin inventarse un cero.
+const emptyForm = {
+  fixtures: "",
+  currentWattage: "",
+  ledWattage: "",
+  dailyHours: "",
+  electricityCost: "",
+};
+
+type FormField = keyof typeof emptyForm;
+
+const parseField = (value: string) => {
+  const parsedValue = Number(value);
+
+  return value.trim() !== "" && Number.isFinite(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : null;
+};
+
+// Marcador para los resultados mientras falte algún dato.
+const pendingResult = "—";
+
 export default function LedSavingsCalculator() {
-  const [fixtures, setFixtures] = useState(24);
-  const [currentWattage, setCurrentWattage] = useState(60);
-  const [ledWattage, setLedWattage] = useState(12);
-  const [dailyHours, setDailyHours] = useState(8);
-  const [electricityCost, setElectricityCost] = useState(1.45);
+  const [form, setForm] = useState(emptyForm);
+
+  const updateField = (field: FormField, value: string) => {
+    setForm((currentForm) => ({ ...currentForm, [field]: value }));
+  };
 
   const results = useMemo(() => {
+    const fixtures = parseField(form.fixtures);
+    const currentWattage = parseField(form.currentWattage);
+    const ledWattage = parseField(form.ledWattage);
+    const dailyHours = parseField(form.dailyHours);
+    const electricityCost = parseField(form.electricityCost);
+
+    if (
+      fixtures === null ||
+      currentWattage === null ||
+      ledWattage === null ||
+      dailyHours === null ||
+      electricityCost === null
+    ) {
+      // Falta algún dato: preferimos no enseñar un cálculo a medias.
+      return null;
+    }
+
     const currentMonthlyConsumption =
       (fixtures * currentWattage * dailyHours * daysPerMonth) / 1000;
     const ledMonthlyConsumption = (fixtures * ledWattage * dailyHours * daysPerMonth) / 1000;
@@ -33,22 +74,31 @@ export default function LedSavingsCalculator() {
         : 0;
 
     return {
+      fixtures,
+      currentWattage,
+      ledWattage,
+      dailyHours,
+      electricityCost,
       currentMonthlyConsumption,
       ledMonthlyConsumption,
       monthlySavings,
       yearlySavings,
       percentageReduction,
     };
-  }, [currentWattage, dailyHours, electricityCost, fixtures, ledWattage]);
+  }, [form]);
 
   const saveResultsForQuote = () => {
+    if (!results) {
+      return;
+    }
+
     const summary = [
       "Resultados de calculadora LED:",
-      `Cantidad de luminarias: ${fixtures}`,
-      `Consumo actual: ${currentWattage} W`,
-      `Consumo LED estimado: ${ledWattage} W`,
-      `Uso diario: ${dailyHours} horas`,
-      `Costo por kWh: ${formatCurrency(electricityCost)}`,
+      `Cantidad de luminarias: ${results.fixtures}`,
+      `Consumo actual: ${results.currentWattage} W`,
+      `Consumo LED estimado: ${results.ledWattage} W`,
+      `Uso diario: ${results.dailyHours} horas`,
+      `Costo por kWh: ${formatCurrency(results.electricityCost)}`,
       `Consumo mensual actual: ${formatNumber(results.currentMonthlyConsumption)} kWh`,
       `Consumo mensual LED: ${formatNumber(results.ledMonthlyConsumption)} kWh`,
       `Ahorro mensual estimado: ${formatCurrency(results.monthlySavings)}`,
@@ -60,54 +110,51 @@ export default function LedSavingsCalculator() {
       "econoluz_led_results",
       JSON.stringify({
         summary,
-        fixtures,
-        currentWattage,
-        ledWattage,
-        dailyHours,
-        electricityCost,
         ...results,
       }),
     );
   };
 
-  const fields = [
+  const fields: {
+    name: FormField;
+    label: string;
+    min: number;
+    max?: number;
+    step: number;
+    suffix: string;
+  }[] = [
     {
+      name: "fixtures",
       label: "Cantidad de luminarias",
-      value: fixtures,
-      onChange: setFixtures,
       min: 1,
       step: 1,
       suffix: "unidades",
     },
     {
+      name: "currentWattage",
       label: "Consumo actual",
-      value: currentWattage,
-      onChange: setCurrentWattage,
       min: 1,
       step: 1,
       suffix: "W",
     },
     {
+      name: "ledWattage",
       label: "Consumo LED",
-      value: ledWattage,
-      onChange: setLedWattage,
       min: 1,
       step: 1,
       suffix: "W",
     },
     {
+      name: "dailyHours",
       label: "Uso diario",
-      value: dailyHours,
-      onChange: setDailyHours,
       min: 1,
       max: 24,
       step: 0.5,
       suffix: "horas",
     },
     {
+      name: "electricityCost",
       label: "Costo por kWh",
-      value: electricityCost,
-      onChange: setElectricityCost,
       min: 0.01,
       step: 0.01,
       suffix: "GTQ",
@@ -124,18 +171,19 @@ export default function LedSavingsCalculator() {
 
           <div className="mt-6 grid gap-5">
             {fields.map((field) => (
-              <label key={field.label} className="grid gap-2">
+              <label key={field.name} className="grid gap-2">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-sm font-semibold">{field.label}</span>
                   <span className="text-sm text-neutral-500">{field.suffix}</span>
                 </div>
                 <input
                   type="number"
+                  inputMode="decimal"
                   min={field.min}
                   max={field.max}
                   step={field.step}
-                  value={field.value}
-                  onChange={(event) => field.onChange(Number(event.target.value))}
+                  value={form[field.name]}
+                  onChange={(event) => updateField(field.name, event.target.value)}
                   className="border border-neutral-200 px-4 py-3 text-lg font-semibold outline-none transition focus:border-proyectos"
                 />
               </label>
@@ -148,19 +196,23 @@ export default function LedSavingsCalculator() {
             {[
               {
                 label: "Consumo mensual actual",
-                value: `${formatNumber(results.currentMonthlyConsumption)} kWh`,
+                value: results
+                  ? `${formatNumber(results.currentMonthlyConsumption)} kWh`
+                  : pendingResult,
               },
               {
                 label: "Consumo mensual LED",
-                value: `${formatNumber(results.ledMonthlyConsumption)} kWh`,
+                value: results
+                  ? `${formatNumber(results.ledMonthlyConsumption)} kWh`
+                  : pendingResult,
               },
               {
                 label: "Ahorro mensual estimado",
-                value: formatCurrency(results.monthlySavings),
+                value: results ? formatCurrency(results.monthlySavings) : pendingResult,
               },
               {
                 label: "Ahorro anual estimado",
-                value: formatCurrency(results.yearlySavings),
+                value: results ? formatCurrency(results.yearlySavings) : pendingResult,
               },
             ].map((result) => (
               <article
@@ -182,18 +234,19 @@ export default function LedSavingsCalculator() {
                   Reducción estimada
                 </p>
                 <p className="mt-4 text-6xl font-semibold leading-none">
-                  {formatNumber(results.percentageReduction)}%
+                  {results ? `${formatNumber(results.percentageReduction)}%` : pendingResult}
                 </p>
               </div>
               <p className="max-w-md leading-7 text-white/66">
-                Este cálculo es una referencia inicial. El ahorro real puede variar según tarifa,
-                horarios, producto seleccionado y condiciones del proyecto.
+                {results
+                  ? "Este cálculo es una referencia inicial. El ahorro real puede variar según tarifa, horarios, producto seleccionado y condiciones del proyecto."
+                  : "Completa los datos del proyecto para ver el consumo, el ahorro estimado y la reducción."}
               </p>
             </div>
             <div className="mt-7 h-2 overflow-hidden rounded-full bg-white/14">
               <div
                 className="h-full rounded-full bg-white transition-all duration-700"
-                style={{ width: `${Math.min(results.percentageReduction, 100)}%` }}
+                style={{ width: `${results ? Math.min(results.percentageReduction, 100) : 0}%` }}
               />
             </div>
           </article>
@@ -212,14 +265,30 @@ export default function LedSavingsCalculator() {
             Guarda este cálculo y completa una solicitud de proyecto para revisar
             cantidades, temperaturas, ópticas y productos adecuados.
           </p>
+          {!results && (
+            <p id="led-cta-help" className="mt-4 text-sm font-semibold text-tienda">
+              Completa los cinco datos del proyecto para solicitar la asesoría.
+            </p>
+          )}
         </div>
-        <Link
-          href="/catalogo#asesoria-proyecto"
-          onClick={saveResultsForQuote}
-          className="inline-flex w-full items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte sm:w-auto"
-        >
-          Solicitar asesoría
-        </Link>
+        {results ? (
+          <Link
+            href="/catalogo#asesoria-proyecto"
+            onClick={saveResultsForQuote}
+            className="inline-flex w-full items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte sm:w-auto"
+          >
+            Solicitar asesoría
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            aria-describedby="led-cta-help"
+            className="inline-flex w-full cursor-not-allowed items-center justify-center rounded-full bg-neutral-200 px-7 py-4 text-sm font-semibold text-neutral-500 sm:w-auto"
+          >
+            Solicitar asesoría
+          </button>
+        )}
       </div>
     </div>
   );
