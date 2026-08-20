@@ -26,7 +26,7 @@ export default function Home() {
       />
       <section
         id="inicio"
-        className="relative isolate flex min-h-[100svh] w-full max-w-full scroll-mt-20 items-end overflow-hidden bg-black px-5 pb-12 pt-28 text-white sm:px-8 sm:pb-14 lg:pb-16"
+        className="relative isolate flex min-h-[100svh] w-full max-w-full scroll-mt-20 items-end overflow-hidden bg-proyectos px-5 pb-12 pt-28 text-white sm:px-8 sm:pb-14 lg:pb-16"
       >
         <div className="absolute inset-0 -z-10">
           <Image
@@ -79,7 +79,7 @@ export default function Home() {
         </div>
       </section>
       <section className="bg-white px-5 pt-8 sm:px-8 lg:pt-10">
-        <div className="mx-auto max-w-7xl border border-neutral-200 bg-black text-white">
+        <div className="mx-auto max-w-7xl border border-neutral-200 bg-proyectos text-white">
           <div className="grid divide-y divide-white/14 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
             {companyStats.map((stat) => (
               <AnimatedStat key={stat.label} value={stat.value} label={stat.label} />
@@ -108,9 +108,9 @@ export default function Home() {
             {companyHighlights.map((highlight) => (
               <article
                 key={highlight.title}
-                className="border border-neutral-200 p-6 transition duration-300 hover:-translate-y-1 hover:border-black"
+                className="border border-neutral-200 p-6 transition duration-300 hover:-translate-y-1 hover:border-proyectos"
               >
-                <span className="block h-2 w-2 rounded-full bg-black" />
+                <span className="block h-2 w-2 rounded-full bg-proyectos" />
                 <h3 className="mt-8 text-xl font-semibold">{highlight.title}</h3>
                 <p className="mt-4 leading-7 text-neutral-600">{highlight.text}</p>
               </article>
@@ -119,7 +119,7 @@ export default function Home() {
         </div>
       </section>
       <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
-        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-black sm:p-8 lg:grid-cols-[0.9fr_1fr_auto] lg:items-center">
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-proyectos sm:p-8 lg:grid-cols-[0.9fr_1fr_auto] lg:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">
               Calculadora LED
@@ -134,7 +134,7 @@ export default function Home() {
           </p>
           <Link
             href="/calculadora-led"
-            className="inline-flex w-fit rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
+            className="inline-flex w-fit rounded-full bg-proyectos px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte"
           >
             Usar calculadora
           </Link>
@@ -152,7 +152,7 @@ export default function Home() {
             action={
               <Link
                 href="/catalogo"
-                className="inline-flex w-fit rounded-full border border-black px-6 py-3 text-sm font-semibold transition duration-300 hover:-translate-y-0.5 hover:bg-black hover:text-white"
+                className="inline-flex w-fit rounded-full border border-proyectos px-6 py-3 text-sm font-semibold transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos hover:text-white"
               >
                 Ver catálogo
               </Link>
@@ -160,7 +160,7 @@ export default function Home() {
           />
           <div className="mt-12 grid min-w-0 gap-5 md:grid-cols-3">
             {collections.map((category) => (
-              <article key={category.title} className="group bg-neutral-950 text-white">
+              <article key={category.title} className="group bg-proyectos text-white">
                 <div className="relative aspect-[4/5] overflow-hidden">
                   <Image
                     src={category.image}
@@ -202,7 +202,7 @@ export default function Home() {
             {faqs.map((item) => (
               <article
                 key={item.question}
-                className="border border-neutral-200 p-6 transition duration-300 hover:border-black"
+                className="border border-neutral-200 p-6 transition duration-300 hover:border-proyectos"
               >
                 <h3 className="text-xl font-semibold leading-tight">{item.question}</h3>
                 <p className="mt-4 leading-7 text-neutral-600">{item.answer}</p>
@@ -213,7 +213,7 @@ export default function Home() {
       </section>
       <section
         id="contacto"
-        className="scroll-mt-20 bg-black px-5 py-20 text-white sm:px-8 sm:py-24 lg:py-28"
+        className="scroll-mt-20 bg-proyectos px-5 py-20 text-white sm:px-8 sm:py-24 lg:py-28"
       >
         <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div className="min-w-0">

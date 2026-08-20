@@ -22,7 +22,7 @@ export default function ContactCTA({
   return (
     <section
       className={`px-5 py-16 sm:px-8 lg:py-20 ${
-        isDark ? "bg-black text-white" : "bg-white text-black"
+        isDark ? "bg-proyectos text-white" : "bg-white text-black"
       }`}
     >
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
@@ -49,7 +49,7 @@ export default function ContactCTA({
             className={`mt-8 inline-flex rounded-full px-7 py-3 text-sm font-semibold transition ${
               isDark
                 ? "bg-white text-black hover:bg-neutral-200"
-                : "bg-black text-white hover:bg-neutral-800"
+                : "bg-proyectos text-white hover:bg-proyectos-fuerte"
             }`}
           >
             {label}

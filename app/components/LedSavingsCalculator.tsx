@@ -136,7 +136,7 @@ export default function LedSavingsCalculator() {
                   step={field.step}
                   value={field.value}
                   onChange={(event) => field.onChange(Number(event.target.value))}
-                  className="border border-neutral-200 px-4 py-3 text-lg font-semibold outline-none transition focus:border-black"
+                  className="border border-neutral-200 px-4 py-3 text-lg font-semibold outline-none transition focus:border-proyectos"
                 />
               </label>
             ))}
@@ -165,7 +165,7 @@ export default function LedSavingsCalculator() {
             ].map((result) => (
               <article
                 key={result.label}
-                className="border border-neutral-200 p-6 transition duration-300 hover:border-black"
+                className="border border-neutral-200 p-6 transition duration-300 hover:border-proyectos"
               >
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
                   {result.label}
@@ -175,7 +175,7 @@ export default function LedSavingsCalculator() {
             ))}
           </div>
 
-          <article className="bg-black p-7 text-white">
+          <article className="bg-proyectos p-7 text-white">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/46">
@@ -200,7 +200,7 @@ export default function LedSavingsCalculator() {
         </div>
       </div>
 
-      <div className="grid gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-black sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+      <div className="grid gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-proyectos sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
             Siguiente paso
@@ -216,7 +216,7 @@ export default function LedSavingsCalculator() {
         <Link
           href="/catalogo#asesoria-proyecto"
           onClick={saveResultsForQuote}
-          className="inline-flex w-full items-center justify-center rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800 sm:w-auto"
+          className="inline-flex w-full items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte sm:w-auto"
         >
           Solicitar asesoría
         </Link>

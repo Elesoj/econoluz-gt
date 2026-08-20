@@ -23,7 +23,7 @@ export default function ProductCard({
     product.labels.productType;
 
   return (
-    <article className="group flex min-h-full flex-col overflow-hidden border border-neutral-200 bg-white transition duration-300 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)]">
+    <article className="group flex min-h-full flex-col overflow-hidden border border-neutral-200 bg-white transition duration-300 hover:border-proyectos hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)]">
       <button
         type="button"
         onClick={onViewDetails}
@@ -62,12 +62,12 @@ export default function ProductCard({
           <button
             type="button"
             onClick={onViewDetails}
-            className="inline-flex h-9 w-full items-center justify-center rounded-full border border-neutral-200 px-3 text-xs font-semibold text-black transition hover:border-black hover:bg-neutral-50"
+            className="inline-flex h-9 w-full items-center justify-center rounded-full border border-neutral-200 px-3 text-xs font-semibold text-black transition hover:border-proyectos hover:bg-neutral-50"
           >
             Ficha técnica
           </button>
           {quantity > 0 ? (
-            <div className="inline-flex h-9 w-full items-center justify-between rounded-full bg-black text-xs font-semibold text-white">
+            <div className="inline-flex h-9 w-full items-center justify-between rounded-full bg-proyectos text-xs font-semibold text-white">
               <button
                 type="button"
                 onClick={onDecrease}
@@ -90,7 +90,7 @@ export default function ProductCard({
             <button
               type="button"
               onClick={onAdd}
-              className="inline-flex h-9 w-full items-center justify-center rounded-full bg-black px-3 text-xs font-semibold text-white transition hover:bg-neutral-800"
+              className="inline-flex h-9 w-full items-center justify-center rounded-full bg-proyectos px-3 text-xs font-semibold text-white transition hover:bg-proyectos-fuerte"
             >
               Agregar
             </button>

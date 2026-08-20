@@ -183,7 +183,7 @@ export default function SiteNavbar({
   };
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/90 text-white backdrop-blur-xl">
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-proyectos/90 text-white backdrop-blur-xl">
       <div className="relative mx-auto grid h-20 w-full max-w-7xl grid-cols-[auto_auto] items-center justify-between px-5 sm:px-8 md:grid-cols-[auto_1fr_auto] md:gap-8">
         <Link
           href="/#inicio"
@@ -265,7 +265,7 @@ export default function SiteNavbar({
             </span>
           </button>
           {isMobileMenuOpen && (
-          <div className="absolute right-0 top-14 w-[min(86vw,22rem)] border border-white/10 bg-black p-4 shadow-2xl">
+          <div className="absolute right-0 top-14 w-[min(86vw,22rem)] border border-white/10 bg-proyectos p-4 shadow-2xl">
             <div className="grid gap-1">
               {items.map((item) => (
                 <Link

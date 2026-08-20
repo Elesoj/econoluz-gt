@@ -33,7 +33,7 @@ export default function CalculadoraLed() {
         mobileCtaLabel="Cotizar proyecto"
       />
 
-      <section className="bg-black px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-20 lg:pb-24 lg:pt-40">
+      <section className="bg-proyectos px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-20 lg:pb-24 lg:pt-40">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-semibold uppercase tracking-[0.34em] text-white/52">
             Calculadora LED
@@ -56,7 +56,7 @@ export default function CalculadoraLed() {
         </div>
       </section>
 
-      <section className="bg-neutral-950 px-5 py-16 text-white sm:px-8 lg:py-20">
+      <section className="bg-proyectos px-5 py-16 text-white sm:px-8 lg:py-20">
         <div className="mx-auto max-w-7xl">
           <SectionHeader
             eyebrow="Comparación visual"
@@ -105,9 +105,9 @@ export default function CalculadoraLed() {
             {benefits.map((benefit) => (
               <article
                 key={benefit.title}
-                className="border border-neutral-200 p-6 transition duration-300 hover:-translate-y-1 hover:border-black"
+                className="border border-neutral-200 p-6 transition duration-300 hover:-translate-y-1 hover:border-proyectos"
               >
-                <span className="block h-2 w-2 rounded-full bg-black" />
+                <span className="block h-2 w-2 rounded-full bg-proyectos" />
                 <h3 className="mt-8 text-xl font-semibold">{benefit.title}</h3>
                 <p className="mt-4 leading-7 text-neutral-600">{benefit.text}</p>
               </article>

@@ -503,7 +503,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         mobileCtaLabel="Solicitar asesoría"
       />
 
-      <section className="bg-black px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-20 lg:pb-24 lg:pt-40">
+      <section className="bg-proyectos px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-20 lg:pb-24 lg:pt-40">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-semibold uppercase tracking-[0.34em] text-white/52">
             Catálogo
@@ -541,13 +541,13 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     }
                   }}
                   placeholder="Busca por nombre, referencia, serie, color o especificación"
-                  className="w-full border border-neutral-200 bg-white px-4 py-4 text-base font-semibold text-black outline-none transition placeholder:text-neutral-400 focus:border-black"
+                  className="w-full border border-neutral-200 bg-white px-4 py-4 text-base font-semibold text-black outline-none transition placeholder:text-neutral-400 focus:border-proyectos"
                 />
                 {catalogLocation.view === "search" && (
                   <button
                     type="button"
                     onClick={clearSearch}
-                    className="shrink-0 rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
+                    className="shrink-0 rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-proyectos hover:text-proyectos"
                   >
                     Limpiar búsqueda
                   </button>
@@ -579,7 +579,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 <button
                   type="button"
                   onClick={navigateToAllProducts}
-                  className="inline-flex rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex rounded-full bg-proyectos px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Mostrar todos los productos
                 </button>
@@ -590,7 +590,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     key={type.id}
                     type="button"
                     onClick={() => selectCategory(type.id)}
-                    className="group min-h-44 overflow-hidden border border-neutral-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-black hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] active:scale-[0.99]"
+                    className="group min-h-44 overflow-hidden border border-neutral-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-proyectos hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] active:scale-[0.99]"
                   >
                     <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
                       {type.marker}
@@ -601,7 +601,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     <p className="mt-4 text-sm leading-6 text-neutral-500">
                       {type.description}
                     </p>
-                    <span className="mt-6 block h-px w-10 bg-black transition duration-300 group-hover:w-20" />
+                    <span className="mt-6 block h-px w-10 bg-proyectos transition duration-300 group-hover:w-20" />
                   </button>
                 ))}
               </div>
@@ -640,7 +640,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                             return;
                           }
                         }}
-                        className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
+                        className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-proyectos"
                       >
                         {item}
                       </button>
@@ -665,14 +665,14 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 <button
                   type="button"
                   onClick={navigateBackInCatalog}
-                  className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
+                  className="rounded-full border border-proyectos px-5 py-3 text-sm font-semibold text-proyectos transition hover:bg-proyectos hover:text-white"
                 >
                   Volver
                 </button>
                 <button
                   type="button"
                   onClick={goToRoot}
-                  className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
+                  className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-proyectos hover:text-proyectos"
                 >
                   Inicio del catálogo
                 </button>
@@ -685,7 +685,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     onClick={() =>
                       selectApplication(selectedCategory, application)
                     }
-                    className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-black active:scale-[0.99]"
+                    className="flex min-h-28 items-end justify-between gap-4 border border-neutral-200 bg-white p-5 text-left transition hover:border-proyectos active:scale-[0.99]"
                   >
                     <span className="text-xl font-semibold">
                       {getApplicationLabel(application)}
@@ -742,7 +742,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                               return;
                             }
                           }}
-                          className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-black"
+                          className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 transition hover:text-proyectos"
                         >
                           {item}
                         </button>
@@ -768,14 +768,14 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     <button
                       type="button"
                       onClick={navigateBackInCatalog}
-                      className="rounded-full border border-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
+                      className="rounded-full border border-proyectos px-5 py-3 text-sm font-semibold text-proyectos transition hover:bg-proyectos hover:text-white"
                     >
                       Volver
                     </button>
                     <button
                       type="button"
                       onClick={goToRoot}
-                      className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black"
+                      className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-proyectos hover:text-proyectos"
                     >
                       Inicio del catálogo
                     </button>
@@ -855,7 +855,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 onClick={() =>
                   catalogLocation.view === "search" ? clearSearch() : goToRoot()
                 }
-                className="mt-4 rounded-full border border-black px-5 py-3 text-sm font-semibold transition hover:bg-black hover:text-white"
+                className="mt-4 rounded-full border border-proyectos px-5 py-3 text-sm font-semibold transition hover:bg-proyectos hover:text-white"
               >
                 Limpiar filtros
               </button>
@@ -868,7 +868,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 type="button"
                 onClick={() => goToProductPage(activePage - 1)}
                 disabled={activePage === 1}
-                className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-proyectos hover:text-proyectos disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Anterior
               </button>
@@ -880,8 +880,8 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   aria-current={page === activePage ? "page" : undefined}
                   className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold transition ${
                     page === activePage
-                      ? "border-black bg-black text-white"
-                      : "border-neutral-200 text-neutral-700 hover:border-black hover:text-black"
+                      ? "border-proyectos bg-proyectos text-white"
+                      : "border-neutral-200 text-neutral-700 hover:border-proyectos hover:text-proyectos"
                   }`}
                 >
                   {page}
@@ -891,7 +891,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 type="button"
                 onClick={() => goToProductPage(activePage + 1)}
                 disabled={activePage === totalPages}
-                className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-black hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:border-proyectos hover:text-proyectos disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Siguiente
               </button>
@@ -900,11 +900,11 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         </div>
       </section>
 
-      <section className="bg-neutral-950 px-5 py-20 text-white sm:px-8 lg:py-28">
+      <section className="bg-proyectos px-5 py-20 text-white sm:px-8 lg:py-28">
         <div id="asesoria-proyecto" className="-mt-20 scroll-mt-20 pt-20" />
         <div className="mx-auto grid max-w-7xl items-start gap-10 lg:grid-cols-[0.85fr_1.15fr]">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/46">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/52">
               Asesoría de proyecto
             </p>
             <h2 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
@@ -918,7 +918,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
 
             <div className="mt-8 border border-white/12 p-5 transition duration-500 hover:border-white/24">
               <div className="flex items-center justify-between gap-4">
-                <p className="text-sm uppercase tracking-[0.2em] text-white/44">
+                <p className="text-sm uppercase tracking-[0.2em] text-white/52">
                   Resumen
                 </p>
                 <p className="text-sm text-white/60">{quoteCount} unidades</p>
@@ -938,7 +938,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                     >
                       <div>
                         <p className="font-semibold text-white">{item.product.publicName}</p>
-                        <p className="mt-1 text-sm text-white/48">
+                        <p className="mt-1 text-sm text-white/52">
                           Ref. {item.product.econoluzReference} / {item.quantity} unidad{item.quantity > 1 ? "es" : ""}
                         </p>
                       </div>
@@ -949,7 +949,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
               </div>
 
               <div className="mt-5 flex items-center justify-between border-t border-white/12 pt-4">
-                <p className="text-sm uppercase tracking-[0.18em] text-white/44">
+                <p className="text-sm uppercase tracking-[0.18em] text-white/52">
                   Modalidad
                 </p>
                 <p className="text-2xl font-semibold">Cotización por asesoría</p>
@@ -958,7 +958,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
 
             {!ledResultsSummary && (
               <div className="mt-5 border border-white/12 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/44">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/52">
                   Consejo
                 </p>
                 <p className="mt-3 text-sm leading-6 text-white/62">
@@ -1005,7 +1005,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   onChange={(event) => updateFormField("fullName", event.target.value)}
                   aria-invalid={Boolean(formErrors.fullName)}
                   aria-describedby={formErrors.fullName ? "quote-full-name-error" : undefined}
-                  className={`border px-4 py-3 outline-none transition focus:border-black ${
+                  className={`border px-4 py-3 outline-none transition focus:border-proyectos ${
                     formErrors.fullName ? "border-error bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="Nombre y apellido"
@@ -1029,7 +1029,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   onChange={(event) => updateFormField("phone", event.target.value)}
                   aria-invalid={Boolean(formErrors.phone)}
                   aria-describedby={formErrors.phone ? "quote-phone-error" : undefined}
-                  className={`border px-4 py-3 outline-none transition focus:border-black ${
+                  className={`border px-4 py-3 outline-none transition focus:border-proyectos ${
                     formErrors.phone ? "border-error bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="+502 0000 0000"
@@ -1053,7 +1053,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   onChange={(event) => updateFormField("email", event.target.value)}
                   aria-invalid={Boolean(formErrors.email)}
                   aria-describedby={formErrors.email ? "quote-email-error" : undefined}
-                  className={`border px-4 py-3 outline-none transition focus:border-black ${
+                  className={`border px-4 py-3 outline-none transition focus:border-proyectos ${
                     formErrors.email ? "border-error bg-neutral-50" : "border-neutral-200"
                   }`}
                   placeholder="correo@empresa.com"
@@ -1070,8 +1070,8 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 <select
                   value={formState.projectType}
                   onChange={(event) => updateFormField("projectType", event.target.value)}
-                  className={`border bg-white px-4 py-3 outline-none transition focus:border-black ${
-                    formErrors.projectType ? "border-black bg-neutral-50" : "border-neutral-200"
+                  className={`border bg-white px-4 py-3 outline-none transition focus:border-proyectos ${
+                    formErrors.projectType ? "border-error bg-neutral-50" : "border-neutral-200"
                   }`}
                 >
                   <option value="">Seleccionar</option>
@@ -1093,7 +1093,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 <input
                   value={formState.estimatedArea}
                   onChange={(event) => updateFormField("estimatedArea", event.target.value)}
-                  className="border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
+                  className="border border-neutral-200 px-4 py-3 outline-none transition focus:border-proyectos"
                   placeholder="Ej. 120"
                 />
               </label>
@@ -1104,7 +1104,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   required
                   value={formState.budgetRange}
                   onChange={(event) => updateFormField("budgetRange", event.target.value)}
-                  className="border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-black"
+                  className="border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-proyectos"
                 >
                   <option value="">Seleccionar</option>
                   {quoteBudgetRanges.map((budgetRange) => (
@@ -1121,7 +1121,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   required
                   value={formState.lightingType}
                   onChange={(event) => updateFormField("lightingType", event.target.value)}
-                  className="border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-black"
+                  className="border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-proyectos"
                 >
                   <option value="">Seleccionar</option>
                   {quoteLightingTypes.map((lightingType) => (
@@ -1137,7 +1137,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 <textarea
                   value={formState.message}
                   onChange={(event) => updateFormField("message", event.target.value)}
-                  className="min-h-32 resize-none border border-neutral-200 px-4 py-3 outline-none transition focus:border-black"
+                  className="min-h-32 resize-none border border-neutral-200 px-4 py-3 outline-none transition focus:border-proyectos"
                   placeholder="Cuéntanos sobre ambientes, acabados, fechas o necesidades técnicas."
                 />
               </label>
@@ -1184,13 +1184,13 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   </a>
                   <a
                     href={contact.phoneHref}
-                    className="text-neutral-600 underline underline-offset-4 hover:text-black"
+                    className="text-neutral-600 underline underline-offset-4 hover:text-proyectos"
                   >
                     {contact.phoneLabel}
                   </a>
                   <a
                     href={mailtoHref}
-                    className="text-neutral-600 underline underline-offset-4 hover:text-black"
+                    className="text-neutral-600 underline underline-offset-4 hover:text-proyectos"
                   >
                     {contact.email}
                   </a>
@@ -1229,7 +1229,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   rel="noopener noreferrer"
                   onClick={handleQuoteSubmit}
                   aria-busy={submitStatus === "saving"}
-                  className="flex w-full items-center justify-center rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
+                  className="flex w-full items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte"
                 >
                   {submitStatus === "saving"
                     ? "Enviando…"
@@ -1250,7 +1250,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         <button
           type="button"
           onClick={() => setIsQuoteOpen(true)}
-          className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:bg-neutral-800 sm:bottom-8 sm:right-8"
+          className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full bg-proyectos px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:bg-proyectos-fuerte sm:bottom-8 sm:right-8"
         >
           Ver selección
           <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">

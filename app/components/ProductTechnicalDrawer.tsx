@@ -114,7 +114,7 @@ export default function ProductTechnicalDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-xl leading-none transition hover:border-black"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-xl leading-none transition hover:border-proyectos"
             aria-label="Cerrar"
           >
             x
@@ -212,7 +212,7 @@ export default function ProductTechnicalDrawer({
                 <p className="text-sm font-semibold text-black">
                   Producto agregado
                 </p>
-                <div className="inline-flex h-11 items-center rounded-full bg-black text-sm font-semibold text-white">
+                <div className="inline-flex h-11 items-center rounded-full bg-proyectos text-sm font-semibold text-white">
                   <button
                     type="button"
                     onClick={() => onDecrease(product)}
@@ -236,14 +236,14 @@ export default function ProductTechnicalDrawer({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex items-center justify-center rounded-full border border-black px-7 py-4 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-black hover:text-white"
+                  className="flex items-center justify-center rounded-full border border-proyectos px-7 py-4 text-sm font-semibold text-black transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos hover:text-white"
                 >
                   Seguir viendo productos
                 </button>
                 <button
                   type="button"
                   onClick={onViewQuote}
-                  className="flex items-center justify-center rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
+                  className="flex items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte"
                 >
                   Ver cotización
                 </button>
@@ -253,7 +253,7 @@ export default function ProductTechnicalDrawer({
             <button
               type="button"
               onClick={addProduct}
-              className="flex w-full items-center justify-center rounded-full bg-black px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800"
+              className="flex w-full items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte"
             >
               Agregar a cotización
             </button>

@@ -69,7 +69,7 @@ export default function PoliticaDevoluciones() {
         items={mainNavItems}
       />
 
-      <section className="bg-black px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-20 lg:pb-24 lg:pt-40">
+      <section className="bg-proyectos px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-20 lg:pb-24 lg:pt-40">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-semibold uppercase tracking-[0.34em] text-white/52">
             Política comercial
@@ -103,7 +103,7 @@ export default function PoliticaDevoluciones() {
             </p>
             <Link
               href="/#contacto"
-              className="mt-8 inline-flex rounded-full bg-black px-7 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+              className="mt-8 inline-flex rounded-full bg-proyectos px-7 py-3 text-sm font-semibold text-white transition hover:bg-proyectos-fuerte"
             >
               Consultar un caso
             </Link>
@@ -117,7 +117,7 @@ export default function PoliticaDevoluciones() {
               </article>
             ))}
 
-            <div className="bg-neutral-950 p-7 text-white">
+            <div className="bg-proyectos p-7 text-white">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/46">
                 Recomendación
               </p>

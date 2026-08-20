@@ -52,7 +52,7 @@ export default function QuoteDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-xl leading-none transition hover:border-black"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-xl leading-none transition hover:border-proyectos"
           >
             x
           </button>
@@ -82,7 +82,7 @@ export default function QuoteDrawer({
                     <button
                       type="button"
                       onClick={() => onRemove(item.product.econoluzReference)}
-                      className="text-sm font-semibold text-neutral-500 transition hover:text-black"
+                      className="text-sm font-semibold text-neutral-500 transition hover:text-proyectos"
                     >
                       Quitar
                     </button>
@@ -135,7 +135,7 @@ export default function QuoteDrawer({
           <button
             type="button"
             onClick={onCompleteAdvice}
-            className="mt-5 flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            className="mt-5 flex items-center justify-center rounded-full bg-proyectos px-6 py-3 text-sm font-semibold text-white transition hover:bg-proyectos-fuerte"
           >
             Completar asesoría
           </button>

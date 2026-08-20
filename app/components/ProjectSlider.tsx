@@ -99,7 +99,7 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
   };
 
   return (
-    <div className="mt-12 w-full max-w-full overflow-hidden bg-neutral-950 text-white lg:mt-14">
+    <div className="mt-12 w-full max-w-full overflow-hidden bg-proyectos text-white lg:mt-14">
       <div className="grid min-w-0 gap-0 lg:grid-cols-[1.15fr_0.85fr]">
         <div
           onPointerDown={handlePointerDown}
@@ -156,7 +156,7 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
               <button
                 type="button"
                 onClick={goToPrevious}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-xl transition hover:border-white hover:bg-white hover:text-black"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-xl transition hover:border-white hover:bg-white hover:text-proyectos"
                 aria-label="Imagen anterior"
               >
                 {"<"}
@@ -164,7 +164,7 @@ export default function ProjectSlider({ projects }: ProjectSliderProps) {
               <button
                 type="button"
                 onClick={goToNext}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-xl transition hover:border-white hover:bg-white hover:text-black"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-xl transition hover:border-white hover:bg-white hover:text-proyectos"
                 aria-label="Imagen siguiente"
               >
                 {">"}
