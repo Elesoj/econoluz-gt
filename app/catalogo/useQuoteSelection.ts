@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PublicProduct } from "../data/publicProduct";
 import { publishFloatingQuoteSelection } from "./floatingQuoteStore";
 import {
@@ -14,46 +14,130 @@ import {
   type QuoteSelectionAction,
 } from "./quoteSelection";
 
-const getSessionStorage = () => {
+type QuoteHydrationPhase = "pending" | "restored" | "failed";
+
+type SessionStorageAccess =
+  | { status: "ok"; storage: Storage }
+  | { status: "failed" };
+
+const getSessionStorage = (): SessionStorageAccess => {
   try {
-    return window.sessionStorage;
+    return { status: "ok", storage: window.sessionStorage };
   } catch {
-    return null;
+    return { status: "failed" };
   }
 };
 
 export default function useQuoteSelection(products: readonly PublicProduct[]) {
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [isQuoteSessionReady, setIsQuoteSessionReady] = useState(false);
+  const itemsRef = useRef<QuoteItem[]>([]);
+  const hydrationPhaseRef = useRef<QuoteHydrationPhase>("pending");
+  const storageRef = useRef<Storage | null>(null);
+  const pendingActionsRef = useRef<QuoteSelectionAction[]>([]);
+  const animationFrameRef = useRef<number | null>(null);
+
+  const hydrateQuoteSession = useCallback(
+    (updateReactState: boolean) => {
+      if (hydrationPhaseRef.current !== "pending") {
+        return;
+      }
+
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      const pendingActions = pendingActionsRef.current;
+      pendingActionsRef.current = [];
+      const storageAccess = getSessionStorage();
+      let nextItems = itemsRef.current;
+
+      if (storageAccess.status === "ok") {
+        const restored = restoreQuoteSession(storageAccess.storage, products);
+
+        if (restored.status === "ok") {
+          storageRef.current = storageAccess.storage;
+          hydrationPhaseRef.current = "restored";
+          nextItems = pendingActions.reduce(
+            (currentItems, action) =>
+              reduceQuoteSelection(currentItems, action),
+            restored.items,
+          );
+        } else {
+          hydrationPhaseRef.current = "failed";
+          nextItems = pendingActions.reduce(
+            (currentItems, action) =>
+              reduceQuoteSelection(currentItems, action),
+            nextItems,
+          );
+        }
+      } else {
+        hydrationPhaseRef.current = "failed";
+        nextItems = pendingActions.reduce(
+          (currentItems, action) => reduceQuoteSelection(currentItems, action),
+          nextItems,
+        );
+      }
+
+      itemsRef.current = nextItems;
+
+      if (updateReactState) {
+        setItems(nextItems);
+        setIsQuoteSessionReady(true);
+      }
+
+      if (hydrationPhaseRef.current === "restored" && storageRef.current) {
+        syncQuoteSessionStorage(storageRef.current, nextItems);
+        publishFloatingQuoteSelection(nextItems);
+      } else if (pendingActions.length > 0) {
+        publishFloatingQuoteSelection(nextItems);
+      }
+    },
+    [products],
+  );
 
   useEffect(() => {
-    const animationFrame = window.requestAnimationFrame(() => {
-      const storage = getSessionStorage();
-
-      setItems(storage ? restoreQuoteSession(storage, products) : []);
-      setIsQuoteSessionReady(true);
-    });
+    if (hydrationPhaseRef.current === "pending") {
+      animationFrameRef.current = window.requestAnimationFrame(() => {
+        animationFrameRef.current = null;
+        hydrateQuoteSession(true);
+      });
+    }
 
     return () => {
-      window.cancelAnimationFrame(animationFrame);
-    };
-  }, [products]);
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
 
-  useEffect(() => {
-    if (!isQuoteSessionReady) {
+      if (pendingActionsRef.current.length > 0) {
+        hydrateQuoteSession(false);
+      }
+    };
+  }, [hydrateQuoteSession]);
+
+  const dispatch = useCallback((action: QuoteSelectionAction) => {
+    if (hydrationPhaseRef.current === "pending") {
+      pendingActionsRef.current.push(action);
+      hydrateQuoteSession(true);
       return;
     }
 
-    const storage = getSessionStorage();
-    if (storage) {
-      syncQuoteSessionStorage(storage, items);
-    }
-    publishFloatingQuoteSelection(items);
-  }, [isQuoteSessionReady, items]);
+    const nextItems = reduceQuoteSelection(itemsRef.current, action);
 
-  const dispatch = useCallback((action: QuoteSelectionAction) => {
-    setItems((currentItems) => reduceQuoteSelection(currentItems, action));
-  }, []);
+    if (nextItems === itemsRef.current) {
+      return;
+    }
+
+    itemsRef.current = nextItems;
+    setItems(nextItems);
+
+    if (hydrationPhaseRef.current === "restored" && storageRef.current) {
+      syncQuoteSessionStorage(storageRef.current, nextItems);
+    }
+    publishFloatingQuoteSelection(nextItems);
+  }, [hydrateQuoteSession]);
 
   const add = useCallback(
     (product: PublicProduct) => dispatch({ type: "add", product }),
@@ -78,7 +162,7 @@ export default function useQuoteSelection(products: readonly PublicProduct[]) {
   return {
     items,
     isQuoteSessionReady,
-    quoteCount: getQuoteSelectionTotal(items),
+    quoteCount: getQuoteSelectionTotal(items) ?? 0,
     add,
     decrease,
     remove,

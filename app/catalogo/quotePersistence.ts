@@ -1,5 +1,8 @@
 import type { PublicProduct } from "../data/publicProduct";
-import type { QuoteItem } from "./quoteSelection";
+import {
+  getQuoteSelectionTotal,
+  type QuoteItem,
+} from "./quoteSelection";
 
 export const QUOTE_SESSION_STORAGE_KEY = "econoluz_catalog_quote";
 
@@ -10,6 +13,10 @@ export type QuoteStorageSyncResult =
   | "written"
   | "removed"
   | "failed";
+
+export type QuoteSessionRestoreResult =
+  | { status: "ok"; items: QuoteItem[] }
+  | { status: "failed" };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -87,35 +94,61 @@ export const parseStoredQuoteSession = (
 export const restoreQuoteSession = (
   storage: QuoteStorage,
   products: readonly PublicProduct[],
-): QuoteItem[] => {
+): QuoteSessionRestoreResult => {
   try {
-    return parseStoredQuoteSession(
-      storage.getItem(QUOTE_SESSION_STORAGE_KEY),
-      products,
-    );
+    return {
+      status: "ok",
+      items: parseStoredQuoteSession(
+        storage.getItem(QUOTE_SESSION_STORAGE_KEY),
+        products,
+      ),
+    };
   } catch {
-    return [];
+    return { status: "failed" };
   }
 };
 
-export const serializeQuoteSession = (items: readonly QuoteItem[]) => {
-  if (items.length === 0) {
-    return null;
+type SerializedQuoteSessionResult =
+  | { status: "ok"; value: string | null }
+  | { status: "failed" };
+
+const serializeQuoteSession = (
+  items: readonly QuoteItem[],
+): SerializedQuoteSessionResult => {
+  if (getQuoteSelectionTotal(items) === null) {
+    return { status: "failed" };
   }
 
-  return JSON.stringify({
-    items: items.map((item) => ({
-      econoluzReference: item.product.econoluzReference,
-      quantity: item.quantity,
-    })),
-  });
+  if (items.length === 0) {
+    return { status: "ok", value: null };
+  }
+
+  try {
+    return {
+      status: "ok",
+      value: JSON.stringify({
+        items: items.map((item) => ({
+          econoluzReference: item.product.econoluzReference,
+          quantity: item.quantity,
+        })),
+      }),
+    };
+  } catch {
+    return { status: "failed" };
+  }
 };
 
 export const syncQuoteSessionStorage = (
   storage: QuoteStorage,
   items: readonly QuoteItem[],
 ): QuoteStorageSyncResult => {
-  const desiredValue = serializeQuoteSession(items);
+  const serialized = serializeQuoteSession(items);
+
+  if (serialized.status === "failed") {
+    return "failed";
+  }
+
+  const desiredValue = serialized.value;
   let storedValue: string | null;
 
   try {

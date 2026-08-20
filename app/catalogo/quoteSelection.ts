@@ -20,14 +20,38 @@ const canIncreaseSafeTotal = (total: number, increment: number) =>
   isValidQuantity(increment) &&
   increment <= Number.MAX_SAFE_INTEGER - total;
 
-export const getQuoteSelectionTotal = (items: readonly QuoteItem[]) =>
-  items.reduce((total, item) => total + item.quantity, 0);
+export const getQuoteSelectionTotal = (items: readonly QuoteItem[]) => {
+  const references = new Set<string>();
+  let total = 0;
+
+  for (const item of items) {
+    const reference = item?.product?.econoluzReference;
+
+    if (
+      typeof reference !== "string" ||
+      reference.length === 0 ||
+      references.has(reference) ||
+      !canIncreaseSafeTotal(total, item.quantity)
+    ) {
+      return null;
+    }
+
+    references.add(reference);
+    total += item.quantity;
+  }
+
+  return total;
+};
 
 export const reduceQuoteSelection = (
   items: QuoteItem[],
   action: QuoteSelectionAction,
 ): QuoteItem[] => {
   const total = getQuoteSelectionTotal(items);
+
+  if (total === null) {
+    return items;
+  }
 
   if (action.type === "add") {
     if (!canIncreaseSafeTotal(total, 1)) {

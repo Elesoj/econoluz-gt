@@ -18,6 +18,9 @@ type QuoteItem = {
 
 type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 type StorageSyncResult = "unchanged" | "written" | "removed" | "failed";
+type QuoteRestoreResult =
+  | { status: "ok"; items: QuoteItem[] }
+  | { status: "failed" };
 
 type QuotePersistenceModule = {
   QUOTE_SESSION_STORAGE_KEY: string;
@@ -28,8 +31,7 @@ type QuotePersistenceModule = {
   restoreQuoteSession: (
     storage: StorageLike,
     products: readonly QuoteProduct[],
-  ) => QuoteItem[];
-  serializeQuoteSession: (items: readonly QuoteItem[]) => string | null;
+  ) => QuoteRestoreResult;
   syncQuoteSessionStorage: (
     storage: StorageLike,
     items: readonly QuoteItem[],
@@ -43,7 +45,7 @@ type QuoteSelectionAction =
   | { type: "set"; econoluzReference: string; quantity: number };
 
 type QuoteSelectionModule = {
-  getQuoteSelectionTotal: (items: readonly QuoteItem[]) => number;
+  getQuoteSelectionTotal: (items: readonly QuoteItem[]) => number | null;
   reduceQuoteSelection: (
     items: readonly QuoteItem[],
     action: QuoteSelectionAction,
@@ -137,6 +139,76 @@ const seedSessionQuote = async (page: Page, raw: string) => {
   await page.addInitScript(
     ({ key, value }) => window.sessionStorage.setItem(key, value),
     { key: QUOTE_KEY, value: raw },
+  );
+};
+
+const installControlledQuoteAnimationFrames = async (
+  page: Page,
+  initialRaw: string,
+) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(
+    ({ key, raw }) => {
+      const storage = window.sessionStorage;
+      const nativeGet = Storage.prototype.getItem;
+      const nativeSet = Storage.prototype.setItem;
+      if (nativeGet.call(storage, key) === null) {
+        nativeSet.call(storage, key, raw);
+      }
+
+      let nextFrameId = 1;
+      let beforeUnloadRegistrations = 0;
+      const callbacks = new Map<number, FrameRequestCallback>();
+      const nativeAddEventListener = EventTarget.prototype.addEventListener;
+
+      window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+        const frameId = nextFrameId;
+        nextFrameId += 1;
+        callbacks.set(frameId, callback);
+        return frameId;
+      };
+      window.cancelAnimationFrame = (frameId: number) => {
+        callbacks.delete(frameId);
+      };
+      EventTarget.prototype.addEventListener = function addEventListener(
+        type: string,
+        callback: EventListenerOrEventListenerObject | null,
+        options?: AddEventListenerOptions | boolean,
+      ) {
+        if (this === window && type === "beforeunload") {
+          beforeUnloadRegistrations += 1;
+        }
+        return nativeAddEventListener.call(this, type, callback, options);
+      };
+
+      (
+        window as typeof window & {
+          __task4RafController?: {
+            snapshot: () => {
+              beforeUnloadRegistrations: number;
+              pendingFrames: number;
+              raw: string | null;
+            };
+            flush: () => void;
+          };
+        }
+      ).__task4RafController = {
+        snapshot: () => ({
+          beforeUnloadRegistrations,
+          pendingFrames: callbacks.size,
+          raw: nativeGet.call(storage, key),
+        }),
+        flush: () => {
+          const pending = [...callbacks.entries()];
+          callbacks.clear();
+          const timestamp = performance.now();
+          for (const [, callback] of pending) {
+            callback(timestamp);
+          }
+        },
+      };
+    },
+    { key: QUOTE_KEY, raw: initialRaw },
   );
 };
 
@@ -244,21 +316,29 @@ test.describe("quote persistence parser", () => {
     ]);
   });
 
-  test("serializes the exact legacy-compatible canonical shape without a version or extra fields", async () => {
+  test("round-trips the exact legacy-compatible canonical shape without a version or extra fields", async () => {
     const persistence = await loadCatalogModule<QuotePersistenceModule>(
       "quotePersistence",
     );
     expect(persistence).not.toBeNull();
+    const fake = createStorage(null);
 
     expect(
-      persistence?.serializeQuoteSession([
+      persistence?.syncQuoteSessionStorage(fake.storage, [
         { product: testProducts[1], quantity: 4 },
         { product: testProducts[0], quantity: 2 },
       ]),
-    ).toBe(
+    ).toBe("written");
+    expect(fake.getValue()).toBe(
       '{"items":[{"econoluzReference":"ECO-TEST-B","quantity":4},{"econoluzReference":"ECO-TEST-A","quantity":2}]}',
     );
-    expect(persistence?.serializeQuoteSession([])).toBeNull();
+    expect(persistence?.restoreQuoteSession(fake.storage, testProducts)).toEqual({
+      status: "ok",
+      items: [
+        { product: testProducts[1], quantity: 4 },
+        { product: testProducts[0], quantity: 2 },
+      ],
+    });
     expect(persistence?.QUOTE_SESSION_STORAGE_KEY).toBe(QUOTE_KEY);
   });
 });
@@ -291,9 +371,13 @@ test.describe("guarded canonical storage synchronization", () => {
     const fake = createStorage(
       '{ "version": 99, "items": [ { "econoluzReference": "ECO-TEST-A", "quantity": 2, "name": "do not persist" } ] }',
     );
-    const items = persistence?.restoreQuoteSession(fake.storage, testProducts) ?? [];
+    const restored = persistence?.restoreQuoteSession(fake.storage, testProducts);
 
-    expect(items).toEqual([{ product: testProducts[0], quantity: 2 }]);
+    expect(restored).toEqual({
+      status: "ok",
+      items: [{ product: testProducts[0], quantity: 2 }],
+    });
+    const items = restored?.status === "ok" ? restored.items : [];
     expect(persistence?.syncQuoteSessionStorage(fake.storage, items)).toBe("written");
     expect(persistence?.syncQuoteSessionStorage(fake.storage, items)).toBe("unchanged");
     expect(fake.getValue()).toBe(
@@ -308,9 +392,10 @@ test.describe("guarded canonical storage synchronization", () => {
     );
     expect(persistence).not.toBeNull();
     const fake = createStorage('{"items":{}}');
-    const items = persistence?.restoreQuoteSession(fake.storage, testProducts) ?? [];
+    const restored = persistence?.restoreQuoteSession(fake.storage, testProducts);
 
-    expect(items).toEqual([]);
+    expect(restored).toEqual({ status: "ok", items: [] });
+    const items = restored?.status === "ok" ? restored.items : [];
     expect(persistence?.syncQuoteSessionStorage(fake.storage, items)).toBe("removed");
     expect(persistence?.syncQuoteSessionStorage(fake.storage, items)).toBe("unchanged");
     expect(fake.operations).toEqual({ get: 3, set: 0, remove: 1 });
@@ -325,7 +410,9 @@ test.describe("guarded canonical storage synchronization", () => {
     const setFailure = createStorage(null, { set: true });
     const removeFailure = createStorage("invalid", { remove: true });
 
-    expect(persistence?.restoreQuoteSession(getFailure.storage, testProducts)).toEqual([]);
+    expect(persistence?.restoreQuoteSession(getFailure.storage, testProducts)).toEqual({
+      status: "failed",
+    });
     expect(
       persistence?.syncQuoteSessionStorage(getFailure.storage, [
         { product: testProducts[0], quantity: 1 },
@@ -339,6 +426,31 @@ test.describe("guarded canonical storage synchronization", () => {
     expect(persistence?.syncQuoteSessionStorage(removeFailure.storage, [])).toBe(
       "failed",
     );
+  });
+
+  test("refuses to serialize duplicate or overflowing in-memory states", async () => {
+    const persistence = await loadCatalogModule<QuotePersistenceModule>(
+      "quotePersistence",
+    );
+    expect(persistence).not.toBeNull();
+    const duplicate = createStorage(null);
+    const overflowing = createStorage(null);
+
+    expect(
+      persistence?.syncQuoteSessionStorage(duplicate.storage, [
+        { product: testProducts[0], quantity: 1 },
+        { product: testProducts[0], quantity: 2 },
+      ]),
+    ).toBe("failed");
+    expect(duplicate.operations).toEqual({ get: 0, set: 0, remove: 0 });
+
+    expect(
+      persistence?.syncQuoteSessionStorage(overflowing.storage, [
+        { product: testProducts[0], quantity: Number.MAX_SAFE_INTEGER },
+        { product: testProducts[1], quantity: 1 },
+      ]),
+    ).toBe("failed");
+    expect(overflowing.operations).toEqual({ get: 0, set: 0, remove: 0 });
   });
 });
 
@@ -422,6 +534,31 @@ test.describe("selection invariants", () => {
         product: testProducts[2],
       }),
     ).toBe(twoProducts);
+  });
+
+  test("does not total duplicate, malformed, or overflowing external states", async () => {
+    const selection = await loadCatalogModule<QuoteSelectionModule>(
+      "quoteSelection",
+    );
+    expect(selection).not.toBeNull();
+
+    expect(
+      selection?.getQuoteSelectionTotal([
+        { product: testProducts[0], quantity: 1 },
+        { product: testProducts[0], quantity: 2 },
+      ]),
+    ).toBeNull();
+    expect(
+      selection?.getQuoteSelectionTotal([
+        { product: testProducts[0], quantity: Number.MAX_SAFE_INTEGER },
+        { product: testProducts[1], quantity: 1 },
+      ]),
+    ).toBeNull();
+    expect(
+      selection?.getQuoteSelectionTotal([
+        { product: testProducts[0], quantity: 0 },
+      ]),
+    ).toBeNull();
   });
 });
 
@@ -566,6 +703,366 @@ test.describe("browser quote integration", () => {
     await secondContext.close();
   });
 
+  test("does not erase a valid quote after a transient getItem restoration failure", async ({
+    page,
+  }) => {
+    const canonical = storedQuote([
+      { econoluzReference: FIRST_REFERENCE, quantity: 2 },
+    ]);
+    await page.addInitScript(
+      ({ key, raw }) => {
+        const storage = window.sessionStorage;
+        const nativeGet = Storage.prototype.getItem;
+        const nativeSet = Storage.prototype.setItem;
+        const nativeRemove = Storage.prototype.removeItem;
+        nativeSet.call(storage, key, raw);
+        const counters = { get: 0, set: 0, remove: 0 };
+
+        Storage.prototype.getItem = function getItem(storageKey: string) {
+          if (this === storage && storageKey === key) {
+            counters.get += 1;
+            if (counters.get === 1) {
+              throw new DOMException("transient get failure", "SecurityError");
+            }
+          }
+          return nativeGet.call(this, storageKey);
+        };
+        Storage.prototype.setItem = function setItem(
+          storageKey: string,
+          value: string,
+        ) {
+          if (this === storage && storageKey === key) {
+            counters.set += 1;
+          }
+          return nativeSet.call(this, storageKey, value);
+        };
+        Storage.prototype.removeItem = function removeItem(storageKey: string) {
+          if (this === storage && storageKey === key) {
+            counters.remove += 1;
+          }
+          return nativeRemove.call(this, storageKey);
+        };
+        (
+          window as typeof window & {
+            __task4TransientSessionProbe?: () => {
+              raw: string | null;
+              counters: typeof counters;
+            };
+          }
+        ).__task4TransientSessionProbe = () => ({
+          raw: nativeGet.call(storage, key),
+          counters: { ...counters },
+        });
+      },
+      { key: QUOTE_KEY, raw: canonical },
+    );
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+
+    await page.goto("/catalogo");
+    await expect(page.getByRole("heading", { name: /tipo de producto buscas/i })).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __task4TransientSessionProbe?: () => {
+                  counters: { get: number };
+                };
+              }
+            ).__task4TransientSessionProbe?.().counters.get,
+        ),
+      )
+      .toBeGreaterThanOrEqual(1);
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __task4TransientSessionProbe?: () => unknown;
+            }
+          ).__task4TransientSessionProbe?.(),
+      ),
+    ).toEqual({ raw: canonical, counters: { get: 1, set: 0, remove: 0 } });
+    expect(pageErrors).toEqual([]);
+  });
+
+  test("does not erase a valid quote after a transient window.sessionStorage getter failure", async ({
+    page,
+  }) => {
+    const canonical = storedQuote([
+      { econoluzReference: FIRST_REFERENCE, quantity: 2 },
+    ]);
+    await page.addInitScript(
+      ({ key, raw }) => {
+        const storage = window.sessionStorage;
+        const nativeGet = Storage.prototype.getItem;
+        const nativeSet = Storage.prototype.setItem;
+        const nativeRemove = Storage.prototype.removeItem;
+        nativeSet.call(storage, key, raw);
+        const counters = { getter: 0, set: 0, remove: 0 };
+
+        Storage.prototype.setItem = function setItem(
+          storageKey: string,
+          value: string,
+        ) {
+          if (this === storage && storageKey === key) {
+            counters.set += 1;
+          }
+          return nativeSet.call(this, storageKey, value);
+        };
+        Storage.prototype.removeItem = function removeItem(storageKey: string) {
+          if (this === storage && storageKey === key) {
+            counters.remove += 1;
+          }
+          return nativeRemove.call(this, storageKey);
+        };
+        Object.defineProperty(window, "sessionStorage", {
+          configurable: true,
+          get() {
+            counters.getter += 1;
+            if (counters.getter === 1) {
+              throw new DOMException("transient getter failure", "SecurityError");
+            }
+            return storage;
+          },
+        });
+        (
+          window as typeof window & {
+            __task4TransientSessionProbe?: () => {
+              raw: string | null;
+              counters: typeof counters;
+            };
+          }
+        ).__task4TransientSessionProbe = () => ({
+          raw: nativeGet.call(storage, key),
+          counters: { ...counters },
+        });
+      },
+      { key: QUOTE_KEY, raw: canonical },
+    );
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+
+    await page.goto("/catalogo");
+    await expect(page.getByRole("heading", { name: /tipo de producto buscas/i })).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __task4TransientSessionProbe?: () => {
+                  counters: { getter: number };
+                };
+              }
+            ).__task4TransientSessionProbe?.().counters.getter,
+        ),
+      )
+      .toBeGreaterThanOrEqual(1);
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __task4TransientSessionProbe?: () => unknown;
+            }
+          ).__task4TransientSessionProbe?.(),
+      ),
+    ).toEqual({ raw: canonical, counters: { getter: 1, set: 0, remove: 0 } });
+    expect(pageErrors).toEqual([]);
+  });
+
+  test("rebases an action before the restoration frame and persists it before frames flush", async ({
+    page,
+  }) => {
+    const initial = storedQuote([
+      { econoluzReference: FIRST_REFERENCE, quantity: 2 },
+    ]);
+    const canonical = storedQuote([
+      { econoluzReference: FIRST_REFERENCE, quantity: 3 },
+    ]);
+    await installControlledQuoteAnimationFrames(page, initial);
+
+    await page.goto("/catalogo");
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __task4RafController?: {
+                  snapshot: () => {
+                    beforeUnloadRegistrations: number;
+                    pendingFrames: number;
+                  };
+                };
+              }
+            ).__task4RafController?.snapshot(),
+        ),
+      )
+      .toMatchObject({ beforeUnloadRegistrations: 1 });
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __task4RafController?: {
+                  snapshot: () => { pendingFrames: number };
+                };
+              }
+            ).__task4RafController?.snapshot().pendingFrames,
+        ),
+      )
+      .toBeGreaterThan(0);
+
+    const search = page.getByLabel(/Buscar en cat/i);
+    await search.fill(FIRST_REFERENCE);
+    await search.press("Enter");
+    const card = page.locator("article").filter({
+      hasText: `Ref. ${FIRST_REFERENCE}`,
+    });
+    await expect(card).toBeVisible();
+    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+
+    await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("3");
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __task4RafController?: { snapshot: () => { raw: string | null } };
+            }
+          ).__task4RafController?.snapshot().raw,
+      ),
+    ).toBe(canonical);
+
+    await page.evaluate(() => {
+      (
+        window as typeof window & {
+          __task4RafController?: { flush: () => void };
+        }
+      ).__task4RafController?.flush();
+    });
+    await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("3");
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __task4RafController?: { snapshot: () => { raw: string | null } };
+            }
+          ).__task4RafController?.snapshot().raw,
+      ),
+    ).toBe(canonical);
+  });
+
+  test("persists an early action across an immediate reload before the restoration frame", async ({
+    page,
+  }) => {
+    const initial = storedQuote([
+      { econoluzReference: FIRST_REFERENCE, quantity: 2 },
+    ]);
+    const canonical = storedQuote([
+      { econoluzReference: FIRST_REFERENCE, quantity: 3 },
+    ]);
+    await installControlledQuoteAnimationFrames(page, initial);
+
+    await page.goto("/catalogo");
+    // Espera al frame de restauración encolado, no al listener `beforeunload`:
+    // son efectos distintos, el listener puede registrarse antes de que el
+    // frame exista, y en esa ventana `flush()` no ejecuta nada y la
+    // restauración nunca ocurre. Es la misma señal que usa la prueba de
+    // acción temprana sin recarga.
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __task4RafController?: {
+                  snapshot: () => { pendingFrames: number };
+                };
+              }
+            ).__task4RafController?.snapshot().pendingFrames,
+        ),
+      )
+      .toBeGreaterThan(0);
+    const search = page.getByLabel(/Buscar en cat/i);
+    await search.fill(FIRST_REFERENCE);
+    await search.press("Enter");
+    const card = page.locator("article").filter({
+      hasText: `Ref. ${FIRST_REFERENCE}`,
+    });
+    await expect(card).toBeVisible();
+    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __task4RafController?: { snapshot: () => { raw: string | null } };
+            }
+          ).__task4RafController?.snapshot().raw,
+      ),
+    ).toBe(canonical);
+
+    await page.reload();
+    // Espera al frame de restauración encolado, no al listener `beforeunload`:
+    // son efectos distintos, el listener puede registrarse antes de que el
+    // frame exista, y en esa ventana `flush()` no ejecuta nada y la
+    // restauración nunca ocurre. Es la misma señal que usa la prueba de
+    // acción temprana sin recarga.
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __task4RafController?: {
+                  snapshot: () => { pendingFrames: number };
+                };
+              }
+            ).__task4RafController?.snapshot().pendingFrames,
+        ),
+      )
+      .toBeGreaterThan(0);
+    await page.evaluate(() => {
+      (
+        window as typeof window & {
+          __task4RafController?: { flush: () => void };
+        }
+      ).__task4RafController?.flush();
+    });
+    await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("3");
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __task4RafController?: { snapshot: () => { raw: string | null } };
+            }
+          ).__task4RafController?.snapshot().raw,
+      ),
+    ).toBe(canonical);
+  });
+
   test("guards a sessionStorage getItem failure and keeps the catalog usable", async ({ page }) => {
     await page.addInitScript((key) => {
       const originalGetItem = Storage.prototype.getItem;
@@ -708,24 +1205,6 @@ test.describe("browser quote integration", () => {
         ),
       )
       .toBe(1);
-    await page.evaluate(() => {
-      const counters = (
-        window as typeof window & {
-          __task4LegacyCounters?: {
-            get: number;
-            set: number;
-            remove: number;
-            events: number;
-          };
-        }
-      ).__task4LegacyCounters;
-      if (counters) {
-        counters.get = 0;
-        counters.set = 0;
-        counters.remove = 0;
-        counters.events = 0;
-      }
-    });
 
     await page.getByLabel("Nombre completo").fill("Persona de prueba");
     await page.getByLabel(/Tel.fono/i).fill("5555 5555");
@@ -752,7 +1231,7 @@ test.describe("browser quote integration", () => {
             }
           ).__task4LegacyCounters,
       ),
-    ).toEqual({ get: 0, set: 0, remove: 0, events: 0 });
+    ).toEqual({ get: 1, set: 0, remove: 0, events: 0 });
     expect(
       await page.evaluate((key) => localStorage.getItem(key), LEGACY_CONTEXT_KEY),
     ).toBeNull();
@@ -792,6 +1271,76 @@ test.describe("browser quote integration", () => {
             ).__task4LegacyRemoves?.(),
         ),
       ).toBe(1);
+    });
+  }
+
+  for (const failedAccess of ["getter", "getItem", "removeItem"] as const) {
+    test(`attempts legacy cleanup once when localStorage ${failedAccess} throws`, async ({
+      page,
+    }) => {
+      await page.addInitScript(
+        ({ key, access }) => {
+          const storage = window.localStorage;
+          const nativeGet = Storage.prototype.getItem;
+          const nativeSet = Storage.prototype.setItem;
+          const nativeRemove = Storage.prototype.removeItem;
+          if (access === "removeItem") {
+            nativeSet.call(storage, key, "PII LEGACY");
+          }
+          let attempts = 0;
+
+          if (access === "getter") {
+            Object.defineProperty(window, "localStorage", {
+              configurable: true,
+              get() {
+                attempts += 1;
+                throw new DOMException("blocked getter", "SecurityError");
+              },
+            });
+          } else if (access === "getItem") {
+            Storage.prototype.getItem = function getItem(storageKey: string) {
+              if (this === storage && storageKey === key) {
+                attempts += 1;
+                throw new DOMException("blocked getItem", "SecurityError");
+              }
+              return nativeGet.call(this, storageKey);
+            };
+          } else {
+            Storage.prototype.removeItem = function removeItem(storageKey: string) {
+              if (this === storage && storageKey === key) {
+                attempts += 1;
+                throw new DOMException("blocked removeItem", "SecurityError");
+              }
+              return nativeRemove.call(this, storageKey);
+            };
+          }
+
+          (
+            window as typeof window & {
+              __task4LegacyFailureAttempts?: () => number;
+            }
+          ).__task4LegacyFailureAttempts = () => attempts;
+        },
+        { key: LEGACY_CONTEXT_KEY, access: failedAccess },
+      );
+      const pageErrors: string[] = [];
+      page.on("pageerror", (error) => pageErrors.push(error.message));
+
+      await page.goto("/");
+      await expect(page.getByRole("link", { name: "Contactar por WhatsApp" })).toBeVisible();
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () =>
+              (
+                window as typeof window & {
+                  __task4LegacyFailureAttempts?: () => number;
+                }
+              ).__task4LegacyFailureAttempts?.(),
+          ),
+        )
+        .toBe(1);
+      expect(pageErrors).toEqual([]);
     });
   }
 
@@ -959,8 +1508,46 @@ test.describe("browser quote integration", () => {
 
   test("preserves the existing LED-results beforeunload lifecycle", async ({ page }) => {
     const ledValue = JSON.stringify({ summary: "Resumen LED vigente" });
+    await page.addInitScript(() => {
+      const nativeAddEventListener = EventTarget.prototype.addEventListener;
+      let ledBeforeUnloadRegistrations = 0;
+      EventTarget.prototype.addEventListener = function addEventListener(
+        type: string,
+        callback: EventListenerOrEventListenerObject | null,
+        options?: AddEventListenerOptions | boolean,
+      ) {
+        if (this === window && type === "beforeunload" && typeof callback === "function") {
+          const source = Function.prototype.toString.call(callback);
+          if (
+            callback.name.includes("clearTemporaryQuoteData") ||
+            source.includes("econoluz_led_results")
+          ) {
+            ledBeforeUnloadRegistrations += 1;
+          }
+        }
+        return nativeAddEventListener.call(this, type, callback, options);
+      };
+      (
+        window as typeof window & {
+          __task4LedBeforeUnloadRegistrations?: () => number;
+        }
+      ).__task4LedBeforeUnloadRegistrations = () =>
+        ledBeforeUnloadRegistrations;
+    });
     await page.goto("/catalogo");
     await expect(page.getByRole("heading", { name: /tipo de producto buscas/i })).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __task4LedBeforeUnloadRegistrations?: () => number;
+              }
+            ).__task4LedBeforeUnloadRegistrations?.(),
+        ),
+      )
+      .toBeGreaterThan(0);
     await page.evaluate(
       ({ key, value }) => localStorage.setItem(key, value),
       { key: "econoluz_led_results", value: ledValue },
