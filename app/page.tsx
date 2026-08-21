@@ -120,28 +120,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
-        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 border border-neutral-200 bg-white p-6 transition duration-300 hover:border-proyectos sm:p-8 lg:grid-cols-[0.9fr_1fr_auto] lg:items-center">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-tienda">
-              Calculadora LED
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold leading-tight sm:text-4xl">
-              Calcula antes de especificar.
-            </h2>
-          </div>
-          <p className="max-w-2xl text-base leading-7 text-neutral-600">
-            Estima consumo, ahorro mensual y reducción energética para llegar a la
-            cotización con mejores datos.
-          </p>
-          <Link
-            href="/calculadora-led"
-            className="inline-flex w-fit rounded-full bg-proyectos px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-proyectos-fuerte"
-          >
-            Usar calculadora
-          </Link>
-        </div>
-      </section>
       <section
         id="colecciones"
         className="scroll-mt-20 px-5 pb-16 sm:px-8 sm:pb-20 lg:pb-24"
