@@ -5,6 +5,7 @@ import AnimatedStat from "./components/AnimatedStat";
 import ProjectSlider from "./components/ProjectSlider";
 import SectionHeader from "./components/SectionHeader";
 import SiteNavbar from "./components/SiteNavbar";
+import SupplierMarquee from "./components/SupplierMarquee";
 import { projects } from "./data/projects";
 import {
   collections,
@@ -87,6 +88,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <SupplierMarquee />
       <section
         id="empresa"
         className="scroll-mt-20 px-5 py-16 sm:px-8 sm:py-20 lg:py-24"

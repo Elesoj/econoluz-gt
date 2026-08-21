@@ -44,6 +44,23 @@ export const companyStats = [
   { value: "+1,000", label: "Clientes satisfechos" },
 ];
 
+// Marcas y proveedores que ECONOLUZ GT representa. El nombre no se pinta en
+// pantalla: es el texto alternativo de cada logo, lo que lee un lector de
+// pantalla y lo que indexa un buscador.
+export const suppliers = [
+  { name: "Tecnolite", logo: "/proveedores/tecnolite.png" },
+  { name: "Construlita", logo: "/proveedores/construlita.png" },
+  { name: "Light-Tec", logo: "/proveedores/lighttec.png" },
+  { name: "Sylvania", logo: "/proveedores/sylvania.png" },
+  { name: "Philips", logo: "/proveedores/philips.png" },
+  { name: "OSRAM", logo: "/proveedores/osram.png" },
+  { name: "Proelca", logo: "/proveedores/proelca.png" },
+  { name: "Ilumitec", logo: "/proveedores/ilumitec.png" },
+  { name: "Ilum", logo: "/proveedores/ilum.png" },
+  { name: "Highlum", logo: "/proveedores/highlum.png" },
+  { name: "Sunnovation", logo: "/proveedores/sunnovation.png" },
+];
+
 export const companyHighlights = [
   {
     title: "Especificación",

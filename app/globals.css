@@ -110,6 +110,47 @@ body {
   }
 }
 
+/* Cinta de logos de proveedores. La lista se pinta dos veces seguidas y la
+   animación desplaza exactamente la mitad del ancho: al reiniciarse, el
+   fotograma final es idéntico al inicial, así que el bucle no da tirón.
+   La duración vive en una variable para poder ajustar la velocidad en un
+   solo sitio. */
+.supplier-marquee {
+  --supplier-marquee-duration: 46s;
+
+  overflow: hidden;
+  /* Los logos se desvanecen en los bordes en lugar de cortarse en seco. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 5rem,
+    #000 calc(100% - 5rem),
+    transparent
+  );
+}
+
+.supplier-marquee-track {
+  animation: supplier-marquee var(--supplier-marquee-duration) linear infinite;
+  width: max-content;
+}
+
+/* Se detiene al pasar el ratón o al llegar el foco por teclado, para poder
+   mirar un logo concreto sin perseguirlo. */
+.supplier-marquee:hover .supplier-marquee-track,
+.supplier-marquee:focus-within .supplier-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes supplier-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .catalog-stage {
     animation: none;
@@ -117,5 +158,16 @@ body {
 
   .catalog-stage-out {
     transition: none;
+  }
+
+  /* Sin movimiento automático: la cinta se queda quieta y el visitante la
+     recorre a mano. */
+  .supplier-marquee {
+    overflow-x: auto;
+    mask-image: none;
+  }
+
+  .supplier-marquee-track {
+    animation: none;
   }
 }
