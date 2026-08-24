@@ -5,10 +5,9 @@ import {
   getFinishLabel,
   getProductTypeId,
   getProductTypeLabel,
-  getSeriesId,
-  getSeriesLabel,
 } from "./catalogTaxonomy";
 import { getBrandId, getBrandLabel } from "./catalogBrands.internal";
+import { getSeriesId, getSeriesLabel } from "./catalogSeries.internal";
 import {
   getPermanentReference,
   validatePermanentReferences,

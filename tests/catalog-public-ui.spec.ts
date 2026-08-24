@@ -35,18 +35,26 @@ test("shows only populated plate applications", async ({ page }) => {
   await expect(page.getByText("0 ref.", { exact: true })).toHaveCount(0);
 });
 
-test("offers the optional series filter only in the product view", async ({ page }) => {
+test("never shows the supplier series filter or its names", async ({ page }) => {
   await page.goto("/catalogo");
+  await page.getByRole("button", { name: "Mostrar todos los productos" }).click();
+  await expect(page.getByRole("heading", { name: "Todos los productos" })).toBeVisible();
 
   await expect(page.getByText("Filtrar por serie", { exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Mostrar todos los productos" }).click();
-  await expect(page.getByText("Filtrar por serie", { exact: true })).toBeVisible();
 
-  const aplSeries = page.getByRole("button", { name: /^APL\s+41$/ });
-  await aplSeries.click();
-
-  await expect(aplSeries).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByText("Serie: APL", { exact: true })).toBeVisible();
+  // Los nombres de serie del fabricante identifican al proveedor ante el
+  // cliente, asi que no pueden aparecer en ninguna vista del catalogo publico.
+  for (const supplierSeries of [
+    "Cuasar",
+    "HB Pure",
+    "HB Steel",
+    "Highlens",
+    "Supreme",
+    "alto_montaje_ufo",
+    "alto_montaje_switchable",
+  ]) {
+    await expect(page.getByText(supplierSeries, { exact: false })).toHaveCount(0);
+  }
 });
 
 test("renders technical values that the old drawer omitted", async ({ page }) => {

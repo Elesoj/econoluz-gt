@@ -16,12 +16,10 @@ import QuoteDrawer from "../components/QuoteDrawer";
 import SectionHeader from "../components/SectionHeader";
 import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
-import FilterChip from "../components/ui/FilterChip";
 import {
   getApplicationLabel,
   getPopulatedApplicationIds,
   getProductTypeLabel,
-  getSeriesLabel,
   productTypeList,
 } from "../data/catalogTaxonomy";
 import type { PublicProduct } from "../data/publicProduct";
@@ -172,7 +170,6 @@ type CatalogClientProps = {
 
 export default function CatalogClient({ products }: CatalogClientProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [selectedSeries, setSelectedSeries] = useState("Todos");
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
   const [technicalProduct, setTechnicalProduct] = useState<PublicProduct | null>(null);
   const [formState, setFormState] = useState<QuoteFormState>(buildInitialFormState);
@@ -204,9 +201,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         location.view === "search" ? location.search : "";
     }
   }, []);
-  const resetTransientCatalogFilters = useCallback(() => {
-    setSelectedSeries("Todos");
-  }, []);
   const {
     location: catalogLocation,
     isTransitioning: isCatalogTransitioning,
@@ -222,7 +216,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     products,
     catalogStageRef,
     onLocationCommitted: syncSearchDraftToLocation,
-    onResetTransient: resetTransientCatalogFilters,
   });
   const searchQuery =
     catalogLocation.view === "search" ? catalogLocation.search : "";
@@ -231,27 +224,10 @@ export default function CatalogClient({ products }: CatalogClientProps) {
   const showAllProducts = catalogLocation.view === "all";
   const currentPage = catalogLocation.page;
 
-  const matchingProductsBeforeSeries = useMemo(() => {
-    return filterCatalogProducts(products, catalogLocation);
-  }, [catalogLocation, products]);
-
-  const seriesCounts = useMemo(
-    () =>
-      matchingProductsBeforeSeries.reduce((counts, product) => {
-        counts.set(product.series, (counts.get(product.series) ?? 0) + 1);
-        return counts;
-      }, new Map<string, number>()),
-    [matchingProductsBeforeSeries],
+  const filteredProducts = useMemo(
+    () => filterCatalogProducts(products, catalogLocation),
+    [catalogLocation, products],
   );
-  const seriesOptions = [...seriesCounts.keys()].sort((left, right) =>
-    getSeriesLabel(left).localeCompare(getSeriesLabel(right), "es"),
-  );
-  const filteredProducts =
-    selectedSeries === "Todos"
-      ? matchingProductsBeforeSeries
-      : matchingProductsBeforeSeries.filter(
-          (product) => product.series === selectedSeries,
-        );
 
   const totalPages = Math.max(
     1,
@@ -286,7 +262,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     ["Vista", showAllProducts ? "Todos los productos" : ""],
     ["Tipo", selectedCategory === "Todos" ? selectedCategory : getProductTypeLabel(selectedCategory)],
     ["Aplicación", selectedApplication === "Todos" ? selectedApplication : getApplicationLabel(selectedApplication)],
-    ["Serie", selectedSeries === "Todos" ? selectedSeries : getSeriesLabel(selectedSeries)],
   ].filter(([, value]) => value && value !== "Todos");
   const shouldShowApplications =
     !showAllProducts &&
@@ -540,7 +515,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                       handleSearchSubmit();
                     }
                   }}
-                  placeholder="Busca por nombre, referencia, serie, color o especificación"
+                  placeholder="Busca por nombre, referencia, color o especificación"
                   className="w-full border border-neutral-200 bg-white px-4 py-4 text-base font-semibold text-black outline-none transition placeholder:text-neutral-400 focus:border-proyectos"
                 />
                 {catalogLocation.view === "search" && (
@@ -782,43 +757,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   </div>
                 )}
               </div>
-
-              {seriesOptions.length > 0 && (
-                <section className="mb-8 border-y border-neutral-200 py-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tienda">
-                    Filtrar por serie
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <FilterChip
-                      label="Todas"
-                      count={matchingProductsBeforeSeries.length}
-                      isActive={selectedSeries === "Todos"}
-                      onToggle={() => {
-                        if (activePage !== 1) {
-                          goToProductPage(1, false);
-                        }
-                        setSelectedSeries("Todos");
-                      }}
-                    />
-                    {seriesOptions.map((series) => (
-                      <FilterChip
-                        key={series}
-                        label={getSeriesLabel(series)}
-                        count={seriesCounts.get(series)}
-                        isActive={selectedSeries === series}
-                        onToggle={() => {
-                          if (activePage !== 1) {
-                            goToProductPage(1, false);
-                          }
-                          setSelectedSeries((current) =>
-                            current === series ? "Todos" : series,
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
 
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                 {visibleProducts.map((product) => {

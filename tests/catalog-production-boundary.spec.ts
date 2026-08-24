@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { extname, join, relative } from "node:path";
-import { series } from "../app/data/catalogTaxonomy";
+import { series } from "../app/data/catalogSeries.internal";
 import { products } from "../app/data/products";
 import { toPublicProduct } from "../app/data/publicProduct";
 
@@ -200,36 +200,6 @@ const approvedInternalTokenCollisions = approvedPublicValues.flatMap(
 
 const expectedApprovedInternalTokenCollisions = [
   {
-    token: "cuasar",
-    publicReference: "ECO-IND-0042",
-    publicField: "series",
-    value: "cuasar",
-  },
-  {
-    token: "hb_pure",
-    publicReference: "ECO-IND-0043",
-    publicField: "series",
-    value: "hb_pure",
-  },
-  {
-    token: "hb_steel",
-    publicReference: "ECO-IND-0044",
-    publicField: "series",
-    value: "hb_steel",
-  },
-  {
-    token: "highlens",
-    publicReference: "ECO-IND-0045",
-    publicField: "series",
-    value: "highlens",
-  },
-  {
-    token: "supreme",
-    publicReference: "ECO-IND-0046",
-    publicField: "series",
-    value: "supreme",
-  },
-  {
     token: "YS-I",
     publicReference: "ECO-CAT-0161",
     publicField: "technicalSpecs.specialFeatures[11]",
@@ -266,30 +236,6 @@ const expectedApprovedInternalTokenCollisions = [
     value: "Conectores tipo L: YS-L/B, YS-L/N",
   },
   {
-    token: "Pecktrack Light",
-    publicReference: "ECO-CAT-0168",
-    publicField: "labels.series",
-    value: "Pecktrack Light",
-  },
-  {
-    token: "FL5",
-    publicReference: "ECO-CAT-0173",
-    publicField: "labels.series",
-    value: "Flood Light FL5",
-  },
-  {
-    token: "Trunk Light",
-    publicReference: "ECO-CAT-0196",
-    publicField: "labels.series",
-    value: "Trunk Light",
-  },
-  {
-    token: "Pull Out Spotlight",
-    publicReference: "ECO-CAT-0197",
-    publicField: "labels.series",
-    value: "Pull Out Spotlight",
-  },
-  {
     token: "Spotlight COB",
     publicReference: "ECO-CAT-0198",
     publicField: "publicDescription",
@@ -299,50 +245,8 @@ const expectedApprovedInternalTokenCollisions = [
   {
     token: "Spotlight COB",
     publicReference: "ECO-CAT-0198",
-    publicField: "labels.series",
-    value: "Spotlight COB",
-  },
-  {
-    token: "Spotlight COB",
-    publicReference: "ECO-CAT-0198",
     publicField: "technicalSpecs.applicationType",
     value: "Spotlight COB compacto para interior",
-  },
-  {
-    token: "Flat Panel Redonda",
-    publicReference: "ECO-CAT-0199",
-    publicField: "labels.series",
-    value: "Flat Panel Redonda",
-  },
-  {
-    token: "Flat Panel Redonda",
-    publicReference: "ECO-CAT-0200",
-    publicField: "labels.series",
-    value: "Flat Panel Redonda",
-  },
-  {
-    token: "Flat Panel Redonda",
-    publicReference: "ECO-CAT-0201",
-    publicField: "labels.series",
-    value: "Flat Panel Redonda",
-  },
-  {
-    token: "Flat Panel Cuadrada",
-    publicReference: "ECO-CAT-0202",
-    publicField: "labels.series",
-    value: "Flat Panel Cuadrada",
-  },
-  {
-    token: "Flat Panel Cuadrada",
-    publicReference: "ECO-CAT-0203",
-    publicField: "labels.series",
-    value: "Flat Panel Cuadrada",
-  },
-  {
-    token: "Glass Flat Panel",
-    publicReference: "ECO-CAT-0204",
-    publicField: "labels.series",
-    value: "Glass Flat Panel",
   },
 ] as const;
 
@@ -396,19 +300,6 @@ const stripExactValues = (content: string, values: readonly string[], marker: st
   return { classified, stripped };
 };
 
-const countExactOccurrences = (content: string, value: string) =>
-  content.split(value).length - 1;
-
-const stripOneExactValue = (content: string, value: string, marker: string) => {
-  const index = content.indexOf(value);
-
-  if (index < 0) {
-    throw new Error(`expected serialized value is missing: ${value}`);
-  }
-
-  return `${content.slice(0, index)}${marker}${content.slice(index + value.length)}`;
-};
-
 type PublicArtifactScope = "catalog-payload" | "static";
 
 const PHYSICAL_IMAGE_MARKER = "<known-catalog-image-path>";
@@ -459,62 +350,6 @@ const approvedSerializedCollisionContexts: ApprovedSerializedCollisionContext[] 
     },
   );
 
-const serializeSeriesEntry = (
-  key: string,
-  entry: { readonly id: string; readonly label: string },
-) => `${key}:{id:${JSON.stringify(entry.id)},label:${JSON.stringify(entry.label)}}`;
-
-const serializedPublicSeriesRegistry = Object.entries(series)
-  .map(([key, entry]) => serializeSeriesEntry(key, entry))
-  .join(",");
-
-const STATIC_CATALOG_CLIENT_MARKER = "Filtrar por serie";
-const CAPTURED_STATIC_SERIES_COLLISION_CONTEXT_COUNT = 5;
-
-const approvedStaticSeriesCollisionContexts = [
-  ...new Map(
-    expectedApprovedInternalTokenCollisions.flatMap(
-      ({ token, publicReference, publicField }) => {
-        if (publicField !== "series" && publicField !== "labels.series") {
-          return [];
-        }
-
-        const internalProduct = products.find(
-          (product) => product.econoluzReference === publicReference,
-        );
-
-        if (!internalProduct) {
-          throw new Error(`missing collision product ${publicReference}`);
-        }
-
-        const publicProduct = toPublicProduct(internalProduct);
-        const registryEntry = Object.entries(series).find(
-          ([, entry]) => entry.id === publicProduct.series,
-        );
-
-        if (!registryEntry) {
-          return [];
-        }
-
-        const serialized = serializeSeriesEntry(...registryEntry);
-
-        return containsExactToken(serialized, token)
-          ? [[serialized, { token, publicReference, publicField, serialized }] as const]
-          : [];
-      },
-    ),
-  ).values(),
-];
-
-if (
-  approvedStaticSeriesCollisionContexts.length !==
-  CAPTURED_STATIC_SERIES_COLLISION_CONTEXT_COUNT
-) {
-  throw new Error(
-    `static series collision snapshot mismatch: expected ${CAPTURED_STATIC_SERIES_COLLISION_CONTEXT_COUNT}, received ${approvedStaticSeriesCollisionContexts.length}`,
-  );
-}
-
 const stripCapturedPhysicalImagePaths = (
   content: string,
   imagePaths: readonly string[] = knownPhysicalImagePaths,
@@ -538,83 +373,6 @@ const stripApprovedPublicCollisionContexts = (
   return stripExactValues(content, serializedContexts, PUBLIC_COLLISION_MARKER);
 };
 
-type StaticArtifact = { file: string; content: string };
-type ArtifactClassification = ReturnType<typeof stripExactValues>;
-
-const stripApprovedStaticSeriesCollisionContexts = (
-  artifacts: readonly StaticArtifact[],
-) => {
-  validateCapturedPublicSeriesRegistry();
-
-  const registryOccurrences = artifacts.reduce(
-    (total, artifact) =>
-      total +
-      countExactOccurrences(artifact.content, serializedPublicSeriesRegistry),
-    0,
-  );
-  const markerOccurrences = artifacts.reduce(
-    (total, artifact) =>
-      total + countExactOccurrences(artifact.content, STATIC_CATALOG_CLIENT_MARKER),
-    0,
-  );
-  const expectedArtifacts = artifacts.filter(
-    ({ file, content }) =>
-      extname(file) === ".js" &&
-      content.includes(serializedPublicSeriesRegistry) &&
-      content.includes(STATIC_CATALOG_CLIENT_MARKER),
-  );
-  const contextCounts = approvedStaticSeriesCollisionContexts.map(
-    ({ serialized }) => ({
-      serialized,
-      total: artifacts.reduce(
-        (count, artifact) =>
-          count + countExactOccurrences(artifact.content, serialized),
-        0,
-      ),
-      expectedArtifact:
-        expectedArtifacts.length === 1
-          ? countExactOccurrences(expectedArtifacts[0].content, serialized)
-          : 0,
-    }),
-  );
-
-  if (
-    registryOccurrences !== 1 ||
-    markerOccurrences !== 1 ||
-    expectedArtifacts.length !== 1 ||
-    contextCounts.some(
-      ({ total, expectedArtifact }) => total !== 1 || expectedArtifact !== 1,
-    )
-  ) {
-    throw new Error(
-      `static series registry collision context mismatch: registry=${registryOccurrences}, marker=${markerOccurrences}, artifacts=${expectedArtifacts.length}, contexts=${contextCounts.map(({ total, expectedArtifact }) => `${total}/${expectedArtifact}`).join(",")}`,
-    );
-  }
-
-  const expectedArtifactFile = expectedArtifacts[0].file;
-
-  return new Map<string, ArtifactClassification>(
-    artifacts.map(({ file, content }): readonly [string, ArtifactClassification] => {
-      if (file !== expectedArtifactFile) {
-        return [file, { classified: [], stripped: content }];
-      }
-
-      const classified: { value: string; occurrences: number }[] = [];
-      let stripped = content;
-
-      for (const { serialized } of approvedStaticSeriesCollisionContexts) {
-        stripped = stripOneExactValue(
-          stripped,
-          serialized,
-          PUBLIC_COLLISION_MARKER,
-        );
-        classified.push({ value: serialized, occurrences: 1 });
-      }
-
-      return [file, { classified, stripped }];
-    }),
-  );
-};
 
 test("does not exempt a longer collision in the wrong reference, field, or artifact", () => {
   const approvedValue = "Conectores tipo I: YS-I/B, YS-I/N, YS-I/S";
@@ -665,36 +423,6 @@ test("rejects a changed physical image path before using it as an exemption", ()
   ).toThrow("captured catalog image path fingerprint mismatch");
 });
 
-test("rejects a copied static series registry entry in another artifact", () => {
-  const copiedRegistryEntry = 'cuasar:{id:"cuasar",label:"Cuasar"}';
-  const staticArtifacts = publicStaticFiles().map((file) => ({
-    file,
-    content: readFileSync(file, "utf8"),
-  }));
-
-  expect(
-    staticArtifacts.some(({ content }) =>
-      content.includes(copiedRegistryEntry),
-    ),
-  ).toBe(true);
-
-  expect(() =>
-    stripApprovedStaticSeriesCollisionContexts([
-      ...staticArtifacts,
-      {
-        file: join(
-          process.cwd(),
-          ".next",
-          "static",
-          "chunks",
-          "counterfeit-series-registry.js",
-        ),
-        content: copiedRegistryEntry,
-      },
-    ]),
-  ).toThrow("static series registry collision context mismatch");
-});
-
 test("does not publish a catalog rewrite table in static build artifacts", () => {
   const staticFiles = publicStaticFiles();
   const findings = staticFiles.flatMap((path) => {
@@ -729,15 +457,6 @@ test("keeps exhaustive internal fields and known codes out of public artifacts",
       stripCapturedPhysicalImagePaths(content),
     ]),
   );
-  const staticSeriesClassifications =
-    stripApprovedStaticSeriesCollisionContexts(
-      textArtifactFiles
-        .filter((path) => path.startsWith(staticArtifactRoot))
-        .map((path) => ({
-          file: path,
-          content: imageClassifications.get(path)!.stripped,
-        })),
-    );
   const classifiedImagePaths: { file: string; value: string; occurrences: number }[] = [];
   const classifiedPublicCollisions: {
     file: string;
@@ -747,12 +466,13 @@ test("keeps exhaustive internal fields and known codes out of public artifacts",
   const findings = textArtifactFiles.flatMap((path) => {
     const relativePath = relative(process.cwd(), path);
     const imageClassification = imageClassifications.get(path)!;
-    const publicCollisionClassification = path.startsWith(staticArtifactRoot)
-      ? staticSeriesClassifications.get(path)!
-      : stripApprovedPublicCollisionContexts(
-          imageClassification.stripped,
-          "catalog-payload",
-        );
+    // Los artefactos estáticos ya no tienen exención propia: desde que la serie
+    // salió del catálogo público, ningún nombre de proveedor debe sobrevivir en
+    // el bundle, y el ámbito "static" no aprueba ninguna colisión.
+    const publicCollisionClassification = stripApprovedPublicCollisionContexts(
+      imageClassification.stripped,
+      path.startsWith(staticArtifactRoot) ? "static" : "catalog-payload",
+    );
 
     classifiedImagePaths.push(
       ...imageClassification.classified.map((entry) => ({

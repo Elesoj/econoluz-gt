@@ -102,7 +102,6 @@ export const buildCatalogSearchText = (product: PublicProduct) =>
     product.finish,
     product.labels.productType,
     product.labels.application,
-    product.labels.series,
     product.labels.finish,
     product.publicDescription,
     ...getPublicTechnicalSpecValues(product),

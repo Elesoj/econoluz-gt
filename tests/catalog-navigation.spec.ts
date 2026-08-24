@@ -1041,24 +1041,18 @@ test("reduced motion applies transitions immediately and scrolls instantly to th
   ]);
 });
 
-test("search and clear reset pagination and transient series without leaking series outside products", async ({
-  page,
-}) => {
+test("search and clear reset pagination", async ({ page }) => {
   await page.getByRole("button", { name: "Mostrar todos los productos" }).click();
-  const aplSeries = page.getByRole("button", { name: /^APL\s+41$/ });
-  await aplSeries.click();
   await page.getByRole("button", { name: "2", exact: true }).click();
-  await expect(page.getByText(/gina 2 de 2/i)).toBeVisible();
+  await expect(page.getByText(/gina 2 de 8/i)).toBeVisible();
 
   await searchInput(page).fill("ECO-IND-0048");
   await searchInput(page).press("Enter");
   await expect(page.getByText(/gina 1 de 1/i)).toBeVisible();
-  await expect(page.getByText("Serie: APL", { exact: true })).toHaveCount(0);
 
   await page.getByRole("button", { name: /Limpiar b/i }).click();
   await expect(page.getByRole("heading", { name: "Todos los productos" })).toBeVisible();
   await expect(page.getByText(/gina 1 de 8/i)).toBeVisible();
-  await expect(aplSeries).toHaveAttribute("aria-pressed", "false");
 });
 
 test("a second category tap during the exit transition is live and wins", async ({

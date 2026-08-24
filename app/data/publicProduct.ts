@@ -72,6 +72,10 @@ export type PublicTechnicalSpecs = Partial<
   Record<PublicTechnicalSpecKey, PublicTechnicalSpecValue>
 >;
 
+// La serie del fabricante (Cuasar, HB Pure, Highlens...) no viaja al navegador:
+// identificaría al proveedor ante el cliente, igual que su marca y sus códigos,
+// que ya se limpian en products.ts. No basta con no pintarla en pantalla, porque
+// el dato quedaría legible en el código fuente de la página.
 export type PublicProduct = {
   id: string;
   econoluzReference: string;
@@ -81,12 +85,10 @@ export type PublicProduct = {
   images?: string[];
   productType: string;
   application: string;
-  series: string;
   finish: string;
   labels: {
     productType: string;
     application: string;
-    series: string;
     finish: string;
   };
   technicalSpecs?: PublicTechnicalSpecs;
@@ -136,12 +138,10 @@ export const toPublicProduct = (product: InternalProduct): PublicProduct => {
     image: product.image,
     productType: product.productType,
     application,
-    series: product.series,
     finish: product.finish,
     labels: {
       productType: product.labels.productType,
       application: getApplicationLabel(application),
-      series: product.labels.series,
       finish: product.labels.finish,
     },
     technicalSpecs: projectTechnicalSpecs(product.technicalSpecs),

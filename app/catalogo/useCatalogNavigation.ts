@@ -37,7 +37,9 @@ type UseCatalogNavigationOptions = {
   products: readonly PublicProduct[];
   catalogStageRef: RefObject<HTMLDivElement | null>;
   onLocationCommitted: (location: CatalogLocation) => void;
-  onResetTransient: () => void;
+  // Opcional: hoy no hay filtros transitorios que reiniciar, desde que el
+  // filtro por serie salió del catálogo público.
+  onResetTransient?: () => void;
 };
 
 const getCatalogUrl = () =>
@@ -138,7 +140,7 @@ export default function useCatalogNavigation({
       setIsTransitioning(false);
 
       if (resetTransient) {
-        onResetTransientRef.current();
+        onResetTransientRef.current?.();
       }
 
       scheduleScroll(scroll, scrollBehavior);
@@ -336,7 +338,7 @@ export default function useCatalogNavigation({
 
       initializationPending = false;
       setLocation(initialEntry);
-      onResetTransientRef.current();
+      onResetTransientRef.current?.();
     });
 
     if (!hasAdviceHash && restoredEntry && restoredEntry.view !== "categories") {
