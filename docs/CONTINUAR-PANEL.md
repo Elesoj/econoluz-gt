@@ -246,33 +246,68 @@ ser de cualquier empresa.
      `expires_at`. Guardar el **hash** del token, no el token: si alguien lee la
      tabla, no puede suplantar a nadie.
 
-2. **Contraseñas con `crypto.scrypt` de Node.** Es de la biblioteca estándar: **no
-   añadir bcrypt ni argon2**, `CLAUDE.md` §6 pide justificar cada dependencia nueva y
-   aquí no hay nada que justificar. Comparar con `crypto.timingSafeEqual`.
+2. **Dos hashes distintos, y no es lo mismo:**
+   - **Contraseñas: `crypto.scrypt`.** Es lento a propósito, que es justo lo que hace
+     falta contra una contraseña que una persona pudo elegir mal. De la biblioteca
+     estándar: **no añadir bcrypt ni argon2**, `CLAUDE.md` §6 pide justificar cada
+     dependencia y aquí no hay nada que justificar. Comparar con `timingSafeEqual`.
+     Ojo con `maxmem` si se suben los parámetros por encima de los de fábrica.
+   - **Token de sesión: SHA-256, NO scrypt.** El token es aleatorio y de mucha
+     entropía, así que no hace falta ralentizar nada. Usar scrypt aquí costaría más de
+     cien milisegundos de CPU **en cada carga de cada página del panel**, que es un
+     error de rendimiento fácil de cometer copiando el hash de las contraseñas.
 
 3. **`scripts/create-admin.mjs`** — crea el primer usuario desde la terminal, porque
    no puede haber una pantalla pública de registro. Pedir correo y contraseña por
-   consola. Debe poder usarse también para cambiar una contraseña olvidada.
+   consola, **sin mostrar la contraseña mientras se escribe**. Debe servir también para
+   cambiar una contraseña olvidada.
 
 4. **`app/admin/entrar/page.tsx`** — formulario de acceso con acción de servidor.
-   Cookie de sesión `httpOnly`, `secure`, `sameSite: "lax"`, con caducidad.
+   Cookie `httpOnly`, `sameSite: "lax"`, con caducidad, y `secure` **condicionado al
+   entorno**: con `secure: true` fijo, el navegador no guarda la cookie en
+   `http://localhost` y el acceso parece roto en desarrollo sin ningún error visible.
 
-5. **`app/admin/layout.tsx`** — lee la cookie, valida la sesión contra
-   `admin_sessions` y redirige a `/admin/entrar` si no vale. **Se hace en el layout,
-   no en `middleware.ts`**: hoy el proyecto no tiene middleware y no hace falta
-   introducirlo para esto.
+5. **La frontera de seguridad es la capa de datos, no el layout.** Esto es importante
+   y es fácil equivocarse:
 
-6. **Salir**: acción que borra la fila de sesión y la cookie.
+   - `app/admin/entrar` **no puede** quedar dentro de un layout que redirija a
+     `/admin/entrar`: sería una redirección circular.
+   - Y aunque se resuelva con un grupo de rutas —`app/admin/(panel)/` con su propio
+     layout, dejando `entrar` fuera—, **el layout sigue sin ser la frontera**. La guía
+     de Next lo dice sin rodeos: un layout no se vuelve a renderizar al navegar, así
+     que la sesión no se comprueba en cada cambio de ruta; y **no controla si el resto
+     de la ruta se renderiza**, de modo que el segmento hijo se ejecuta igual y sus
+     datos pueden acabar en la carga RSC. Ver
+     `node_modules/next/dist/docs/01-app/02-guides/authentication.md`, «Layouts and
+     auth checks».
+
+   Lo que sí es frontera: **una función `verificarSesion()` en un módulo
+   `server-only`**, memoizada con `cache` de React para que no consulte Neon una vez
+   por componente, que **llaman todas las páginas del panel y todas las acciones de
+   servidor**. El layout protegido se queda, pero como comodidad —redirigir pronto y
+   pintar la cabecera—, no como guardia.
+
+6. **Salir**: acción que borra la fila de sesión y la cookie. Borrar la fila importa:
+   si solo se borra la cookie, el token sigue siendo válido para quien lo tuviera.
 
 ### Cuidados
 
 - Las rutas bajo `/admin` dependen de cookies: no se pueden prerenderizar. Marcarlas
   como dinámicas.
-- Limitar los intentos fallidos (contador con ventana de tiempo). Un formulario de
-  acceso público sin freno se prueba a fuerza bruta.
+- Limitar los intentos fallidos (por ejemplo, cinco en quince minutos por correo y
+  origen). Un formulario de acceso público sin freno se prueba a fuerza bruta.
+  **El contador tiene que vivir en Postgres, no en memoria**: en Vercel cada petición
+  puede caer en una instancia distinta, así que un `Map` en memoria cuenta mal y no
+  frena nada, sin dar ningún error que lo delate.
 - No decir nunca "ese correo no existe" ni "contraseña incorrecta" por separado: un
   único mensaje para los dos casos.
 - El `/admin` no debe aparecer en `sitemap` ni ser indexable (`robots: noindex`).
+- **Renovar la caducidad de la sesión con la actividad.** Doce horas fijas suenan
+  suficientes, pero la tarea real para la que se construye esto es cargar precios a 313
+  productos a lo largo de muchos ratos: si la sesión vence con un formulario a medio
+  rellenar, se pierde lo escrito y la culpa parece del panel.
+- Borrar las sesiones caducadas, o la tabla crece sin límite. Basta con limpiarlas al
+  validar.
 
 ### Cómo saber que está terminado
 
