@@ -304,3 +304,22 @@ actividad, caducidad a las doce horas, bloqueo tras cinco fallos y revocación a
 salir— están implementados y probados en unidad contra un repositorio en memoria, pero
 **no se han ejercitado contra Neon**, porque la migración todavía no se ha aplicado.
 
+## 14. Activación real (25/08/2026)
+
+El acceso dejó de ser teórico: la migración está aplicada en Neon, el secreto está en
+`.env.local` y existe el primer administrador. Se entró en `/admin` desde el navegador.
+
+Dos fallos aparecieron en ese primer uso real y están corregidos:
+
+1. **`scripts/create-admin.mjs` moría con `Cannot find package 'server-only'`**, justo
+   después de pedir la contraseña. El paquete no está instalado; Next lo resuelve con un
+   alias propio, así que el build y las pruebas de navegador pasaban mientras el camino
+   de terminal estaba roto. El script usa ahora el adaptador puro y se conecta antes de
+   preguntar nada.
+2. **El logo era invisible sobre el azul marino.** El logotipo lleva `#001B59` y estaba
+   puesto sobre ese mismo color. En toda la web el logo va sobre blanco; el panel ahora
+   también.
+
+Sigue pendiente **añadir `ADMIN_SESSION_SECRET` a Vercel**. Sin eso, el panel no
+funcionará en el sitio publicado. No se ha hecho push, ni merge, ni despliegue.
+

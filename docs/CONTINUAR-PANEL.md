@@ -27,12 +27,17 @@ en el código, pero todavía no hay ninguna pantalla para tocarlos.
 - **La captura de solicitudes de asesoría funciona en producción.** Se envió una
   solicitud real al sitio publicado y quedó guardada (`stored: "db"`).
 
+- **La entrada al panel funciona** (paso b, 25/08/2026). `/admin` pide usuario y
+  contraseña, la sesión vive en Neon y se puede cerrar. Verificado entrando en local.
+  El detalle está en §5.bis.
+
 ### Falta
 
-- **b.** La entrada al panel (usuario, contraseña, sesión).
 - **c.** El panel de productos (listar, crear, editar, publicar, precio, existencias).
 - **d.** Subida de fotos a Vercel Blob.
 - **e.** La galería de proyectos, con el mismo tratamiento que los productos.
+- **Operativo:** añadir `ADMIN_SESSION_SECRET` a Vercel antes de desplegar el panel, y
+  decidir si la rama `panel-admin-auth` se integra en `panel-admin`.
 
 Después de eso empieza el **paso 2**, la tienda B2C, que es otro proyecto entero
 (carrito, checkout con NIT, cobro, factura FEL, existencias).
@@ -416,6 +421,10 @@ claro con filete azul marino.
 **El código está completo y verificado; nadie puede entrar todavía.** Las dos cosas son
 ciertas a la vez y conviene no confundirlas: faltan tres pasos operativos que no se
 resuelven programando.
+
+> **Hecho el 25/08/2026.** Los pasos 1 a 4 de abajo se ejecutaron y el acceso funciona
+> en local. Se dejan escritos porque hay que repetirlos en cualquier equipo nuevo, y
+> porque el paso 5 —Vercel— sigue pendiente.
 
 ### Lo que hay que hacer para activarlo, en este orden
 

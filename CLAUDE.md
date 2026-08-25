@@ -102,15 +102,20 @@ buscadores. El diseño está en
 `docs/superpowers/specs/2026-08-25-admin-auth-design.md` y el plan TDD en
 `docs/superpowers/plans/2026-08-25-admin-auth.md`.
 
-**Nadie puede entrar todavía**, y no es un fallo: falta aplicar `db/003_admin.sql` a
-Neon, definir `ADMIN_SESSION_SECRET` y crear el primer usuario con `npm run admin:crear`.
-Son tres pasos operativos que dependen del dueño; están detallados en
-`docs/CONTINUAR-PANEL.md` §5.bis, con los comandos exactos y en orden.
+**El panel ya está activo en local (25/08/2026).** `db/003_admin.sql` está aplicado en
+Neon, `ADMIN_SESSION_SECRET` está en `.env.local`, y el primer administrador se creó con
+`npm run admin:crear`. Se comprobó entrando de verdad en `http://localhost:3000/admin`.
 
-Verificación de esa rama: `npm run test:admin` 44/44, `typecheck` y `lint` limpios,
-`build` correcto y la batería completa de Playwright con 92 pruebas en verde y el único
-fallo histórico de `catalog-quote.spec.ts:891`. Nada de esto se ha fusionado, subido ni
-desplegado.
+Su portada muestra el estado real del catálogo leído de Postgres —hoy **313 productos,
+313 publicados, 0 con precio**—, que es la forma de ver de un vistazo lo que falta.
+
+**Lo que sigue pendiente y bloquea el despliegue:** añadir el mismo
+`ADMIN_SESSION_SECRET` a Vercel. Sin él, el panel no funcionará en el sitio publicado.
+Y la rama sigue sin fusionar: nada de esto se ha subido ni desplegado.
+
+Verificación de esa rama: `npm run test:admin` en verde, `typecheck` y `lint` limpios,
+`build` correcto y la batería completa de Playwright con el único fallo histórico de
+`catalog-quote.spec.ts:891`.
 
 ---
 
