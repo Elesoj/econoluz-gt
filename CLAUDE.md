@@ -29,8 +29,8 @@ No es una ferretería en línea; es una casa de iluminación que además vende a
 
 ## 2. Los dos públicos — regla crítica
 
-El sitio atiende **dos modelos de negocio distintos que NO deben mezclarse**
-en la misma interfaz, el mismo flujo ni los mismos componentes de decisión.
+El sitio atiende **dos modelos de negocio distintos con necesidades opuestas**, y el
+catálogo tiene que servir a los dos **sobre el mismo producto**.
 
 ### Pista A — TIENDA (B2C, transaccional)
 
@@ -46,12 +46,26 @@ en la misma interfaz, el mismo flujo ni los mismos componentes de decisión.
 - **Qué necesita:** ficha técnica (lúmenes, IRC, temperatura de color, ángulo de apertura,
   IP, vida útil, archivos IES/fotométricos), garantía, tiempos de entrega, referencias de obra.
 - **Decisión:** lenta, técnica, comparativa, con presupuesto de proyecto.
-- **Regla de precio:** en esta pista **NO se muestran precios**. Se cotiza.
+- **Regla de precio:** el precio unitario de tienda **no sirve** para decidir aquí. El
+  volumen se cotiza.
 - **Flujo:** armar lista de especificación → solicitar cotización → asesoría.
 - **Salida esperada:** solicitud de cotización con datos completos del proyecto.
 
-> Si una propuesta de diseño o de código hace que un usuario dude entre "¿compro o cotizo?",
-> está mal resuelta. La separación debe ser evidente desde el home.
+### Las dos salidas conviven — decisión vigente
+
+**El catálogo va a ser una tienda B2C sin dejar de ser un catálogo de cotización.** Un
+mismo producto ofrece las dos salidas: quien necesita dos luminarias las paga en línea,
+y quien necesita doscientas pide cotización, porque nadie compra un proyecto con tarjeta.
+
+Esto **sustituye a la regla anterior**, que exigía separar las dos pistas en interfaces,
+flujos y componentes distintos, y describía la tienda como una sección aparte. Se
+descartó: obligaba a duplicar el catálogo entero y a que el visitante eligiera bando
+antes de haber visto un producto.
+
+> Lo que sí sigue vigente: si una propuesta hace que el usuario dude entre "¿compro o
+> cotizo?", está mal resuelta. Antes eso se conseguía separando; ahora hay que conseguirlo
+> con jerarquía dentro de la misma ficha — una acción principal clara y la otra disponible
+> sin competir con ella.
 
 **Techo tensado** es una línea diferenciadora de la pista B. Ningún competidor local lo
 ofrece integrado con iluminación. Debe tener presencia propia, no quedar escondido.
@@ -60,7 +74,8 @@ ofrece integrado con iluminación. Debe tener presencia propia, no quedar escond
 
 Lo que hay construido hoy es solo pista B: catálogo guiado, ficha técnica, lista de
 cotización y salida por WhatsApp. De la pista A no hay nada: **ni precios, ni carrito,
-ni checkout, ni pasarela de pago, ni autenticación.**
+ni checkout, ni pasarela de pago, ni autenticación.** Ningún producto tiene precio ni
+existencias hoy: son datos que todavía no existen en ninguna parte, ni en el código.
 
 El sitio es estático salvo una excepción: `POST /api/leads`, que guarda las solicitudes
 de asesoría en Postgres (Neon). Esa es toda la base de datos que existe hoy — una tabla
@@ -184,8 +199,11 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
 
 ## 4. Stack técnico
 
-- Framework: Next.js `16.2.6` — **App Router**. Todo el código vive en `app/`;
-  no existe `pages/`, ni `src/`, ni rutas de API, ni `middleware.ts`.
+- Framework: Next.js `16.3.1` — **App Router**. Todo el código vive en `app/`;
+  no existe `pages/`, ni `src/`, ni `middleware.ts`. La única ruta de API es
+  `app/api/leads/route.ts`.
+  La versión importa: `16.2.6` duplicaba el ancla de la URL al navegar entre secciones
+  (`/#inicio#inicio`) y se subió a `16.3.1` para corregirlo. No bajar de ahí.
 - Lenguaje: **TypeScript** `5.9.3` en modo `strict`, sobre React `19.2.4`.
   Alias de importación: `@/*` → raíz del proyecto.
 - Estilos: **Tailwind CSS v4** (`4.3.0`) vía `@tailwindcss/postcss`.
@@ -194,8 +212,14 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
 - Tipografía: `Geist` y `Geist Mono` cargadas con `next/font/google` en `app/layout.tsx`.
 - Gestor de paquetes: **npm** (`package-lock.json`; no hay lockfile de pnpm ni yarn).
 - Lint: ESLint 9 con `eslint-config-next` (`core-web-vitals` + `typescript`) — `npm run lint`.
-- Deploy: Vercel (`econoluz-gt.vercel.app`)
-- Base de datos: `TODO — aún no definida`
+- Pruebas: **Playwright** (`playwright.config.ts`, carpeta `tests/`). El navegador es
+  `channel: "msedge"`; **chromium no está instalado**, así que un `npx playwright test`
+  que asuma chromium falla. Levanta su propio servidor en el puerto `3100`.
+- Deploy: Vercel (`econoluz-gt.vercel.app`), automático al empujar a `main` en GitHub
+  (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
+  cambiar el DNS es tarea del dueño del proyecto, no del código.
+- Base de datos: **Postgres en Neon**, con `@neondatabase/serverless`. Hoy solo existe la
+  tabla `leads` (`db/001_leads.sql`) y hace falta `DATABASE_URL` en el entorno.
 - Pasarela de pago: `TODO — pendiente de decidir`
 - Certificador FEL: `TODO — pendiente de decidir`
 
@@ -211,19 +235,34 @@ frontend/
     globals.css                   Tailwind, tokens CSS y utilidades propias
     favicon.ico
     calculadora-led/page.tsx      calculadora de ahorro LED
-    catalogo/page.tsx             catálogo guiado y flujo de cotización
     politica-devoluciones/page.tsx
-    components/                   UI compartida (11 componentes)
+    catalogo/                     catálogo guiado y flujo de cotización
+      page.tsx                    servidor: arma el payload público
+      CatalogClient.tsx           cliente: filtros, buscador, paginación
+      catalogState.ts  useCatalogNavigation.ts  quoteSelection.ts
+      useQuoteSelection.ts  quotePersistence.ts  floatingQuoteStore.ts
+      publicQuoteMessage.ts       texto de la cotización que sale por WhatsApp
+    api/leads/route.ts            única ruta de API: guarda el lead en Neon
+    components/                   UI compartida (12 componentes + ui/)
                                   AnimatedStat, ContactCTA, FloatingWhatsApp,
                                   LedSavingsCalculator, ProductCard,
                                   ProductTechnicalDrawer, ProjectSlider,
-                                  QuoteDrawer, SectionHeader, SiteFooter, SiteNavbar
-    data/                         datos estáticos; no hay backend ni base de datos
-      products.ts                 catálogo de productos, specs y filtros
-      catalogTaxonomy.ts          taxonomía de tipos y aplicaciones
+                                  QuoteDrawer, SectionHeader, SiteFooter,
+                                  SiteNavbar, SupplierMarquee
+      ui/                         Button, FilterChip
+    data/                         datos estáticos; la base de datos solo guarda leads
+      products.ts                 313 productos con specs y filtros (~9 900 líneas)
+      publicProduct.ts            recorta el producto interno a lo que ve el navegador
+      catalog.server.ts           acceso solo-servidor al catálogo
+      catalogTaxonomy.ts          taxonomía pública de tipos y aplicaciones
+      catalogBrands.internal.ts   marcas del proveedor — NUNCA llega al cliente
+      catalogSeries.internal.ts   series del proveedor — NUNCA llega al cliente
+      productReferences.ts        referencias públicas de producto
       projects.ts                 galería de obra ejecutada
-      siteData.ts                 navegación, contacto, home, FAQ, marcas
+      siteData.ts                 navegación, contacto, home, FAQ, proveedores
     lib/formatters.ts             formateo de números y moneda
+  db/001_leads.sql                esquema de la tabla de leads
+  tests/                          Playwright: catálogo, cotización y fronteras de datos
   public/
     logo_econoluz.png
     catalogos/<marca>/<familia>/  imágenes de producto (artlite, construlita, highlum)
@@ -232,7 +271,21 @@ frontend/
     file|globe|next|vercel|window.svg   assets de create-next-app, sin usar
   AGENTS.md                       reglas de Next.js autogeneradas (se incluye desde aquí)
   next.config.ts  tsconfig.json  postcss.config.mjs  eslint.config.mjs
+  playwright.config.ts  .env.example
 ```
+
+### El catálogo público no nombra a los proveedores
+
+Regla de negocio, no de estilo: el cliente **no debe poder identificar al fabricante** ni
+irse a comprarle directamente. Marcas (`Artlite`, `Construlita`, `Highlum`), series
+(`Cuasar`, `HB Pure`, `HB Steel`, `Highlens`, `Supreme`) y códigos de referencia del
+proveedor se quedan en el servidor: viven en los dos archivos `*.internal.ts`, y
+`publicProduct.ts` decide qué cruza al navegador.
+
+No basta con ocultarlos en pantalla: **tampoco pueden aparecer en el JavaScript que se
+descarga**. Las pruebas de `tests/catalog-production-boundary.spec.ts` revisan los chunks
+compilados precisamente para eso. Al añadir cualquier vista nueva —filtro, ficha,
+buscador, resumen de cotización— hay que comprobar que no reabra esa puerta.
 
 Fuera de `frontend/`, la carpeta hermana `Imagenes/` guarda el original del logo.
 No entra en el build ni está en el repositorio.
@@ -282,9 +335,11 @@ entrenamiento. Antes de escribir código, consulta la guía correspondiente en
 
 Problemas ya identificados en la versión actual. No los repitas y ayúdame a resolverlos:
 
-1. **Los contadores del home muestran cero** ("+0 Referencias", "0 Eficiencia",
-   "0 Cobertura", "+0 Clientes satisfechos"). Además, métricas como "Eficiencia: 0%"
-   no comunican nada — reemplazar por datos duros y verificables.
+1. **Contadores del home: resuelto.** Mostraban cero porque dos de las cuatro cifras no
+   eran números ("Eficiencia", "Cobertura") y el contador animado las llevaba a `0`.
+   Ahora la banda repite las cifras del sitio original —`+500` lámparas, `11` marcas,
+   `9` proveedores, `+1,000` clientes satisfechos— y `AnimatedStat` deja pasar sin animar
+   cualquier valor que no tenga dígitos, en vez de convertirlo en cero.
 2. **Captura de leads: resuelta, con el aviso por correo pendiente.** El formulario
    de asesoría ya guarda el lead en Postgres (Neon) mediante `POST /api/leads` antes
    de abrir WhatsApp, así que deja de perderse si el usuario no tiene WhatsApp, si el
@@ -338,8 +393,8 @@ Aplican a la pista de tienda y condicionan el diseño del checkout:
   `marca/familia` y referenciados con ruta literal desde `app/data/products.ts`.
   Mismo riesgo: mover o renombrar rompe el catálogo en silencio.
   Los PDF fuente están excluidos del repositorio por `.gitignore` (`/public/catalogos/*.pdf`).
-- Los logos de `/public/proveedores/` — 10 marcas representadas. Hoy no los referencia
-  ningún componente, pero no son basura: no borrarlos por parecer huérfanos.
+- Los logos de `/public/proveedores/` — 11 marcas representadas. Los usa la cinta
+  `SupplierMarquee` del home, con las rutas literales de `siteData.ts`.
 - El logo (`/public/logo_econoluz.png`) — no recortar, recolorear ni regenerar.
 - El bloque de `AGENTS.md` entre `BEGIN:nextjs-agent-rules` y `END:nextjs-agent-rules`
   lo genera Next.js y lo sobrescribe. Las reglas propias van en este archivo.
@@ -359,3 +414,31 @@ Aplican a la pista de tienda y condicionan el diseño del checkout:
   Si una idea mía es mala, dilo y explica por qué.
 - Trabajo por ramas de git: cada bloque grande (tienda, proyectos, migración SEO)
   en su propia rama.
+- **Quiero cargar y corregir el contenido yo mismo**, sin pedírselo a un programador.
+  Cualquier dato que yo vaya a mantener —productos, precios, existencias, fotos— no
+  debería nacer escrito dentro del código.
+- Recuérdame en qué punto del plan general estamos, no solo el plan de la tarea de hoy.
+
+---
+
+## 11. Hoja de ruta
+
+El orden importa: cada paso desbloquea al siguiente.
+
+**Ahora — publicar lo que ya existe.** Apuntar el DNS de `econoluzgt.com` a Vercel y
+definir `DATABASE_URL` en Vercel con `db/001_leads.sql` ya ejecutado en Neon. Las dos son
+tareas de paneles, no de código, y las hace el dueño del proyecto.
+
+**Paso 1 — Productos en base de datos y panel de administración.** Sacar los 313 productos
+de `app/data/products.ts` y llevarlos a Postgres, con una interfaz protegida para crear,
+editar, fotografiar y publicar producto. Es lo que da autonomía y lo que permite cargar
+los productos que aún faltan.
+
+**Paso 2 — Tienda.** Precio y compra conviviendo con la cotización: carrito, checkout con
+NIT, cobro, factura FEL y existencias. Depende del paso 1, porque sin panel no hay dónde
+cargar precios ni stock.
+
+**En paralelo, y sin código de por medio:** contratar certificador FEL, decidir el medio
+de cobro, redactar los textos legales de venta en línea y —lo más lento— fijar los precios.
+
+**La cotización no se retira en ningún momento.**
