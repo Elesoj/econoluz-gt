@@ -250,6 +250,15 @@ y termina en un commit propio.
 acceso viven en `app/admin/auth/crypto.ts` y `app/admin/auth/policy.ts`. Se verificaron
 con `node --test --import ./scripts/register-ts.mjs tests/admin-auth-crypto.test.ts tests/admin-auth-policy.test.ts`.
 
+**Task 2 completada (25/08/2026):** `app/admin/auth/types.ts` define el contrato de
+usuarios, sesiones, intentos y limpieza; `repository.ts` lo adapta con consultas SQL
+parametrizadas e inyectables; y `repository.server.ts` deja la conexión a Neon aislada
+en un módulo `server-only`. La migración `db/003_admin.sql` crea `admin_users`,
+`admin_sessions` y `admin_login_attempts`, con restricciones, cascadas e índices para
+sesiones y limpieza. Las pruebas enfocadas del repositorio pasaron (9/9), junto con
+`npm run typecheck` y `npm run lint`. **`db/003_admin.sql` no se aplicó:** queda
+pendiente la autorización operativa para ejecutar `npm run db:migrar` contra Neon.
+
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
 de cada subagente; el contenido, los commits y los informes permanecen en español.
