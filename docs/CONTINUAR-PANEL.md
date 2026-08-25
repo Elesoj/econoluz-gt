@@ -237,6 +237,11 @@ ser de cualquier empresa.
 
 **Objetivo:** que `/admin` no se pueda abrir sin usuario y contraseña.
 
+**Diseño aprobado el 25/08/2026.** La especificación completa, incluida la estructura
+de archivos, los flujos, los errores y las pruebas, está en
+`docs/superpowers/specs/2026-08-25-admin-auth-design.md`. Si este resumen y aquella
+especificación discrepan, manda la especificación más reciente.
+
 ### Qué construir
 
 1. **Migración `db/003_admin.sql`:**
@@ -245,6 +250,9 @@ ser de cualquier empresa.
    - `admin_sessions`: `token_hash` (clave primaria), `user_id`, `created_at`,
      `expires_at`. Guardar el **hash** del token, no el token: si alguien lee la
      tabla, no puede suplantar a nadie.
+   - `admin_login_attempts`: contador y ventana de bloqueo identificados mediante una
+     clave anónima. Es lo que permite limitar intentos en Vercel sin depender de la
+     memoria de una instancia.
 
 2. **Dos hashes distintos, y no es lo mismo:**
    - **Contraseñas: `crypto.scrypt`.** Es lento a propósito, que es justo lo que hace
@@ -252,10 +260,12 @@ ser de cualquier empresa.
      estándar: **no añadir bcrypt ni argon2**, `CLAUDE.md` §6 pide justificar cada
      dependencia y aquí no hay nada que justificar. Comparar con `timingSafeEqual`.
      Ojo con `maxmem` si se suben los parámetros por encima de los de fábrica.
-   - **Token de sesión: SHA-256, NO scrypt.** El token es aleatorio y de mucha
-     entropía, así que no hace falta ralentizar nada. Usar scrypt aquí costaría más de
-     cien milisegundos de CPU **en cada carga de cada página del panel**, que es un
-     error de rendimiento fácil de cometer copiando el hash de las contraseñas.
+   - **Token de sesión: HMAC-SHA-256, NO scrypt.** El token es aleatorio y de mucha
+     entropía, así que no hace falta ralentizar nada. La HMAC usa
+     `ADMIN_SESSION_SECRET` y da sentido al secreto de sesión exigido para el panel.
+     Usar scrypt aquí costaría más de cien milisegundos de CPU **en cada carga de cada
+     página del panel**, que es un error de rendimiento fácil de cometer copiando el
+     hash de las contraseñas.
 
 3. **`scripts/create-admin.mjs`** — crea el primer usuario desde la terminal, porque
    no puede haber una pantalla pública de registro. Pedir correo y contraseña por
@@ -302,10 +312,12 @@ ser de cualquier empresa.
 - No decir nunca "ese correo no existe" ni "contraseña incorrecta" por separado: un
   único mensaje para los dos casos.
 - El `/admin` no debe aparecer en `sitemap` ni ser indexable (`robots: noindex`).
-- **Renovar la caducidad de la sesión con la actividad.** Doce horas fijas suenan
-  suficientes, pero la tarea real para la que se construye esto es cargar precios a 313
-  productos a lo largo de muchos ratos: si la sesión vence con un formulario a medio
-  rellenar, se pierde lo escrito y la culpa parece del panel.
+- **Renovar la caducidad de la sesión con la actividad.** La sesión vence tras doce
+  horas **sin actividad**. Un componente mínimo, que no recibe datos de negocio,
+  renueva la cookie y Neon cuando detecta teclado, puntero o envío de formulario. El
+  servidor no escribe más de una renovación cada quince minutos y una pestaña abierta
+  sin interacción no mantiene viva la sesión. Esto evita que caduque mientras se cargan
+  precios o se rellena un formulario largo.
 - Borrar las sesiones caducadas, o la tabla crece sin límite. Basta con limpiarlas al
   validar.
 
@@ -446,7 +458,7 @@ correspondiente y no descubrirlas a mitad, porque bloquean.
 | Hace falta para | Qué tiene que hacer el dueño |
 |---|---|
 | Paso b — entrada al panel | Elegir **su correo y su contraseña** de administrador. Se dan de alta con `scripts/create-admin.mjs`, no con una pantalla pública de registro. |
-| Paso b — sesiones | Generar un secreto de sesión y ponerlo en `.env.local` **y en Vercel**. Se genera con `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. |
+| Paso b — sesiones | Generar `ADMIN_SESSION_SECRET` y ponerlo en `.env.local` **y en Vercel**. Se genera con `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. |
 | Paso c — referencias | **Decidir el prefijo** de las referencias nuevas (§6, «Referencia de los productos nuevos»). El reparto actual no es una regla y esas referencias son las que él cita al cotizar. |
 | Paso d — fotos | **Crear el almacén Blob** en Vercel (Storage → Blob) y copiar `BLOB_READ_WRITE_TOKEN` a `.env.local`. |
 | Que el sitio nuevo sea el oficial | **Apuntar el DNS de `econoluzgt.com` a Vercel.** Hoy ese dominio sigue sirviendo el WordPress viejo. |

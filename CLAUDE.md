@@ -94,6 +94,11 @@ están en base de datos pero no hay ninguna pantalla para tocarlos. El plan paso
 está en `docs/CONTINUAR-PANEL.md`. **Toda la tienda B2C está por construir**, y con
 ella los requisitos operativos de la sección 8 (FEL, pago, inventario, marco legal).
 
+El diseño del acceso al panel ya está aprobado y documentado en
+`docs/superpowers/specs/2026-08-25-admin-auth-design.md`: varios usuarios en Neon,
+contraseñas con `scrypt`, sesiones revocables con HMAC-SHA-256, límite persistente de
+intentos y caducidad tras doce horas sin actividad. Todavía no está implementado.
+
 ---
 
 ## 3. Marca y reglas visuales
@@ -528,8 +533,9 @@ tarea de paneles, no de código, y la hace el dueño del proyecto.
   congelada del catálogo.
 - ~~Que `/catalogo` los lea de la base de datos~~, comprobado despublicando un producto
   y viendo que la página pasaba de 313 a 312.
-- Falta la entrada al panel, el panel de productos, la subida de fotos a Vercel Blob y
-  la galería de proyectos. **El plan detallado de cada uno está en
+- El diseño de la entrada al panel está aprobado; falta implementarlo. Después faltan
+  el panel de productos, la subida de fotos a Vercel Blob y la galería de proyectos.
+  **El plan detallado de cada uno está en
   `docs/CONTINUAR-PANEL.md`**, escrito para poder retomarse sin contexto previo.
 
 **Paso 2 — Tienda.** Precio y compra conviviendo con la cotización: carrito, checkout con
