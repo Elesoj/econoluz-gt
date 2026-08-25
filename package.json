@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "db:migrar": "node --env-file-if-exists=.env.local ./scripts/migrate.mjs",
     "catalogo:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs ./scripts/verify-product-rows.mjs",
     "catalogo:auditar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs ./scripts/audit-supplier-leaks.mjs"
   },
