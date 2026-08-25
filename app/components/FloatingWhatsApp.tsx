@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useSyncExternalStore } from "react";
 import {
   getFloatingQuoteServerSnapshot,
@@ -12,6 +13,7 @@ const legacyQuoteContextKey = "econoluz_quote_context";
 let hasAttemptedLegacyContextCleanup = false;
 
 export default function FloatingWhatsApp() {
+  const pathname = usePathname();
   const message = useSyncExternalStore(
     subscribeToFloatingQuote,
     getFloatingQuoteSnapshot,
@@ -35,6 +37,12 @@ export default function FloatingWhatsApp() {
       // El almacenamiento puede estar bloqueado en navegadores internos.
     }
   }, []);
+
+  // El panel es una herramienta interna: ofrecer ahí el WhatsApp comercial no
+  // tiene sentido y además tapa la interfaz. El sitio público no cambia.
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <a

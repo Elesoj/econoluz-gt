@@ -94,11 +94,17 @@ están en base de datos pero no hay ninguna pantalla para tocarlos. El plan paso
 está en `docs/CONTINUAR-PANEL.md`. **Toda la tienda B2C está por construir**, y con
 ella los requisitos operativos de la sección 8 (FEL, pago, inventario, marco legal).
 
-El diseño del acceso al panel ya está aprobado y documentado en
-`docs/superpowers/specs/2026-08-25-admin-auth-design.md`: varios usuarios en Neon,
-contraseñas con `scrypt`, sesiones revocables con HMAC-SHA-256, límite persistente de
-intentos y caducidad tras doce horas sin actividad. El plan TDD está en
-`docs/superpowers/plans/2026-08-25-admin-auth.md`. Todavía no está implementado.
+**La entrada al panel ya está escrita**, en la rama `panel-admin-auth` y todavía sin
+fusionar: varios usuarios en Neon, contraseñas con `scrypt`, sesiones revocables con
+HMAC-SHA-256, límite persistente de intentos y caducidad tras doce horas sin actividad.
+`/admin` redirige a `/admin/entrar` si no hay sesión, y el panel queda fuera de los
+buscadores. El diseño está en
+`docs/superpowers/specs/2026-08-25-admin-auth-design.md` y el plan TDD en
+`docs/superpowers/plans/2026-08-25-admin-auth.md`.
+
+**Nadie puede entrar todavía**, y no es un fallo: falta aplicar `db/003_admin.sql` a
+Neon, definir `ADMIN_SESSION_SECRET` y crear el primer usuario. Son tres pasos
+operativos que dependen del dueño; están detallados en `docs/CONTINUAR-PANEL.md`.
 
 ---
 
@@ -534,8 +540,10 @@ tarea de paneles, no de código, y la hace el dueño del proyecto.
   congelada del catálogo.
 - ~~Que `/catalogo` los lea de la base de datos~~, comprobado despublicando un producto
   y viendo que la página pasaba de 313 a 312.
-- El diseño de la entrada al panel está aprobado; falta implementarlo. Después faltan
-  el panel de productos, la subida de fotos a Vercel Blob y la galería de proyectos.
+- La entrada al panel está implementada y probada en la rama `panel-admin-auth`, a
+  falta de aplicar la migración, definir el secreto de sesión y crear el primer usuario.
+  Después faltan el panel de productos, la subida de fotos a Vercel Blob y la galería
+  de proyectos.
   **El plan detallado de cada uno está en
   `docs/CONTINUAR-PANEL.md`**, escrito para poder retomarse sin contexto previo.
 

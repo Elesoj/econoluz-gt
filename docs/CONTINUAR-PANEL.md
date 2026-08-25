@@ -317,6 +317,32 @@ completa de autenticación (38/38), `npm run typecheck`, `npm run lint`, `npm ru
 `npx playwright test tests/catalog-production-boundary.spec.ts` (4/4).
 `db/003_admin.sql` sigue sin aplicarse.
 
+**Task 5 completada (25/08/2026):** ya hay pantallas. `/admin` redirige a
+`/admin/entrar` sin sesión, el panel declara `robots: noindex` y el botón flotante de
+WhatsApp desaparece dentro de `/admin` sin cambiar nada en el sitio público.
+
+- **`app/admin/entrar/`** es la pantalla de acceso: azul marino de superficie, tarjeta
+  blanca y una sola acción roja —«Entrar»—, según §4.4. El formulario es un componente
+  de cliente, pero solo recibe el estado público del intento: nunca token, sal, hash ni
+  dato de proveedor.
+- **Los tres desenlaces comparten mensaje.** Credenciales equivocadas y correo
+  inexistente dicen exactamente lo mismo; el bloqueo añade «inténtalo dentro de unos
+  minutos» sin revelar si la cuenta existe. Hay una prueba que lo comprueba.
+- **`app/admin/(panel)/`** es la zona protegida. El layout llama a `verificarSesion()`
+  para redirigir pronto y poner el nombre en la cabecera, y la página **vuelve a
+  llamarla**, porque la frontera está junto a los datos y no en el layout.
+- **`SessionActivity`** renueva la sesión con teclado, puntero y envíos de formulario,
+  como mucho una vez cada quince minutos. No recibe ni un dato de negocio: es cliente, y
+  todo lo que recibiera acabaría en el JavaScript descargado.
+- **`estadoAccesoInicial` no puede vivir en `actions.ts`:** un módulo `"use server"`
+  solo puede exportar funciones asíncronas. El estado inicial se quedó en `LoginForm`.
+
+Verificado con `npx playwright test tests/admin-auth.spec.ts` (5/5), `npm run build`
+—`/admin`, `/admin/entrar` y `/admin/sesion` salen como rutas dinámicas—,
+`npx playwright test tests/catalog-production-boundary.spec.ts` (4/4), `npm run
+typecheck` y `npm run lint`. **Nadie puede entrar todavía:** falta aplicar
+`db/003_admin.sql`, definir `ADMIN_SESSION_SECRET` y crear el primer usuario (Task 6).
+
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
 de cada subagente; el contenido, los commits y los informes permanecen en español.

@@ -24,7 +24,7 @@ function esProduccion() {
  * El secreto no tiene valor por defecto a propósito: sin él, las huellas de
  * sesión serían predecibles y el panel parecería funcionar igual.
  */
-function obtenerSecreto() {
+export function obtenerSecretoSesion() {
   const secreto = process.env.ADMIN_SESSION_SECRET;
   if (!secreto || secreto.length < 32) {
     throw new Error(
@@ -51,7 +51,7 @@ export const leerSesion = cache(async (): Promise<SessionValidation> => {
     return { status: "invalid" };
   }
 
-  return validateSessionToken(token, getAdminAuthRepository(), new Date(), obtenerSecreto());
+  return validateSessionToken(token, getAdminAuthRepository(), new Date(), obtenerSecretoSesion());
 });
 
 /**
@@ -82,7 +82,7 @@ export async function verificarSesionParaAccion(): Promise<SessionUser> {
     token,
     getAdminAuthRepository(),
     new Date(),
-    obtenerSecreto(),
+    obtenerSecretoSesion(),
   );
 
   if (resultado.status !== "valid") {
@@ -113,7 +113,7 @@ export async function revocarSesionActual() {
   if (token) {
     try {
       const repositorio = getAdminAuthRepository();
-      await repositorio.deleteSession(hashSessionToken(token, obtenerSecreto()));
+      await repositorio.deleteSession(hashSessionToken(token, obtenerSecretoSesion()));
     } catch {
       // Aunque Neon no conteste, la cookie se retira igual: el navegador deja
       // de presentar el token y la fila caduca sola a las doce horas.

@@ -656,7 +656,7 @@ carga de página.
 - Produce: UI pública `/admin/entrar`, portada protegida `/admin`, salida y detector de
   actividad sin props de negocio.
 
-- [ ] **Paso 1: escribir Playwright RED para el límite público observable**
+- [x] **Paso 1: escribir Playwright RED para el límite público observable**
 
 ```ts
 import { expect, test } from "@playwright/test";
@@ -681,7 +681,7 @@ test("el formulario es identificable y navegable por teclado", async ({ page }) 
 });
 ```
 
-- [ ] **Paso 2: añadir la prueba al `testMatch` y confirmar RED**
+- [x] **Paso 2: añadir la prueba al `testMatch` y confirmar RED**
 
 ```powershell
 npx playwright test tests/admin-auth.spec.ts
@@ -689,7 +689,7 @@ npx playwright test tests/admin-auth.spec.ts
 
 Resultado esperado: `/admin` no existe y la prueba falla con 404.
 
-- [ ] **Paso 3: implementar rutas y formulario mínimo**
+- [x] **Paso 3: implementar rutas y formulario mínimo**
 
 La Server Action de entrada devuelve únicamente `{ status, email }` para errores y
 establece la cookie al acertar. `LoginForm` puede usar `useActionState`; nunca recibe
@@ -704,7 +704,7 @@ escucha teclado, puntero y envío, limita peticiones en cliente y llama a
 `FloatingWhatsApp` ya es cliente: usar `usePathname()` para devolver `null` cuando la
 ruta empiece por `/admin`, conservando intactas las rutas públicas.
 
-- [ ] **Paso 4: confirmar GREEN y ejecutar la frontera de producción**
+- [x] **Paso 4: confirmar GREEN y ejecutar la frontera de producción**
 
 ```powershell
 npx playwright test tests/admin-auth.spec.ts
@@ -713,12 +713,20 @@ npm run typecheck
 npm run lint
 ```
 
-- [ ] **Paso 5: actualizar documentación y commit**
+- [x] **Paso 5: actualizar documentación y commit**
 
 ```powershell
 git add app/admin app/components/FloatingWhatsApp.tsx tests/admin-auth.spec.ts playwright.config.ts docs/CONTINUAR-PANEL.md
 git commit -m "feat: crea la entrada protegida al panel"
 ```
+
+**Notas de implementación (25/08/2026):** la cookie de sesión es `econoluz_admin`. El
+estado inicial del formulario se define en `LoginForm` y no en `actions.ts`, porque un
+módulo `"use server"` solo puede exportar funciones asíncronas. La acción `salir` no
+exige sesión válida antes de revocar: solo puede destruir la sesión de quien manda la
+cookie, y exigirla complicaría el caso de una sesión ya rota sin proteger de nada. Se
+añadieron dos pruebas al paso 1: el mensaje genérico ante credenciales equivocadas y que
+el WhatsApp flotante sigue en el sitio público.
 
 ---
 

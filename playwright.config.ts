@@ -12,6 +12,7 @@ export default defineConfig({
     "catalog-production-boundary.spec.ts",
     "catalog-navigation.spec.ts",
     "catalog-quote.spec.ts",
+    "admin-auth.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,
