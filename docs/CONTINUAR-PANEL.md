@@ -125,7 +125,7 @@ pueden aparecer en el JavaScript compilado**, y
 
 **Deuda conocida, no garantizada.** Siguen apareciendo nombres heredados del proveedor
 dentro de las rutas de las imágenes, de los textos de las descripciones y de la
-taxonomía: 30 nombres en unas 556 apariciones (§9.1). Está documentado y el dueño lo
+taxonomía: 30 nombres en unas 556 apariciones (§10.1). Está documentado y el dueño lo
 sabe. No confundir una cosa con la otra: la regla describe la intención y el mecanismo,
 no un estado ya alcanzado.
 
@@ -184,7 +184,27 @@ llama exactamente al mismo código interno que `revalidateTag(tag)` sin perfil.
 `scripts/import-products.mjs` las respeta a propósito. Cualquier script nuevo que
 escriba en `products` debe hacer lo mismo.
 
-### 4.4 Del propio `CLAUDE.md`
+### 4.4 El panel también tiene que parecer de ECONOLUZ
+
+El dueño rechazó expresamente el diseño anterior del sitio con estas palabras: **«no
+quiero un diseño tan estándar o que parezca tan hecho por IA»**. El sitio estaba en
+blanco, negro y grises con tipografía grande y bordes finos, que es exactamente el
+minimalismo por defecto al que tiende cualquier generación automática. Lo detectó él
+solo y lo tiró.
+
+Un panel de administración es donde ese riesgo es mayor, porque la tentación de sacar
+una tabla gris genérica es enorme. **No lo hagas.** El panel usa la misma identidad que
+el resto del sitio: azul marino `#001B59` y rojo `#E11133` sobre blanco, con los tokens
+que ya existen en `app/globals.css` (`--proyectos`, `--tienda` y sus variantes). Las
+reglas de reparto están en `CLAUDE.md` §3 y siguen valiendo aquí: **el rojo solo en la
+acción principal de cada pantalla** —una sola por vista— y en etiquetas, filetes e
+iconos; el azul marino sí admite superficie.
+
+No hace falta inventar un lenguaje visual nuevo: reutiliza los componentes de
+`app/components/ui/` y los patrones del catálogo. Lo que no vale es un panel que podría
+ser de cualquier empresa.
+
+### 4.5 Del propio `CLAUDE.md`
 
 - No publicar ni desplegar nada sin confirmación explícita.
 - No borrar archivos sin preguntar antes.
@@ -363,12 +383,31 @@ literales de `/public/proyectos/`. Hay 104 fotos en 12 carpetas.
 
 ---
 
-## 9. Problemas conocidos, anteriores a este trabajo
+## 9. Lo que no puede hacer quien programe
+
+Estas cosas **no se resuelven escribiendo código**: las tiene que hacer el dueño del
+proyecto en un panel web o decidirlas él. Conviene pedírselas al empezar el paso
+correspondiente y no descubrirlas a mitad, porque bloquean.
+
+| Hace falta para | Qué tiene que hacer el dueño |
+|---|---|
+| Paso b — entrada al panel | Elegir **su correo y su contraseña** de administrador. Se dan de alta con `scripts/create-admin.mjs`, no con una pantalla pública de registro. |
+| Paso b — sesiones | Generar un secreto de sesión y ponerlo en `.env.local` **y en Vercel**. Se genera con `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. |
+| Paso c — referencias | **Decidir el prefijo** de las referencias nuevas (§6, «Referencia de los productos nuevos»). El reparto actual no es una regla y esas referencias son las que él cita al cotizar. |
+| Paso d — fotos | **Crear el almacén Blob** en Vercel (Storage → Blob) y copiar `BLOB_READ_WRITE_TOKEN` a `.env.local`. |
+| Que el sitio nuevo sea el oficial | **Apuntar el DNS de `econoluzgt.com` a Vercel.** Hoy ese dominio sigue sirviendo el WordPress viejo. |
+| La tienda (paso 2) | Contratar certificador FEL, decidir el medio de cobro, redactar los textos legales de venta en línea y **fijar los precios**. Nada de eso lo puede hacer un programador. |
+
+Además, **nada se publica ni se despliega sin que él lo confirme.**
+
+---
+
+## 10. Problemas conocidos, anteriores a este trabajo
 
 No los causó la migración. Están documentados para que nadie pierda tiempo
 investigándolos ni los confunda con una regresión.
 
-### 9.1 Nombres de proveedor visibles en el catálogo público
+### 10.1 Nombres de proveedor visibles en el catálogo público
 
 `npm run catalogo:auditar` lo lista. **30 nombres distintos en unas 556 apariciones**,
 en dos formas:
@@ -386,14 +425,14 @@ en dos formas:
 El dueño ya sabe que existe. **No arreglarlo sin hablarlo con él**: es un cambio de
 contenido, no un bug.
 
-### 9.2 Una prueba que falla
+### 10.2 Una prueba que falla
 
 `tests/catalog-quote.spec.ts:891` (`rebases an action before the restoration frame and
 persists it before frames flush`) falla de forma determinista. **Se comprobó
 guardando los cambios a un lado y ejecutándola sobre el código anterior: falla igual.**
 No tiene que ver con la base de datos ni con el catálogo. Las otras 87 pasan.
 
-### 9.3 Otras
+### 10.3 Otras
 
 - `econoluzgt.com` sigue apuntando al WordPress viejo. Solo
   `econoluz-gt.vercel.app` tiene el sitio nuevo. Es un cambio de DNS que hace el dueño.
