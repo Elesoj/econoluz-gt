@@ -247,7 +247,7 @@ export default async function ProductosPage({
                 al final de la página obliga a bajar cada vez. */}
             <div className="sticky bottom-0 mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 bg-white/95 py-4 backdrop-blur">
               <p className="text-sm text-neutral-600">
-                Se guardan solo las filas que hayas cambiado.
+                Cambia un producto o los que quieras: se guarda solo lo que hayas tocado.
               </p>
               <button
                 type="submit"
