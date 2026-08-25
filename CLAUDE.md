@@ -324,7 +324,14 @@ Al añadir cualquier vista nueva —filtro, ficha, buscador, resumen de cotizaci
 pantalla del panel— hay que comprobar que no reabre esa puerta.
 
 Fuera de `frontend/`, la carpeta hermana `Imagenes/` guarda el original del logo.
-No entra en el build ni está en el repositorio.
+No entra en el build ni está en el repositorio. Hay también una carpeta `app/` vacía,
+resto de un movimiento antiguo.
+
+**Abre `frontend/` como carpeta de trabajo, no la carpeta que la contiene.** Las
+herramientas que cargan instrucciones solas las buscan desde la raíz del proyecto hasta
+la carpeta de trabajo, sin bajar a subcarpetas: abriendo la carpeta padre no encuentran
+`AGENTS.md` y se programa sin ninguna de estas reglas. Hay punteros en la carpeta padre
+por si acaso, pero están fuera del repositorio y no viajan con un clon.
 
 ### Comandos
 

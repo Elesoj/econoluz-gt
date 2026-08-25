@@ -58,6 +58,25 @@ volver a preguntarle, no decidirlo por cuenta propia.
 
 ## 3. El entorno, en concreto
 
+### Carpeta de trabajo — importa más de lo que parece
+
+**El repositorio es `frontend/`, no la carpeta que lo contiene.** La carpeta padre
+(`Proyecto Econoluz/`) no es un repositorio git: solo guarda `frontend/`, la carpeta
+`Imagenes/` con el original del logo, y una carpeta `app/` vacía que sobró de un
+movimiento antiguo.
+
+Esto tiene una consecuencia práctica: las herramientas que cargan instrucciones solas
+buscan **desde la raíz del proyecto hasta la carpeta de trabajo**, y no bajan a
+subcarpetas arbitrarias. Si se abre la carpeta padre en vez de `frontend/`, no
+encuentran `frontend/AGENTS.md` y se empieza a programar sin ninguna de estas reglas.
+
+Hay puntero en la carpeta padre (`AGENTS.md` y `CLAUDE.md`, con el mismo contenido) por
+si eso pasa, pero **viven fuera del repositorio y no viajan con un clon**. Lo fiable es
+abrir `frontend/` directamente como carpeta de trabajo.
+
+> Estas instrucciones se cargan **una vez al empezar la sesión**. Si se edita
+> `AGENTS.md` con una sesión ya abierta, hay que abrir una nueva para que surtan efecto.
+
 ### Base de datos
 
 Postgres 18 en **Neon**, creada desde el Marketplace de Vercel, región AWS US East 1.
