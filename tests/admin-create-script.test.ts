@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { verifyPassword } from "../app/admin/auth/crypto";
 import {
+  createCliRepository,
   requireDatabaseUrl,
   saveAdmin,
   validatePasswordConfirmation,
@@ -77,4 +78,16 @@ test("rechaza una confirmación distinta antes de abrir la base de datos", () =>
 test("la ausencia de DATABASE_URL no expone ningún valor de entorno", () => {
   assert.throws(() => requireDatabaseUrl({}), /^Error: Falta DATABASE_URL\.$/);
   assert.equal(requireDatabaseUrl({ DATABASE_URL: "postgres://x" }), "postgres://x");
+});
+
+test("el repositorio de terminal se construye bajo node, sin server-only", async () => {
+  // Esta prueba existe por un fallo real: el script importaba
+  // `repository.server.ts`, que a su vez importa "server-only". Next resuelve
+  // ese paquete con un alias propio, pero `node` no lo encuentra, así que el
+  // alta moría justo después de pedir la contraseña.
+  const repositorio = await createCliRepository(
+    "postgresql://usuario:clave@ejemplo.invalid/econoluz?sslmode=require",
+  );
+  assert.equal(typeof repositorio.upsertAdminUser, "function");
+  assert.equal(typeof repositorio.deleteSessionsForUser, "function");
 });

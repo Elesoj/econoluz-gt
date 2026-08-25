@@ -127,8 +127,25 @@ function preguntarSecreto(etiqueta) {
   });
 }
 
+/**
+ * Arma el repositorio sin pasar por `repository.server.ts`. Ese módulo importa
+ * "server-only", que Next resuelve con un alias propio y `node` no: el script
+ * moría con "Cannot find package 'server-only'" justo después de pedir la
+ * contraseña. El adaptador SQL es el mismo, así que no hay dos comportamientos.
+ */
+export async function createCliRepository(connectionString) {
+  const { neon } = await import("@neondatabase/serverless");
+  const { createAdminAuthRepository } = await import("../app/admin/auth/repository.ts");
+  const sql = neon(connectionString);
+  return createAdminAuthRepository((text, params) => sql.query(text, [...params]));
+}
+
 async function main() {
-  requireDatabaseUrl(process.env);
+  const connectionString = requireDatabaseUrl(process.env);
+
+  // Se conecta ANTES de preguntar nada: si algo falla, que falle antes de que
+  // alguien escriba su contraseña dos veces para nada.
+  const repositorio = await createCliRepository(connectionString);
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
 
@@ -149,14 +166,7 @@ async function main() {
     process.exit(1);
   }
 
-  // Carga diferida: así importar este archivo desde las pruebas no arrastra
-  // `server-only` ni el driver de Neon.
-  const { getAdminAuthRepository } = await import("../app/admin/auth/repository.server.ts");
-
-  const guardado = await saveAdmin(
-    { name: nombre, email: correo, password },
-    getAdminAuthRepository(),
-  );
+  const guardado = await saveAdmin({ name: nombre, email: correo, password }, repositorio);
 
   console.log("");
   console.log(`Listo. Ya puedes entrar en /admin/entrar con ${guardado}.`);

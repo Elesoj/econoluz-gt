@@ -363,6 +363,20 @@ que ejecuta de una vez las seis baterías de autenticación (44 pruebas). Verifi
 `npm run test:admin` (44/44), `npm run typecheck` y `npm run lint`. No se añadió ninguna
 dependencia.
 
+**Corrección posterior de Task 6 (25/08/2026):** el script moría con `Cannot find
+package 'server-only'` **justo después de pedir la contraseña**, en el primer intento
+real de alta. La causa: importaba `app/admin/auth/repository.server.ts`, que empieza con
+`import "server-only"`. Ese paquete **no está instalado**; Next lo resuelve con un alias
+propio, así que la web funciona y el build pasa, pero un script lanzado con `node` no lo
+encuentra. Ahora el script arma el repositorio con `createCliRepository`, usando el
+adaptador puro `repository.ts` y `neon` directamente, y **se conecta antes de preguntar
+nada**, para que un fallo así no llegue después de escribir la contraseña dos veces.
+`tests/admin-create-script.test.ts` incluye la prueba que reproduce el fallo.
+
+> **Regla que se deduce de esto:** cualquier script de terminal que necesite datos del
+> proyecto debe importar los módulos puros, **nunca los `*.server.ts`**. Estos últimos
+> solo saben vivir dentro de Next.
+
 ---
 
 ## 5.bis El paso b, terminado en código y pendiente de activar (25/08/2026)
