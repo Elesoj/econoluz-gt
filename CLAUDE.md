@@ -81,7 +81,9 @@ existencias hoy: son datos que todavía no existen en ninguna parte, ni en el c�
 `products` guarda los 313, y `/catalogo` los lee de ahí filtrando por `published`.
 `app/data/products.ts` sigue existiendo, pero dejó de ser la fuente de verdad: ahora es
 la red de seguridad si la base de datos no responde, y lo que protegen las pruebas de
-base. Editarlo ya no cambia lo que se ve en la web.
+base. Editarlo **no cambia lo que ve el visitante mientras Neon conteste**, pero sí
+cambia el catálogo de respaldo y sí cambia cualquier entorno sin `DATABASE_URL` —el
+desarrollo local, por ejemplo—. Para cambiar la web se edita la base de datos.
 
 `POST /api/leads` guarda las solicitudes de asesoría en la misma base de datos, y está
 verificado en producción. La galería de proyectos y el resto del contenido siguen en
@@ -293,18 +295,33 @@ frontend/
   playwright.config.ts  .env.example
 ```
 
-### El catálogo público no nombra a los proveedores
+### El catálogo público no expone los datos del proveedor
 
 Regla de negocio, no de estilo: el cliente **no debe poder identificar al fabricante** ni
-irse a comprarle directamente. Marcas (`Artlite`, `Construlita`, `Highlum`), series
-(`Cuasar`, `HB Pure`, `HB Steel`, `Highlens`, `Supreme`) y códigos de referencia del
-proveedor se quedan en el servidor: viven en los dos archivos `*.internal.ts`, y
-`publicProduct.ts` decide qué cruza al navegador.
+irse a comprarle directamente.
 
-No basta con ocultarlos en pantalla: **tampoco pueden aparecer en el JavaScript que se
-descarga**. Las pruebas de `tests/catalog-production-boundary.spec.ts` revisan los chunks
-compilados precisamente para eso. Al añadir cualquier vista nueva —filtro, ficha,
-buscador, resumen de cotización— hay que comprobar que no reabra esa puerta.
+**Lo que está garantizado hoy:** los campos internos del proveedor —`sku`, `brand`,
+`supplierBrand`, `supplierCode`, `productCode`, la serie— **no cruzan al catálogo
+público**. Viven en los archivos `*.internal.ts` y en las columnas `supplier_*` de la
+base de datos, y `publicProduct.ts` decide qué pasa. No basta con ocultarlos en
+pantalla: tampoco pueden aparecer en el JavaScript que se descarga, y
+`tests/catalog-production-boundary.spec.ts` revisa los chunks compilados precisamente
+para eso.
+
+**Lo que todavía no está resuelto:** quedan nombres heredados del proveedor dentro de
+las rutas de las imágenes, de los textos de las descripciones y de la taxonomía —30
+nombres en unas 556 apariciones, ver la sección 7—. Es deuda conocida y documentada,
+no un descuido: la regla describe la intención y el mecanismo, no un estado ya
+alcanzado.
+
+**Alcance de la prohibición:** se refiere al **catálogo público y a cualquier visitante
+sin sesión**. El panel de administración, detrás de autenticación, necesariamente envía
+esos datos al navegador de quien administra, porque son los que tiene que editar. Lo que
+no puede ocurrir es que acaben en un chunk compartido que se descargue en las páginas
+públicas.
+
+Al añadir cualquier vista nueva —filtro, ficha, buscador, resumen de cotización,
+pantalla del panel— hay que comprobar que no reabre esa puerta.
 
 Fuera de `frontend/`, la carpeta hermana `Imagenes/` guarda el original del logo.
 No entra en el build ni está en el repositorio.

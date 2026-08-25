@@ -130,9 +130,32 @@ buscándolos.
 ### 4.2 Invalidar la caché al guardar
 
 `app/data/catalog.server.ts` exporta `CATALOG_CACHE_TAG`. **Toda acción del panel que
-escriba en `products` tiene que llamar a `revalidateTag(CATALOG_CACHE_TAG)`** al
-terminar. Sin eso, el usuario guarda, ve el mensaje de éxito, va a la web y no ha
-cambiado nada — y pensará que el panel está roto.
+escriba en `products` tiene que invalidar esa etiqueta** al terminar. Sin eso, el
+usuario guarda, ve el mensaje de éxito, va a la web y no ha cambiado nada — y pensará
+que el panel está roto.
+
+Cuál de las dos funciones usar **no es indiferente** en Next 16.3.1:
+
+```ts
+import { updateTag } from "next/cache";
+
+updateTag(CATALOG_CACHE_TAG); // desde una Server Action
+```
+
+- **Desde una Server Action** (que es como debe guardar el panel): `updateTag(tag)`.
+  Expira la entrada de inmediato, así que el usuario ve su propio cambio al instante.
+  Es justo lo que hace falta aquí.
+- **Desde un Route Handler** o cualquier otro sitio: `updateTag` **lanza un error** —
+  solo funciona dentro de Server Actions. Ahí hay que usar `revalidateTag(tag, "max")`.
+- **`revalidateTag(tag)` con un solo argumento está obsoleto** y avisa por consola.
+  `revalidateTag(tag, "max")` tampoco sirve para el panel: sigue sirviendo la versión
+  vieja mientras refresca por detrás, de modo que el usuario guardaría y vería lo
+  anterior.
+
+Funciona con `unstable_cache`, que es lo que usa el catálogo, aunque la documentación
+de `updateTag` hable de `use cache`: comprobado en
+`node_modules/next/dist/server/web/spec-extension/revalidate.js`, donde `updateTag(tag)`
+llama exactamente al mismo código interno que `revalidateTag(tag)` sin perfil.
 
 ### 4.3 Las columnas del panel son del usuario
 
@@ -213,7 +236,7 @@ escriba en `products` debe hacer lo mismo.
 3. **`app/admin/productos/nuevo/page.tsx`** — alta.
 4. **`app/admin/actions.ts`** — acciones de servidor: `guardarProducto`,
    `crearProducto`, `publicar`, `despublicar`. **Todas terminan en
-   `revalidateTag(CATALOG_CACHE_TAG)`.**
+   `updateTag(CATALOG_CACHE_TAG)`** — ver §4.2 para por qué esa función y no otra.
 
 ### El formulario
 

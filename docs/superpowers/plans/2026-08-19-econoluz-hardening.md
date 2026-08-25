@@ -1,5 +1,27 @@
 # ECONOLUZ GT Catalog Hardening Implementation Plan
 
+> ---
+>
+> ## ⚠️ ESTADO: COMPLETADO. DOCUMENTO HISTÓRICO. NO GOBIERNA EL TRABAJO ACTUAL.
+>
+> Este plan se ejecutó y se terminó. Se conserva como registro de lo que se hizo y por
+> qué, **no como reglas vigentes**.
+>
+> Sus restricciones —«nunca añadir precios, inventario, autenticación, un backend nuevo
+> ni una base de datos nueva»— eran correctas **para aquella tarea concreta**, que era
+> endurecer el catálogo sin convertirlo en tienda. **Hoy contradicen la dirección
+> aprobada por el dueño del proyecto**, que decidió que el catálogo sea tienda B2C y que
+> los productos se administren desde un panel autenticado con base de datos.
+>
+> **Las reglas vigentes están en `CLAUDE.md`.** El plan del trabajo en curso está en
+> `docs/CONTINUAR-PANEL.md`.
+>
+> Lo que de este documento **sí sigue vigente**, porque se recogió en `CLAUDE.md`:
+> preservar los 313 productos y sus referencias ECONOLUZ, no exponer los campos internos
+> del proveedor en el catálogo público, y no mover ni borrar nada de `public/catalogos`.
+>
+> ---
+
 > Approved by the user on 2026-08-19. Execute with strict TDD, phase-by-phase verification, task review, and final verification.
 
 **Goal:** Correct the catalog's data exposure, unstable references, taxonomy, navigation, persistence, lead capture, accessibility, performance, dependencies, and basic metadata without redesigning the site or turning it into ecommerce.
