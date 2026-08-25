@@ -4,6 +4,7 @@ import {
   CAMPOS_FICHA_TECNICA,
   aplicacionesDe,
   fichaTecnicaDesdeFormulario,
+  leerProductoPorReferencia,
   lineasDesdeLista,
   validarFichaProducto,
 } from "../app/admin/productos/ficha";
@@ -95,4 +96,29 @@ test("los campos de ficha técnica que se ofrecen son los que de verdad se usan"
   }
   // `specialFeatures` es una lista y se edita aparte, no como campo suelto.
   assert.equal(claves.includes("specialFeatures"), false);
+});
+
+test("un producto sin galería ni ficha técnica se lee sin huecos", async () => {
+  const producto = await leerProductoPorReferencia(
+    async () => [
+      {
+        econoluz_reference: "ECO-CAT-0007",
+        public_name: "Panel",
+        images: null,
+        technical_specs: null,
+        price_gtq: null,
+        stock: null,
+        published: true,
+      },
+    ],
+    "ECO-CAT-0007",
+  );
+  assert.deepEqual(producto?.galeria, []);
+  assert.deepEqual(producto?.fichaTecnica, {});
+  assert.equal(producto?.precio, null);
+  assert.equal(producto?.publicado, true);
+});
+
+test("una referencia que no existe devuelve null, no un producto vacío", async () => {
+  assert.equal(await leerProductoPorReferencia(async () => [], "ECO-NO-9999"), null);
 });
