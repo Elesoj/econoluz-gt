@@ -363,6 +363,47 @@ que ejecuta de una vez las seis baterías de autenticación (44 pruebas). Verifi
 `npm run test:admin` (44/44), `npm run typecheck` y `npm run lint`. No se añadió ninguna
 dependencia.
 
+---
+
+## 5.bis El paso b, terminado en código y pendiente de activar (25/08/2026)
+
+**El código está completo y verificado; nadie puede entrar todavía.** Las dos cosas son
+ciertas a la vez y conviene no confundirlas: faltan tres pasos operativos que no se
+resuelven programando.
+
+### Lo que hay que hacer para activarlo, en este orden
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+1. Pegar ese valor en `frontend/.env.local` como `ADMIN_SESSION_SECRET="..."`. Sin él el
+   panel no arranca, a propósito.
+2. `npm run db:migrar` — aplica `db/003_admin.sql` y crea `admin_users`,
+   `admin_sessions` y `admin_login_attempts`. Es repetible.
+3. `npm run admin:crear` — pide nombre, correo y contraseña. **La contraseña se escribe
+   en la terminal del dueño y no se pide por chat ni se registra en ninguna salida.**
+4. Comprobar a mano: entrar, recargar el panel, salir, y volver a `/admin` para
+   confirmar que redirige. **Comprobar también** que una página del panel sigue exigiendo
+   sesión aunque el layout ya la haya comprobado: es lo único de la revisión por
+   mutaciones que las pruebas no cubren, porque sin base de datos local no se puede
+   montar una sesión válida en el navegador.
+5. Añadir el mismo secreto a Vercel y desplegar **solo con autorización expresa**.
+
+> Los pasos 2 y 3 escriben en Neon. No se ejecutaron: el dueño no ha autorizado tocar la
+> base de datos, y el paso 3 necesita una contraseña que solo él debe escribir.
+
+### Resultados de la verificación
+
+`npm run test:admin` 44/44 · `npm run typecheck` limpio · `npm run lint` limpio ·
+`npm run build` correcto, con `/admin`, `/admin/entrar` y `/admin/sesion` como rutas
+dinámicas · `tests/admin-auth.spec.ts` 5/5 · `tests/catalog-production-boundary.spec.ts`
+4/4 · batería completa **92 pasan y 1 falla**, que es el fallo histórico
+`catalog-quote.spec.ts:891` descrito en §10.2, idéntico al de siempre.
+
+La rama es `panel-admin-auth`, en el worktree `.worktrees/panel-admin-auth`. **No está
+fusionada a `panel-admin` ni a `main`, no se ha hecho push y no se ha desplegado nada.**
+
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
 de cada subagente; el contenido, los commits y los informes permanecen en español.

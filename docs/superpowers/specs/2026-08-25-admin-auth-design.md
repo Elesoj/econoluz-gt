@@ -266,3 +266,41 @@ implementación sin una confirmación específica.
 - No hay secretos ni datos del proveedor en chunks públicos.
 - Pruebas unitarias, `npm run typecheck`, `npm run lint` y la batería Playwright quedan
   verdes salvo el fallo histórico ya documentado en `catalog-quote.spec.ts:891`.
+
+---
+
+## 13. Estado final de la implementación (25/08/2026)
+
+**Implementado y verificado en la rama `panel-admin-auth`**, sin fusionar, sin push y
+sin desplegar. Commits `f0d2186..6e47fb9`, uno por tarea.
+
+Resultados reproducibles:
+
+| Comprobación | Resultado |
+|---|---|
+| `npm run test:admin` | 44/44 |
+| `npm run typecheck` | limpio |
+| `npm run lint` | limpio |
+| `npm run build` | correcto; `/admin`, `/admin/entrar` y `/admin/sesion` son dinámicas |
+| `npx playwright test tests/admin-auth.spec.ts` | 5/5 |
+| `npx playwright test tests/catalog-production-boundary.spec.ts` | 4/4 |
+| `npx playwright test` (completa) | 92 pasan, 1 falla: el histórico `catalog-quote.spec.ts:891` |
+
+**Revisión por mutaciones.** Se alteró cada condición de seguridad para comprobar que
+alguna prueba lo detecta. Seis de siete quedaron cubiertas: aceptar cualquier
+contraseña (3 fallos), ignorar el secreto de la HMAC (1), renovar sin mirar la
+caducidad (1), no contar los fallos de acceso (2), poner `secure: true` en desarrollo
+(1) y devolver el WhatsApp público a `/admin` (1).
+
+**La séptima no está cubierta:** quitar `verificarSesion()` de la página protegida y
+dejar la comprobación solo en el layout **no hace fallar ninguna prueba**. No es un
+descuido de las pruebas: sin `DATABASE_URL` local no existe forma de montar una sesión
+válida en el navegador, así que solo se puede ejercitar el camino sin sesión, donde el
+layout ya redirige. Queda cubierto por revisión de código y **debe comprobarse a mano
+al activar el acceso contra Neon**.
+
+Los criterios de la sección 12 que dependen de una sesión real —renovación por
+actividad, caducidad a las doce horas, bloqueo tras cinco fallos y revocación al
+salir— están implementados y probados en unidad contra un repositorio en memoria, pero
+**no se han ejercitado contra Neon**, porque la migración todavía no se ha aplicado.
+

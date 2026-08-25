@@ -862,7 +862,7 @@ como los demás del proyecto.
 - Produce: paso 1.b documentado con resultados reproducibles y operaciones pendientes
   separadas del código.
 
-- [ ] **Paso 1: ejecutar verificación automática completa**
+- [x] **Paso 1: ejecutar verificación automática completa**
 
 ```powershell
 npm run test:admin
@@ -879,7 +879,7 @@ Registrar el número exacto de pruebas. La única tolerancia es el fallo histór
 aparece cualquier otro fallo, detener la entrega y depurarlo con
 `superpowers:systematic-debugging`.
 
-- [ ] **Paso 2: revisión de seguridad por mutaciones mentales**
+- [x] **Paso 2: revisión de seguridad por mutaciones mentales**
 
 Comprobar que al cambiar cada una de estas condiciones falla al menos una prueba:
 
@@ -891,7 +891,7 @@ Comprobar que al cambiar cada una de estas condiciones falla al menos una prueba
 - dejar `secure: true` en desarrollo;
 - volver a mostrar WhatsApp en `/admin`.
 
-- [ ] **Paso 3: actualizar los tres documentos**
+- [x] **Paso 3: actualizar los tres documentos**
 
 Marcar la implementación como terminada en el código pero pendiente de activación real.
 Documentar los commits y resultados. Mantener expresamente pendientes:
@@ -902,7 +902,7 @@ Documentar los commits y resultados. Mantener expresamente pendientes:
 4. comprobar acceso, renovación y salida contra Neon;
 5. añadir el secreto a Vercel y desplegar solo con autorización explícita.
 
-- [ ] **Paso 4: commit de documentación y estado limpio**
+- [x] **Paso 4: commit de documentación y estado limpio**
 
 ```powershell
 git add CLAUDE.md docs/CONTINUAR-PANEL.md docs/superpowers/specs/2026-08-25-admin-auth-design.md
@@ -912,7 +912,7 @@ git status --short --branch
 
 Resultado esperado: árbol limpio en `panel-admin`. No hacer push ni desplegar.
 
-- [ ] **Paso 5: pedir autorización antes de tocar Neon**
+- [x] **Paso 5: pedir autorización antes de tocar Neon**
 
 Presentar al dueño los resultados automáticos y pedir confirmación específica para
 generar el secreto local, aplicar la migración y crear el administrador. La contraseña

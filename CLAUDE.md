@@ -103,8 +103,14 @@ buscadores. El diseño está en
 `docs/superpowers/plans/2026-08-25-admin-auth.md`.
 
 **Nadie puede entrar todavía**, y no es un fallo: falta aplicar `db/003_admin.sql` a
-Neon, definir `ADMIN_SESSION_SECRET` y crear el primer usuario. Son tres pasos
-operativos que dependen del dueño; están detallados en `docs/CONTINUAR-PANEL.md`.
+Neon, definir `ADMIN_SESSION_SECRET` y crear el primer usuario con `npm run admin:crear`.
+Son tres pasos operativos que dependen del dueño; están detallados en
+`docs/CONTINUAR-PANEL.md` §5.bis, con los comandos exactos y en orden.
+
+Verificación de esa rama: `npm run test:admin` 44/44, `typecheck` y `lint` limpios,
+`build` correcto y la batería completa de Playwright con 92 pruebas en verde y el único
+fallo histórico de `catalog-quote.spec.ts:891`. Nada de esto se ha fusionado, subido ni
+desplegado.
 
 ---
 
