@@ -377,6 +377,19 @@ nada**, para que un fallo así no llegue después de escribir la contraseña dos
 > proyecto debe importar los módulos puros, **nunca los `*.server.ts`**. Estos últimos
 > solo saben vivir dentro de Next.
 
+**Corrección visual del panel (25/08/2026):** en la primera prueba real, el logo estaba
+puesto sobre fondo azul marino y **se veía solo la palabra «ECONO» en rojo**: el resto
+del logotipo es `#001B59`, el mismo color que el fondo, y desaparecía. Es el caso de
+contraste 1.23:1 que `CLAUDE.md` §3 marca como inservible.
+
+**Norma que se estaba incumpliendo:** en toda la web el logo va **siempre sobre blanco**
+—`SiteFooter` es `bg-white` y `SiteNavbar` es `bg-white/92`—, nunca sobre una superficie
+de color. Ahora el panel hace lo mismo: en `/admin/entrar` el logo vive dentro de la
+tarjeta blanca, y la cabecera del panel pasó a ser blanca con filete inferior, como la
+barra del sitio público, con la etiqueta «PANEL» en rojo y el botón «Salir» en contorno
+azul marino. La etiqueta roja de la portada se retiró para no duplicar el acento en la
+misma vista.
+
 ---
 
 ## 5.bis El paso b, terminado en código y pendiente de activar (25/08/2026)

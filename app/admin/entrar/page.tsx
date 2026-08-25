@@ -15,21 +15,21 @@ export default async function EntrarPage() {
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-proyectos px-5 py-12">
       <div className="w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center gap-4 text-center">
+        <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.28em] text-proyectos-claro">
+          Administración interna
+        </p>
+
+        <div className="rounded-3xl bg-white p-7 shadow-[0_30px_80px_rgba(0,0,0,0.35)] sm:p-9">
+          {/* El logo va sobre blanco, como en toda la web: su parte azul marino
+              es del mismo color que este fondo y desaparecería encima de él. */}
           <Image
             src="/logo_econoluz.png"
             alt="ECONOLUZ GT"
             width={180}
             height={52}
-            className="h-11 w-auto"
+            className="mb-7 h-10 w-auto"
             priority
           />
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-proyectos-claro">
-            Administración interna
-          </p>
-        </div>
-
-        <div className="rounded-3xl bg-white p-7 shadow-[0_30px_80px_rgba(0,0,0,0.35)] sm:p-9">
           <h1 className="text-2xl font-semibold text-proyectos">Acceso al panel</h1>
           <p className="mt-2 mb-7 text-sm text-proyectos/70">
             Esta zona administra el catálogo de la web. Si no tienes credenciales, no

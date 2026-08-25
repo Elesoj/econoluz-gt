@@ -10,10 +10,9 @@ export default async function PanelPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-tienda">
-          Panel de administración
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold text-proyectos sm:text-4xl">
+        {/* La etiqueta roja ya la lleva la cabecera: repetirla aquí solo
+            duplicaría el acento en la misma vista. */}
+        <h1 className="text-3xl font-semibold text-proyectos sm:text-4xl">
           Hola, {usuario.name}
         </h1>
         <p className="mt-3 max-w-2xl text-base text-proyectos/70">
