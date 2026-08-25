@@ -77,10 +77,19 @@ cotización y salida por WhatsApp. De la pista A no hay nada: **ni precios, ni c
 ni checkout, ni pasarela de pago, ni autenticación.** Ningún producto tiene precio ni
 existencias hoy: son datos que todavía no existen en ninguna parte, ni en el código.
 
-El sitio es estático salvo una excepción: `POST /api/leads`, que guarda las solicitudes
-de asesoría en Postgres (Neon). Esa es toda la base de datos que existe hoy — una tabla
-`leads` y nada más; no hay productos, pedidos ni inventario en base de datos. El resto
-de los datos vive en `app/data/*.ts`. **Toda la tienda B2C está por construir**, y con
+**Los productos ya no viven en el código: viven en Postgres (Neon).** La tabla
+`products` guarda los 313, y `/catalogo` los lee de ahí filtrando por `published`.
+`app/data/products.ts` sigue existiendo, pero dejó de ser la fuente de verdad: ahora es
+la red de seguridad si la base de datos no responde, y lo que protegen las pruebas de
+base. Editarlo ya no cambia lo que se ve en la web.
+
+`POST /api/leads` guarda las solicitudes de asesoría en la misma base de datos, y está
+verificado en producción. La galería de proyectos y el resto del contenido siguen en
+`app/data/*.ts`.
+
+Lo que falta para la autonomía es el **panel de administración**: hoy los productos
+están en base de datos pero no hay ninguna pantalla para tocarlos. El plan paso a paso
+está en `docs/CONTINUAR-PANEL.md`. **Toda la tienda B2C está por construir**, y con
 ella los requisitos operativos de la sección 8 (FEL, pago, inventario, marco legal).
 
 ---
@@ -218,8 +227,10 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
 - Deploy: Vercel (`econoluz-gt.vercel.app`), automático al empujar a `main` en GitHub
   (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
   cambiar el DNS es tarea del dueño del proyecto, no del código.
-- Base de datos: **Postgres en Neon**, con `@neondatabase/serverless`. Hoy solo existe la
-  tabla `leads` (`db/001_leads.sql`) y hace falta `DATABASE_URL` en el entorno.
+- Base de datos: **Postgres 18 en Neon**, con `@neondatabase/serverless`, creada desde el
+  Marketplace de Vercel (región AWS US East 1). Tablas: `leads`, `products` y
+  `schema_migrations`. Las migraciones se aplican con `npm run db:migrar`, que es
+  repetible. `DATABASE_URL` está en `.env.local` (ignorado por git) y en Vercel.
 - Pasarela de pago: `TODO — pendiente de decidir`
 - Certificador FEL: `TODO — pendiente de decidir`
 
@@ -250,10 +261,14 @@ frontend/
                                   QuoteDrawer, SectionHeader, SiteFooter,
                                   SiteNavbar, SupplierMarquee
       ui/                         Button, FilterChip
-    data/                         datos estáticos; la base de datos solo guarda leads
-      products.ts                 313 productos con specs y filtros (~9 900 líneas)
+    data/
+      products.ts                 los 313 productos escritos a mano (~9 900 líneas).
+                                  YA NO es la fuente de verdad: manda la base de datos.
+                                  Es la red si Neon no responde y la base de las pruebas.
+      productRow.ts               traducción producto <-> fila, y listas de columnas
       publicProduct.ts            recorta el producto interno a lo que ve el navegador
-      catalog.server.ts           acceso solo-servidor al catálogo
+      catalog.server.ts           lee el catálogo de Postgres, con caché por etiqueta
+                                  (CATALOG_CACHE_TAG) y vuelta al código si falla
       catalogTaxonomy.ts          taxonomía pública de tipos y aplicaciones
       catalogBrands.internal.ts   marcas del proveedor — NUNCA llega al cliente
       catalogSeries.internal.ts   series del proveedor — NUNCA llega al cliente
@@ -261,7 +276,11 @@ frontend/
       projects.ts                 galería de obra ejecutada
       siteData.ts                 navegación, contacto, home, FAQ, proveedores
     lib/formatters.ts             formateo de números y moneda
-  db/001_leads.sql                esquema de la tabla de leads
+  db/                             migraciones SQL, se aplican en orden con db:migrar
+    001_leads.sql                 solicitudes de asesoría
+    002_products.sql              catálogo de productos, comentado campo por campo
+  scripts/                        utilidades de línea de comandos (ver "Comandos")
+  docs/CONTINUAR-PANEL.md         hoja de traspaso: qué falta y cómo hacerlo
   tests/                          Playwright: catálogo, cotización y fronteras de datos
   public/
     logo_econoluz.png
@@ -289,6 +308,28 @@ buscador, resumen de cotización— hay que comprobar que no reabra esa puerta.
 
 Fuera de `frontend/`, la carpeta hermana `Imagenes/` guarda el original del logo.
 No entra en el build ni está en el repositorio.
+
+### Comandos
+
+```bash
+npm run dev                # servidor de desarrollo
+npm run build              # compilación de producción
+npm run typecheck          # tsc --noEmit
+npm run lint
+npx playwright test        # batería completa
+
+npm run db:migrar          # aplica las migraciones de db/ que falten, repetible
+npm run catalogo:importar  # sube los productos del código a Neon y verifica el resultado
+npm run catalogo:verificar # ensayo de la migración, sin tocar la base de datos
+npm run catalogo:auditar   # busca nombres de proveedor en el catálogo público
+```
+
+Los scripts de `scripts/` importan los datos `.ts` del proyecto sin compilar, gracias
+al gancho `register-ts.mjs`. Cualquier script nuevo que haga lo mismo necesita
+`--import ./scripts/register-ts.mjs`.
+
+**La consola es Windows PowerShell 5.1 y no entiende `&&`.** Los comandos que se le den
+al dueño del proyecto van en líneas separadas.
 
 ### Regla crítica de versión
 
@@ -354,15 +395,36 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    con definir esas tres variables en Vercel; no hay que tocar código.
 
    Hasta entonces, las solicitudes solo se ven consultando la tabla `leads`. Conviene
-   revisarla a diario o el lead se guarda pero nadie se entera.
-3. **Falta `og:image`** y el `twitter:card` está en `summary` en lugar de
+   revisarla a diario o el lead se guarda pero nadie se entera. Queda ahí una solicitud
+   de prueba (`id = 1`, «PRUEBA TECNICA - no es un cliente») que sirvió para comprobar
+   que producción guardaba de verdad; se puede borrar cuando el dueño quiera.
+3. **El catálogo público todavía nombra a los proveedores.** `npm run catalogo:auditar`
+   lo lista: **30 nombres distintos en unas 556 apariciones**, en dos formas.
+
+   - **Las rutas de las fotos** (`/catalogos/construlita/…`, `/highlum/…`, `/artlite/…`)
+     llevan la marca en el nombre de la carpeta, en los 313 productos. El nombre del
+     archivo sí está anonimizado; la carpeta no. Se ve con clic derecho sobre una foto.
+     Se arregla con código.
+   - **Los textos**: «Magnetrack Pro», «Nanovia», «Corvus», «Vialed», «Wallpack»,
+     «Softglow»… en 62 descripciones y 22 fichas técnicas. Y «Magnetrack Pro» y
+     «Wallpacks» son además **categorías visibles del filtro**. Esto será mucho más
+     fácil de corregir cuando exista el panel y el dueño pueda editar los textos él.
+
+   El dueño ya lo sabe. Es contenido, no un fallo: **no cambiarlo sin hablarlo con él.**
+4. **Una prueba falla desde antes de la migración.**
+   `tests/catalog-quote.spec.ts:891` falla de forma determinista. Comprobado sobre el
+   código anterior a la base de datos: falla igual. Las otras 87 pasan. No perder tiempo
+   creyendo que es una regresión.
+5. **Falta `og:image`** y el `twitter:card` está en `summary` en lugar de
    `summary_large_image`. Casi todo se comparte por WhatsApp en Guatemala.
-4. **Regresión de SEO.** El sitio viejo posiciona para "lámparas LED Guatemala".
+6. **Regresión de SEO.** El sitio viejo posiciona para "lámparas LED Guatemala".
    El título nuevo ("Catálogo de iluminación por cotización") no lo busca nadie.
    Hay que conservar las palabras clave reales y mapear redirects 301 desde las
    URLs viejas de WordPress.
-5. **Xela está subrepresentado.** El sitio anterior tenía páginas dedicadas
+7. **Xela está subrepresentado.** El sitio anterior tenía páginas dedicadas
    que probablemente generan tráfico local; ahora solo hay menciones en el footer.
+8. **`app/components/ui/FilterChip.tsx` quedó sin usar** al retirar el filtro de series.
+   No se borró porque la sección 9 prohíbe borrar archivos sin preguntar antes.
 
 ---
 
@@ -418,6 +480,11 @@ Aplican a la pista de tienda y condicionan el diseño del checkout:
   Cualquier dato que yo vaya a mantener —productos, precios, existencias, fotos— no
   debería nacer escrito dentro del código.
 - Recuérdame en qué punto del plan general estamos, no solo el plan de la tarea de hoy.
+- **Mantén los `.md` al día mientras trabajas, no al final.** Actualizar este archivo y
+  `docs/CONTINUAR-PANEL.md` forma parte de terminar un paso, igual que pasar las
+  pruebas. Trabajo a caballo entre herramientas y con límite de tokens: si la
+  documentación describe un estado que ya no existe, quien retome el proyecto —otra
+  persona u otro agente— actuará sobre información falsa.
 
 ---
 
@@ -425,14 +492,21 @@ Aplican a la pista de tienda y condicionan el diseño del checkout:
 
 El orden importa: cada paso desbloquea al siguiente.
 
-**Ahora — publicar lo que ya existe.** Apuntar el DNS de `econoluzgt.com` a Vercel y
-definir `DATABASE_URL` en Vercel con `db/001_leads.sql` ya ejecutado en Neon. Las dos son
-tareas de paneles, no de código, y las hace el dueño del proyecto.
+**Publicar lo que ya existe.** `DATABASE_URL` ya está en Vercel y las solicitudes de
+asesoría se guardan de verdad en producción, comprobado enviando una al sitio publicado.
+**Sigue pendiente apuntar el DNS de `econoluzgt.com` a Vercel**: hoy ese dominio todavía
+sirve el WordPress viejo y solo `econoluz-gt.vercel.app` tiene el sitio nuevo. Es una
+tarea de paneles, no de código, y la hace el dueño del proyecto.
 
-**Paso 1 — Productos en base de datos y panel de administración.** Sacar los 313 productos
-de `app/data/products.ts` y llevarlos a Postgres, con una interfaz protegida para crear,
-editar, fotografiar y publicar producto. Es lo que da autonomía y lo que permite cargar
-los productos que aún faltan.
+**Paso 1 — Productos en base de datos y panel de administración.** En curso.
+
+- ~~Los 313 productos a Postgres~~, verificados campo por campo contra la huella
+  congelada del catálogo.
+- ~~Que `/catalogo` los lea de la base de datos~~, comprobado despublicando un producto
+  y viendo que la página pasaba de 313 a 312.
+- Falta la entrada al panel, el panel de productos, la subida de fotos a Vercel Blob y
+  la galería de proyectos. **El plan detallado de cada uno está en
+  `docs/CONTINUAR-PANEL.md`**, escrito para poder retomarse sin contexto previo.
 
 **Paso 2 — Tienda.** Precio y compra conviviendo con la cotización: carrito, checkout con
 NIT, cobro, factura FEL y existencias. Depende del paso 1, porque sin panel no hay dónde
