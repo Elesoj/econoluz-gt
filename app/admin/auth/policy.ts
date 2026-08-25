@@ -32,7 +32,10 @@ export function getSessionExpiry(now: Date) {
 }
 
 export function shouldRenewSession(expiresAt: Date, now: Date) {
-  return expiresAt.getTime() <= getSessionExpiry(now).getTime() - SESSION_RENEWAL_INTERVAL_MS;
+  return (
+    expiresAt.getTime() > now.getTime() &&
+    expiresAt.getTime() <= getSessionExpiry(now).getTime() - SESSION_RENEWAL_INTERVAL_MS
+  );
 }
 
 export function getSessionCookieOptions(
