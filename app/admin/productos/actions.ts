@@ -10,6 +10,8 @@ import { esRutaDeImagenValida } from "./imagenes";
 import { subirFoto } from "./imagenes.server";
 import { parsearExistencias, parsearPrecio } from "./list";
 import { guardarCambiosProducto } from "./list.server";
+import { crearProductoEnCatalogo } from "./nuevo.server";
+import { prefijoSugerido, validarPrefijo } from "./nuevo";
 
 /** Se muestran los primeros errores; la URL no es sitio para una lista larga. */
 const MAXIMO_ERRORES_MOSTRADOS = 3;
@@ -166,4 +168,90 @@ export async function guardarFicha(datos: FormData) {
   updateTag(CATALOG_CACHE_TAG);
 
   redirect(`/admin/productos/${referencia}?guardado=1`);
+}
+
+/**
+ * Da de alta un producto que todavía no existe.
+ *
+ * Al terminar lleva a su ficha, que es donde se completan el precio, las
+ * existencias y los datos del fabricante: el alta pide lo imprescindible para
+ * que el producto exista y sea encontrable.
+ */
+export async function crearProductoNuevo(datos: FormData) {
+  await verificarSesionParaAccion();
+
+  const volver = (mensaje: string) => {
+    const destino = new URLSearchParams({ error: mensaje });
+    redirect(`/admin/productos/nuevo?${destino.toString()}`);
+  };
+
+  const tipo = String(datos.get("tipo") ?? "");
+
+  // Vacío significa "el que corresponda al tipo": así no hay que teclearlo
+  // cada vez y sigue pudiéndose cambiar cuando interese.
+  const prefijoEscrito = String(datos.get("prefijo") ?? "").trim();
+  const prefijo = prefijoEscrito === "" ? prefijoSugerido(tipo) : prefijoEscrito;
+  const prefijoValido = validarPrefijo(prefijo);
+  if (!prefijoValido.ok) {
+    volver(prefijoValido.error);
+    return;
+  }
+
+  // La foto se sube antes de crear nada: si falla, no queda un producto a
+  // medias en el catálogo. El nombre lleva "nuevo" porque todavía no hay
+  // referencia; al cambiar la foto desde la ficha pasará a llevarla.
+  let imagen = String(datos.get("imagen") ?? "").trim();
+  const archivo = datos.get("foto");
+  if (archivo instanceof File && archivo.size > 0) {
+    const subida = await subirFoto("nuevo", archivo);
+    if (!subida.ok) {
+      volver(subida.error);
+      return;
+    }
+    imagen = subida.url;
+  }
+
+  if (!esRutaDeImagenValida(imagen)) {
+    volver("El producto necesita una foto: súbela o escribe la ruta de una que ya exista.");
+    return;
+  }
+
+  const validacion = validarFichaProducto({
+    nombre: String(datos.get("nombre") ?? ""),
+    descripcion: String(datos.get("descripcion") ?? ""),
+    imagen,
+    tipo,
+    aplicacion: String(datos.get("aplicacion") ?? ""),
+    acabado: "",
+    acabadoEtiqueta: "",
+    familia: String(datos.get("familia") ?? ""),
+  });
+
+  if (!validacion.ok) {
+    volver(validacion.errores.join(" "));
+    return;
+  }
+
+  const campos: Record<string, string> = {};
+  for (const campo of CAMPOS_FICHA_TECNICA) {
+    campos[campo.clave] = String(datos.get(`spec_${campo.clave}`) ?? "");
+  }
+
+  const referencia = await crearProductoEnCatalogo({
+    prefijo: prefijoValido.valor,
+    nombre: validacion.datos.nombre,
+    descripcion: validacion.datos.descripcion,
+    imagen: validacion.datos.imagen,
+    tipo: validacion.datos.tipo,
+    tipoEtiqueta: validacion.datos.tipoEtiqueta,
+    aplicacion: validacion.datos.aplicacion,
+    aplicacionEtiqueta: validacion.datos.aplicacionEtiqueta,
+    familia: validacion.datos.familia,
+    fichaTecnica: fichaTecnicaDesdeFormulario(campos, String(datos.get("caracteristicas") ?? "")),
+    publicado: datos.get("publicado") === "on",
+  });
+
+  updateTag(CATALOG_CACHE_TAG);
+
+  redirect(`/admin/productos/${referencia}?creado=1`);
 }

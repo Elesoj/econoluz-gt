@@ -75,10 +75,18 @@ export default async function ProductosPage({
           >
             ← Panel
           </Link>
-          <h1 className="mt-4 text-3xl font-semibold sm:text-4xl">Productos</h1>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+            <h1 className="text-3xl font-semibold sm:text-4xl">Productos</h1>
+            <Link
+              href="/admin/productos/nuevo"
+              className="min-h-11 rounded-full bg-tienda px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-tienda-fuerte"
+            >
+              Nuevo producto
+            </Link>
+          </div>
           <p className="mt-3 text-white/75">
             Escribe el precio y las existencias directamente en la fila, y guarda todos los
-            cambios de la página de una vez.
+            cambios de la página de una vez. Pulsa el nombre para abrir su ficha completa.
           </p>
         </div>
       </section>
@@ -256,7 +264,7 @@ export default async function ProductosPage({
               </p>
               <button
                 type="submit"
-                className="min-h-11 rounded-full bg-tienda px-7 text-sm font-semibold text-white transition duration-300 hover:bg-tienda-fuerte"
+                className="min-h-11 rounded-full bg-proyectos px-7 text-sm font-semibold text-white transition duration-300 hover:bg-proyectos-fuerte"
               >
                 Guardar cambios
               </button>

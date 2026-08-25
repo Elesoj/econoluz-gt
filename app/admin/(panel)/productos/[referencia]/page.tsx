@@ -52,6 +52,7 @@ export default async function FichaProductoPage({
 
   const error = typeof consulta.error === "string" ? consulta.error : "";
   const guardado = consulta.guardado === "1";
+  const creado = consulta.creado === "1";
   const aplicacionesDelTipo = aplicacionesDe(producto.tipo);
 
   return (
@@ -70,6 +71,13 @@ export default async function FichaProductoPage({
       </section>
 
       <div className="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8">
+        {creado ? (
+          <p className="mb-6 border-l-2 border-tienda bg-neutral-50 px-4 py-3 text-sm text-proyectos">
+            Producto creado con la referencia <strong>{producto.referencia}</strong>. Aquí puedes
+            completar el precio, las existencias y los datos del fabricante.
+          </p>
+        ) : null}
+
         {guardado ? (
           <p className="mb-6 border-l-2 border-proyectos bg-neutral-50 px-4 py-3 text-sm text-proyectos">
             Guardado. El catálogo de la web ya muestra el cambio.

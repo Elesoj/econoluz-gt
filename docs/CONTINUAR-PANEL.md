@@ -7,15 +7,58 @@ por ejemplo) pueda seguir el trabajo sin haber estado en las conversaciones prev
 Ahí están las reglas del proyecto, la marca, las convenciones y lo que no se toca.
 Este documento no las repite: las da por leídas.
 
-Rama de trabajo: **`panel-admin`**. Nada de esto está publicado ni fusionado a `main`.
+Rama de trabajo: **`panel-admin-auth`**, en el worktree `.worktrees/panel-admin-auth`.
+Nada de esto está publicado, ni fusionado a `panel-admin`, ni a `main`.
+
+---
+
+## 0. Estado en dos minutos (última actualización: 25/08/2026)
+
+**El panel funciona y se usa.** Hay un administrador dado de alta y se ha entrado desde el
+navegador. Lo construido:
+
+| | Estado |
+|---|---|
+| Los 313 productos en Postgres (Neon) | ✅ |
+| El catálogo público los lee de la base de datos | ✅ |
+| **b.** Entrada al panel: usuarios, sesiones, límite de intentos | ✅ activo en local |
+| **c.** Panel de productos: listado, edición en línea, ficha completa y alta | ✅ |
+| **d.** Subida de fotos a Vercel Blob | ✅ almacén creado y probado |
+| **e.** Galería de proyectos | ❌ **lo siguiente** |
+
+Rutas del panel: `/admin` (portada con cifras del catálogo), `/admin/entrar`,
+`/admin/productos` (listado con edición en línea), `/admin/productos/nuevo` y
+`/admin/productos/<referencia>` (ficha completa).
+
+**Comprobaciones:** `npm run test:admin` (87 pruebas de unidad), `npm run typecheck`,
+`npm run lint`, `npm run build` y `npx playwright test`. La batería de navegador tiene
+**un fallo histórico conocido** en `tests/catalog-quote.spec.ts:891` (§10.2): es anterior
+a todo este trabajo y no debe confundirse con una regresión.
+
+> **Ojo con Playwright:** levanta su propio servidor y Next no arranca dos del mismo
+> proyecto. Si hay un `npm run dev` abierto, las pruebas de navegador fallan con
+> «Process from config.webServer was not able to start». Cerrar el `dev` primero.
+
+**Lo que falta, por orden:**
+
+1. **Paso e — galería de proyectos** (§8). Es el último bloque del paso 1.
+2. **Operativo, del dueño:** añadir `ADMIN_SESSION_SECRET` a Vercel antes de desplegar el
+   panel, y decidir si esta rama se integra en `panel-admin`.
+3. **Paso 2 — la tienda B2C**, que es otro proyecto entero.
+
+**Lo que el dueño ya hizo y no hay que repetir:** generar `ADMIN_SESSION_SECRET` local,
+aplicar las migraciones en Neon, crear su usuario administrador y crear el almacén Blob
+(`econoluz-gt-blob`, región iad1, acceso público) con su `BLOB_READ_WRITE_TOKEN` ya en
+`.env.local`.
 
 ---
 
 ## 1. Dónde estamos
 
 El objetivo del paso 1 es que **el dueño del proyecto pueda cargar y editar los
-productos él mismo**, sin depender de un programador. Hoy los productos ya no viven
-en el código, pero todavía no hay ninguna pantalla para tocarlos.
+productos él mismo**, sin depender de un programador. **Ese objetivo ya está cumplido
+para los productos**: viven en Postgres y hay panel para administrarlos. Falta la galería
+de proyectos, que todavía se edita en `app/data/projects.ts`.
 
 ### Hecho y verificado
 
@@ -684,9 +727,34 @@ listado.
 Verificado: `npm run test:admin` 81/81, `typecheck`, `lint` y `build` limpios, con
 `/admin/productos/[referencia]` como ruta dinámica.
 
-**Siguiente en este paso:** el alta de productos nuevos con la referencia automática
-—el prefijo se sugiere por tipo y se puede cambiar antes de guardar— y después la galería
-de proyectos (paso e).
+**Alta de productos nuevos (25/08/2026).** `/admin/productos/nuevo`, con botón en la
+cabecera del listado. Pide lo imprescindible —nombre, descripción, foto, tipo, aplicación,
+familia y ficha técnica— y al guardar lleva a la ficha del producto recién creado, que es
+donde se completan precio, existencias y datos del fabricante.
+
+- **La referencia se pone sola** con `nextval('econoluz_reference_seq')`, la secuencia que
+  creó `db/002_products.sql` arrancando en 314. Pedirle un número a una secuencia es
+  atómico: dos altas simultáneas no pueden recibir el mismo.
+- **El prefijo se sugiere, no se impone.** El campo se deja vacío y se usa el del tipo
+  (`placas_accesorios → ELE`, `iluminacion_industrial → IND`,
+  `sistemas_lineales_tubos → TUB`, el resto `CAT`), pero se puede escribir otro. Esa
+  decisión está razonada arriba: no existe una regla histórica que recuperar.
+- **El identificador interno del producto nuevo es su referencia en minúsculas**
+  (`eco-tub-0314`). Los 313 antiguos lo tienen con el nombre del proveedor dentro
+  (`construlita-cuasar`); lo nuevo no repite eso.
+- **La posición es la última más diez**, respetando los huecos que deja
+  `POSITION_STEP` para poder intercalar sin renumerar.
+- **Nace sin publicar salvo que se marque la casilla**, para que un producto a medio
+  rellenar no aparezca en la web.
+- La foto del alta se sube con el nombre `productos/nuevo-<aleatorio>.<ext>`, porque
+  todavía no hay referencia cuando se sube. Al cambiarla después desde la ficha, el
+  archivo pasa a llevar la referencia. Es cosmético: ningún nombre lleva datos del
+  proveedor.
+
+**Con esto el paso c está terminado.** El dueño puede crear, editar, publicar, poner
+precio y subir fotos sin tocar código.
+
+**Siguiente:** el paso e, la galería de proyectos (§8).
 
 ### Cómo saber que está terminado
 

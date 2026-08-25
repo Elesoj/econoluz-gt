@@ -106,8 +106,19 @@ buscadores. El diseño está en
 Neon, `ADMIN_SESSION_SECRET` está en `.env.local`, y el primer administrador se creó con
 `npm run admin:crear`. Se comprobó entrando de verdad en `http://localhost:3000/admin`.
 
+**El panel de productos está terminado.** El dueño puede buscar entre los 313, escribir
+precio y existencias directamente en el listado, publicar y despublicar, editar la ficha
+completa de cualquier producto —nombre, descripción, foto, galería, clasificación y ficha
+técnica— y **dar de alta productos nuevos**, con la referencia puesta automáticamente y
+la foto subida desde el navegador a Vercel Blob. Todo el panel es de servidor, sin un
+solo componente de cliente, que es lo que mantiene los datos del proveedor fuera del
+JavaScript descargable.
+
 Su portada muestra el estado real del catálogo leído de Postgres —hoy **313 productos,
 313 publicados, 0 con precio**—, que es la forma de ver de un vistazo lo que falta.
+
+**Lo único que queda del paso 1 es la galería de proyectos**, que sigue viviendo en
+`app/data/projects.ts`.
 
 **Lo que sigue pendiente y bloquea el despliegue:** añadir el mismo
 `ADMIN_SESSION_SECRET` a Vercel. Sin él, el panel no funcionará en el sitio publicado.
@@ -301,9 +312,18 @@ frontend/
       projects.ts                 galería de obra ejecutada
       siteData.ts                 navegación, contacto, home, FAQ, proveedores
     lib/formatters.ts             formateo de números y moneda
+    admin/                        el panel, detrás de autenticación
+      layout.tsx                  metadata `noindex` del panel entero
+      entrar/                     pantalla de acceso pública
+      (panel)/                    zona protegida: portada, productos, ficha y alta
+      sesion/route.ts             renovación de la sesión por actividad
+      auth/                       criptografía, políticas, repositorio y la DAL
+      productos/                  consultas, validación, fotos y Server Actions
+      panelStats.ts               las cifras del catálogo que abren la portada
   db/                             migraciones SQL, se aplican en orden con db:migrar
     001_leads.sql                 solicitudes de asesoría
     002_products.sql              catálogo de productos, comentado campo por campo
+    003_admin.sql                 usuarios, sesiones e intentos de acceso del panel
   scripts/                        utilidades de línea de comandos (ver "Comandos")
   docs/CONTINUAR-PANEL.md         hoja de traspaso: qué falta y cómo hacerlo
   tests/                          Playwright: catálogo, cotización y fronteras de datos
@@ -369,6 +389,9 @@ npm run db:migrar          # aplica las migraciones de db/ que falten, repetible
 npm run catalogo:importar  # sube los productos del código a Neon y verifica el resultado
 npm run catalogo:verificar # ensayo de la migración, sin tocar la base de datos
 npm run catalogo:auditar   # busca nombres de proveedor en el catálogo público
+
+npm run test:admin         # las pruebas de unidad del panel (87)
+npm run admin:crear        # da de alta un administrador o le cambia la contraseña
 ```
 
 Los scripts de `scripts/` importan los datos `.ts` del proyecto sin compilar, gracias
@@ -551,10 +574,12 @@ tarea de paneles, no de código, y la hace el dueño del proyecto.
   congelada del catálogo.
 - ~~Que `/catalogo` los lea de la base de datos~~, comprobado despublicando un producto
   y viendo que la página pasaba de 313 a 312.
-- La entrada al panel está implementada y probada en la rama `panel-admin-auth`, a
-  falta de aplicar la migración, definir el secreto de sesión y crear el primer usuario.
-  Después faltan el panel de productos, la subida de fotos a Vercel Blob y la galería
-  de proyectos.
+- ~~La entrada al panel~~, activa y usada: usuarios en Neon, sesiones revocables y
+  límite de intentos.
+- ~~El panel de productos~~: listado con edición en línea, ficha completa y alta de
+  productos nuevos.
+- ~~La subida de fotos~~ a Vercel Blob, con el almacén ya creado y probado.
+- **Falta la galería de proyectos**, y con eso termina el paso 1.
   **El plan detallado de cada uno está en
   `docs/CONTINUAR-PANEL.md`**, escrito para poder retomarse sin contexto previo.
 
