@@ -244,7 +244,11 @@ especificación discrepan, manda la especificación más reciente.
 
 El plan TDD para implementarlo tarea por tarea está en
 `docs/superpowers/plans/2026-08-25-admin-auth.md`. Cada tarea actualiza este documento
-y termina en un commit propio; todavía no se ha escrito código de producción.
+y termina en un commit propio.
+
+**Task 1 completada (25/08/2026):** las primitivas criptográficas y las políticas de
+acceso viven en `app/admin/auth/crypto.ts` y `app/admin/auth/policy.ts`. Se verificaron
+con `node --test --import ./scripts/register-ts.mjs tests/admin-auth-crypto.test.ts tests/admin-auth-policy.test.ts`.
 
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
