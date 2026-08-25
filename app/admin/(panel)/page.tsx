@@ -1,40 +1,110 @@
+import { formatNumber } from "../../lib/formatters";
 import { verificarSesion } from "../auth/authorization.server";
+import { getCatalogStats } from "../panelStats.server";
 
 // Depende de la cookie: no se puede prerenderizar.
 export const dynamic = "force-dynamic";
 
+const SECCIONES = [
+  {
+    titulo: "Productos",
+    descripcion: "Listar, editar, publicar, poner precio y existencias.",
+    estado: "En construcción",
+  },
+  {
+    titulo: "Galería de proyectos",
+    descripcion: "La obra ejecutada, con el mismo tratamiento que los productos.",
+    estado: "En construcción",
+  },
+];
+
 export default async function PanelPage() {
   // Se vuelve a verificar aquí, junto a los datos, no solo en el layout.
   const usuario = await verificarSesion();
+  const stats = await getCatalogStats();
+
+  const cifras = stats
+    ? [
+        { etiqueta: "Productos en el catálogo", valor: stats.total, nota: null },
+        {
+          etiqueta: "Publicados en la web",
+          valor: stats.publicados,
+          nota:
+            stats.total > stats.publicados
+              ? `${formatNumber(stats.total - stats.publicados)} sin publicar`
+              : "todos visibles",
+        },
+        {
+          etiqueta: "Con precio puesto",
+          valor: stats.conPrecio,
+          nota:
+            stats.total > stats.conPrecio
+              ? `faltan ${formatNumber(stats.total - stats.conPrecio)}`
+              : "catálogo completo",
+        },
+      ]
+    : [];
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        {/* La etiqueta roja ya la lleva la cabecera: repetirla aquí solo
-            duplicaría el acento en la misma vista. */}
-        <h1 className="text-3xl font-semibold text-proyectos sm:text-4xl">
-          Hola, {usuario.name}
-        </h1>
-        <p className="mt-3 max-w-2xl text-base text-proyectos/70">
-          Desde aquí se administrará el contenido de la web sin tocar código. El acceso ya
-          está protegido; las pantallas de contenido llegan en los siguientes pasos.
-        </p>
-      </div>
+    <>
+      {/* El azul marino sí admite superficie: es lo que da peso a la portada y
+          la diferencia de una pantalla blanca cualquiera. CLAUDE.md §3. */}
+      <section className="bg-proyectos text-white">
+        <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+          <h1 className="text-3xl font-semibold sm:text-4xl">Hola, {usuario.name}</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-white/75">
+            Desde aquí se administra el contenido de la web sin tocar código. El acceso ya
+            está protegido; las pantallas de contenido llegan en los siguientes pasos.
+          </p>
 
-      <ul className="grid gap-4 sm:grid-cols-2">
-        <li className="rounded-2xl border border-proyectos/15 p-6">
-          <p className="text-sm font-semibold text-proyectos">Productos</p>
-          <p className="mt-2 text-sm text-proyectos/65">
-            Listar, editar, publicar, poner precio y existencias. En construcción.
-          </p>
-        </li>
-        <li className="rounded-2xl border border-proyectos/15 p-6">
-          <p className="text-sm font-semibold text-proyectos">Galería de proyectos</p>
-          <p className="mt-2 text-sm text-proyectos/65">
-            Mismo tratamiento que los productos. En construcción.
-          </p>
-        </li>
-      </ul>
-    </div>
+          {cifras.length > 0 ? (
+            <dl className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-10">
+              {cifras.map((cifra) => (
+                // El filete rojo es el acento permitido sobre azul marino: como
+                // texto no llegaría al contraste mínimo, como filete sí.
+                <div key={cifra.etiqueta} className="border-t-2 border-tienda-claro pt-4">
+                  <dt className="text-sm text-white/70">{cifra.etiqueta}</dt>
+                  <dd className="mt-2 text-4xl font-semibold tabular-nums sm:text-5xl">
+                    {formatNumber(cifra.valor)}
+                  </dd>
+                  {cifra.nota ? (
+                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-white/55">
+                      {cifra.nota}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="mt-10 border-t-2 border-tienda-claro pt-4 text-sm text-white/70">
+              No se pudo leer el catálogo ahora mismo. El panel funciona igual; vuelve a
+              cargar en un momento.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.28em] text-tienda">
+          Secciones
+        </h2>
+        <ul className="mt-6 grid gap-5 sm:grid-cols-2">
+          {SECCIONES.map((seccion) => (
+            <li
+              key={seccion.titulo}
+              className="border-t-2 border-proyectos bg-neutral-50 p-6"
+            >
+              <div className="flex items-baseline justify-between gap-4">
+                <h3 className="text-lg font-semibold text-proyectos">{seccion.titulo}</h3>
+                <span className="shrink-0 text-xs uppercase tracking-[0.18em] text-neutral-500">
+                  {seccion.estado}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-neutral-600">{seccion.descripcion}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 }

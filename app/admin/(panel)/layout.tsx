@@ -40,7 +40,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 sm:px-8">{children}</main>
+      {/* Sin ancho ni margen aquí: cada pantalla decide, porque las franjas de
+          color van a todo el ancho y el contenido no. */}
+      <main className="flex-1">{children}</main>
 
       <SessionActivity />
     </div>

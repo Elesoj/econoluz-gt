@@ -390,6 +390,25 @@ barra del sitio público, con la etiqueta «PANEL» en rojo y el botón «Salir�
 azul marino. La etiqueta roja de la portada se retiró para no duplicar el acento en la
 misma vista.
 
+**La portada del panel muestra el estado real del catálogo (25/08/2026).** El dueño
+señaló que la pantalla quedaba «todo blanco», que es exactamente el riesgo del §4.4.
+La causa de fondo no era el color: era que la página no tenía nada que enseñar.
+
+Ahora la portada abre con una **franja de azul marino a todo el ancho** —el azul sí
+admite superficie, §3— con el saludo y tres cifras leídas de Postgres: productos en el
+catálogo, publicados en la web y con precio puesto, cada una con su filete rojo encima.
+Hoy son **313, 313 y 0**, comprobado contra Neon. Debajo, las secciones sobre gris muy
+claro con filete azul marino.
+
+- `app/admin/panelStats.ts` hace la consulta y es puro, así que se prueba sin base de
+  datos (`tests/admin-panel-stats.test.ts`). Convierte los `count()` a número: Postgres
+  los devuelve como texto porque son `bigint`.
+- `app/admin/panelStats.server.ts` conecta con Neon. **Si no hay `DATABASE_URL` o la
+  consulta falla, devuelve `null` y la portada se dibuja igual** con un aviso discreto:
+  entrar y navegar no puede depender de que las cifras se puedan leer.
+- El layout del panel ya no impone ancho ni márgenes; cada pantalla decide, porque las
+  franjas de color van a todo el ancho y el contenido no.
+
 ---
 
 ## 5.bis El paso b, terminado en código y pendiente de activar (25/08/2026)
