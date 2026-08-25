@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createAdminAuthRepository } from "../app/admin/auth/repository";
-import { TEST_NOW, createControlledQuery } from "./helpers/admin-auth";
+import { TEST_NOW, createControlledQuery, createInMemoryAuthFixture } from "./helpers/admin-auth";
 
 test("solo reconstruye usuarios activos con todos sus campos de autenticación", async () => {
   const repository = createAdminAuthRepository(
@@ -77,6 +77,21 @@ test("el adaptador devuelve el bloqueo calculado atómicamente por Postgres", as
   });
 });
 
+test("consultar un intento vigente no lo consume ni altera su bloqueo", async () => {
+  const blockedUntil = new Date("2026-08-25T12:15:00.000Z");
+  const repository = createAdminAuthRepository(
+    createControlledQuery({
+      expectedParams: ["clave-anónima", "2026-08-25T12:00:00.000Z", 900],
+      rows: [{ failure_count: 5, blocked_until: blockedUntil.toISOString() }],
+    }),
+  );
+
+  assert.deepEqual(await repository.findCurrentLoginAttempt("clave-anónima", TEST_NOW), {
+    failureCount: 5,
+    blockedUntil,
+  });
+});
+
 test("la limpieza devuelve el recuento de sesiones e intentos caducados", async () => {
   const repository = createAdminAuthRepository(
     createControlledQuery({
@@ -146,4 +161,14 @@ test("guardar un administrador parametriza todos sus datos de autenticación", a
     salt: "cd".repeat(16),
     now,
   });
+});
+
+test("la fixture no crea una sesión cuando falta el usuario", async () => {
+  const fixture = await createInMemoryAuthFixture({ withoutUser: true });
+  const expiresAt = new Date("2026-08-26T00:00:00.000Z");
+
+  await fixture.repository.createSessionForUser("7", "huella", TEST_NOW, expiresAt);
+
+  assert.deepEqual(fixture.state.users, []);
+  assert.deepEqual(fixture.state.sessions, []);
 });

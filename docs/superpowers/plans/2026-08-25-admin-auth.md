@@ -258,8 +258,13 @@ git commit -m "feat: añade las primitivas seguras del panel"
   actualizar el último acceso y limpiar filas caducadas.
 - Los nombres exactos del contrato son `findActiveUserByEmail`,
   `createSessionForUser`, `findValidSession`, `renewSession`, `deleteSession`,
-  `deleteSessionsForUser`, `recordLoginFailure`, `clearLoginAttempt`,
+  `deleteSessionsForUser`, `findCurrentLoginAttempt`, `recordLoginFailure`, `clearLoginAttempt`,
   `deleteExpiredData` y `upsertAdminUser`.
+- `findCurrentLoginAttempt(keyHash, now)` lee sin escribir el intento dentro de la
+  ventana vigente y devuelve su contador y bloqueo, o `null` si no existe o ya venció.
+  El caso de uso lo consulta antes de verificar la contraseña: solo un bloqueo cuyo
+  `blockedUntil` sea posterior a `now` rechaza de inmediato; cuatro fallos no impiden
+  un acierto posterior, que limpia el contador.
 - Produce: `createAdminAuthRepository(query)` en `repository.ts`, comprobable con un
   ejecutor controlado, y `getAdminAuthRepository()` en `repository.server.ts` para Neon.
 - Produce para pruebas: `TEST_NOW`, `TEST_SECRET`, `TEST_TOKEN`,
@@ -393,6 +398,10 @@ git commit -m "feat: prepara usuarios y sesiones en Neon"
 - Consume: `AdminAuthRepository`, primitivas y políticas de las tareas 1 y 2.
 - Produce: `loginAdmin({ email, password, origin }, repository, now, secret)` con
   resultados discriminados `success`, `invalid`, `blocked` o `unavailable`.
+- Tras validar la forma de la entrada y calcular la clave anónima, consulta
+  `findCurrentLoginAttempt` antes de verificar la contraseña. Si el bloqueo sigue
+  vigente devuelve `blocked`; si no, verifica credenciales, registra solo los fallos y
+  limpia el contador únicamente después de un acierto.
 
 - [ ] **Paso 1: escribir pruebas RED con un repositorio en memoria completo**
 
@@ -421,6 +430,21 @@ test("un acceso correcto crea sesión, limpia fallos y actualiza el último acce
   assert.equal(fixture.state.attempts.size, 0);
 });
 
+test("cuatro fallos no bloquean una contraseña correcta y el acierto los limpia", async () => {
+  const fixture = await createInMemoryAuthFixture({
+    userPassword: "frase segura de prueba",
+    previousFailures: 4,
+  });
+  const result = await loginAdmin(
+    { email: "admin@ejemplo.com", password: "frase segura de prueba", origin: "203.0.113.7" },
+    fixture.repository,
+    TEST_NOW,
+    TEST_SECRET,
+  );
+  assert.equal(result.status, "success");
+  assert.equal(fixture.state.attempts.size, 0);
+});
+
 test("correo inexistente y contraseña errónea producen el mismo estado público", async () => {
   const unknown = await createInMemoryAuthFixture({ withoutUser: true });
   const wrong = await createInMemoryAuthFixture({ userPassword: "frase segura de prueba" });
@@ -429,7 +453,7 @@ test("correo inexistente y contraseña errónea producen el mismo estado públic
   assert.equal((await loginAdmin(input, wrong.repository, TEST_NOW, TEST_SECRET)).status, "invalid");
 });
 
-test("el quinto fallo bloquea y el acierto no omite un bloqueo vigente", async () => {
+test("el quinto fallo bloquea y una contraseña correcta no omite un bloqueo vigente", async () => {
   const fixture = await createInMemoryAuthFixture({
     userPassword: "frase segura de prueba",
     previousFailures: 4,

@@ -259,6 +259,14 @@ sesiones y limpieza. Las pruebas enfocadas del repositorio pasaron (9/9), junto 
 `npm run typecheck` y `npm run lint`. **`db/003_admin.sql` no se aplicó:** queda
 pendiente la autorización operativa para ejecutar `npm run db:migrar` contra Neon.
 
+**Corrección posterior de Task 2 (25/08/2026):** el contrato incluye
+`findCurrentLoginAttempt(keyHash, now)`, una lectura no destructiva del contador y del
+bloqueo de la ventana vigente. El caso de uso de entrada debe consultarla antes de
+verificar la contraseña: con cuatro fallos, una contraseña correcta entra y limpia el
+contador; con cinco y un bloqueo vigente, la contraseña correcta se rechaza sin poder
+omitirlo. La fixture ya reproduce que crear una sesión solo funciona para un usuario
+activo existente. `db/003_admin.sql` sigue sin aplicarse.
+
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
 de cada subagente; el contenido, los commits y los informes permanecen en español.

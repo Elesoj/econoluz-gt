@@ -102,6 +102,26 @@ export function createAdminAuthRepository(query: AdminAuthQuery): AdminAuthRepos
       await query("delete from admin_sessions where user_id = $1", [userId]);
     },
 
+    async findCurrentLoginAttempt(keyHash, now) {
+      const rows = await query(
+        `
+          select failure_count, blocked_until
+          from admin_login_attempts
+          where key_hash = $1
+            and window_started_at > $2::timestamptz - ($3 * interval '1 second')
+          limit 1
+        `,
+        [keyHash, toIsoString(now), LOGIN_FAILURE_WINDOW_SECONDS],
+      );
+      const row = rows[0];
+      if (!row) return null;
+
+      return {
+        failureCount: Number(row.failure_count),
+        blockedUntil: row.blocked_until ? new Date(String(row.blocked_until)) : null,
+      } satisfies AdminLoginAttempt;
+    },
+
     async recordLoginFailure(keyHash, now) {
       const rows = await query(
         `

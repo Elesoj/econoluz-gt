@@ -32,6 +32,7 @@ export type AdminAuthRepository = {
   renewSession(tokenHash: string, expiresAt: Date, now: Date): Promise<boolean>;
   deleteSession(tokenHash: string): Promise<void>;
   deleteSessionsForUser(userId: string): Promise<void>;
+  findCurrentLoginAttempt(keyHash: string, now: Date): Promise<AdminLoginAttempt | null>;
   recordLoginFailure(keyHash: string, now: Date): Promise<AdminLoginAttempt>;
   clearLoginAttempt(keyHash: string): Promise<void>;
   deleteExpiredData(now: Date): Promise<{ deletedSessions: number; deletedAttempts: number }>;

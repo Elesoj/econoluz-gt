@@ -124,10 +124,11 @@ export async function createInMemoryAuthFixture(seed: FixtureSeed = {}) {
     },
     async createSessionForUser(userId, tokenHash, now, expiresAt) {
       unavailableIfNeeded(Boolean(seed.failQueries));
-      const user = state.users.find((candidate) => candidate.id === userId);
-      if (user) user.lastLoginAt = now;
+      const user = state.users.find((candidate) => candidate.id === userId && candidate.active);
+      if (!user) return;
+      user.lastLoginAt = now;
       state.sessions.push(
-        createStoredSession({ tokenHash, userId, userName: user?.name ?? "", createdAt: now, expiresAt }),
+        createStoredSession({ tokenHash, userId, userName: user.name, createdAt: now, expiresAt }),
       );
     },
     async findValidSession(tokenHash, now) {
@@ -155,6 +156,14 @@ export async function createInMemoryAuthFixture(seed: FixtureSeed = {}) {
     async deleteSessionsForUser(userId) {
       unavailableIfNeeded(Boolean(seed.failQueries));
       state.sessions = state.sessions.filter((session) => session.userId !== userId);
+    },
+    async findCurrentLoginAttempt(keyHash, now) {
+      unavailableIfNeeded(Boolean(seed.failQueries));
+      const attempt = state.attempts.get(keyHash);
+      if (!attempt || attempt.windowStartedAt.getTime() + LOGIN_FAILURE_WINDOW_MS <= now.getTime()) {
+        return null;
+      }
+      return { failureCount: attempt.failureCount, blockedUntil: attempt.blockedUntil };
     },
     async recordLoginFailure(keyHash, now) {
       unavailableIfNeeded(Boolean(seed.failQueries));
