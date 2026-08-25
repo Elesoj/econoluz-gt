@@ -104,7 +104,11 @@ export async function createInMemoryAuthFixture(seed: FixtureSeed = {}) {
     state.attempts.set(hashLoginAttemptKey("admin@ejemplo.com", "203.0.113.7", TEST_SECRET), {
       failureCount: seed.previousFailures,
       windowStartedAt: TEST_NOW,
-      blockedUntil: null,
+      // Igual que `recordLoginFailure`: alcanzar el límite deja la marca de bloqueo.
+      blockedUntil:
+        seed.previousFailures >= LOGIN_FAILURE_LIMIT
+          ? new Date(TEST_NOW.getTime() + LOGIN_FAILURE_WINDOW_MS)
+          : null,
     });
   }
 

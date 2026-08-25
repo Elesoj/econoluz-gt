@@ -267,6 +267,27 @@ contador; con cinco y un bloqueo vigente, la contraseña correcta se rechaza sin
 omitirlo. La fixture ya reproduce que crear una sesión solo funciona para un usuario
 activo existente. `db/003_admin.sql` sigue sin aplicarse.
 
+**Task 3 completada (25/08/2026):** `app/admin/auth/login.ts` contiene `loginAdmin`, el
+caso de uso de entrada, independiente de Next.js y con el repositorio inyectado. Devuelve
+un resultado discriminado —`success`, `invalid`, `blocked` o `unavailable`— y en el
+acierto deja la sesión ya creada, así que la capa de Next solo tendrá que escribir la
+cookie con el `token` y el `expiresAt` que recibe. Tres decisiones que conviene no
+deshacer sin motivo:
+
+- **Un correo desconocido también ejecuta `verifyPassword`**, contra una credencial
+  señuelo generada al cargar el módulo. Sin eso, un correo que no existe respondería
+  mucho antes que uno que sí, y esa diferencia de tiempo revela qué cuentas hay dadas
+  de alta.
+- **El bloqueo se decide por la marca `blocked_until` o por el contador**, no solo por
+  la marca. Si una fila llegara con el contador agotado y la marca sin rellenar, mirar
+  únicamente la marca dejaría la puerta abierta a la fuerza bruta.
+- **El bloqueo se consulta antes de verificar la contraseña y no consume intentos**, de
+  modo que quien está bloqueado no alarga su propio bloqueo por reintentar.
+
+Se verificó con `node --test --import ./scripts/register-ts.mjs
+tests/admin-auth-login.test.ts` (9/9) y con la unidad completa de autenticación (31/31),
+más `npm run typecheck` y `npm run lint`. `db/003_admin.sql` sigue sin aplicarse.
+
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
 de cada subagente; el contenido, los commits y los informes permanecen en español.

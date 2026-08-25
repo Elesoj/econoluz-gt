@@ -403,7 +403,7 @@ git commit -m "feat: prepara usuarios y sesiones en Neon"
   vigente devuelve `blocked`; si no, verifica credenciales, registra solo los fallos y
   limpia el contador únicamente después de un acierto.
 
-- [ ] **Paso 1: escribir pruebas RED con un repositorio en memoria completo**
+- [x] **Paso 1: escribir pruebas RED con un repositorio en memoria completo**
 
 Casos mínimos:
 
@@ -495,7 +495,7 @@ test("un fallo de Neon se convierte en indisponibilidad sin filtrar detalles", a
 });
 ```
 
-- [ ] **Paso 2: confirmar RED, implementar lo mínimo y confirmar GREEN**
+- [x] **Paso 2: confirmar RED, implementar lo mínimo y confirmar GREEN**
 
 ```powershell
 node --test --import ./scripts/register-ts.mjs tests/admin-auth-login.test.ts
@@ -506,18 +506,26 @@ La primera ejecución debe fallar por ausencia del caso de uso; la segunda debe 
 El camino de correo desconocido debe ejecutar `verifyPassword` con una credencial
 ficticia válida para no crear una diferencia trivial de tiempo.
 
-- [ ] **Paso 3: ejecutar toda la unidad y actualizar documentación**
+- [x] **Paso 3: ejecutar toda la unidad y actualizar documentación**
 
 ```powershell
 node --test --import ./scripts/register-ts.mjs tests/admin-auth-crypto.test.ts tests/admin-auth-policy.test.ts tests/admin-auth-repository.test.ts tests/admin-auth-login.test.ts
 ```
 
-- [ ] **Paso 4: commit**
+- [x] **Paso 4: commit**
 
 ```powershell
 git add app/admin/auth/login.ts tests/admin-auth-login.test.ts docs/CONTINUAR-PANEL.md
 git commit -m "feat: limita y valida el acceso al panel"
 ```
+
+**Notas de implementación (25/08/2026):** el resultado `success` devuelve también
+`token`, `expiresAt` y `userName`, porque la Task 5 necesita esos tres datos para
+escribir la cookie sin volver a consultar Neon. El bloqueo se evalúa con
+`getBlockedUntil`, que acepta la marca `blocked_until` **o** el contador agotado dentro
+de la ventana, y se consulta antes de verificar la contraseña para no consumir intentos
+mientras el bloqueo está vigente. La fixture compartida se corrigió para que sembrar
+cinco fallos deje también la marca de bloqueo, como hace `recordLoginFailure`.
 
 ---
 
