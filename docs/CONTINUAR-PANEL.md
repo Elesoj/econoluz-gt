@@ -108,16 +108,30 @@ db/002_products.sql         el esquema de productos, comentado campo por campo.
 
 ## 4. Reglas que no se pueden romper
 
-### 4.1 El catálogo público no revela a los proveedores
+### 4.1 El catálogo público no expone los datos del proveedor
 
 Es la regla de negocio más importante del proyecto y el dueño ha tenido que repetirla
-dos veces. Marcas (`Artlite`, `Construlita`, `Highlum`), nombres de línea (`Cuasar`,
-`HB Pure`, `Magnetrack Pro`, `Nanovia`…) y códigos de referencia del fabricante **no
-pueden llegar al navegador**.
+dos veces: el cliente no debe poder identificar al fabricante e irse a comprarle
+directamente. Conviene tener clara la diferencia entre lo garantizado y lo pendiente,
+porque no es lo mismo romper una cosa que la otra.
 
-No basta con no pintarlos en pantalla: **tampoco pueden aparecer en el JavaScript
-compilado**. `tests/catalog-production-boundary.spec.ts` revisa los chunks del build
-buscándolos.
+**Garantizado, y con pruebas que lo comprueban.** Los campos internos —`sku`, `brand`,
+`supplierBrand`, `supplierCode`, `productCode`, la serie— **no cruzan al catálogo
+público**. Viven en los `*.internal.ts` y en las columnas `supplier_*`, y
+`publicProduct.ts` decide qué pasa. No basta con no pintarlos en pantalla: **tampoco
+pueden aparecer en el JavaScript compilado**, y
+`tests/catalog-production-boundary.spec.ts` revisa los chunks del build buscándolos.
+**Esto no se puede romper.**
+
+**Deuda conocida, no garantizada.** Siguen apareciendo nombres heredados del proveedor
+dentro de las rutas de las imágenes, de los textos de las descripciones y de la
+taxonomía: 30 nombres en unas 556 apariciones (§9.1). Está documentado y el dueño lo
+sabe. No confundir una cosa con la otra: la regla describe la intención y el mecanismo,
+no un estado ya alcanzado.
+
+**Alcance.** La prohibición se refiere al **catálogo público y a los visitantes sin
+sesión**. El panel, detrás de autenticación, tiene que enseñar esos datos a quien
+administra: son justamente los que edita.
 
 > **Trampa concreta al construir el panel.** El panel SÍ tiene que enseñar los datos
 > del proveedor: para eso es interno. Pero si el formulario de edición es un
@@ -146,11 +160,18 @@ updateTag(CATALOG_CACHE_TAG); // desde una Server Action
   Expira la entrada de inmediato, así que el usuario ve su propio cambio al instante.
   Es justo lo que hace falta aquí.
 - **Desde un Route Handler** o cualquier otro sitio: `updateTag` **lanza un error** —
-  solo funciona dentro de Server Actions. Ahí hay que usar `revalidateTag(tag, "max")`.
+  solo funciona dentro de Server Actions. Ahí, para invalidar de inmediato:
+
+  ```ts
+  revalidateTag(CATALOG_CACHE_TAG, { expire: 0 });
+  ```
+
+- **`revalidateTag(tag, "max")` no vale cuando hay que ver el cambio ya.** Marca la
+  entrada como caducada pero sigue sirviendo la versión vieja mientras refresca por
+  detrás. Es lo correcto para un refresco periódico en segundo plano, y lo incorrecto
+  para alguien que acaba de pulsar «guardar».
 - **`revalidateTag(tag)` con un solo argumento está obsoleto** y avisa por consola.
-  `revalidateTag(tag, "max")` tampoco sirve para el panel: sigue sirviendo la versión
-  vieja mientras refresca por detrás, de modo que el usuario guardaría y vería lo
-  anterior.
+  Hace lo mismo que `updateTag`, pero no hay razón para usarlo.
 
 Funciona con `unstable_cache`, que es lo que usa el catálogo, aunque la documentación
 de `updateTag` hable de `use cache`: comprobado en

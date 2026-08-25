@@ -1,6 +1,8 @@
 ﻿# ECONOLUZ GT
 
-Premium black/white lighting catalog website for ECONOLUZ GT. The project presents architectural, technical, exterior, residential, and accessory lighting references for quotation-based sales in Guatemala.
+Lighting catalog website for ECONOLUZ GT. The project presents architectural, technical, exterior, residential, and accessory lighting references for the Guatemalan market.
+
+The visual identity is the brand's two colours over neutral ground: navy `#001B59` and red `#E11133`, both taken from the logo, on white with a dark neutral base. The colour rules — how much of each, and where not to use them — are in `CLAUDE.md` §3.
 
 Today the site is quotation-only: catalog selections are collected into a temporary quote context and sent through WhatsApp for asesoría técnica. No prices, checkout, payment, or customer accounts are exposed yet.
 
@@ -23,7 +25,7 @@ Today the site is quotation-only: catalog selections are collected into a tempor
 - Responsive premium homepage with ECONOLUZ project imagery
 - Guided catalog UX by product type and application
 - Compact product grid prepared for larger catalogs
-- Search and filters by product type, application, finish, and specs. **Not by brand or series:** those identify the supplier and never reach the public catalog
+- Search and filters by product type, application, finish, and specs. **Not by brand or series:** those identify the supplier. The structured supplier fields never cross into the public catalog and the build artifacts are tested for it, but supplier names inherited in image paths and description text are still present — known debt, see `CLAUDE.md` §7
 - Technical product drawer/modal
 - Quotation/add-to-quote flow without prices
 - WhatsApp message generation from selected products and project form data
@@ -97,8 +99,8 @@ npm run build
 ## Deployment Notes
 
 - The public deployment is managed on Vercel.
-- Product and project images must live under `public/` and be referenced with root-relative paths, for example `/catalogos/construlita/downlight/alfa.png`.
-- Keep catalog image folders structured by brand and family to avoid broken legacy paths such as `/bmw1.jpeg`.
+- **Legacy images** live under `public/` and are referenced with root-relative paths, for example `/catalogos/construlita/downlight/alfa.png`. Do not move, rename or delete them: `CLAUDE.md` §9 forbids it and the paths are literal, so renaming breaks the catalog without failing the build. Keep their brand/family folder structure to avoid broken paths such as `/bmw1.jpeg`.
+- **New images will not go there.** Photos uploaded from the admin panel go to Vercel Blob, because the deployed filesystem is read-only and the owner must be able to add a product without a developer. The database stores whichever form applies, so both must keep working. See `docs/CONTINUAR-PANEL.md` §7.
 - **The catalog is no longer static data.** Products live in the `products` table in Postgres (Neon) and `/catalogo` reads them from there. Editing `app/data/products.ts` changes only the fallback and environments without `DATABASE_URL`.
 - `DATABASE_URL` is required. It is set in Vercel and, for local work, in `.env.local` (see `.env.example`).
 - Run `npm run db:migrar` to apply pending SQL migrations from `db/`.
