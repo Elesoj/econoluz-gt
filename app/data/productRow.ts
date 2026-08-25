@@ -45,6 +45,50 @@ export type ProductRow = {
   published: boolean;
 };
 
+// Las columnas que vienen del catálogo. El orden manda: se usa para construir
+// las consultas, así que vive aquí y no repetida en cada script, porque dos
+// listas separadas acabarían diciendo cosas distintas.
+export const CATALOG_COLUMNS = [
+  "id",
+  "econoluz_reference",
+  "position",
+  "public_name",
+  "public_description",
+  "image",
+  "images",
+  "technical_specs",
+  "product_type",
+  "product_type_label",
+  "application",
+  "application_label",
+  "finish",
+  "finish_label",
+  "family_label",
+  "supplier_brand",
+  "supplier_brand_label",
+  "supplier_series",
+  "supplier_series_label",
+  "supplier_code",
+  "supplier_name",
+  "supplier_description",
+] as const satisfies readonly (keyof ProductRow)[];
+
+// Columnas que administra una persona desde el panel, no el código. Volver a
+// importar el catálogo NO las toca: cargar precios a 313 productos es la tarea
+// más lenta del proyecto y un comando no puede borrarla.
+export const PANEL_COLUMNS = [
+  "price_gtq",
+  "stock",
+  "sellable_online",
+  "published",
+] as const satisfies readonly (keyof ProductRow)[];
+
+// Las dos columnas jsonb: viajan serializadas y hay que marcarlas al insertar.
+export const JSON_COLUMNS: ReadonlySet<string> = new Set(["images", "technical_specs"]);
+
+// Lo mínimo que hace falta para reconstruir un producto del catálogo.
+export type CatalogRow = Pick<ProductRow, (typeof CATALOG_COLUMNS)[number]>;
+
 // Deja huecos entre posiciones para poder intercalar un producto nuevo sin
 // renumerar los 313 que ya existen.
 export const POSITION_STEP = 10;
@@ -100,7 +144,7 @@ export const toProductRow = (product: InternalProduct, index: number): ProductRo
   published: true,
 });
 
-export const fromProductRow = (row: ProductRow): InternalProduct =>
+export const fromProductRow = (row: CatalogRow): InternalProduct =>
   ({
     id: row.id,
     // `sku` y `supplierCode` son el mismo dato con dos nombres, igual que

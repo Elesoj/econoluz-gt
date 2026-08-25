@@ -16,7 +16,13 @@
 
 import { Client, neonConfig } from "@neondatabase/serverless";
 import { products } from "../app/data/products.ts";
-import { fromProductRow, toProductRow } from "../app/data/productRow.ts";
+import {
+  CATALOG_COLUMNS,
+  JSON_COLUMNS,
+  PANEL_COLUMNS,
+  fromProductRow,
+  toProductRow,
+} from "../app/data/productRow.ts";
 import { compareCatalogs, reportProblems } from "./compare-catalog.mjs";
 
 const connectionString = process.env.DATABASE_URL;
@@ -31,37 +37,11 @@ if (!connectionString) {
 
 neonConfig.webSocketConstructor = globalThis.WebSocket;
 
-// El orden manda: es el que se usa para construir el INSERT y para leer de
-// vuelta, así que las dos mitades no se pueden desincronizar.
-const COLUMNS = [
-  "id",
-  "econoluz_reference",
-  "position",
-  "public_name",
-  "public_description",
-  "image",
-  "images",
-  "technical_specs",
-  "product_type",
-  "product_type_label",
-  "application",
-  "application_label",
-  "finish",
-  "finish_label",
-  "family_label",
-  "supplier_brand",
-  "supplier_brand_label",
-  "supplier_series",
-  "supplier_series_label",
-  "supplier_code",
-  "supplier_name",
-  "supplier_description",
-];
-
-// Columnas que administra la persona, no el código. Reimportar no las toca.
-const COLUMNS_DEL_PANEL = ["price_gtq", "stock", "sellable_online", "published"];
-
-const JSON_COLUMNS = new Set(["images", "technical_specs"]);
+// Las listas de columnas viven en app/data/productRow.ts, junto a la
+// traducción entre producto y fila, para que la aplicación y este script no
+// puedan acabar consultando columnas distintas.
+const COLUMNS = CATALOG_COLUMNS;
+const COLUMNS_DEL_PANEL = PANEL_COLUMNS;
 
 const BATCH_SIZE = 50;
 
