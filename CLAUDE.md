@@ -89,18 +89,15 @@ desarrollo local, por ejemplo—. Para cambiar la web se edita la base de datos.
 verificado en producción. La galería de proyectos y el resto del contenido siguen en
 `app/data/*.ts`.
 
-Lo que falta para la autonomía es el **panel de administración**: hoy los productos
-están en base de datos pero no hay ninguna pantalla para tocarlos. El plan paso a paso
-está en `docs/CONTINUAR-PANEL.md`. **Toda la tienda B2C está por construir**, y con
-ella los requisitos operativos de la sección 8 (FEL, pago, inventario, marco legal).
-
-**La entrada al panel ya está escrita**, en la rama `panel-admin-auth` y todavía sin
-fusionar: varios usuarios en Neon, contraseñas con `scrypt`, sesiones revocables con
-HMAC-SHA-256, límite persistente de intentos y caducidad tras doce horas sin actividad.
-`/admin` redirige a `/admin/entrar` si no hay sesión, y el panel queda fuera de los
-buscadores. El diseño está en
-`docs/superpowers/specs/2026-08-25-admin-auth-design.md` y el plan TDD en
+**El panel de administración existe y funciona.** Su acceso está protegido con usuarios
+en Neon, contraseñas con `scrypt`, sesiones revocables con HMAC-SHA-256, límite
+persistente de intentos y caducidad tras doce horas sin actividad. `/admin` redirige a
+`/admin/entrar` sin sesión, y el panel no es indexable. El diseño está en
+`docs/superpowers/specs/2026-08-25-admin-auth-design.md` y el plan que se siguió en
 `docs/superpowers/plans/2026-08-25-admin-auth.md`.
+
+**Toda la tienda B2C sigue por construir**, y con ella los requisitos operativos de la
+sección 8 (FEL, pago, inventario, marco legal).
 
 **El panel ya está activo en local (25/08/2026).** `db/003_admin.sql` está aplicado en
 Neon, `ADMIN_SESSION_SECRET` está en `.env.local`, y el primer administrador se creó con
@@ -120,12 +117,16 @@ Su portada muestra el estado real del catálogo leído de Postgres —hoy **313 
 **Lo único que queda del paso 1 es la galería de proyectos**, que sigue viviendo en
 `app/data/projects.ts`.
 
-**Lo que sigue pendiente y bloquea el despliegue:** añadir el mismo
-`ADMIN_SESSION_SECRET` a Vercel. Sin él, el panel no funcionará en el sitio publicado.
-Y la rama sigue sin fusionar: nada de esto se ha subido ni desplegado.
+**Lo que sigue pendiente y bloquea el despliegue:** añadir `ADMIN_SESSION_SECRET` y
+`BLOB_READ_WRITE_TOKEN` a Vercel. Sin el primero el panel no arranca en el sitio
+publicado; sin el segundo no se pueden subir fotos desde ahí.
 
-Verificación de esa rama: `npm run test:admin` en verde, `typecheck` y `lint` limpios,
-`build` correcto y la batería completa de Playwright con el único fallo histórico de
+Todo el trabajo del panel está integrado en la rama **`panel-admin`**, que es la que vive
+en `frontend/`. **No se ha hecho push ni se ha desplegado nada**: el sitio publicado sigue
+sin panel.
+
+Verificación: `npm run test:admin` en verde, `typecheck` y `lint` limpios, `build`
+correcto y la batería completa de Playwright con el único fallo histórico de
 `catalog-quote.spec.ts:891`.
 
 ---

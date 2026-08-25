@@ -7,8 +7,11 @@ por ejemplo) pueda seguir el trabajo sin haber estado en las conversaciones prev
 Ahí están las reglas del proyecto, la marca, las convenciones y lo que no se toca.
 Este documento no las repite: las da por leídas.
 
-Rama de trabajo: **`panel-admin-auth`**, en el worktree `.worktrees/panel-admin-auth`.
-Nada de esto está publicado, ni fusionado a `panel-admin`, ni a `main`.
+**Carpeta de trabajo: `frontend/`. Rama: `panel-admin`.** Todo el trabajo del panel está
+ya integrado ahí, así que no hace falta entrar en `.worktrees/`. Ese worktree se conserva
+por si hiciera falta consultarlo, pero **la rama viva es `panel-admin`**.
+
+Nada de esto está subido a GitHub ni desplegado: el sitio publicado sigue sin panel.
 
 ---
 
@@ -38,6 +41,11 @@ a todo este trabajo y no debe confundirse con una regresión.
 > **Ojo con Playwright:** levanta su propio servidor y Next no arranca dos del mismo
 > proyecto. Si hay un `npm run dev` abierto, las pruebas de navegador fallan con
 > «Process from config.webServer was not able to start». Cerrar el `dev` primero.
+
+> **Ojo con el worktree y ESLint.** `.worktrees/` vive dentro de `frontend/` y lleva su
+> propia copia del código y de `node_modules`. `eslint.config.mjs` lo excluye a propósito;
+> sin esa exclusión, `npm run lint` analiza el proyecto dos veces y saca cientos de
+> errores que no son del código.
 
 **Lo que falta, por orden:**
 
