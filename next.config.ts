@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  experimental: {
+    serverActions: {
+      // Las fotos del panel viajan dentro de la Server Action que guarda la
+      // ficha, y el límite de fábrica es 1 MB: sin subirlo, cualquier foto de
+      // verdad se rechaza antes de llegar a validarse.
+      bodySizeLimit: "5mb",
+    },
+  },
   images: {
     // Las fotos que se suben desde el panel viven en Vercel Blob, fuera del
     // repositorio. `next/image` se niega a servir imágenes de un dominio que no

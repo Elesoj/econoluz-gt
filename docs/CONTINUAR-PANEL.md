@@ -658,8 +658,35 @@ Verificado: `npm run test:admin` 60/60, `typecheck`, `lint` y `build` limpios
 sin volver a desplegar. Es la prueba de que la invalidación de caché funciona, y necesita
 una sesión abierta, así que la hace el dueño.
 
-**Siguiente en este paso:** la ficha completa de edición y el alta de productos nuevos
-con la referencia automática.
+**Ficha completa de edición (25/08/2026).** `/admin/productos/<referencia>` edita un
+producto entero: nombre, descripción, foto, galería, clasificación, ficha técnica, datos
+del fabricante, precio, existencias y publicación. Se llega pulsando el nombre en el
+listado.
+
+- **La foto se sube desde el navegador a Vercel Blob.** El almacén ya existe
+  (`econoluz-gt-blob`, región iad1, acceso público) y se comprobó subiendo, leyendo sin
+  credenciales y borrando un archivo de prueba. Dependencia nueva: `@vercel/blob`, que es
+  la única forma soportada y estaba aprobada en el paso d.
+- **El nombre del archivo subido se genera con la referencia pública**
+  (`productos/eco-cat-0132-a1b2c3d4.webp`) y **descarta el nombre original**. Los archivos
+  del proveedor se llaman como el proveedor, y la URL de una foto se ve con clic derecho:
+  es justo la deuda de `/catalogos/<marca>/` y no tiene sentido repetirla en lo nuevo.
+- Se aceptan webp, jpg, png y avif hasta 4 MB. `next.config.ts` sube el límite de cuerpo
+  de las Server Actions a 5 MB —el de fábrica es 1 MB y rechazaría cualquier foto real— y
+  declara `*.public.blob.vercel-storage.com` en `images.remotePatterns`, sin lo cual
+  `next/image` se niega a servir las fotos nuevas.
+- El campo de ruta sigue aceptando **las dos formas**: una ruta local de las que ya
+  existen o una URL del almacén. Cualquier otro dominio se rechaza.
+- **Lo que todavía no se edita:** el acabado, y la marca y la serie del proveedor. Son
+  parejas de identificador y etiqueta que otros módulos dan por buenas, y cambiarlas desde
+  un campo de texto las desemparejaría. Se muestran, pero en gris.
+
+Verificado: `npm run test:admin` 81/81, `typecheck`, `lint` y `build` limpios, con
+`/admin/productos/[referencia]` como ruta dinámica.
+
+**Siguiente en este paso:** el alta de productos nuevos con la referencia automática
+—el prefijo se sugiere por tipo y se puede cambiar antes de guardar— y después la galería
+de proyectos (paso e).
 
 ### Cómo saber que está terminado
 

@@ -4,6 +4,10 @@ import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { CATALOG_CACHE_TAG } from "../../data/catalog.server";
 import { verificarSesionParaAccion } from "../auth/authorization.server";
+import { fichaTecnicaDesdeFormulario, validarFichaProducto, CAMPOS_FICHA_TECNICA } from "./ficha";
+import { getProductoFicha, saveProductoFicha } from "./ficha.server";
+import { esRutaDeImagenValida } from "./imagenes";
+import { subirFoto } from "./imagenes.server";
 import { parsearExistencias, parsearPrecio } from "./list";
 import { guardarCambiosProducto } from "./list.server";
 
@@ -73,4 +77,93 @@ export async function guardarProductos(datos: FormData) {
 
   // `redirect` lanza para cortar el render: siempre fuera de un try/catch.
   redirect(`/admin/productos?${destino.toString()}`);
+}
+
+/**
+ * Guarda la ficha completa de un producto.
+ *
+ * Devuelve el error por la dirección, sin JavaScript de cliente: el formulario
+ * entero es de servidor, que es lo que exige §4.1 para que los datos del
+ * proveedor no acaben en un chunk descargable.
+ */
+export async function guardarFicha(datos: FormData) {
+  await verificarSesionParaAccion();
+
+  const referencia = String(datos.get("referencia") ?? "");
+  const destino = new URLSearchParams();
+
+  const actual = await getProductoFicha(referencia);
+  if (!actual) {
+    redirect("/admin/productos?errores=" + encodeURIComponent("Ese producto ya no existe."));
+  }
+
+  // La foto nueva, si la hay, se sube antes de tocar la base de datos: si
+  // fallara la subida, el producto se queda como estaba.
+  let imagen = String(datos.get("imagen") ?? "").trim();
+  const archivo = datos.get("foto");
+  if (archivo instanceof File && archivo.size > 0) {
+    const subida = await subirFoto(referencia, archivo);
+    if (!subida.ok) {
+      destino.set("error", subida.error);
+      redirect(`/admin/productos/${referencia}?${destino.toString()}`);
+    }
+    imagen = subida.url;
+  }
+
+  if (!esRutaDeImagenValida(imagen)) {
+    destino.set(
+      "error",
+      "La ruta de la imagen no vale. Tiene que empezar por / o ser una URL del almacén de fotos.",
+    );
+    redirect(`/admin/productos/${referencia}?${destino.toString()}`);
+  }
+
+  const validacion = validarFichaProducto({
+    nombre: String(datos.get("nombre") ?? ""),
+    descripcion: String(datos.get("descripcion") ?? ""),
+    imagen,
+    tipo: String(datos.get("tipo") ?? ""),
+    aplicacion: String(datos.get("aplicacion") ?? ""),
+    acabado: actual.acabado,
+    acabadoEtiqueta: actual.acabadoEtiqueta,
+    familia: String(datos.get("familia") ?? ""),
+  });
+
+  if (!validacion.ok) {
+    destino.set("error", validacion.errores.join(" "));
+    redirect(`/admin/productos/${referencia}?${destino.toString()}`);
+  }
+
+  const precio = parsearPrecio(String(datos.get("precio") ?? ""));
+  const existencias = parsearExistencias(String(datos.get("existencias") ?? ""));
+  if (!precio.ok || !existencias.ok) {
+    destino.set("error", !precio.ok ? precio.error : "Revisa las existencias.");
+    redirect(`/admin/productos/${referencia}?${destino.toString()}`);
+  }
+
+  const campos: Record<string, string> = {};
+  for (const campo of CAMPOS_FICHA_TECNICA) {
+    campos[campo.clave] = String(datos.get(`spec_${campo.clave}`) ?? "");
+  }
+
+  await saveProductoFicha({
+    referencia,
+    ...validacion.datos,
+    galeria: String(datos.get("galeria") ?? "")
+      .split(/\r?\n/)
+      .map((linea) => linea.trim())
+      .filter((linea) => linea.length > 0),
+    fichaTecnica: fichaTecnicaDesdeFormulario(campos, String(datos.get("caracteristicas") ?? "")),
+    proveedorCodigo: String(datos.get("proveedorCodigo") ?? "").trim(),
+    proveedorNombre: String(datos.get("proveedorNombre") ?? "").trim(),
+    proveedorDescripcion: String(datos.get("proveedorDescripcion") ?? "").trim(),
+    precio: precio.valor,
+    existencias: existencias.valor,
+    seVendeEnLinea: datos.get("seVendeEnLinea") === "on",
+    publicado: datos.get("publicado") === "on",
+  });
+
+  updateTag(CATALOG_CACHE_TAG);
+
+  redirect(`/admin/productos/${referencia}?guardado=1`);
 }

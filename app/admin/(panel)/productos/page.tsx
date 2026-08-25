@@ -202,7 +202,12 @@ export default async function ProductosPage({
                             className="h-12 w-12 shrink-0 rounded-lg object-cover"
                           />
                           <div className="min-w-0">
-                            <p className="truncate font-semibold text-proyectos">{producto.nombre}</p>
+                            <Link
+                              href={`/admin/productos/${producto.referencia}`}
+                              className="block truncate font-semibold text-proyectos underline-offset-4 hover:underline"
+                            >
+                              {producto.nombre}
+                            </Link>
                             <p className="font-mono text-xs text-neutral-500">{producto.referencia}</p>
                           </div>
                         </div>
