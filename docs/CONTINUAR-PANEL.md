@@ -246,6 +246,10 @@ El plan TDD para implementarlo tarea por tarea está en
 `docs/superpowers/plans/2026-08-25-admin-auth.md`. Cada tarea actualiza este documento
 y termina en un commit propio; todavía no se ha escrito código de producción.
 
+Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
+`subagent-driven-development` la necesita literalmente para generar el brief aislado
+de cada subagente; el contenido, los commits y los informes permanecen en español.
+
 La ejecución con subagentes fue autorizada en un worktree aislado:
 `.worktrees/panel-admin-auth`, rama temporal `panel-admin-auth`. La rama `panel-admin`
 no recibirá la implementación hasta que el trabajo completo esté probado, revisado y

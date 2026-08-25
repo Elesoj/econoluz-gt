@@ -81,7 +81,7 @@ los datos.
 
 ---
 
-### Tarea 1: Primitivas criptográficas y políticas
+### Task 1: Primitivas criptográficas y políticas
 
 **Archivos:**
 
@@ -239,7 +239,7 @@ git commit -m "feat: añade las primitivas seguras del panel"
 
 ---
 
-### Tarea 2: Esquema y repositorio de autenticación
+### Task 2: Esquema y repositorio de autenticación
 
 **Archivos:**
 
@@ -380,7 +380,7 @@ git commit -m "feat: prepara usuarios y sesiones en Neon"
 
 ---
 
-### Tarea 3: Caso de uso de inicio de sesión y bloqueo
+### Task 3: Caso de uso de inicio de sesión y bloqueo
 
 **Archivos:**
 
@@ -497,7 +497,7 @@ git commit -m "feat: limita y valida el acceso al panel"
 
 ---
 
-### Tarea 4: Sesión, renovación y DAL de autorización
+### Task 4: Sesión, renovación y DAL de autorización
 
 **Archivos:**
 
@@ -595,7 +595,7 @@ git commit -m "feat: protege y renueva las sesiones del panel"
 
 ---
 
-### Tarea 5: Pantallas de acceso, salida y actividad
+### Task 5: Pantallas de acceso, salida y actividad
 
 **Archivos:**
 
@@ -683,7 +683,7 @@ git commit -m "feat: crea la entrada protegida al panel"
 
 ---
 
-### Tarea 6: Script para crear y recuperar administradores
+### Task 6: Script para crear y recuperar administradores
 
 **Archivos:**
 
@@ -792,7 +792,7 @@ porque no hay dependencias nuevas.
 
 ---
 
-### Tarea 7: Verificación integral y documentación de entrega
+### Task 7: Verificación integral y documentación de entrega
 
 **Archivos:**
 
