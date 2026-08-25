@@ -12,7 +12,7 @@
     "catalogo:importar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/import-products.mjs",
     "catalogo:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs ./scripts/verify-product-rows.mjs",
     "catalogo:auditar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs ./scripts/audit-supplier-leaks.mjs",
-    "test:admin": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/admin-auth-crypto.test.ts tests/admin-auth-policy.test.ts tests/admin-auth-repository.test.ts tests/admin-auth-login.test.ts tests/admin-auth-session.test.ts tests/admin-create-script.test.ts tests/admin-panel-stats.test.ts",
+    "test:admin": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/admin-auth-crypto.test.ts tests/admin-auth-policy.test.ts tests/admin-auth-repository.test.ts tests/admin-auth-login.test.ts tests/admin-auth-session.test.ts tests/admin-create-script.test.ts tests/admin-panel-stats.test.ts tests/admin-productos.test.ts",
     "admin:crear": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/create-admin.mjs"
   },
   "dependencies": {

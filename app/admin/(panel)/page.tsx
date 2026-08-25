@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatNumber } from "../../lib/formatters";
 import { verificarSesion } from "../auth/authorization.server";
 import { getCatalogStats } from "../panelStats.server";
@@ -8,13 +9,15 @@ export const dynamic = "force-dynamic";
 const SECCIONES = [
   {
     titulo: "Productos",
-    descripcion: "Listar, editar, publicar, poner precio y existencias.",
-    estado: "En construcción",
+    descripcion: "Buscar, poner precio y existencias, publicar y ocultar.",
+    estado: "Disponible",
+    href: "/admin/productos",
   },
   {
     titulo: "Galería de proyectos",
     descripcion: "La obra ejecutada, con el mismo tratamiento que los productos.",
     estado: "En construcción",
+    href: null,
   },
 ];
 
@@ -90,17 +93,31 @@ export default async function PanelPage() {
         </h2>
         <ul className="mt-6 grid gap-5 sm:grid-cols-2">
           {SECCIONES.map((seccion) => (
-            <li
-              key={seccion.titulo}
-              className="border-t-2 border-proyectos bg-neutral-50 p-6"
-            >
-              <div className="flex items-baseline justify-between gap-4">
-                <h3 className="text-lg font-semibold text-proyectos">{seccion.titulo}</h3>
-                <span className="shrink-0 text-xs uppercase tracking-[0.18em] text-neutral-500">
-                  {seccion.estado}
-                </span>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-neutral-600">{seccion.descripcion}</p>
+            <li key={seccion.titulo}>
+              {seccion.href ? (
+                <Link
+                  href={seccion.href}
+                  className="block h-full border-t-2 border-tienda bg-neutral-50 p-6 transition duration-300 hover:bg-white hover:shadow-[0_18px_40px_rgba(0,27,89,0.12)]"
+                >
+                  <div className="flex items-baseline justify-between gap-4">
+                    <h3 className="text-lg font-semibold text-proyectos">{seccion.titulo}</h3>
+                    <span className="shrink-0 text-xs uppercase tracking-[0.18em] text-tienda">
+                      {seccion.estado}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-neutral-600">{seccion.descripcion}</p>
+                </Link>
+              ) : (
+                <div className="h-full border-t-2 border-proyectos/30 bg-neutral-50 p-6">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <h3 className="text-lg font-semibold text-proyectos">{seccion.titulo}</h3>
+                    <span className="shrink-0 text-xs uppercase tracking-[0.18em] text-neutral-500">
+                      {seccion.estado}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-neutral-600">{seccion.descripcion}</p>
+                </div>
+              )}
             </li>
           ))}
         </ul>

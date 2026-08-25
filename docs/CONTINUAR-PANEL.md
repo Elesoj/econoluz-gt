@@ -618,6 +618,49 @@ no significa nada funcionalmente, solo forma parte de un identificador único.
 dejarlo escrito en el código. **Preguntar al dueño antes**, porque esas referencias
 son lo que él cita al cotizar y puede tener criterio propio.
 
+### Estado del paso c (25/08/2026) — primera entrega
+
+**Decisiones tomadas con el dueño:**
+
+- Se empieza por el **listado con precio, existencias y publicado editables en la propia
+  fila**, no por la ficha completa. Razón: poner precio a 313 productos entrando y
+  saliendo de cada ficha es inviable, y ésa es la tarea más larga que tiene por delante.
+- **El prefijo de las referencias nuevas no se fija en el código.** El dueño explicó que
+  los prefijos actuales salieron de las carpetas de catálogo de cada proveedor, y al
+  comprobarlo contra la base de datos se vio que **no hay una regla única**: `ECO-ELE` es
+  todo artlite/placas, `ECO-IND` es industrial de dos marcas, `ECO-TUB` son los lineales
+  de highlum y los 4 lineales de construlita se quedaron en `ECO-CAT`. Como la norma
+  nunca existió, la pantalla de alta **sugerirá** el prefijo según el tipo y dejará
+  cambiarlo antes de guardar.
+
+**Construido:** `/admin/productos`, con buscador por nombre y referencia, filtro por tipo
+y por estado (todos, publicados, sin publicar, sin precio), paginación de 25 en 25 y
+edición en línea de precio, existencias y publicado. Un único botón guarda toda la página.
+
+- **Toda la pantalla es de servidor**, sin un solo componente de cliente: es lo que exige
+  §4.1 para que los datos internos no acaben en un chunk de JavaScript.
+- **La fila se identifica por `econoluz_reference`, no por `id`.** La columna `id` es un
+  texto del estilo `construlita-cuasar`: **lleva dentro el nombre del fabricante**, así
+  que ni se lee de la base de datos. Hay una prueba que lo comprueba.
+- **Solo se escriben las filas que cambiaron**, comparando con el valor original que
+  viaja en el formulario.
+- Al guardar se llama a `updateTag(CATALOG_CACHE_TAG)`, que es lo que hace que la web
+  pública muestre el cambio al momento (§4.2).
+- Lo escrito se acepta como se escribe de verdad: `1,250.50`, `Q 1250` o vacío. **Vacío
+  significa «todavía sin precio», que no es lo mismo que cero.** Las existencias son
+  enteras. Un error en una fila no impide guardar las demás; el aviso dice cuáles
+  fallaron.
+
+Verificado: `npm run test:admin` 60/60, `typecheck`, `lint` y `build` limpios
+—`/admin/productos` sale como ruta dinámica— y las 9 pruebas de frontera y de acceso.
+
+**Falta por comprobar en persona:** cambiar un precio en el panel y verlo en `/catalogo`
+sin volver a desplegar. Es la prueba de que la invalidación de caché funciona, y necesita
+una sesión abierta, así que la hace el dueño.
+
+**Siguiente en este paso:** la ficha completa de edición y el alta de productos nuevos
+con la referencia automática.
+
 ### Cómo saber que está terminado
 
 - Cambiar el nombre de un producto en el panel y verlo cambiado en `/catalogo` **sin
