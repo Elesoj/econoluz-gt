@@ -549,7 +549,7 @@ cinco fallos deje también la marca de bloqueo, como hace `recordLoginFailure`.
   `revocarSesionActual()`.
 - Produce: `POST /admin/sesion`, que solo renueva tokens válidos.
 
-- [ ] **Paso 1: escribir pruebas RED de sesión**
+- [x] **Paso 1: escribir pruebas RED de sesión**
 
 ```ts
 import assert from "node:assert/strict";
@@ -592,14 +592,14 @@ test("la actividad amplía la sesión doce horas sin escribir antes de quince mi
 });
 ```
 
-- [ ] **Paso 2: confirmar RED, implementar núcleo y confirmar GREEN**
+- [x] **Paso 2: confirmar RED, implementar núcleo y confirmar GREEN**
 
 ```powershell
 node --test --import ./scripts/register-ts.mjs tests/admin-auth-session.test.ts
 node --test --import ./scripts/register-ts.mjs tests/admin-auth-session.test.ts
 ```
 
-- [ ] **Paso 3: adaptar a Next.js**
+- [x] **Paso 3: adaptar a Next.js**
 
 `authorization.server.ts` debe importar `server-only`, usar `await cookies()` y envolver
 la lectura memoizada con `cache`. Una cookie ausente redirige sin consultar Neon. Las
@@ -610,7 +610,7 @@ El Route Handler responde `204` al renovar, `401` para token inválido y `503` a
 de infraestructura, sin devolver identidad ni expiración. Añadir a `.env.example` el
 comando exacto para generar `ADMIN_SESSION_SECRET`.
 
-- [ ] **Paso 4: ejecutar unidad, typecheck y lint**
+- [x] **Paso 4: ejecutar unidad, typecheck y lint**
 
 ```powershell
 node --test --import ./scripts/register-ts.mjs tests/admin-auth-crypto.test.ts tests/admin-auth-policy.test.ts tests/admin-auth-repository.test.ts tests/admin-auth-login.test.ts tests/admin-auth-session.test.ts
@@ -618,12 +618,19 @@ npm run typecheck
 npm run lint
 ```
 
-- [ ] **Paso 5: actualizar documentación y commit**
+- [x] **Paso 5: actualizar documentación y commit**
 
 ```powershell
 git add app/admin/auth/session.ts app/admin/auth/authorization.server.ts app/admin/sesion/route.ts tests/admin-auth-session.test.ts .env.example docs/CONTINUAR-PANEL.md
 git commit -m "feat: protege y renueva las sesiones del panel"
 ```
+
+**Notas de implementación (25/08/2026):** la cookie se llama `econoluz_admin`. La prueba
+de renovación del paso 1 se adaptó para estrechar el resultado discriminado antes de leer
+`renewed`: tal como estaba escrita se ejecutaba en Node pero `npm run typecheck` la
+rechazaba. La limpieza de filas caducadas se colgó de la renovación efectiva —como mucho
+una cada quince minutos— en lugar de cada validación, para no pagar una escritura por
+carga de página.
 
 ---
 

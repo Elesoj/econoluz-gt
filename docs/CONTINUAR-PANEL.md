@@ -288,6 +288,35 @@ Se verificó con `node --test --import ./scripts/register-ts.mjs
 tests/admin-auth-login.test.ts` (9/9) y con la unidad completa de autenticación (31/31),
 más `npm run typecheck` y `npm run lint`. `db/003_admin.sql` sigue sin aplicarse.
 
+**Task 4 completada (25/08/2026):** `app/admin/auth/session.ts` valida y renueva el
+token sin depender de Next.js, y `app/admin/auth/authorization.server.ts` lo adapta a
+cookies, memoización y redirecciones. La cookie se llama **`econoluz_admin`** (nombre
+elegido en esta tarea; no estaba fijado en la especificación).
+
+- **`verificarSesion()`** es la frontera de las páginas: memoizada con `cache` de React,
+  así que varias llamadas en un mismo render no consultan Neon varias veces. Sin cookie
+  ni siquiera abre conexión.
+- **`verificarSesionParaAccion()`** es la de las Server Actions: vuelve a comprobar
+  junto a la escritura y renueva la cookie si toca, en vez de fiarse de lo que el layout
+  comprobó al cargar la página.
+- **`revocarSesionActual()`** borra primero la fila y después la cookie. Si Neon no
+  contesta, la cookie se retira igual y la fila caduca sola.
+- **`POST /admin/sesion`** renueva por actividad: `204` si sigue en pie, `401` si el
+  token no vale y `503` si falla la infraestructura. No devuelve identidad ni caducidad,
+  para que nada de eso quede al alcance del JavaScript del navegador.
+- **Una sesión inválida y un fallo de Neon son cosas distintas.** Confundirlas cerraría
+  la sesión de todo el mundo cada vez que la base de datos tosiera.
+- La renovación efectiva ocurre como mucho cada quince minutos, y se aprovecha para
+  borrar sesiones e intentos caducados: así las tablas no crecen sin límite sin pagar
+  una escritura por carga de página.
+
+`ADMIN_SESSION_SECRET` está documentada en `.env.example`, incluido el comando exacto
+para generarla. **Sin ella el panel no arranca, a propósito.** Verificado con la unidad
+completa de autenticación (38/38), `npm run typecheck`, `npm run lint`, `npm run build`
+—`/admin/sesion` sale como ruta dinámica— y
+`npx playwright test tests/catalog-production-boundary.spec.ts` (4/4).
+`db/003_admin.sql` sigue sin aplicarse.
+
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
 de cada subagente; el contenido, los commits y los informes permanecen en español.
