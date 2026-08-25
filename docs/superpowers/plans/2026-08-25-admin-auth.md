@@ -745,7 +745,7 @@ el WhatsApp flotante sigue en el sitio público.
 - Produce: `npm run admin:crear`, interactivo, sin eco de contraseña y repetible por
   correo.
 
-- [ ] **Paso 1: escribir prueba RED ejecutando el script como proceso hijo**
+- [x] **Paso 1: escribir prueba RED ejecutando el script como proceso hijo**
 
 Separar el flujo reusable en funciones exportadas sin ejecutar prompts al importar. La
 prueba invoca el script con un repositorio controlado y una entrada controlada para
@@ -800,7 +800,7 @@ test("la ausencia de DATABASE_URL no expone ningún valor de entorno", () => {
 });
 ```
 
-- [ ] **Paso 2: confirmar RED, implementar y confirmar GREEN**
+- [x] **Paso 2: confirmar RED, implementar y confirmar GREEN**
 
 ```powershell
 node --test --import ./scripts/register-ts.mjs tests/admin-create-script.test.ts
@@ -810,7 +810,7 @@ node --test --import ./scripts/register-ts.mjs tests/admin-create-script.test.ts
 La lectura secreta debe restaurar siempre el modo de terminal incluso si se cancela. No
 guardar ni imprimir contraseña, hash, sal o cadena de conexión.
 
-- [ ] **Paso 3: añadir comandos estables y ejecutar toda la unidad**
+- [x] **Paso 3: añadir comandos estables y ejecutar toda la unidad**
 
 Añadir a `package.json`:
 
@@ -827,7 +827,7 @@ npm run typecheck
 npm run lint
 ```
 
-- [ ] **Paso 4: actualizar documentación y commit**
+- [x] **Paso 4: actualizar documentación y commit**
 
 ```powershell
 git add scripts/create-admin.mjs tests/admin-create-script.test.ts package.json package-lock.json docs/CONTINUAR-PANEL.md
@@ -836,6 +836,15 @@ git commit -m "feat: permite crear administradores por terminal"
 
 `package-lock.json` solo se añade si npm lo modificó realmente; no ejecutar instalación
 porque no hay dependencias nuevas.
+
+**Notas de implementación (25/08/2026):** el repositorio de Neon se carga con `import()`
+diferido dentro de `main()`, para que importar el script desde las pruebas no arrastre
+`server-only` ni el driver. La ejecución directa se detecta con
+`pathToFileURL(process.argv[1])` y no comparando sufijos: la ruta del proyecto lleva un
+espacio y en la URL aparece como `%20`. Las teclas de control se comparan con escapes
+(``, ``) en lugar de caracteres literales, que son invisibles en el fuente y
+se pierden al copiar. Los comandos nuevos llevan `--disable-warning=MODULE_TYPELESS_PACKAGE_JSON`
+como los demás del proyecto.
 
 ---
 

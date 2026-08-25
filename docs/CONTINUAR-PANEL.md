@@ -343,6 +343,26 @@ Verificado con `npx playwright test tests/admin-auth.spec.ts` (5/5), `npm run bu
 typecheck` y `npm run lint`. **Nadie puede entrar todavía:** falta aplicar
 `db/003_admin.sql`, definir `ADMIN_SESSION_SECRET` y crear el primer usuario (Task 6).
 
+**Task 6 completada (25/08/2026):** `scripts/create-admin.mjs`, expuesto como
+`npm run admin:crear`, da de alta a quien administra y sirve también para cambiar una
+contraseña olvidada: repetir el mismo correo la reemplaza y **cierra sus sesiones
+abiertas**, que es justo lo que hace falta si la contraseña se cambió porque alguien
+pudo verla.
+
+- Pide nombre y correo a la vista, y la contraseña **sin mostrarla**. El modo de la
+  terminal se restaura siempre, incluso al cancelar con Ctrl+C: dejarla sin eco obliga
+  a cerrarla.
+- Mínimo doce caracteres. `scrypt` frena la fuerza bruta, no la adivinanza.
+- Sin `DATABASE_URL` avisa con una sola línea y sale con código 1, sin imprimir ningún
+  valor del entorno ni la cadena de conexión.
+- No hay pantalla pública de registro a propósito: dar de alta exige la terminal del
+  proyecto y la cadena de conexión.
+
+Comandos nuevos en `package.json`: **`npm run admin:crear`** y **`npm run test:admin`**,
+que ejecuta de una vez las seis baterías de autenticación (44 pruebas). Verificado con
+`npm run test:admin` (44/44), `npm run typecheck` y `npm run lint`. No se añadió ninguna
+dependencia.
+
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
 de cada subagente; el contenido, los commits y los informes permanecen en español.
