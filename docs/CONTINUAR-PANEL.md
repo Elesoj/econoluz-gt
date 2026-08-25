@@ -242,6 +242,10 @@ de archivos, los flujos, los errores y las pruebas, está en
 `docs/superpowers/specs/2026-08-25-admin-auth-design.md`. Si este resumen y aquella
 especificación discrepan, manda la especificación más reciente.
 
+El plan TDD para implementarlo tarea por tarea está en
+`docs/superpowers/plans/2026-08-25-admin-auth.md`. Cada tarea actualiza este documento
+y termina en un commit propio; todavía no se ha escrito código de producción.
+
 ### Qué construir
 
 1. **Migración `db/003_admin.sql`:**

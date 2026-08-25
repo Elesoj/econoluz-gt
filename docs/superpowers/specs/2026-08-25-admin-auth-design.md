@@ -1,7 +1,7 @@
 # Diseño del acceso al panel de administración
 
 Fecha: 25/08/2026  
-Estado: diseño conversacional aprobado; pendiente de revisión escrita del dueño  
+Estado: aprobado por el dueño; plan de implementación redactado
 Rama: `panel-admin`
 
 ## 1. Objetivo y alcance
@@ -120,10 +120,13 @@ app/admin/
   (panel)/layout.tsx            cabecera y redirección temprana
   (panel)/page.tsx              inicio protegido del panel
   auth/
+    types.ts                    contratos compartidos sin dependencias de Next
     crypto.ts                   primitivas puras de contraseña, token y HMAC
     policy.ts                   duración, límites y normalización
-    repository.server.ts        consultas de Neon; marcado `server-only`
-    session.server.ts           crear, validar, renovar y revocar sesiones
+    repository.ts               adaptador SQL inyectable y comprobable
+    repository.server.ts        conexión Neon y variables; marcado `server-only`
+    login.ts                    caso de uso de entrada y bloqueo
+    session.ts                  validar y renovar sesiones sin depender de Next
     authorization.server.ts     `verificarSesion()` y autorización de acciones
 ```
 

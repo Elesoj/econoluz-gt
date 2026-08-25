@@ -97,7 +97,8 @@ ella los requisitos operativos de la sección 8 (FEL, pago, inventario, marco le
 El diseño del acceso al panel ya está aprobado y documentado en
 `docs/superpowers/specs/2026-08-25-admin-auth-design.md`: varios usuarios en Neon,
 contraseñas con `scrypt`, sesiones revocables con HMAC-SHA-256, límite persistente de
-intentos y caducidad tras doce horas sin actividad. Todavía no está implementado.
+intentos y caducidad tras doce horas sin actividad. El plan TDD está en
+`docs/superpowers/plans/2026-08-25-admin-auth.md`. Todavía no está implementado.
 
 ---
 
