@@ -124,13 +124,14 @@ ordenar, publicar y ocultar proyectos; ordenar y retirar fotografías de forma r
 y subir varias imágenes directamente a Vercel Blob. `app/data/projects.ts` se conserva
 como respaldo si Neon no responde. La web pública mantiene el mismo diseño y orden.
 
-**Lo que sigue pendiente y bloquea el despliegue:** añadir `ADMIN_SESSION_SECRET` y
-`BLOB_READ_WRITE_TOKEN` a Vercel. Sin el primero el panel no arranca en el sitio
-publicado; sin el segundo no se pueden subir fotos desde ahí.
+**Publicado el 26/08/2026.** El dueño autorizó el despliegue: los 50 commits se
+fusionaron en `main` y se subieron a GitHub, y Vercel desplegó solo. `econoluz-gt.vercel.app`
+sirve ya el catálogo con precios, la galería desde Neon y el panel en `/admin`.
+`ADMIN_SESSION_SECRET` se añadió a Vercel como *Secret* del entorno Production antes de
+subir, para que el primer despliegue lo tuviera.
 
-Todo el trabajo del panel está integrado en la rama **`panel-admin`**, que es la que vive
-en `frontend/`. **No se ha hecho push ni se ha desplegado nada**: el sitio publicado sigue
-sin panel.
+La rama de trabajo era `panel-admin`; tras la fusión, **`main` es la rama viva**. El
+siguiente bloque grande —la tienda— va en su propia rama, como pide la sección 10.
 
 Verificación del 25/08/2026: `npm run test:admin` **129/129**, `typecheck` y `lint`
 limpios, `build` correcto y Playwright **95/96**, con el único fallo histórico de
@@ -602,9 +603,8 @@ tarea de paneles, no de código, y la hace el dueño del proyecto.
   **El plan detallado de cada uno está en
   `docs/CONTINUAR-PANEL.md`**, escrito para poder retomarse sin contexto previo.
 
-Antes de desplegar el panel siguen pendientes `ADMIN_SESSION_SECRET` y
-`BLOB_READ_WRITE_TOKEN` en Vercel, además de la confirmación expresa del dueño para
-hacer push o desplegar.
+**Desplegado el 26/08/2026** en `econoluz-gt.vercel.app`, con autorización expresa del
+dueño. Sigue pendiente apuntar el DNS de `econoluzgt.com`.
 
 **Paso 2 — Tienda.** Precio y compra conviviendo con la cotización: carrito, checkout con
 NIT, cobro, factura FEL y existencias. Depende del paso 1, porque sin panel no hay dónde

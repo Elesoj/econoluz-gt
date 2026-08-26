@@ -11,7 +11,10 @@ Este documento no las repite: las da por leídas.
 ya integrado ahí, así que no hace falta entrar en `.worktrees/`. Ese worktree se conserva
 por si hiciera falta consultarlo, pero **la rama viva es `panel-admin`**.
 
-Nada de esto está subido a GitHub ni desplegado: el sitio publicado sigue sin panel.
+**Publicado el 26/08/2026:** `main` recibió los 50 commits y Vercel desplegó.
+`econoluz-gt.vercel.app` sirve el catálogo con precios, la galería desde Neon y el panel
+en `/admin`. `econoluzgt.com` sigue apuntando al WordPress viejo: ese cambio de DNS lo
+hace el dueño.
 
 ---
 
