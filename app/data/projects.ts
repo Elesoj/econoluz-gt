@@ -1,8 +1,31 @@
 ﻿const projectImages = (folder: string, files: string[]) =>
   files.map((file) => `/proyectos/${folder}/${file}`);
 
+export type ProjectSource = {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  images: string[];
+};
+
+export type PublicProject = Omit<ProjectSource, "id">;
+
+export const toPublicProject = ({
+  type,
+  title,
+  description,
+  images,
+}: ProjectSource): PublicProject => ({
+  type,
+  title,
+  description,
+  images: [...images],
+});
+
 export const projects = [
   {
+    id: "borghetto",
     type: "Edificio",
     title: "Borghetto",
     description: "Proyecto arquitectónico con distintas escenas de iluminación interior y exterior.",
@@ -16,6 +39,7 @@ export const projects = [
     ]),
   },
   {
+    id: "agencia-bmw",
     type: "Automotriz",
     title: "Agencia BMW",
     description: "Iluminación comercial para showroom automotriz y áreas de exhibición.",
@@ -31,6 +55,7 @@ export const projects = [
     ]),
   },
   {
+    id: "torre-once",
     type: "Edificio",
     title: "Torre Once",
     description: "Soluciones de luz para edificio vertical y espacios de circulación.",
@@ -52,6 +77,7 @@ export const projects = [
     ]),
   },
   {
+    id: "san-martin",
     type: "Restaurante",
     title: "San Martin",
     description: "Ambiente gastronómico con iluminación decorativa, funcional y de acento.",
@@ -74,6 +100,7 @@ export const projects = [
     ]),
   },
   {
+    id: "insigne",
     type: "Edificio",
     title: "Insigne",
     description: "Iluminación para áreas comunes, interiores y arquitectura de edificio.",
@@ -91,6 +118,7 @@ export const projects = [
     ]),
   },
   {
+    id: "casa-campo",
     type: "Residencial",
     title: "Casa Campo",
     description: "Proyecto residencial con luz cálida para fachada, recorrido y vida interior.",
@@ -111,6 +139,7 @@ export const projects = [
     ]),
   },
   {
+    id: "la-estacion",
     type: "Centro comercial",
     title: "La Estación",
     description: "Iluminación para espacios comerciales, circulaciones y experiencia pública.",
@@ -128,12 +157,14 @@ export const projects = [
     ]),
   },
   {
+    id: "quo",
     type: "Edificio",
     title: "Quo",
     description: "Aplicaciones arquitectónicas para edificio contemporáneo de uso mixto.",
     images: projectImages("quo", ["quo1.jpeg", "quo2.jpeg", "quo3.jpeg", "quo4.jpeg"]),
   },
   {
+    id: "veka",
     type: "Edificio",
     title: "Veka",
     description: "Iluminación para fachada, interiores y ambientes de edificio moderno.",
@@ -153,6 +184,7 @@ export const projects = [
     ]),
   },
   {
+    id: "desigual",
     type: "Retail",
     title: "Desigual",
     description: "Iluminación comercial para tienda, producto y experiencia de marca.",
@@ -164,12 +196,14 @@ export const projects = [
     ]),
   },
   {
+    id: "geely",
     type: "Automotriz",
     title: "Geely",
     description: "Iluminación para showroom automotriz con enfoque en exhibición y detalle.",
     images: projectImages("geely", ["geely1.jpg", "geely2.jpg", "geely3.jpg"]),
   },
   {
+    id: "perfiles-led",
     type: "Perfiles LED",
     title: "Perfiles LED",
     description: "Aplicaciones de luz lineal para arquitectura, cielos, muros y mobiliario.",
@@ -181,4 +215,4 @@ export const projects = [
       "perfilesled5.jpg",
     ]),
   },
-];
+] satisfies ProjectSource[];
