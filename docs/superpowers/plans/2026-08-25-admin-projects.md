@@ -58,7 +58,6 @@
 ### Pruebas y documentación
 
 - Crear `tests/admin-project-rows.test.ts`.
-- Crear `tests/admin-projects-schema.test.ts`.
 - Crear `tests/projects-public.test.ts`.
 - Crear `tests/admin-projects.test.ts`.
 - Crear `tests/admin-project-images.test.ts`.
@@ -297,39 +296,18 @@ git commit -m "feat: prepara la migración reversible de proyectos"
 **Archivos:**
 - Crear: `db/004_projects.sql`
 - Crear: `scripts/import-projects.mjs`
-- Crear: `tests/admin-projects-schema.test.ts`
 - Modificar: `package.json`
 
 **Interfaces:**
 - Consume: `PROJECT_COLUMNS`, `PROJECT_IMAGE_COLUMNS`, `toProjectRows`, `fromProjectRows`.
 - Produce: tablas `projects` y `project_images` y el comando operativo `npm run proyectos:importar`.
 
-- [ ] **Paso 1: Escribir una prueba roja para las garantías del esquema**
+- [ ] **Paso 1: Crear la migración completa**
 
-Crear `tests/admin-projects-schema.test.ts` para leer `db/004_projects.sql` y exigir:
-
-```ts
-test("el esquema conserva identidad, orden y retirada reversible", () => {
-  const sql = readFileSync(join(process.cwd(), "db/004_projects.sql"), "utf8");
-  assert.match(sql, /create table if not exists projects/i);
-  assert.match(sql, /id\s+text\s+primary key/i);
-  assert.match(sql, /published\s+boolean\s+not null\s+default false/i);
-  assert.match(sql, /create table if not exists project_images/i);
-  assert.match(sql, /visible\s+boolean\s+not null\s+default true/i);
-  assert.match(sql, /unique\s*\(project_id,\s*url\)/i);
-  assert.match(sql, /on delete restrict/i);
-});
-```
-
-- [ ] **Paso 2: Ejecutar y observar el fallo por ausencia de la migración**
-
-```powershell
-node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/admin-projects-schema.test.ts
-```
-
-Resultado esperado: `ENOENT` para `db/004_projects.sql`.
-
-- [ ] **Paso 3: Crear la migración completa**
+El SQL es configuración declarativa y no se prueba buscando cadenas en su propio
+archivo: eso solo detectaría cambios de texto, no comportamiento. La tarea 8 verifica
+sus restricciones de forma funcional al aplicarlo dos veces en Neon y ejecutar después
+la importación y reconstrucción ya cubiertas por las pruebas de la tarea 1.
 
 `db/004_projects.sql` debe contener:
 
@@ -378,7 +356,7 @@ create trigger projects_touch_updated_at
 
 Añadir comentarios SQL en español que expliquen por qué no hay `delete`, por qué el ID no depende del título y por qué las imágenes se ocultan en vez de borrarse.
 
-- [ ] **Paso 4: Implementar el importador con transacción y verificación posterior**
+- [ ] **Paso 2: Implementar el importador con transacción y verificación posterior**
 
 Crear `scripts/import-projects.mjs` siguiendo `scripts/import-products.mjs`:
 
@@ -401,23 +379,22 @@ Añadir a `package.json` cuando ya exista el importador:
 "proyectos:importar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/import-projects.mjs"
 ```
 
-- [ ] **Paso 5: Pasar las pruebas locales sin tocar Neon**
+- [ ] **Paso 3: Pasar las pruebas locales sin tocar Neon**
 
 ```powershell
-node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/admin-projects-schema.test.ts
+node --check scripts/import-projects.mjs
 npm run proyectos:verificar
+npm run test:admin
 npm run typecheck
 npm run lint
 ```
 
 No ejecutar todavía `npm run db:migrar` ni `npm run proyectos:importar`; la activación real está en la tarea 8, después de validar todo el código consumidor.
 
-- [ ] **Paso 6: Añadir las pruebas al agregado del panel y hacer commit**
-
-Añadir `tests/admin-project-rows.test.ts` y `tests/admin-projects-schema.test.ts` a `test:admin`.
+- [ ] **Paso 4: Hacer commit**
 
 ```powershell
-git add db/004_projects.sql scripts/import-projects.mjs tests/admin-projects-schema.test.ts package.json
+git add db/004_projects.sql scripts/import-projects.mjs package.json docs/superpowers/plans/2026-08-25-admin-projects.md
 git commit -m "feat: define el almacenamiento de proyectos en Neon"
 ```
 
