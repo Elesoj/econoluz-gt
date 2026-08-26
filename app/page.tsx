@@ -6,7 +6,7 @@ import ProjectSlider from "./components/ProjectSlider";
 import SectionHeader from "./components/SectionHeader";
 import SiteNavbar from "./components/SiteNavbar";
 import SupplierMarquee from "./components/SupplierMarquee";
-import { projects } from "./data/projects";
+import { getPublicProjects } from "./data/projects.server";
 import {
   collections,
   companyHighlights,
@@ -16,7 +16,9 @@ import {
   homeHero,
   homeNavItems,
 } from "./data/siteData";
-export default function Home() {
+export default async function Home() {
+  const projects = await getPublicProjects();
+
   return (
     <main className="w-full max-w-full overflow-x-hidden bg-white text-black">
       <SiteNavbar

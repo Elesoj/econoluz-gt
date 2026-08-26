@@ -2,16 +2,10 @@
 
 import Image from "next/image";
 import { type PointerEvent, useEffect, useRef, useState } from "react";
-
-type Project = {
-  title: string;
-  type: string;
-  images: string[];
-  description: string;
-};
+import type { PublicProject } from "../data/projects";
 
 type ProjectSliderProps = {
-  projects: Project[];
+  projects: PublicProject[];
 };
 
 export default function ProjectSlider({ projects }: ProjectSliderProps) {
