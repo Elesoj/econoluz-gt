@@ -42,6 +42,56 @@ hace el dueño.
 > `main` sin nada de este trabajo; se comprobó el 26/08/2026 haciendo `checkout` de `main`
 > y ejecutándola. El resto de la suite pasa: 169 pruebas de unidad y 103 de navegador.
 
+---
+
+## 0.1 Qué hacer ahora — leer antes de empezar (26/08/2026)
+
+**Hay dos frentes abiertos y los dos están esperando una decisión del dueño. No avances
+por tu cuenta en ninguno de los dos sin preguntarle.**
+
+### Frente 1 — El carrito, hecho pero sin publicar
+
+Rama `tienda-carrito`, 14 commits, `main` intacto. Todo probado: 169 pruebas de unidad y
+103 de navegador en verde. Verificado además a mano contra la base de datos real, con dos
+productos y su total correcto.
+
+**Decisión pendiente del dueño:** si se fusiona en `main` y se despliega. Se le advirtió
+de la consecuencia y hay que repetírsela antes de publicar: **al desplegar, los 25
+productos con precio (`ECO-ELE-0001` a `ECO-ELE-0025`) quedan a la venta automáticamente**,
+al precio que tengan ese día. Ya no hay una segunda casilla que lo frene.
+
+**Si aprueba publicar:** fusionar en `main`, empujar y dejar que Vercel despliegue. Nada
+más; no hay migración de base de datos en este trabajo.
+
+**Si prefiere seguir construyendo:** lo siguiente del paso 2 es la pieza B, el checkout
+con NIT. No depende de la pasarela de pago, así que se puede hacer entero mientras el
+dueño tramita el alta del comercio.
+
+### Frente 2 — Las fugas del proveedor, diagnosticadas y sin tocar
+
+**Todo el diagnóstico está en `docs/FUGAS-PROVEEDOR.md`.** Se descubrió al auditar el
+catálogo durante el trabajo del carrito. Nada se ha modificado: ni imágenes, ni datos, ni
+descripciones.
+
+Lo que hay que saber sin abrir el informe: la fuga grave **no son los textos, son las
+rutas de las fotos**, que llevan el nombre del fabricante en la carpeta y están vivas en
+producción. De las 62 apariciones en descripciones que denuncia `npm run catalogo:auditar`,
+**solo 38 son reales**; el resto son falsos positivos que no hay que tocar.
+
+**Cuatro decisiones esperan al dueño**, listadas al final del informe. La más importante:
+cómo se llama el sistema «Magnetrack Pro», que son 29 productos y una categoría visible
+del filtro. **Es una decisión comercial, no técnica.**
+
+### Lo que el dueño tiene pendiente, sin código de por medio
+
+1. **Contratar una pasarela de pago.** No sabe cómo se hace; se le explicó el 26/08/2026
+   que empiece por su banco y pida presupuesto también a un procesador local, y qué cuatro
+   preguntas hacer (entorno de pruebas, si el pago ocurre dentro de la web, cómo avisan del
+   pago confirmado, comisión y plazo de depósito). **Bloquea la pieza C del paso 2.**
+2. **Poner precios.** 25 de 313. Es la tarea más lenta del proyecto y no depende de nadie
+   más.
+3. **Apuntar el DNS de `econoluzgt.com`** a Vercel. Sigue sirviendo el WordPress viejo.
+
 > **El catálogo público ya muestra los precios (26/08/2026).** Lo decidió el dueño: si
 > va a ser una tienda B2C, el precio tiene que verse. `PublicProduct.priceGtq` es
 > **opcional a propósito** —cuando el producto no tiene precio el campo no existe y la

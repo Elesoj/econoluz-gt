@@ -494,6 +494,11 @@ entrenamiento. Antes de escribir código, consulta la guía correspondiente en
   **sin acoplar la lógica de compra con la lógica de cotización**.
 - Todo formulario debe persistir el dato antes de abrir WhatsApp
   (ver "Deuda técnica conocida").
+- **Ningún importe que venga del navegador se acepta como bueno.** El navegador guarda
+  referencias y cantidades; los precios se resuelven siempre contra el catálogo del
+  servidor. Vale para el carrito, el checkout y el cobro.
+- **El dinero se suma en centavos enteros**, nunca en coma flotante. `formatPrice` solo
+  al pintar.
 - Accesibilidad: contraste suficiente, textos alternativos en imágenes,
   navegación por teclado funcional.
 - Rendimiento: las imágenes **ya están optimizadas** (430 archivos, 24 MB en total,
@@ -532,24 +537,33 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    revisarla a diario o el lead se guarda pero nadie se entera. Queda ahí una solicitud
    de prueba (`id = 1`, «PRUEBA TECNICA - no es un cliente») que sirvió para comprobar
    que producción guardaba de verdad; se puede borrar cuando el dueño quiera.
-3. **El catálogo público todavía nombra a los proveedores.** `npm run catalogo:auditar`
-   lo lista: **30 nombres distintos en unas 556 apariciones**, en dos formas.
+3. **El catálogo público todavía nombra a los proveedores.**
+   **Diagnóstico completo, con números comprobados, en `docs/FUGAS-PROVEEDOR.md`
+   (26/08/2026). Léelo antes de tocar nada de esto.** Resumen:
 
-   - **Las rutas de las fotos** (`/catalogos/construlita/…`, `/highlum/…`, `/artlite/…`)
-     llevan la marca en el nombre de la carpeta, en los 313 productos. El nombre del
-     archivo sí está anonimizado; la carpeta no. Se ve con clic derecho sobre una foto.
-     Se arregla con código.
-   - **Los textos**: «Magnetrack Pro», «Nanovia», «Corvus», «Vialed», «Wallpack»,
-     «Softglow»… en 62 descripciones y 22 fichas técnicas. Y «Magnetrack Pro» y
-     «Wallpacks» son además **categorías visibles del filtro**. Esto será mucho más
-     fácil de corregir ahora que existe el panel y el dueño puede editar los textos él.
+   - **Las rutas de las fotos** son la fuga grave: `/catalogos/construlita/…`,
+     `/highlum/…`, `/artlite/…` llevan la marca en el nombre de la carpeta, en los 313
+     productos. El nombre del archivo sí está anonimizado; la carpeta no. Se ve con clic
+     derecho sobre una foto. **Comprobado en producción**, no solo en local: 240 + 110 +
+     41 apariciones en el HTML de `/catalogo` de `econoluz-gt.vercel.app`. Y la carpeta
+     `magnetrackpro` añade 29 más.
+   - **Los textos**: son **38 fugas reales**, no las 62 que cuenta la auditoría. El resto
+     son falsos positivos —«Bronce» es un color, «Wallpack» y «Uplight» son vocabulario
+     del sector— y **cambiarlos empeoraría las descripciones sin proteger nada**.
+     «Magnetrack Pro» es además **categoría visible del filtro** en 29 productos y es el
+     único caso que no se puede borrar sin más: hay que decidir cómo se llama el sistema.
+   - **La auditoría tiene un punto ciego:** `scripts/audit-supplier-leaks.mjs` compara los
+     nombres tal cual, así que no encuentra las variantes sin espacios (`magnetrackpro`).
+     Conviene normalizar antes de comparar.
+   - **Dato que abarata el arreglo:** ninguna imagen está todavía en Vercel Blob. Las 391
+     están en `public/`, versionadas en git.
 
    El dueño ya lo sabe. Es contenido, no un fallo: **no cambiarlo sin hablarlo con él.**
 4. **Una prueba falla desde antes de la migración.**
-   `tests/catalog-quote.spec.ts:891` falla de forma determinista. Comprobado sobre el
-   código anterior a la base de datos: falla igual. En la batería del 25/08/2026 las
-   otras 95 pasan. No perder tiempo
-   creyendo que es una regresión.
+   `tests/catalog-quote.spec.ts:891` falla de forma determinista. **Comprobado otra vez el
+   26/08/2026** haciendo `git checkout main` y ejecutándola sin nada del trabajo nuevo:
+   falla igual. En la batería de ese día pasan las otras 103 y las 169 de unidad. No
+   perder tiempo creyendo que es una regresión.
 5. **Falta `og:image`** y el `twitter:card` está en `summary` en lugar de
    `summary_large_image`. Casi todo se comparte por WhatsApp en Guatemala.
 6. **Regresión de SEO.** El sitio viejo posiciona para "lámparas LED Guatemala".
@@ -652,11 +666,21 @@ tarea de paneles, no de código, y la hace el dueño del proyecto.
 **Desplegado el 26/08/2026** en `econoluz-gt.vercel.app`, con autorización expresa del
 dueño. Sigue pendiente apuntar el DNS de `econoluzgt.com`.
 
-**Paso 2 — Tienda.** Precio y compra conviviendo con la cotización: carrito, checkout con
-NIT, cobro, factura FEL y existencias. Depende del paso 1, porque sin panel no hay dónde
-cargar precios ni stock.
+**Paso 2 — Tienda.** Precio y compra conviviendo con la cotización. Se descompone en
+cinco piezas, y solo la primera está hecha:
 
-**En paralelo, y sin código de por medio:** contratar certificador FEL, decidir el medio
-de cobro, redactar los textos legales de venta en línea y —lo más lento— fijar los precios.
+- ~~**A. El carrito.**~~ Terminado el 26/08/2026 en la rama `tienda-carrito`, **sin
+  fusionar ni desplegar**. Diseño en `docs/superpowers/specs/2026-08-26-tienda-carrito-design.md`,
+  plan en `docs/superpowers/plans/2026-08-26-tienda-carrito.md`.
+- **B. Checkout con datos fiscales (NIT).** No depende de nadie de fuera; es lo siguiente
+  que se puede construir.
+- **C. El cobro.** **Bloqueado**: depende de contratar una pasarela de pago, trámite que
+  el dueño todavía no ha empezado. Puede llevar semanas. Eligió cobro con tarjeta.
+- **D. Factura FEL.** Bloqueado: depende de contratar un certificador.
+- **E. Descuento de existencias.**
+
+**En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
+certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar
+los precios (hoy 25 de 313).
 
 **La cotización no se retira en ningún momento.**

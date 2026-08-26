@@ -20,11 +20,22 @@ Next.js y lo sobrescribe en cada arranque, así que nada propio puede vivir dent
    El nombre del archivo es de una herramienta concreta, pero su contenido vale para
    cualquiera que trabaje aquí.
 
-2. **`docs/CONTINUAR-PANEL.md`** contiene el plan del trabajo en curso —el panel de
-   administración— paso a paso, con las decisiones ya tomadas por el dueño, las trampas
-   concretas y cómo verificar cada paso.
+2. **`docs/CONTINUAR-PANEL.md`** contiene el estado del trabajo y **qué hacer ahora**,
+   paso a paso, con las decisiones ya tomadas por el dueño, las trampas concretas y cómo
+   verificar cada paso. **Empieza por su sección «0.1 Qué hacer ahora».**
 
-3. **`docs/superpowers/plans/2026-08-19-econoluz-hardening.md`** es un documento
+3. **`docs/FUGAS-PROVEEDOR.md`** (26/08/2026) es el diagnóstico de los datos del
+   proveedor que hoy se escapan al catálogo público. Está **sin resolver y esperando
+   decisiones del dueño**. Si vas a tocar imágenes, descripciones o la auditoría, léelo
+   antes: corrige varios números del informe automático, que cuenta como fugas cosas que
+   no lo son.
+
+4. **El paso 2, la tienda**, va por su primera pieza. El diseño está en
+   `docs/superpowers/specs/2026-08-26-tienda-carrito-design.md` y el plan ejecutado en
+   `docs/superpowers/plans/2026-08-26-tienda-carrito.md`. El carrito está terminado en la
+   rama `tienda-carrito`, **sin fusionar ni desplegar**.
+
+5. **`docs/superpowers/plans/2026-08-19-econoluz-hardening.md`** es un documento
    **histórico y ya completado**. Sus restricciones («nunca añadir precios,
    autenticación ni base de datos») eran correctas para aquella tarea y **hoy
    contradicen la dirección aprobada**. No lo tomes como norma vigente.
