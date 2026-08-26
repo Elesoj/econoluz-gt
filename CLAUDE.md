@@ -86,8 +86,8 @@ cambia el catálogo de respaldo y sí cambia cualquier entorno sin `DATABASE_URL
 desarrollo local, por ejemplo—. Para cambiar la web se edita la base de datos.
 
 `POST /api/leads` guarda las solicitudes de asesoría en la misma base de datos, y está
-verificado en producción. La galería de proyectos y el resto del contenido siguen en
-`app/data/*.ts`.
+verificado en producción. La galería de proyectos también vive ya en Neon; el resto del
+contenido editorial del home sigue en `app/data/*.ts`.
 
 **El panel de administración existe y funciona.** Su acceso está protegido con usuarios
 en Neon, contraseñas con `scrypt`, sesiones revocables con HMAC-SHA-256, límite
@@ -107,15 +107,16 @@ Neon, `ADMIN_SESSION_SECRET` está en `.env.local`, y el primer administrador se
 precio y existencias directamente en el listado, publicar y despublicar, editar la ficha
 completa de cualquier producto —nombre, descripción, foto, galería, clasificación y ficha
 técnica— y **dar de alta productos nuevos**, con la referencia puesta automáticamente y
-la foto subida desde el navegador a Vercel Blob. Todo el panel es de servidor, sin un
-solo componente de cliente, que es lo que mantiene los datos del proveedor fuera del
-JavaScript descargable.
+la foto subida desde el navegador a Vercel Blob. Las fichas de producto son de servidor,
+que es lo que mantiene los datos del proveedor fuera del JavaScript descargable.
 
 Su portada muestra el estado real del catálogo leído de Postgres —hoy **313 productos,
 313 publicados, 0 con precio**—, que es la forma de ver de un vistazo lo que falta.
 
-**Lo único que queda del paso 1 es la galería de proyectos**, que sigue viviendo en
-`app/data/projects.ts`.
+**El panel de proyectos está terminado y activo en Neon.** Permite crear, editar,
+ordenar, publicar y ocultar proyectos; ordenar y retirar fotografías de forma reversible;
+y subir varias imágenes directamente a Vercel Blob. `app/data/projects.ts` se conserva
+como respaldo si Neon no responde. La web pública mantiene el mismo diseño y orden.
 
 **Lo que sigue pendiente y bloquea el despliegue:** añadir `ADMIN_SESSION_SECRET` y
 `BLOB_READ_WRITE_TOKEN` a Vercel. Sin el primero el panel no arranca en el sitio
@@ -125,9 +126,10 @@ Todo el trabajo del panel está integrado en la rama **`panel-admin`**, que es l
 en `frontend/`. **No se ha hecho push ni se ha desplegado nada**: el sitio publicado sigue
 sin panel.
 
-Verificación: `npm run test:admin` en verde, `typecheck` y `lint` limpios, `build`
-correcto y la batería completa de Playwright con el único fallo histórico de
-`catalog-quote.spec.ts:891`.
+Verificación del 25/08/2026: `npm run test:admin` **129/129**, `typecheck` y `lint`
+limpios, `build` correcto y Playwright **95/96**, con el único fallo histórico de
+`catalog-quote.spec.ts:891`. Neon contiene 12 proyectos publicados y las 104 fotos
+originales visibles; además queda oculta la imagen Blob de la prueba real.
 
 ---
 
@@ -311,20 +313,25 @@ frontend/
       catalogSeries.internal.ts   series del proveedor — NUNCA llega al cliente
       productReferences.ts        referencias públicas de producto
       projects.ts                 galería de obra ejecutada
+      projectRow.ts               traducción reversible proyecto <-> filas
+      projects.server.ts          lectura pública desde Neon, caché y respaldo local
+      projectsQuery.ts            consulta y reconstrucción del contrato público
       siteData.ts                 navegación, contacto, home, FAQ, proveedores
     lib/formatters.ts             formateo de números y moneda
     admin/                        el panel, detrás de autenticación
       layout.tsx                  metadata `noindex` del panel entero
       entrar/                     pantalla de acceso pública
-      (panel)/                    zona protegida: portada, productos, ficha y alta
+      (panel)/                    zona protegida: portada, productos y proyectos
       sesion/route.ts             renovación de la sesión por actividad
       auth/                       criptografía, políticas, repositorio y la DAL
       productos/                  consultas, validación, fotos y Server Actions
+      proyectos/                  consultas, validación, orden, fotos y subidas Blob
       panelStats.ts               las cifras del catálogo que abren la portada
   db/                             migraciones SQL, se aplican en orden con db:migrar
     001_leads.sql                 solicitudes de asesoría
     002_products.sql              catálogo de productos, comentado campo por campo
     003_admin.sql                 usuarios, sesiones e intentos de acceso del panel
+    004_projects.sql              galería de proyectos y sus fotografías
   scripts/                        utilidades de línea de comandos (ver "Comandos")
   docs/CONTINUAR-PANEL.md         hoja de traspaso: qué falta y cómo hacerlo
   tests/                          Playwright: catálogo, cotización y fronteras de datos
@@ -390,8 +397,11 @@ npm run db:migrar          # aplica las migraciones de db/ que falten, repetible
 npm run catalogo:importar  # sube los productos del código a Neon y verifica el resultado
 npm run catalogo:verificar # ensayo de la migración, sin tocar la base de datos
 npm run catalogo:auditar   # busca nombres de proveedor en el catálogo público
+npm run proyectos:verificar # ensayo reversible de los 12 proyectos y 104 fotos
+npm run proyectos:importar  # importa a Neon de forma idempotente y relee el resultado
+npm run proyectos:probar    # prueba cambios reales en Neon y los restaura siempre
 
-npm run test:admin         # las pruebas de unidad del panel (87)
+npm run test:admin         # las pruebas de unidad del panel (129)
 npm run admin:crear        # da de alta un administrador o le cambia la contraseña
 ```
 
@@ -479,12 +489,13 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    - **Los textos**: «Magnetrack Pro», «Nanovia», «Corvus», «Vialed», «Wallpack»,
      «Softglow»… en 62 descripciones y 22 fichas técnicas. Y «Magnetrack Pro» y
      «Wallpacks» son además **categorías visibles del filtro**. Esto será mucho más
-     fácil de corregir cuando exista el panel y el dueño pueda editar los textos él.
+     fácil de corregir ahora que existe el panel y el dueño puede editar los textos él.
 
    El dueño ya lo sabe. Es contenido, no un fallo: **no cambiarlo sin hablarlo con él.**
 4. **Una prueba falla desde antes de la migración.**
    `tests/catalog-quote.spec.ts:891` falla de forma determinista. Comprobado sobre el
-   código anterior a la base de datos: falla igual. Las otras 87 pasan. No perder tiempo
+   código anterior a la base de datos: falla igual. En la batería del 25/08/2026 las
+   otras 95 pasan. No perder tiempo
    creyendo que es una regresión.
 5. **Falta `og:image`** y el `twitter:card` está en `summary` en lugar de
    `summary_large_image`. Casi todo se comparte por WhatsApp en Guatemala.
@@ -569,7 +580,7 @@ asesoría se guardan de verdad en producción, comprobado enviando una al sitio 
 sirve el WordPress viejo y solo `econoluz-gt.vercel.app` tiene el sitio nuevo. Es una
 tarea de paneles, no de código, y la hace el dueño del proyecto.
 
-**Paso 1 — Productos en base de datos y panel de administración.** En curso.
+**Paso 1 — Productos en base de datos y panel de administración.** Terminado en local.
 
 - ~~Los 313 productos a Postgres~~, verificados campo por campo contra la huella
   congelada del catálogo.
@@ -580,9 +591,14 @@ tarea de paneles, no de código, y la hace el dueño del proyecto.
 - ~~El panel de productos~~: listado con edición en línea, ficha completa y alta de
   productos nuevos.
 - ~~La subida de fotos~~ a Vercel Blob, con el almacén ya creado y probado.
-- **Falta la galería de proyectos**, y con eso termina el paso 1.
+- ~~La galería de proyectos~~: 12 proyectos y 104 fotos visibles en Neon, edición,
+  orden, publicación, retirada reversible y subida múltiple desde el panel.
   **El plan detallado de cada uno está en
   `docs/CONTINUAR-PANEL.md`**, escrito para poder retomarse sin contexto previo.
+
+Antes de desplegar el panel siguen pendientes `ADMIN_SESSION_SECRET` y
+`BLOB_READ_WRITE_TOKEN` en Vercel, además de la confirmación expresa del dueño para
+hacer push o desplegar.
 
 **Paso 2 — Tienda.** Precio y compra conviviendo con la cotización: carrito, checkout con
 NIT, cobro, factura FEL y existencias. Depende del paso 1, porque sin panel no hay dónde

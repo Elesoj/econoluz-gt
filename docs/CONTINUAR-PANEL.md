@@ -27,14 +27,15 @@ navegador. Lo construido:
 | **b.** Entrada al panel: usuarios, sesiones, límite de intentos | ✅ activo en local |
 | **c.** Panel de productos: listado, edición en línea, ficha completa y alta | ✅ |
 | **d.** Subida de fotos a Vercel Blob | ✅ almacén creado y probado |
-| **e.** Galería de proyectos | ❌ **lo siguiente** |
+| **e.** Galería de proyectos | ✅ activa en Neon y probada |
 
 Rutas del panel: `/admin` (portada con cifras del catálogo), `/admin/entrar`,
 `/admin/productos` (listado con edición en línea), `/admin/productos/nuevo` y
-`/admin/productos/<referencia>` (ficha completa).
+`/admin/productos/<referencia>` (ficha completa), `/admin/proyectos`,
+`/admin/proyectos/nuevo` y `/admin/proyectos/<id>`.
 
-**Comprobaciones:** `npm run test:admin` (87 pruebas de unidad), `npm run typecheck`,
-`npm run lint`, `npm run build` y `npx playwright test`. La batería de navegador tiene
+**Comprobaciones:** `npm run test:admin` (129 pruebas de unidad), `npm run typecheck`,
+`npm run lint`, `npm run build` y `npx playwright test` (95/96). La batería de navegador tiene
 **un fallo histórico conocido** en `tests/catalog-quote.spec.ts:891` (§10.2): es anterior
 a todo este trabajo y no debe confundirse con una regresión.
 
@@ -49,10 +50,9 @@ a todo este trabajo y no debe confundirse con una regresión.
 
 **Lo que falta, por orden:**
 
-1. **Paso e — galería de proyectos** (§8). Es el último bloque del paso 1.
-2. **Operativo, del dueño:** añadir `ADMIN_SESSION_SECRET` a Vercel antes de desplegar el
-   panel, y decidir si esta rama se integra en `panel-admin`.
-3. **Paso 2 — la tienda B2C**, que es otro proyecto entero.
+1. **Operativo, del dueño:** añadir `ADMIN_SESSION_SECRET` y `BLOB_READ_WRITE_TOKEN` a
+   Vercel y confirmar cuándo se hace push o se despliega la rama `panel-admin`.
+2. **Paso 2 — la tienda B2C**, que es otro proyecto entero.
 
 **Lo que el dueño ya hizo y no hay que repetir:** generar `ADMIN_SESSION_SECRET` local,
 aplicar las migraciones en Neon, crear su usuario administrador y crear el almacén Blob
@@ -64,9 +64,9 @@ aplicar las migraciones en Neon, crear su usuario administrador y crear el almac
 ## 1. Dónde estamos
 
 El objetivo del paso 1 es que **el dueño del proyecto pueda cargar y editar los
-productos él mismo**, sin depender de un programador. **Ese objetivo ya está cumplido
-para los productos**: viven en Postgres y hay panel para administrarlos. Falta la galería
-de proyectos, que todavía se edita en `app/data/projects.ts`.
+productos y proyectos él mismo**, sin depender de un programador. **Ese objetivo está
+cumplido en local**: ambos viven en Postgres y tienen pantallas de administración.
+`app/data/projects.ts` queda únicamente como respaldo público si Neon no responde.
 
 ### Hecho y verificado
 
@@ -81,14 +81,16 @@ de proyectos, que todavía se edita en `app/data/projects.ts`.
 - **La entrada al panel funciona** (paso b, 25/08/2026). `/admin` pide usuario y
   contraseña, la sesión vive en Neon y se puede cerrar. Verificado entrando en local.
   El detalle está en §5.bis.
+- **El panel de productos está terminado**: listado, ficha, alta, publicación, precio,
+  existencias y subida de fotos.
+- **La galería de proyectos está terminada**: 12 proyectos y 104 fotografías originales
+  visibles en Neon, con alta, edición, orden, publicación, ocultación reversible y subida
+  múltiple directa a Blob. La imagen de la prueba real quedó registrada y oculta.
 
 ### Falta
 
-- **c.** El panel de productos (listar, crear, editar, publicar, precio, existencias).
-- **d.** Subida de fotos a Vercel Blob.
-- **e.** La galería de proyectos, con el mismo tratamiento que los productos.
-- **Operativo:** añadir `ADMIN_SESSION_SECRET` a Vercel antes de desplegar el panel, y
-  decidir si la rama `panel-admin-auth` se integra en `panel-admin`.
+- **Operativo:** añadir `ADMIN_SESSION_SECRET` y `BLOB_READ_WRITE_TOKEN` a Vercel y
+  confirmar el push o despliegue de `panel-admin`.
 
 Después de eso empieza el **paso 2**, la tienda B2C, que es otro proyecto entero
 (carrito, checkout con NIT, cobro, factura FEL, existencias).
@@ -496,8 +498,9 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
    montar una sesión válida en el navegador.
 5. Añadir el mismo secreto a Vercel y desplegar **solo con autorización expresa**.
 
-> Los pasos 2 y 3 escriben en Neon. No se ejecutaron: el dueño no ha autorizado tocar la
-> base de datos, y el paso 3 necesita una contraseña que solo él debe escribir.
+> **Nota histórica:** en la primera entrega estos pasos aún no se habían ejecutado. El
+> dueño los completó después; `db/003_admin.sql`, el usuario y el secreto local están
+> activos. `db/004_projects.sql` también quedó aplicado el 25/08/2026.
 
 ### Resultados de la verificación
 
@@ -507,17 +510,17 @@ dinámicas · `tests/admin-auth.spec.ts` 5/5 · `tests/catalog-production-bounda
 4/4 · batería completa **92 pasan y 1 falla**, que es el fallo histórico
 `catalog-quote.spec.ts:891` descrito en §10.2, idéntico al de siempre.
 
-La rama es `panel-admin-auth`, en el worktree `.worktrees/panel-admin-auth`. **No está
-fusionada a `panel-admin` ni a `main`, no se ha hecho push y no se ha desplegado nada.**
+En aquella entrega la rama era `panel-admin-auth`, dentro de
+`.worktrees/panel-admin-auth`. Después se integró localmente en `panel-admin`. No se ha
+hecho push ni se ha desplegado nada.
 
 Los encabezados del plan usan la palabra técnica `Task` porque el extractor de
 `subagent-driven-development` la necesita literalmente para generar el brief aislado
 de cada subagente; el contenido, los commits y los informes permanecen en español.
 
-La ejecución con subagentes fue autorizada en un worktree aislado:
-`.worktrees/panel-admin-auth`, rama temporal `panel-admin-auth`. La rama `panel-admin`
-no recibirá la implementación hasta que el trabajo completo esté probado, revisado y
-el dueño autorice expresamente su integración local. Esto no implica push ni despliegue.
+La ejecución original con subagentes se hizo en el worktree aislado
+`.worktrees/panel-admin-auth`; esa integración local ya terminó. Esto no implicó push
+ni despliegue.
 
 ### Qué construir
 
@@ -762,7 +765,8 @@ donde se completan precio, existencias y datos del fabricante.
 **Con esto el paso c está terminado.** El dueño puede crear, editar, publicar, poner
 precio y subir fotos sin tocar código.
 
-**Siguiente:** el paso e, la galería de proyectos (§8).
+**Siguiente:** el paso e quedó terminado; el siguiente bloque de producto es la tienda
+B2C del paso 2, después de la decisión operativa de publicar el panel.
 
 ### Cómo saber que está terminado
 
@@ -800,24 +804,26 @@ precio y subir fotos sin tocar código.
 
 ## 8. Paso e — La galería de proyectos
 
-Mismo tratamiento que los productos, y **en el mismo orden**, que es el que demostró
-funcionar:
+**Terminado el 25/08/2026.** Se implementó y comprobó el tratamiento completo:
 
-1. `db/004_projects.sql` con el esquema, mirando `app/data/projects.ts` para saber
-   qué campos hacen falta.
-2. Traducción reversible proyecto ↔ fila, al estilo de `app/data/productRow.ts`.
-3. Un script de verificación que convierta, simule el viaje por Postgres, reconstruya
-   y compare **antes** de tocar la base de datos.
-4. Importar y volver a comprobar leyendo de Neon.
-5. Cambiar la lectura de la galería a la base de datos, con su etiqueta de caché.
-6. Las pantallas del panel.
+1. `db/004_projects.sql` crea `projects` y `project_images` sin borrado en cascada.
+2. `app/data/projectRow.ts` conserva identidad, contenido y orden de forma reversible.
+3. `npm run proyectos:verificar` confirma 12 proyectos y 104 fotografías antes de
+   tocar la base de datos.
+4. `npm run proyectos:importar` importa de forma idempotente, relee Neon y compara el
+   resultado. Se ejecutó dos veces: 12 proyectos, 104 fotos, 12 publicados y 104 visibles.
+5. La portada lee Neon con `PROJECTS_CACHE_TAG` y vuelve a `app/data/projects.ts` si la
+   base falla o está vacía, sin cambiar el diseño de `ProjectSlider`.
+6. `/admin/proyectos`, `/admin/proyectos/nuevo` y `/admin/proyectos/<id>` permiten alta,
+   edición, orden, publicación y retirada reversible de fotos. No existe botón de borrar.
+7. La carga múltiple va directamente del navegador a Vercel Blob; la ruta de token exige
+   sesión, limita a cuatro formatos y 4 MB, y el registro es idempotente.
 
-Lo que hizo que la migración de productos saliera limpia fue **no dar por buena una
-importación porque el `insert` no diera error**, sino releer la base de datos y
-comparar el resultado. Repetir eso aquí.
-
-Ojo: `app/data/projects.ts` arma las rutas con el nombre de carpeta y de archivo
-literales de `/public/proyectos/`. Hay 104 fotos en 12 carpetas.
+**Prueba real:** `npm run proyectos:probar` cambió y restauró el título de Agencia BMW,
+ocultó y restauró una foto (8 → 7 → 8) y despublicó y republicó el proyecto mediante
+Neon. También se subió una imagen real con nombre UUID, se registró y se dejó oculta.
+El navegador integrado no estaba disponible en la sesión, por lo que no se afirma una
+prueba manual de clics; las rutas y la frontera de sesión sí se comprobaron con Playwright.
 
 ---
 
@@ -832,7 +838,7 @@ correspondiente y no descubrirlas a mitad, porque bloquean.
 | Paso b — entrada al panel | Elegir **su correo y su contraseña** de administrador. Se dan de alta con `scripts/create-admin.mjs`, no con una pantalla pública de registro. |
 | Paso b — sesiones | Generar `ADMIN_SESSION_SECRET` y ponerlo en `.env.local` **y en Vercel**. Se genera con `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. |
 | Paso c — referencias | **Decidir el prefijo** de las referencias nuevas (§6, «Referencia de los productos nuevos»). El reparto actual no es una regla y esas referencias son las que él cita al cotizar. |
-| Paso d — fotos | **Crear el almacén Blob** en Vercel (Storage → Blob) y copiar `BLOB_READ_WRITE_TOKEN` a `.env.local`. |
+| Paso d — fotos | El almacén Blob y el token local ya existen. Falta copiar `BLOB_READ_WRITE_TOKEN` a Vercel antes de desplegar. |
 | Que el sitio nuevo sea el oficial | **Apuntar el DNS de `econoluzgt.com` a Vercel.** Hoy ese dominio sigue sirviendo el WordPress viejo. |
 | La tienda (paso 2) | Contratar certificador FEL, decidir el medio de cobro, redactar los textos legales de venta en línea y **fijar los precios**. Nada de eso lo puede hacer un programador. |
 
@@ -868,7 +874,8 @@ contenido, no un bug.
 `tests/catalog-quote.spec.ts:891` (`rebases an action before the restoration frame and
 persists it before frames flush`) falla de forma determinista. **Se comprobó
 guardando los cambios a un lado y ejecutándola sobre el código anterior: falla igual.**
-No tiene que ver con la base de datos ni con el catálogo. Las otras 87 pasan.
+No tiene que ver con la base de datos ni con el catálogo. En la batería completa del
+25/08/2026, las otras **95** pasaron.
 
 ### 10.3 Otras
 

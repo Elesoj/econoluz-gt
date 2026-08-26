@@ -6,7 +6,7 @@ The visual identity is the brand's two colours over neutral ground: navy `#001B5
 
 Today the site is quotation-only: catalog selections are collected into a temporary quote context and sent through WhatsApp for asesoría técnica. No prices, checkout, payment, or customer accounts are exposed yet.
 
-**That is the current state, not the target.** The owner decided the catalog will become a B2C store while keeping the quotation flow for projects, on the same products. The work in progress is the admin panel that lets the owner manage products himself; the 313 products already live in Postgres. See `CLAUDE.md` §2 and §11 for the decision and the roadmap, and `docs/CONTINUAR-PANEL.md` for the step-by-step plan.
+**That is the current state, not the target.** The owner decided the catalog will become a B2C store while keeping the quotation flow for projects, on the same products. The local admin panel now manages both the 313 products and the public project gallery from Postgres; deployment is still pending. See `CLAUDE.md` §2 and §11 for the decision and the roadmap, and `docs/CONTINUAR-PANEL.md` for the handoff record.
 
 > This README is in English because it was written that way; the rest of the project documentation and all code comments are in Spanish, per `CLAUDE.md` §5.
 
@@ -30,8 +30,9 @@ Today the site is quotation-only: catalog selections are collected into a tempor
 - Quotation/add-to-quote flow without prices
 - WhatsApp message generation from selected products and project form data
 - LED savings calculator with handoff into the quote form
-- Project gallery and supplier/brand presentation
-- Shared data files for products, projects, navigation, contact, and homepage content
+- Project gallery sourced from Postgres, with a code fallback
+- Protected admin panel for products, projects, ordering, visibility, and Blob uploads
+- Shared data files for fallback, navigation, contact, and homepage content
 
 ## Folder Structure
 
@@ -51,7 +52,9 @@ app/
     catalogTaxonomy.ts      Public taxonomy of product types and applications
     catalogBrands.internal.ts   Supplier brands, server-only
     catalogSeries.internal.ts   Supplier series, server-only
-    projects.ts             Project gallery image data
+    projects.ts             Project gallery fallback data
+    projectRow.ts           Reversible project/database row translation
+    projects.server.ts      Cached Postgres reader with local fallback
     siteData.ts             Navigation, contact, homepage, quote, FAQ, supplier logos
   lib/
     formatters.ts           Number and currency formatters for non-catalog tools
@@ -59,6 +62,7 @@ app/
   globals.css               Global Tailwind styles
   layout.tsx                App metadata and root layout
   page.tsx                  Homepage
+  admin/                    Protected product and project management panel
 db/                         SQL migrations, applied in order by `npm run db:migrar`
 scripts/                    Migration, import, verification and audit scripts
 docs/CONTINUAR-PANEL.md     Handoff plan for the remaining admin-panel work
@@ -100,8 +104,9 @@ npm run build
 
 - The public deployment is managed on Vercel.
 - **Legacy images** live under `public/` and are referenced with root-relative paths, for example `/catalogos/construlita/downlight/alfa.png`. Do not move, rename or delete them: `CLAUDE.md` §9 forbids it and the paths are literal, so renaming breaks the catalog without failing the build. Keep their brand/family folder structure to avoid broken paths such as `/bmw1.jpeg`.
-- **New images will not go there.** Photos uploaded from the admin panel go to Vercel Blob, because the deployed filesystem is read-only and the owner must be able to add a product without a developer. The database stores whichever form applies, so both must keep working. See `docs/CONTINUAR-PANEL.md` §7.
+- **New images do not go there.** Photos uploaded from the admin panel go to Vercel Blob, because the deployed filesystem is read-only and the owner must be able to add content without a developer. The database stores whichever form applies, so both must keep working. See `docs/CONTINUAR-PANEL.md` §7 and §8.
 - **The catalog is no longer static data.** Products live in the `products` table in Postgres (Neon) and `/catalogo` reads them from there. Editing `app/data/products.ts` changes only the fallback and environments without `DATABASE_URL`.
+- **The project gallery also lives in Neon.** The `projects` and `project_images` tables drive the homepage; `app/data/projects.ts` is retained as a fallback if Neon is unavailable.
 - `DATABASE_URL` is required. It is set in Vercel and, for local work, in `.env.local` (see `.env.example`).
 - Run `npm run db:migrar` to apply pending SQL migrations from `db/`.
 
@@ -112,5 +117,5 @@ npm run build
 - Advisory requests are saved to the database, verified against the deployed site.
 - Catalog rendering uses an initial page size with a "Cargar más" flow so the UI does not render every matching product at once.
 - The product model is still quotation-first and price-free in the UI. Price and stock columns already exist in the database so they can be loaded from the admin panel before the store is built.
-- **In progress:** the admin panel — login, product CRUD, photo upload to Vercel Blob, and the project gallery. Plan in `docs/CONTINUAR-PANEL.md`.
+- **Completed locally:** admin login, product CRUD, project CRUD and ordering, reversible image visibility, and direct multi-image upload to Vercel Blob. Nothing has been pushed or deployed yet; the two panel secrets still need to be configured in Vercel with the owner's approval.
 - Known debt, including supplier names still present in image paths and descriptions, is listed in `CLAUDE.md` §7.
