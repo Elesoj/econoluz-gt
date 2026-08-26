@@ -72,10 +72,16 @@ ofrece integrado con iluminación. Debe tener presencia propia, no quedar escond
 
 ### Estado actual — la pista A todavía no existe
 
-Lo que hay construido hoy es solo pista B: catálogo guiado, ficha técnica, lista de
-cotización y salida por WhatsApp. De la pista A no hay nada: **ni precios, ni carrito,
-ni checkout, ni pasarela de pago, ni autenticación.** Ningún producto tiene precio ni
-existencias hoy: son datos que todavía no existen en ninguna parte, ni en el código.
+Lo construido es casi todo pista B: catálogo guiado, ficha técnica, lista de cotización
+y salida por WhatsApp. **De la pista A ya existe el precio**: el catálogo lo muestra en
+la tarjeta y en la ficha, y donde no hay precio cargado dice «Precio a consultar».
+Siguen sin existir **carrito, checkout, pasarela de pago ni facturación**.
+
+El precio se enseña **por decisión expresa del dueño (26/08/2026)**, aunque la tienda no
+esté: si el catálogo va a ser B2C, quien compra una o dos piezas necesita ver el precio
+antes de decidir. Se le advirtió de las dos pegas —la competencia ve las tarifas y hoy
+casi ningún producto tiene precio cargado— y aun así lo prefirió así. Es reversible:
+basta con dejar de pintar `priceGtq` en `ProductCard` y en la ficha.
 
 **Los productos ya no viven en el código: viven en Postgres (Neon).** La tabla
 `products` guarda los 313, y `/catalogo` los lee de ahí filtrando por `published`.

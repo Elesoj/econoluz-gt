@@ -92,6 +92,15 @@ export type PublicProduct = {
     finish: string;
   };
   technicalSpecs?: PublicTechnicalSpecs;
+  /**
+   * Precio de venta al público en quetzales.
+   *
+   * Es **opcional a propósito**: mientras un producto no tenga precio puesto,
+   * el campo no existe, y el catálogo enseña que hay que consultarlo. Si en su
+   * lugar viajara un `null`, los 313 productos cambiarían de forma y la huella
+   * congelada del catálogo dejaría de coincidir sin que nada haya cambiado.
+   */
+  priceGtq?: number;
 };
 
 const projectTechnicalSpecs = (
@@ -127,7 +136,15 @@ const restoredApplicationBySourceFamily: Readonly<Record<string, string>> = {
   "Tapas ciegas": "tapas_ciegas",
 };
 
-export const toPublicProduct = (product: InternalProduct): PublicProduct => {
+/** Datos que no viven en el catálogo escrito, sino en la base de datos. */
+export type PublicProductExtras = {
+  priceGtq?: number | null;
+};
+
+export const toPublicProduct = (
+  product: InternalProduct,
+  extras?: PublicProductExtras,
+): PublicProduct => {
   const application =
     restoredApplicationBySourceFamily[product.labels.family] ?? product.application;
   const publicProduct: PublicProduct = {
@@ -149,6 +166,12 @@ export const toPublicProduct = (product: InternalProduct): PublicProduct => {
 
   if (product.images?.length) {
     publicProduct.images = [...product.images];
+  }
+
+  // Cero es un precio válido; `null`, `undefined` y cualquier cosa que no sea
+  // un número finito significan "todavía sin precio".
+  if (typeof extras?.priceGtq === "number" && Number.isFinite(extras.priceGtq)) {
+    publicProduct.priceGtq = extras.priceGtq;
   }
 
   return publicProduct;

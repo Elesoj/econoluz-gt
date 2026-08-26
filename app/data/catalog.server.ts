@@ -15,8 +15,11 @@ export const CATALOG_CACHE_TAG = "catalogo";
 // quedar una versión vieja si algo fallara al invalidar.
 const CATALOG_REVALIDATE_SECONDS = 3600;
 
+// `price_gtq` no está en CATALOG_COLUMNS —esa lista es la del catálogo escrito
+// en el código, que no tiene precios— pero sí viaja al navegador desde que el
+// catálogo enseña precios. Llega como texto: `numeric` siempre lo hace.
 const catalogQuery = `
-  select ${CATALOG_COLUMNS.join(", ")}
+  select ${CATALOG_COLUMNS.join(", ")}, price_gtq
   from products
   where published
   order by position
@@ -32,12 +35,20 @@ const readCatalogFromDatabase = async (): Promise<PublicProduct[]> => {
   // Se crea aquí y no a nivel de módulo, igual que en /api/leads: así la falta
   // de DATABASE_URL en local no revienta la importación del módulo entero.
   const sql = neon(connectionString);
-  const rows = (await sql.query(catalogQuery)) as CatalogRow[];
+  const rows = (await sql.query(catalogQuery)) as (CatalogRow & {
+    price_gtq: string | number | null;
+  })[];
 
   // `toPublicProduct` es la frontera: recorta el producto a lo que puede ver
   // el navegador y deja fuera marca, serie y códigos del proveedor, que sí
   // viajan desde la base de datos hasta aquí pero no pasan de este punto.
-  return rows.map((row) => toPublicProduct(fromProductRow(row)));
+  return rows.map((row) =>
+    toPublicProduct(fromProductRow(row), {
+      // `Number(null)` es cero, y cero significaría "regalado": el producto sin
+      // precio tiene que llegar como `null`, no como 0.
+      priceGtq: row.price_gtq === null ? null : Number(row.price_gtq),
+    }),
+  );
 };
 
 const getCachedCatalog = unstable_cache(readCatalogFromDatabase, ["catalogo-publico"], {

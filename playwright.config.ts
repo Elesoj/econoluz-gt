@@ -13,6 +13,7 @@ export default defineConfig({
     "catalog-navigation.spec.ts",
     "catalog-quote.spec.ts",
     "admin-auth.spec.ts",
+    "catalog-precio.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,

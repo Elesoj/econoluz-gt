@@ -7,6 +7,7 @@ import {
   type PublicTechnicalSpecValue,
 } from "../data/publicProduct";
 import { useEffect } from "react";
+import { formatPrice } from "../lib/formatters";
 
 type TechnicalProduct = PublicProduct;
 
@@ -110,6 +111,17 @@ export default function ProductTechnicalDrawer({
             <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-tienda">
               Ref. {product.econoluzReference}
             </p>
+            {/* Quien mira la ficha está decidiendo: el precio va aquí arriba,
+                no escondido entre las especificaciones. */}
+            {typeof product.priceGtq === "number" ? (
+              <p className="mt-4 text-3xl font-semibold tabular-nums text-proyectos">
+                {formatPrice(product.priceGtq)}
+              </p>
+            ) : (
+              <p className="mt-4 text-base font-semibold text-neutral-500">
+                Precio a consultar
+              </p>
+            )}
           </div>
           <button
             type="button"

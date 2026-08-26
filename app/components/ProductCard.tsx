@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { PublicProduct } from "../data/publicProduct";
+import { formatPrice } from "../lib/formatters";
 
 type ProductCardProps = {
   product: PublicProduct;
@@ -57,6 +58,17 @@ export default function ProductCard({
         <p className="mt-2 line-clamp-2 min-h-10 text-xs leading-5 text-neutral-500">
           {[shortSpec, product.labels.finish].filter(Boolean).join(" / ")}
         </p>
+
+        {/* El precio es lo primero que busca quien compra una o dos piezas.
+            Mientras no lo tenga puesto, se dice que hay que consultarlo, en vez
+            de dejar un hueco que parezca un fallo. */}
+        {typeof product.priceGtq === "number" ? (
+          <p className="mt-3 text-lg font-semibold tabular-nums text-proyectos">
+            {formatPrice(product.priceGtq)}
+          </p>
+        ) : (
+          <p className="mt-3 text-sm font-semibold text-neutral-500">Precio a consultar</p>
+        )}
 
         <div className="mt-auto grid gap-2 pt-4">
           <button

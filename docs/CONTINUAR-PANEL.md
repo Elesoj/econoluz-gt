@@ -17,7 +17,17 @@ Nada de esto está subido a GitHub ni desplegado: el sitio publicado sigue sin p
 
 ## 0. Estado en dos minutos (última actualización: 25/08/2026)
 
-> **El precio no se ve en la web, y es a propósito.** `publicProduct.ts` no deja cruzar
+> **El catálogo público ya muestra los precios (26/08/2026).** Lo decidió el dueño: si
+> va a ser una tienda B2C, el precio tiene que verse. `PublicProduct.priceGtq` es
+> **opcional a propósito** —cuando el producto no tiene precio el campo no existe y la
+> tarjeta dice «Precio a consultar»—, porque un `null` en los 313 cambiaría la forma de
+> los objetos y rompería la huella congelada del catálogo sin que nada haya cambiado de
+> verdad. El formato es `Q1,250.00` (`formatPrice` en `app/lib/formatters.ts`).
+> `tests/catalog-precio.spec.ts` comprueba que ninguna tarjeta se queda sin decir nada
+> del precio. Sigue sin haber carrito ni pago: el precio se ve, pero se compra por
+> cotización.
+>
+> **Redacción anterior, ya derogada:** `publicProduct.ts` no deja cruzar
 > `price_gtq` ni `stock` al navegador porque la tienda B2C no existe todavía: no hay
 > dónde comprar. El panel los guarda para tenerlos listos cuando llegue el paso 2. El
 > dueño lo esperó dos veces, así que **el propio panel lo avisa ahora** en el listado y en
