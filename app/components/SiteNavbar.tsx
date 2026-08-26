@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
+import CarritoContador from "../tienda/CarritoContador";
 import { isUnmodifiedPrimaryClick } from "./isUnmodifiedPrimaryClick";
 
 type NavItem = {
@@ -230,6 +231,13 @@ export default function SiteNavbar({
               />
             </Link>
           ))}
+        </div>
+
+        {/* Fuera del bloque de escritorio a propósito: en el móvil el CTA se
+            esconde dentro del menú desplegable, pero el carrito tiene que
+            verse siempre que tenga algo, sin abrir ningún menú. */}
+        <div className="flex items-center justify-end">
+          <CarritoContador />
         </div>
 
         <div className="hidden min-w-[7.25rem] items-center justify-end gap-3 md:flex">
