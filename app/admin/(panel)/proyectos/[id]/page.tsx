@@ -2,7 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { verificarSesion } from "../../../auth/authorization.server";
-import { saveProjectAction, setProjectPublishedAction } from "../../../proyectos/actions";
+import {
+  moveProjectImageAction,
+  saveProjectAction,
+  setProjectImageVisibleAction,
+  setProjectPublishedAction,
+} from "../../../proyectos/actions";
 import { getAdminProject, getProjectTypes } from "../../../proyectos/repository.server";
 
 export const dynamic = "force-dynamic";
@@ -52,13 +57,35 @@ export default async function ProjectDetailPage({ params, searchParams }: { para
 
           <section className="mt-12 border-t border-neutral-200 pt-8">
             <h2 className="text-2xl font-semibold text-proyectos">Fotografías</h2>
-            <p className="mt-2 text-sm leading-6 text-neutral-600">La primera fotografía visible será la imagen inicial. Los controles de carga y orden se activan en el siguiente bloque.</p>
+            <p className="mt-2 text-sm leading-6 text-neutral-600">La primera fotografía visible será la imagen inicial. Ocultar no borra el archivo: podrás volver a mostrarlo cuando quieras.</p>
             {project.images.length > 0 ? (
-              <ul className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {project.images.map((image) => (
-                  <li key={image.id} className="relative">
+              <ul className="mt-5 grid gap-5 sm:grid-cols-2">
+                {project.images.map((image, index) => (
+                  <li key={image.id} className="border border-neutral-200 p-3">
                     <Image src={image.url} alt="" width={320} height={220} className={`aspect-[4/3] w-full object-cover ${image.visible ? "" : "opacity-35"}`} />
-                    <span className="mt-2 block text-xs text-neutral-500">{image.visible ? "Visible" : "Oculta"}</span>
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{image.visible ? "Visible" : "Oculta"} · posición {index + 1}</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <form action={moveProjectImageAction}>
+                        <input type="hidden" name="id" value={project.id} />
+                        <input type="hidden" name="imageId" value={image.id} />
+                        <input type="hidden" name="direction" value="up" />
+                        <button disabled={index === 0} className="min-h-10 rounded-full border border-proyectos/30 px-3 text-xs font-semibold text-proyectos disabled:cursor-not-allowed disabled:opacity-35">Anterior</button>
+                      </form>
+                      <form action={moveProjectImageAction}>
+                        <input type="hidden" name="id" value={project.id} />
+                        <input type="hidden" name="imageId" value={image.id} />
+                        <input type="hidden" name="direction" value="down" />
+                        <button disabled={index === project.images.length - 1} className="min-h-10 rounded-full border border-proyectos/30 px-3 text-xs font-semibold text-proyectos disabled:cursor-not-allowed disabled:opacity-35">Siguiente</button>
+                      </form>
+                      <form action={setProjectImageVisibleAction}>
+                        <input type="hidden" name="id" value={project.id} />
+                        <input type="hidden" name="imageId" value={image.id} />
+                        <input type="hidden" name="visible" value={String(!image.visible)} />
+                        <button className="min-h-10 rounded-full border border-proyectos/30 px-3 text-xs font-semibold text-proyectos transition hover:bg-proyectos hover:text-white">{image.visible ? "Ocultar" : "Volver a mostrar"}</button>
+                      </form>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -81,4 +108,3 @@ export default async function ProjectDetailPage({ params, searchParams }: { para
     </>
   );
 }
-

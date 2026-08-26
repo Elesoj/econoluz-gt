@@ -5,6 +5,10 @@ import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { PROJECTS_CACHE_TAG } from "../../data/projects.server";
 import { verificarSesionParaAccion } from "../auth/authorization.server";
+import {
+  moveAdminProjectImage,
+  setAdminProjectImageVisible,
+} from "./imagenes.server";
 import { validateProjectInput, type ProjectMoveDirection } from "./model";
 import {
   createAdminProject,
@@ -85,3 +89,35 @@ export async function setProjectPublishedAction(formData: FormData) {
   redirect(origin);
 }
 
+function imageId(formData: FormData) {
+  const id = Number(formData.get("imageId"));
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
+export async function moveProjectImageAction(formData: FormData) {
+  await verificarSesionParaAccion();
+  const id = projectId(formData);
+  const image = imageId(formData);
+  const direction = String(formData.get("direction") ?? "") as ProjectMoveDirection;
+  if (!id || !image || (direction !== "up" && direction !== "down")) {
+    redirect("/admin/proyectos?error=Movimiento%20de%20foto%20no%20válido.");
+  }
+
+  const result = await moveAdminProjectImage(id, image, direction);
+  if (!result.ok) redirect(`/admin/proyectos/${id}?error=${encodeURIComponent(result.error)}`);
+  updateTag(PROJECTS_CACHE_TAG);
+  redirect(`/admin/proyectos/${id}?saved=1`);
+}
+
+export async function setProjectImageVisibleAction(formData: FormData) {
+  await verificarSesionParaAccion();
+  const id = projectId(formData);
+  const image = imageId(formData);
+  if (!id || !image) redirect("/admin/proyectos?error=Fotografía%20no%20válida.");
+
+  const visible = String(formData.get("visible") ?? "") === "true";
+  const result = await setAdminProjectImageVisible(id, image, visible);
+  if (!result.ok) redirect(`/admin/proyectos/${id}?error=${encodeURIComponent(result.error)}`);
+  updateTag(PROJECTS_CACHE_TAG);
+  redirect(`/admin/proyectos/${id}?saved=1`);
+}
