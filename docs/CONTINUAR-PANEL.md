@@ -18,7 +18,29 @@ hace el dueño.
 
 ---
 
-## 0. Estado en dos minutos (última actualización: 25/08/2026)
+## 0. Estado en dos minutos (última actualización: 26/08/2026)
+
+> **El paso 2 empezó: ya hay carrito (26/08/2026).** Rama `tienda-carrito`, sin fusionar
+> ni desplegar todavía. Lo que existe: motor del carrito en `app/tienda/`, página
+> `/carrito` con totales calculados en el servidor, contador en la barra de navegación
+> que solo aparece con algo dentro, y la tarjeta del catálogo con **un solo camino por
+> producto** —con precio, «Agregar al carrito»; sin precio, «Agregar a cotización»—.
+> El plan completo está en `docs/superpowers/plans/2026-08-26-tienda-carrito.md` y el
+> diseño en `docs/superpowers/specs/2026-08-26-tienda-carrito-design.md`.
+>
+> **La casilla `sellable_online` se retiró del panel**: ahora tener precio es estar a la
+> venta. La columna sigue en la base de datos, sin usar. Ver `CLAUDE.md` §2.
+>
+> **Lo que falta del paso 2**, en orden: checkout con datos fiscales (NIT), cobro —que
+> depende de contratar una pasarela de pago, trámite que el dueño aún no ha empezado—,
+> factura FEL con un certificador, y descuento de existencias.
+>
+> **Antes de desplegar esto:** los 25 productos con precio (ECO-ELE-0001 a ECO-ELE-0025)
+> quedarán a la venta automáticamente, al precio que tengan ese día. Conviene repasarlos.
+>
+> **Fallo preexistente, no tocar:** `tests/catalog-quote.spec.ts:891` falla también en
+> `main` sin nada de este trabajo; se comprobó el 26/08/2026 haciendo `checkout` de `main`
+> y ejecutándola. El resto de la suite pasa: 169 pruebas de unidad y 103 de navegador.
 
 > **El catálogo público ya muestra los precios (26/08/2026).** Lo decidió el dueño: si
 > va a ser una tienda B2C, el precio tiene que verse. `PublicProduct.priceGtq` es

@@ -84,12 +84,44 @@ como acción principal, cotizar disponible sin competir.
 **Techo tensado** es una línea diferenciadora de la pista B. Ningún competidor local lo
 ofrece integrado con iluminación. Debe tener presencia propia, no quedar escondido.
 
-### Estado actual — la pista A todavía no existe
+### Estado actual — la pista A ya tiene carrito
 
 Lo construido es casi todo pista B: catálogo guiado, ficha técnica, lista de cotización
-y salida por WhatsApp. **De la pista A ya existe el precio**: el catálogo lo muestra en
-la tarjeta y en la ficha, y donde no hay precio cargado dice «Precio a consultar».
-Siguen sin existir **carrito, checkout, pasarela de pago ni facturación**.
+y salida por WhatsApp. **De la pista A ya existen el precio y el carrito**: el catálogo
+muestra el precio en la tarjeta y en la ficha, y donde no hay precio cargado dice
+«Precio a consultar». Siguen sin existir **checkout, pasarela de pago y facturación**.
+
+#### Tener precio es estar a la venta — regla vigente (26/08/2026)
+
+No hay ninguna casilla de «se vende en línea». **Un producto con precio se puede
+comprar; uno sin precio, no.** La columna `sellable_online` existe en la base de datos
+pero no se usa, y su casilla se retiró de la ficha del panel: obligaba a hacer dos cosas
+para vender una, y con más de trescientos productos administrados por una sola persona,
+cada casilla extra es una tarea multiplicada por trescientos y un producto más que puede
+quedar a medio configurar sin que nadie lo note. Lo decidió el dueño al preguntar qué era
+esa casilla. Se pierde poder enseñar un precio de referencia sin vender el producto; es
+un caso que hoy no existe, y la columna sigue ahí por si vuelve a hacer falta.
+
+**Consecuencia que hay que tener presente:** ponerle precio a un producto lo pone a la
+venta en cuanto se despliega. No hay una segunda confirmación.
+
+#### El carrito
+
+Vive en `app/tienda/`, separado a propósito del motor de cotización de
+`app/catalogo/quoteSelection.ts`: los dos flujos divergen desde el primer día y la
+cotización no debe cargar con precios ni existencias. La página es `/carrito` y el
+contador aparece en la barra de navegación **solo cuando hay algo dentro**.
+
+**Ningún importe que venga del navegador se acepta como bueno.** El navegador guarda
+referencia y cantidad, nunca precios: se resuelven contra el catálogo del servidor cada
+vez que se pinta. Si el importe viajara en el navegador, cualquiera podría editar su
+propio `localStorage` y comprar un panel por un quetzal. Esta regla se hereda al
+checkout y al cobro. El dinero se suma en **centavos enteros** (`app/tienda/lineas.ts`);
+`formatPrice` solo se usa al pintar.
+
+Las existencias **avisan, no bloquean**: pedir más de lo apuntado muestra que puede
+tardar unos días, y solo cuando hay un número apuntado —la casilla vacía significa «no
+se ha contado el inventario», que no es lo mismo que cero—.
 
 El precio se enseña **por decisión expresa del dueño (26/08/2026)**, aunque la tienda no
 esté: si el catálogo va a ser B2C, quien compra una o dos piezas necesita ver el precio
