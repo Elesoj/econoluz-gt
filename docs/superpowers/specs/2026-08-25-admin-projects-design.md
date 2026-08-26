@@ -169,6 +169,13 @@ Una ruta `POST /admin/proyectos/subir` usa `handleUpload` de `@vercel/blob/clien
 5. Al completarse la subida, el callback firmado de Vercel Blob valida el payload,
    registra la URL como una nueva `project_image` visible al final y evita duplicados.
 
+Después de que `upload()` devuelve la URL, el componente cliente llama además a una
+Server Action autenticada que registra esa misma URL antes de mostrar la subida como
+terminada. La restricción única hace que esta escritura y el callback sean idempotentes.
+Este segundo camino no es redundancia accidental: en desarrollo local Vercel Blob no
+puede llamar a un `localhost`, y en producción el callback sirve de respaldo si el
+navegador pierde la conexión justo después de subir el archivo.
+
 `BLOB_READ_WRITE_TOKEN` permanece en el servidor. El nombre original se descarta para
 la URL final. Cada archivo informa su propio progreso y error; el fallo de uno no impide
 que los demás terminen.
@@ -204,6 +211,7 @@ política respeta la prohibición de borrar sin permiso.
 - Consultas del listado y de la ficha sin depender de Neon real.
 - Acciones de alta, edición, orden, publicación, ocultación y restauración.
 - Emisión de tokens de Blob solo con sesión y proyecto válidos.
+- Registro autenticado de la URL devuelta al navegador.
 - Registro idempotente del callback de subida.
 - Respaldo del código cuando falta `DATABASE_URL` o falla Neon.
 - La portada recibe el mismo contrato público y conserva el contenido y el orden.
