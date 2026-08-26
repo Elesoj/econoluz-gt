@@ -28,7 +28,7 @@ export default function CalculadoraLed() {
     <main className="min-h-screen bg-white text-black">
       <SiteNavbar
         items={mainNavItems}
-        ctaHref="/catalogo#asesoria-proyecto"
+        ctaHref="/asesoria"
         ctaLabel="Cotizar"
         mobileCtaLabel="Cotizar proyecto"
       />

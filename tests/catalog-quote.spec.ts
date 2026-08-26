@@ -1192,7 +1192,9 @@ test.describe("browser quote integration", () => {
       },
       { contextKey: LEGACY_CONTEXT_KEY, eventName: LEGACY_EVENT },
     );
-    await page.goto("/catalogo");
+    // El formulario de asesoría tiene página propia desde que el catálogo dejó
+    // de ser un formulario de proyecto.
+    await page.goto("/asesoria");
     await expect
       .poll(() =>
         page.evaluate(
@@ -1356,6 +1358,9 @@ test.describe("browser quote integration", () => {
       "Luminaria alto montaje - Ref. ECO-IND-0048 - Cantidad: 1",
     );
 
+    // La selección viaja en el navegador, así que sigue ahí al cambiar de
+    // página; el botón flotante también, porque vive en el layout del sitio.
+    await page.goto("/asesoria");
     await page.getByLabel("Nombre completo").fill("No cambia el flotante");
     await page.getByLabel("Mensaje adicional").fill("Tampoco cambia el flotante");
     await page.evaluate(
@@ -1366,13 +1371,17 @@ test.describe("browser quote integration", () => {
     );
     expect(await floating.getAttribute("href")).toBe(oneItemHref);
 
-    await card.getByRole("button", { name: /Agregar una unidad/i }).click();
+    // De vuelta al catálogo, que es donde se cambian las cantidades. La tarjeta
+    // anterior murió al cambiar de página, así que se vuelve a buscar.
+    const cardDeVuelta = await openProduct(page);
+
+    await cardDeVuelta.getByRole("button", { name: /Agregar una unidad/i }).click();
     await expect(floating).not.toHaveAttribute("href", oneItemHref ?? "");
     const twoItemHref = await floating.getAttribute("href");
     expect(readWhatsAppMessage(twoItemHref ?? "")).toContain("Cantidad: 2");
 
-    await card.getByRole("button", { name: /Quitar una unidad/i }).click();
-    await card.getByRole("button", { name: /Quitar una unidad/i }).click();
+    await cardDeVuelta.getByRole("button", { name: /Quitar una unidad/i }).click();
+    await cardDeVuelta.getByRole("button", { name: /Quitar una unidad/i }).click();
     await expect(floating).toHaveAttribute("href", defaultHref ?? "");
   });
 
@@ -1445,6 +1454,7 @@ test.describe("browser quote integration", () => {
     const card = await openProduct(page);
     const publicName = (await card.getByRole("heading").textContent())?.trim() ?? "";
     await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await page.goto("/asesoria");
     await page.getByLabel("Nombre completo").fill("Persona de prueba");
     await page.getByLabel(/Tel.fono/i).fill("5555 5555");
     await page.getByLabel("Email").fill("persona@example.com");

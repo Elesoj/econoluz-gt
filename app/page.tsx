@@ -23,7 +23,7 @@ export default async function Home() {
     <main className="w-full max-w-full overflow-x-hidden bg-white text-black">
       <SiteNavbar
         items={homeNavItems}
-        ctaHref="/catalogo#asesoria-proyecto"
+        ctaHref="/asesoria"
         ctaLabel="Cotizar"
         mobileCtaLabel="Cotizar proyecto"
       />
@@ -213,7 +213,7 @@ export default async function Home() {
             </p>
             <div className="mt-8 grid gap-3">
               <Link
-                href="/catalogo#asesoria-proyecto"
+                href="/asesoria"
                 className="inline-flex items-center justify-center rounded-full bg-tienda px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte"
               >
                 Preparar cotización

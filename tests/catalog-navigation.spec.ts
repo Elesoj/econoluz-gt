@@ -754,14 +754,18 @@ test("modified and non-primary catalog links preserve native navbar/footer behav
   }
 });
 
-test("preserves and scrolls the asesoria-proyecto hash entry", async ({ page }) => {
+test("the old asesoria-proyecto link still offers a way to the advisory page", async ({
+  page,
+}) => {
+  // El formulario vivía aquí bajo ese ancla y ahora tiene página propia. El
+  // enlace antiguo ya no lleva a un formulario, pero el catálogo enseña el
+  // acceso, así que nadie se queda sin saber por dónde pedir cotización.
   await page.goto("/catalogo#asesoria-proyecto");
 
-  await expect(page).toHaveURL(/\/catalogo#asesoria-proyecto$/);
-  await expect(
-    page.getByRole("heading", { name: /Define tu proyecto de iluminaci/i }),
-  ).toBeInViewport();
   await expect(rootHeading(page)).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Pedir cotizaci.n con asesor/i }),
+  ).toBeVisible();
 });
 
 test("search is a pushed global result state and clear returns to its deliberate prior stage", async ({

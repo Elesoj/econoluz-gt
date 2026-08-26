@@ -29,7 +29,7 @@ export const homeHero = {
     "ECONOLUZ GT acompaña proyectos residenciales, comerciales y de hospitalidad con luminarias LED, asesoría técnica y piezas seleccionadas para arquitectura contemporánea.",
   image: "/proyectos/borghetto/borghetto1.jpg",
   imageAlt: "Interior arquitectónico con iluminación premium",
-  primaryCta: { label: "Agendar asesoría", href: "/catalogo#asesoria-proyecto" },
+  primaryCta: { label: "Agendar asesoría", href: "/asesoria" },
   secondaryCta: { label: "Ver catálogo", href: "/catalogo" },
   stats: [
     { value: "2006", label: "Trayectoria" },

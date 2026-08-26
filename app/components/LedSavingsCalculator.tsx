@@ -273,7 +273,7 @@ export default function LedSavingsCalculator() {
         </div>
         {results ? (
           <Link
-            href="/catalogo#asesoria-proyecto"
+            href="/asesoria"
             onClick={saveResultsForQuote}
             className="inline-flex w-full items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte sm:w-auto"
           >

@@ -62,6 +62,20 @@ flujos y componentes distintos, y describía la tienda como una sección aparte.
 descartó: obligaba a duplicar el catálogo entero y a que el visitante eligiera bando
 antes de haber visto un producto.
 
+**La asesoría tiene página propia desde el 26/08/2026.** El formulario de proyecto vivía
+dentro de `/catalogo` y ocupaba media página: el dueño señaló que ahí no cabe un
+comprador individual, y tenía razón. Ahora está en **`/asesoria`**, y el catálogo cierra
+con una franja que enlaza a ella. **Las dos salidas siguen conviviendo** —esto no
+resucita la separación derogada—: lo que cambió es la jerarquía dentro del catálogo, no
+que la cotización desaparezca.
+
+`app/catalogo/ProjectAdvisory.tsx` es autónomo: su propio estado y su propia lectura de
+la selección, que viaja entre páginas por el almacenamiento del navegador. La página
+carga el catálogo entero porque la selección se guarda como referencias y cantidades.
+
+Cuando exista el carrito habrá que rematar la jerarquía en la ficha de producto: comprar
+como acción principal, cotizar disponible sin competir.
+
 > Lo que sí sigue vigente: si una propuesta hace que el usuario dude entre "¿compro o
 > cotizo?", está mal resuelta. Antes eso se conseguía separando; ahora hay que conseguirlo
 > con jerarquía dentro de la misma ficha — una acción principal clara y la otra disponible
