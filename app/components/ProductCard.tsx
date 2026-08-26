@@ -4,17 +4,25 @@ import { formatPrice } from "../lib/formatters";
 
 type ProductCardProps = {
   product: PublicProduct;
+  /** Unidades en la selección de cotización. */
   quantity?: number;
+  /** Unidades en el carrito de compra. */
+  cartQuantity?: number;
   onAdd: () => void;
   onDecrease: () => void;
+  onAddToCart: () => void;
+  onDecreaseFromCart: () => void;
   onViewDetails: () => void;
 };
 
 export default function ProductCard({
   product,
   quantity = 0,
+  cartQuantity = 0,
   onAdd,
   onDecrease,
+  onAddToCart,
+  onDecreaseFromCart,
   onViewDetails,
 }: ProductCardProps) {
   const shortSpec =
@@ -78,7 +86,43 @@ export default function ProductCard({
           >
             Ficha técnica
           </button>
-          {quantity > 0 ? (
+          {/* Tener precio es estar a la venta: ese producto se compra. El que
+              no lo tiene sigue el camino de siempre, el de la cotización. Los
+              dos botones a la vez obligarían al visitante a elegir sin saber
+              en qué se diferencian. */}
+          {typeof product.priceGtq === "number" ? (
+            cartQuantity > 0 ? (
+              <div className="inline-flex h-9 w-full items-center justify-between rounded-full bg-tienda text-xs font-semibold text-white">
+                <button
+                  type="button"
+                  onClick={onDecreaseFromCart}
+                  className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/12"
+                  aria-label={`Quitar una unidad de ${product.publicName} del carrito`}
+                >
+                  -
+                </button>
+                <span className="min-w-0 text-center">
+                  En el carrito ({cartQuantity})
+                </span>
+                <button
+                  type="button"
+                  onClick={onAddToCart}
+                  className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/12"
+                  aria-label={`Agregar una unidad de ${product.publicName} al carrito`}
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onAddToCart}
+                className="inline-flex h-9 w-full items-center justify-center rounded-full bg-tienda px-3 text-xs font-semibold text-white transition hover:bg-tienda-fuerte"
+              >
+                Agregar al carrito
+              </button>
+            )
+          ) : quantity > 0 ? (
             <div className="inline-flex h-9 w-full items-center justify-between rounded-full bg-proyectos text-xs font-semibold text-white">
               <button
                 type="button"
@@ -102,9 +146,9 @@ export default function ProductCard({
             <button
               type="button"
               onClick={onAdd}
-              className="inline-flex h-9 w-full items-center justify-center rounded-full bg-tienda px-3 text-xs font-semibold text-white transition hover:bg-tienda-fuerte"
+              className="inline-flex h-9 w-full items-center justify-center rounded-full bg-proyectos px-3 text-xs font-semibold text-white transition hover:opacity-90"
             >
-              Agregar
+              Agregar a cotización
             </button>
           )}
         </div>
