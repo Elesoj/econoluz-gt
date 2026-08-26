@@ -383,7 +383,7 @@ pantalla: tampoco pueden aparecer en el JavaScript que se descarga, y
 `tests/catalog-production-boundary.spec.ts` revisa los chunks compilados precisamente
 para eso.
 
-**Resuelto en la rama `ocultar-proveedores`, pendiente de desplegar:**
+**Resuelto y desplegado el 26/08/2026:**
 `publicProductPrivacy.ts` transforma únicamente la proyección pública. Las imágenes
 salen por `arquitectonico/`, `lineal/` y `electrico/`; los nombres de línea se retiran;
 y `Magnetrack Pro` pasa a «Microrriel magnético 48 V», incluido su identificador de
@@ -392,8 +392,8 @@ devuelve **0 coincidencias**. El producto interno y las columnas `supplier_*` no
 tocan: el panel conserva marca, serie, código y nombre del fabricante.
 
 Las 326 imágenes originales siguen en sus carpetas antiguas porque no se borra ningún
-archivo sin permiso. El catálogo ya no enlaza esas rutas; se retirarán solo después de
-desplegar, comprobar las rutas neutras en producción y recibir autorización expresa.
+archivo sin permiso. Producción ya sirve y enlaza las 326 rutas neutras; los originales
+se retirarán únicamente después de recibir autorización expresa.
 
 **Alcance de la prohibición:** se refiere al **catálogo público y a cualquier visitante
 sin sesión**. El panel de administración, detrás de autenticación, necesariamente envía
@@ -510,8 +510,8 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    revisarla a diario o el lead se guarda pero nadie se entera. Queda ahí una solicitud
    de prueba (`id = 1`, «PRUEBA TECNICA - no es un cliente») que sirvió para comprobar
    que producción guardaba de verdad; se puede borrar cuando el dueño quiera.
-3. **Exposición pública del proveedor: resuelta en `ocultar-proveedores`, pendiente de
-   desplegar.** La salida pública transforma rutas, nombres, descripciones, taxonomía y
+3. **Exposición pública del proveedor: resuelta y desplegada el 26/08/2026.** La salida
+   pública transforma rutas, nombres, descripciones, taxonomía y
    ficha técnica sin modificar el producto interno. La auditoría revisa 313 productos y
    408 identificadores normalizados y devuelve 0 coincidencias. La prueba específica
    confirma además que el panel conserva Artlite, Construlita, Highlum y Magnetrack Pro.
@@ -623,6 +623,11 @@ tarea de paneles, no de código, y la hace el dueño del proyecto.
 
 **Desplegado el 26/08/2026** en `econoluz-gt.vercel.app`, con autorización expresa del
 dueño. Sigue pendiente apuntar el DNS de `econoluzgt.com`.
+
+La anonimización del proveedor también se fusionó en `main` y se verificó en producción
+el 26/08/2026: 326 rutas neutras, 0 rutas antiguas enlazadas y 0 identificadores sensibles
+en el HTML y los recursos públicos revisados. Las carpetas originales siguen presentes
+hasta recibir permiso separado para borrarlas.
 
 **Paso 2 — Tienda.** Precio y compra conviviendo con la cotización: carrito, checkout con
 NIT, cobro, factura FEL y existencias. Depende del paso 1, porque sin panel no hay dónde

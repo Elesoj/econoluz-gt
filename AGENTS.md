@@ -26,7 +26,7 @@ Next.js y lo sobrescribe en cada arranque, así que nada propio puede vivir dent
 
 3. **`docs/FUGAS-PROVEEDOR.md`** documenta la anonimización del catálogo público. La
    marca, serie y código permanecen en el panel interno; las rutas y textos que recibe
-   el visitante son neutros. El trabajo está en `ocultar-proveedores`, sin desplegar.
+   el visitante son neutros. Está fusionado en `main` y desplegado en producción.
 
 4. **`docs/superpowers/plans/2026-08-19-econoluz-hardening.md`** es un documento
    **histórico y ya completado**. Sus restricciones («nunca añadir precios,

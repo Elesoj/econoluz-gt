@@ -2,8 +2,9 @@
 
 **Fecha:** 26/08/2026
 
-**Rama:** `ocultar-proveedores`
-**Estado:** implementado y verificado en local; sin fusionar ni desplegar.
+**Rama de origen:** `ocultar-proveedores`, fusionada en `main`
+
+**Estado:** implementado, fusionado, desplegado y verificado en producción.
 
 ## Decisión del dueño
 
@@ -71,13 +72,18 @@ Verificación completa superada:
 - catálogo público y límites de producción: 99/99 pruebas de Playwright;
 - `typecheck`, `lint` y `build`: sin errores.
 
-## Qué falta para llevarlo a producción
+## Verificación en producción
 
-1. Fusionar y desplegar únicamente con autorización expresa.
-2. Comprobar en producción el catálogo, las fichas y las 326 rutas neutras.
-3. Confirmar que el HTML y los chunks públicos no contienen identificadores del
-   proveedor.
-4. Pedir autorización separada antes de borrar las tres carpetas antiguas. Hasta ese
-   momento ya no estarán enlazadas, pero una URL antigua conocida seguirá respondiendo.
+El 26/08/2026 se fusionó en `main` y Vercel desplegó el cambio con autorización expresa.
+La comprobación posterior confirmó:
 
-No hace falta ejecutar una migración ni actualizar Neon para desplegar este cambio.
+- respuesta HTTP 200 del catálogo;
+- las 326 rutas neutras presentes;
+- 0 rutas antiguas enlazadas;
+- «Microrriel magnético 48 V» visible;
+- 0 identificadores sensibles en el HTML y los recursos públicos revisados.
+
+Solo falta pedir autorización separada antes de borrar las tres carpetas antiguas. Hasta
+ese momento ya no están enlazadas, pero una URL antigua conocida seguirá respondiendo.
+
+No hizo falta ejecutar una migración ni actualizar Neon para desplegar este cambio.

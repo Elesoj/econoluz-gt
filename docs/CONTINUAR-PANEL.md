@@ -7,9 +7,8 @@ por ejemplo) pueda seguir el trabajo sin haber estado en las conversaciones prev
 Ahí están las reglas del proyecto, la marca, las convenciones y lo que no se toca.
 Este documento no las repite: las da por leídas.
 
-**Carpeta de trabajo: `frontend/`.** El panel ya está integrado y publicado desde
-`main`. El trabajo actual para anonimizar el catálogo público vive en la rama
-`ocultar-proveedores`; no está fusionado ni desplegado.
+**Carpeta de trabajo: `frontend/`.** El panel y la anonimización del catálogo público ya
+están integrados en `main` y publicados.
 
 **Publicado el 26/08/2026:** `main` recibió los 50 commits y Vercel desplegó.
 `econoluz-gt.vercel.app` sirve el catálogo con precios, la galería desde Neon y el panel
@@ -20,13 +19,14 @@ hace el dueño.
 
 ## 0. Estado en dos minutos (última actualización: 26/08/2026)
 
-> **Exposición del proveedor resuelta en código (26/08/2026), pendiente de desplegar.**
+> **Exposición del proveedor resuelta y desplegada (26/08/2026).**
 > `publicProductPrivacy.ts` transforma solo lo que recibe el visitante: rutas neutras,
 > nombres de línea anonimizados y «Microrriel magnético 48 V» en lugar de
 > `Magnetrack Pro`. El panel conserva marca, serie, código y nombre del fabricante.
 > `npm run catalogo:auditar` revisa 313 productos y 408 identificadores normalizados:
 > 0 coincidencias. Las 326 imágenes originales siguen sin borrarse; las 326 copias
-> neutras son idénticas byte a byte. No hace falta modificar Neon.
+> neutras son idénticas byte a byte. Producción sirve las 326 rutas neutras y no enlaza
+> ninguna ruta antigua. No hizo falta modificar Neon.
 
 > **El catálogo público ya muestra los precios (26/08/2026).** Lo decidió el dueño: si
 > va a ser una tienda B2C, el precio tiene que verse. `PublicProduct.priceGtq` es
@@ -237,7 +237,7 @@ pueden aparecer en el JavaScript compilado**, y
 `tests/catalog-production-boundary.spec.ts` revisa los chunks del build buscándolos.
 **Esto no se puede romper.**
 
-**Resuelto en `ocultar-proveedores`, pendiente de desplegar.** La proyección pública
+**Resuelto y desplegado el 26/08/2026.** La proyección pública
 anonimiza rutas, textos, ficha técnica y el identificador de la aplicación antes de que
 los datos lleguen al navegador. La transformación no reescribe Neon ni el producto
 interno, de modo que el panel sigue enseñando la información necesaria al personal.
@@ -889,16 +889,16 @@ Además, **nada se publica ni se despliega sin que él lo confirme.**
 No los causó la migración. Están documentados para que nadie pierda tiempo
 investigándolos ni los confunda con una regresión.
 
-### 10.1 Nombres de proveedor visibles en el catálogo público — resuelto en código
+### 10.1 Nombres de proveedor visibles en el catálogo público — resuelto y desplegado
 
-El dueño autorizó ocultarlos el 26/08/2026. La rama `ocultar-proveedores` sirve las
+El dueño autorizó ocultarlos y desplegarlos el 26/08/2026. `main` sirve las
 imágenes desde `arquitectonico/`, `lineal/` y `electrico/`, retira los nombres de línea
 de los campos públicos y renombra la familia `Magnetrack Pro` como «Microrriel magnético
 48 V». Los datos originales permanecen detrás de sesión en el panel.
 
-No se han borrado las carpetas antiguas y no se ha desplegado. Después del despliegue
-hay que verificar las rutas neutras en producción y pedir permiso antes de retirar los
-originales. El diagnóstico y el procedimiento están en `docs/FUGAS-PROVEEDOR.md`.
+No se han borrado las carpetas antiguas. Las 326 rutas neutras ya se verificaron en
+producción; falta pedir permiso antes de retirar los originales. El diagnóstico y el
+procedimiento están en `docs/FUGAS-PROVEEDOR.md`.
 
 ### 10.2 Una prueba que falla
 
