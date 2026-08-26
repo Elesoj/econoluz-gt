@@ -29,13 +29,13 @@ permanencia entre visitas.
 
 Estado real de los datos el 2026-08-26, comprobado contra Neon:
 
-| Productos | Con precio | Con existencias | Vendibles en línea |
-|-----------|-----------|-----------------|--------------------|
-| 313       | 25        | 24              | **0**              |
+| Productos | Con precio | Con existencias |
+|-----------|-----------|-----------------|
+| 313       | **25**    | 24              |
 
-Mientras esa última columna sea cero, **el carrito no se le verá a nadie**.
-Marcar productos como vendibles es trabajo del dueño desde el panel, no del
-programador.
+Los productos con precio son los que se pondrán a la venta (ver la decisión 2).
+Los 288 restantes seguirán siendo escaparate hasta que el dueño los tarife: poner
+precios es la tarea más lenta del proyecto y no depende de programar.
 
 ## Decisiones del dueño
 
@@ -45,7 +45,17 @@ programador.
    botones en la misma tarjeta obligan al cliente a elegir sin saber por qué.
    Quien quiera un proyecto grande sigue teniendo el enlace a `/asesoria`.
 
-2. **Las existencias avisan, no bloquean.** Pedir más unidades de las
+2. **Tener precio es la decisión de vender.** No hay una casilla aparte de
+   «se vende en línea». Un producto con precio se puede comprar; uno sin precio,
+   no. La columna  existía y se descarta: obligaba a hacer dos
+   cosas para vender una, y con más de trescientos productos administrados por
+   una sola persona, cada casilla extra es una tarea multiplicada por trescientos
+   y un producto más que puede quedar a medio configurar sin que nadie lo note.
+   Se pierde poder enseñar un precio de referencia sin vender el producto; es un
+   caso que hoy no existe y la columna sigue en la base de datos por si vuelve a
+   hacer falta.
+
+3. **Las existencias avisan, no bloquean.** Pedir más unidades de las
    apuntadas muestra «puede tardar unos días» en esa línea, y deja seguir. El
    número del panel se desfasa con facilidad, y un stock desfasado que bloquea
    cuesta ventas reales. Se puede endurecer más adelante sin rehacer nada.
@@ -92,28 +102,31 @@ saliendo en pantalla como un céntimo que no cuadra.
 
 ### Datos nuevos que bajan al navegador
 
-`PublicProduct` gana dos campos **opcionales**, igual que se hizo con `priceGtq`:
+`PublicProduct` gana un campo **opcional** más, igual que se hizo con `priceGtq`:
 
 ```ts
 stock?: number;
-sellableOnline?: boolean;
 ```
 
-Opcionales y no `null` a propósito: un `null` cambiaría la forma de los 313
-productos y la huella congelada del catálogo dejaría de coincidir sin que nada
-haya cambiado de verdad. Se pueblan en `toPublicProduct` a través de
-`PublicProductExtras`, y la consulta de `catalog.server.ts` añade `stock` y
-`sellable_online` a las columnas que ya lee.
+`priceGtq` ya viaja desde que el catálogo enseña precios, y es lo que decide si
+un producto se puede comprar, así que no hace falta ningún campo más.
 
-Ninguno de los dos revela nada del proveedor, así que la frontera pública
+Opcional y no `null` a propósito: un `null` cambiaría la forma de los 313
+productos y la huella congelada del catálogo dejaría de coincidir sin que nada
+haya cambiado de verdad. Se puebla en `toPublicProduct` a través de
+`PublicProductExtras`, y la consulta de `catalog.server.ts` añade `stock` a las
+columnas que ya lee.
+
+Las existencias no revelan nada del proveedor, así que la frontera pública
 sigue cumpliéndose.
 
 ## Lo que ve el cliente
 
-**Tarjeta vendible** (`sellableOnline` y `priceGtq`): precio, y «Añadir al
-carrito» con el control de cantidad.
+**Tarjeta con precio**: el precio, y «Añadir al carrito» con el control de
+cantidad.
 
-**Cualquier otra tarjeta**: exactamente lo de hoy, sin cambios.
+**Tarjeta sin precio**: exactamente lo de hoy, sin cambios: «Precio a consultar»
+y el control de cotización.
 
 **Cabecera**: un botón de carrito con el número de artículos, que abre el cajón.
 Vive en la barra de navegación del sitio, y **solo aparece cuando el carrito
@@ -122,21 +135,28 @@ tiene algo dentro**: un carrito vacío permanente en todas las páginas es ruido
 **Cajón del carrito**: cada línea con imagen, nombre, precio unitario, cantidad
 editable y subtotal; el aviso «puede tardar unos días» en las líneas que superen
 las existencias apuntadas —solo cuando el producto tiene existencias apuntadas:
-si la casilla está vacía no se sabe nada del inventario y no se avisa de nada—; el total abajo; y «Ir a pagar», deshabilitado con la
-nota de que el pago en línea está en preparación.
+si la casilla está vacía no se sabe nada del inventario y no se avisa de nada—;
+el total abajo; y «Ir a pagar», deshabilitado con la nota de que el pago en
+línea está en preparación.
 
 **Permanencia**: el carrito se guarda en `localStorage` y sobrevive a cerrar el
 navegador. La selección de cotización se queda en `sessionStorage` como está.
 
 ## En el panel
 
-La casilla «se vende en línea» se añade al listado de productos, junto a precio
-y existencias, editable en la fila. Hoy solo se puede marcar abriendo la ficha
-de cada producto: con 25 productos con precio, eso son 25 fichas.
+Se **retira** la casilla «se vende en línea» de la ficha del producto
+(`app/admin/(panel)/productos/[referencia]/page.tsx`). Con la decisión 2 deja de
+tener efecto, y un interruptor visible que no cambia nada es peor que no tenerlo:
+haría creer al dueño que un producto no está a la venta cuando sí lo está.
+
+La columna `sellable_online` se queda en la base de datos, sin usar y sin borrar.
+
+No se añade ningún control nuevo: el listado ya edita el precio en la fila, y el
+precio es ahora lo único que decide si un producto se vende.
 
 ## Errores y casos límite
 
-- **Un producto guardado ya no existe o dejó de ser vendible.** Al restaurar el
+- **Un producto guardado ya no existe o se quedó sin precio.** Al restaurar el
   carrito se descarta esa línea en silencio y se avisa en el cajón de que un
   producto ya no está disponible. No se rompe el carrito entero por una línea.
 - **El precio cambió desde que se añadió.** Manda el del servidor. El cliente
@@ -147,8 +167,8 @@ de cada producto: con 25 productos con precio, eso son 25 fichas.
 - **Cantidades absurdas.** El reductor rechaza lo que no sea un entero positivo
   y protege el total del desbordamiento, igual que hace hoy el de cotización.
 - **La base de datos no responde.** `getPublicCatalog` ya cae al catálogo
-  escrito en el código, que no tiene precios: sin precios no hay productos
-  vendibles, así que el carrito desaparece y el catálogo sigue funcionando para
+  escrito en el código, que no tiene precios: sin precios no hay nada que
+  comprar, así que el carrito desaparece y el catálogo sigue funcionando para
   cotizar. Degrada bien, sin página rota.
 
 ## Pruebas
@@ -160,7 +180,8 @@ un `localStorage` que lanza excepción—.
 
 **De navegador** (Playwright): añadir un producto vendible, comprobar el total,
 recargar la página y comprobar que el carrito sigue ahí; comprobar que una
-tarjeta sin precio sigue enseñando el control de cotización y no el carrito;
+tarjeta sin precio sigue enseñando el control de cotización y no el carrito, que
+es la prueba de que la regla «precio = a la venta» se respeta;
 comprobar que pedir más unidades de las apuntadas muestra el aviso de plazo.
 
 Se trabaja con TDD: prueba en rojo antes que código.
