@@ -17,6 +17,15 @@ Nada de esto está subido a GitHub ni desplegado: el sitio publicado sigue sin p
 
 ## 0. Estado en dos minutos (última actualización: 25/08/2026)
 
+> **El precio no se ve en la web, y es a propósito.** `publicProduct.ts` no deja cruzar
+> `price_gtq` ni `stock` al navegador porque la tienda B2C no existe todavía: no hay
+> dónde comprar. El panel los guarda para tenerlos listos cuando llegue el paso 2. El
+> dueño lo esperó dos veces, así que **el propio panel lo avisa ahora** en el listado y en
+> la ficha. Si algún día se decide enseñar precios antes de la tienda, el cambio es
+> pequeño —añadir el campo a `PublicProduct` y pintarlo— pero **es una decisión de
+> negocio, no técnica**: expone los precios a la competencia y hoy solo un producto de 313
+> tiene precio cargado.
+
 **El panel funciona y se usa.** Hay un administrador dado de alta y se ha entrado desde el
 navegador. Lo construido:
 

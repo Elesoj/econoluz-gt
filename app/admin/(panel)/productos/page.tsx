@@ -88,6 +88,12 @@ export default async function ProductosPage({
             Escribe el precio y las existencias directamente en la fila, y guarda todos los
             cambios de la página de una vez. Pulsa el nombre para abrir su ficha completa.
           </p>
+          <p className="mt-3 max-w-2xl border-l-2 border-tienda-claro pl-4 text-sm text-white/70">
+            Los precios se guardan pero <strong className="font-semibold text-white">todavía no
+            aparecen en la web</strong>: el catálogo público no los muestra hasta que exista la
+            tienda en línea. Cargarlos ahora adelanta ese trabajo. Publicar y despublicar sí se
+            nota al momento.
+          </p>
         </div>
       </section>
 

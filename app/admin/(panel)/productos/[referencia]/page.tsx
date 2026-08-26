@@ -325,7 +325,10 @@ export default async function FichaProductoPage({
             </div>
           </Seccion>
 
-          <Seccion titulo="Tienda y publicación">
+          <Seccion
+            titulo="Tienda y publicación"
+            descripcion="El precio y las existencias se guardan pero todavía no se ven en la web: el catálogo público no muestra precios hasta que exista la tienda. Cargarlos ahora es preparar ese paso. Lo que sí se ve al momento es la casilla de publicado."
+          >
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <label htmlFor="precio" className={claseEtiqueta}>
