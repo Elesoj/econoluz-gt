@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   PUBLIC_TECHNICAL_SPEC_REGISTRY,
   type PublicProduct,
@@ -23,7 +24,6 @@ type ProductTechnicalDrawerProps = {
   onAdd: (product: TechnicalProduct) => void;
   onDecrease: (product: TechnicalProduct) => void;
   onClose: () => void;
-  onViewQuote: () => void;
 };
 
 export default function ProductTechnicalDrawer({
@@ -32,7 +32,6 @@ export default function ProductTechnicalDrawer({
   onAdd,
   onDecrease,
   onClose,
-  onViewQuote,
 }: ProductTechnicalDrawerProps) {
   useEffect(() => {
     if (!product) {
@@ -222,9 +221,9 @@ export default function ProductTechnicalDrawer({
             <div>
               <div className="flex items-center justify-between gap-4">
                 <p className="text-sm font-semibold text-black">
-                  Producto agregado
+                  En el carrito
                 </p>
-                <div className="inline-flex h-11 items-center rounded-full bg-proyectos text-sm font-semibold text-white">
+                <div className="inline-flex h-11 items-center rounded-full bg-tienda text-sm font-semibold text-white">
                   <button
                     type="button"
                     onClick={() => onDecrease(product)}
@@ -252,23 +251,29 @@ export default function ProductTechnicalDrawer({
                 >
                   Seguir viendo productos
                 </button>
-                <button
-                  type="button"
-                  onClick={onViewQuote}
+                <Link
+                  href="/carrito"
                   className="flex items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte"
                 >
-                  Ver cotización
-                </button>
+                  Ir al carrito
+                </Link>
               </div>
             </div>
-          ) : (
+          ) : typeof product.priceGtq === "number" ? (
             <button
               type="button"
               onClick={addProduct}
               className="flex w-full items-center justify-center rounded-full bg-tienda px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-tienda-fuerte"
             >
-              Agregar a cotización
+              Agregar al carrito
             </button>
+          ) : (
+            <Link
+              href={`/asesoria?producto=${encodeURIComponent(product.econoluzReference)}`}
+              className="flex w-full items-center justify-center rounded-full bg-proyectos px-7 py-4 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:opacity-90"
+            >
+              Consultar precio
+            </Link>
           )}
         </div>
       </aside>

@@ -87,13 +87,4 @@ export type PublicProduct = {
   technicalSpecs?: PublicTechnicalSpecs;
   /** Precio público en quetzales; ausente significa «Precio a consultar». */
   priceGtq?: number;
-  /**
-   * Unidades apuntadas en el panel.
-   *
-   * Opcional por el mismo motivo que `priceGtq`, y con una distinción que
-   * importa: que no exista significa «no se ha contado el inventario», que es
-   * distinto de `0`, que significa «se agotó». La tienda solo avisa del plazo
-   * de entrega cuando hay un número apuntado; sin él no promete nada.
-   */
-  stock?: number;
 };

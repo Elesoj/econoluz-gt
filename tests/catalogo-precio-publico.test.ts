@@ -34,23 +34,14 @@ test("el precio se escribe en quetzales con dos decimales", () => {
   assert.equal(formatPrice(0), "Q0.00");
 });
 
-test("un producto sin existencias apuntadas sale exactamente igual que antes", () => {
-  // Mismo motivo que con el precio: un `stock: null` en los 313 productos
-  // rompería la huella congelada del catálogo sin que nada haya cambiado.
+test("las existencias NO bajan al catálogo público", () => {
+  // El número de unidades es información del negocio: puesto en el HTML,
+  // cualquiera podría leer el inventario de los 313 productos sin comprar
+  // nada. El carrito lo pregunta al servidor solo por lo que lleva dentro
+  // (`app/tienda/disponibilidad.server.ts`).
   assert.equal("stock" in toPublicProduct(UNO), false);
-  assert.equal("stock" in toPublicProduct(UNO, { stock: null }), false);
-});
-
-test("las existencias apuntadas llegan al catálogo público", () => {
-  assert.equal(toPublicProduct(UNO, { stock: 12 }).stock, 12);
-});
-
-test("cero existencias es un dato y se publica", () => {
-  // Cero significa «se agotó», que no es lo mismo que «no lo he contado».
-  assert.equal(toPublicProduct(UNO, { stock: 0 }).stock, 0);
-});
-
-test("unas existencias que no son un entero no se publican", () => {
-  assert.equal("stock" in toPublicProduct(UNO, { stock: Number.NaN }), false);
-  assert.equal("stock" in toPublicProduct(UNO, { stock: 2.5 }), false);
+  assert.equal(
+    "stock" in toPublicProduct(UNO, { priceGtq: 100 }),
+    false,
+  );
 });

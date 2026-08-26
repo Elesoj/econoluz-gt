@@ -1,12 +1,7 @@
 ﻿"use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useSyncExternalStore } from "react";
-import {
-  getFloatingQuoteServerSnapshot,
-  getFloatingQuoteSnapshot,
-  subscribeToFloatingQuote,
-} from "../catalogo/floatingQuoteStore";
+import { useEffect } from "react";
 import { contact } from "../data/siteData";
 
 const legacyQuoteContextKey = "econoluz_quote_context";
@@ -14,11 +9,10 @@ let hasAttemptedLegacyContextCleanup = false;
 
 export default function FloatingWhatsApp() {
   const pathname = usePathname();
-  const message = useSyncExternalStore(
-    subscribeToFloatingQuote,
-    getFloatingQuoteSnapshot,
-    getFloatingQuoteServerSnapshot,
-  );
+  // El mensaje era dinámico: arrastraba las luminarias que el visitante hubiera
+  // seleccionado en el catálogo. Al retirarse la cotización de ahí, ya no hay
+  // selección que arrastrar y el saludo vuelve a ser el de siempre.
+  const message = contact.whatsappDefaultMessage;
 
   useEffect(() => {
     if (hasAttemptedLegacyContextCleanup) {

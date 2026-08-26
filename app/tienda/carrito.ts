@@ -6,20 +6,30 @@
  * viajara en el navegador, cualquiera podría editar su propio carrito y
  * comprar un panel por un quetzal.
  *
- * Es gemelo del motor de cotización (`app/catalogo/quoteSelection.ts`) y a
- * propósito no lo reutiliza: la cotización no sabe de dinero ni de existencias
- * y no debe cargar con ello.
+ * Nació como gemelo del motor de cotización del catálogo, que se retiró el
+ * 26/08/2026 cuando el catálogo pasó a ser solo tienda. Se mantuvo separado a
+ * propósito y por eso aquella retirada no le afectó.
  */
 
 export type LineaCarrito = {
   econoluzReference: string;
   cantidad: number;
+  /**
+   * El cliente pidió más unidades de las que hay apuntadas y aceptó esperar.
+   *
+   * Solo se guarda el sí: cuando prefiere llevarse lo disponible, lo que hace
+   * es bajar la cantidad, y entonces no hay nada que esperar ni que recordar.
+   * La marca se pierde en cuanto cambia la cantidad, porque quien aceptó
+   * esperar diez unidades no ha aceptado esperar cuarenta.
+   */
+  esperaAceptada?: true;
 };
 
 export type AccionCarrito =
   | { tipo: "agregar"; econoluzReference: string; cantidad?: number }
   | { tipo: "quitar"; econoluzReference: string }
   | { tipo: "fijar"; econoluzReference: string; cantidad: number }
+  | { tipo: "aceptarEspera"; econoluzReference: string }
   | { tipo: "vaciar" };
 
 /**
@@ -63,6 +73,16 @@ export const reducirCarrito = (
       : lineas.filter((_, posicion) => posicion !== indice);
   }
 
+  if (accion.tipo === "aceptarEspera") {
+    if (indice < 0 || lineas[indice].esperaAceptada) {
+      return lineas as LineaCarrito[];
+    }
+
+    return lineas.map((linea, posicion) =>
+      posicion === indice ? { ...linea, esperaAceptada: true as const } : linea,
+    );
+  }
+
   const cantidadPedida =
     accion.tipo === "agregar"
       ? (accion.cantidad ?? 1) + (indice < 0 ? 0 : lineas[indice].cantidad)
@@ -90,7 +110,11 @@ export const reducirCarrito = (
     return lineas as LineaCarrito[];
   }
 
+  // Se reconstruye la línea en vez de copiarla: cambiar la cantidad tiene que
+  // olvidar la espera aceptada, que se dio para otra cantidad distinta.
   return lineas.map((linea, posicion) =>
-    posicion === indice ? { ...linea, cantidad: cantidadPedida } : linea,
+    posicion === indice
+      ? { econoluzReference: linea.econoluzReference, cantidad: cantidadPedida }
+      : linea,
   );
 };

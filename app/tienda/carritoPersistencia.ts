@@ -45,14 +45,14 @@ export const parsearCarritoGuardado = (
     return [];
   }
 
-  const porReferencia = new Map<string, number>();
+  const porReferencia = new Map<string, { cantidad: number; espera: boolean }>();
 
   for (const guardada of contenido.lineas) {
     if (!esObjeto(guardada)) {
       continue;
     }
 
-    const { econoluzReference, cantidad } = guardada;
+    const { econoluzReference, cantidad, esperaAceptada } = guardada;
 
     if (
       typeof econoluzReference !== "string" ||
@@ -64,16 +64,23 @@ export const parsearCarritoGuardado = (
       continue;
     }
 
-    const acumulada = (porReferencia.get(econoluzReference) ?? 0) + cantidad;
-    porReferencia.set(
-      econoluzReference,
-      Math.min(acumulada, CANTIDAD_MAXIMA_POR_LINEA),
-    );
+    const previa = porReferencia.get(econoluzReference);
+    porReferencia.set(econoluzReference, {
+      cantidad: Math.min(
+        (previa?.cantidad ?? 0) + cantidad,
+        CANTIDAD_MAXIMA_POR_LINEA,
+      ),
+      // Solo el `true` literal cuenta: cualquier otra cosa que alguien haya
+      // dejado escrita aquí es basura, y aceptar una espera en nombre del
+      // cliente sería ponerle un plazo que nunca aceptó.
+      espera: previa?.espera === true || esperaAceptada === true,
+    });
   }
 
-  return [...porReferencia].map(([econoluzReference, cantidad]) => ({
+  return [...porReferencia].map(([econoluzReference, { cantidad, espera }]) => ({
     econoluzReference,
     cantidad,
+    ...(espera ? { esperaAceptada: true as const } : {}),
   }));
 };
 
@@ -102,6 +109,7 @@ export const guardarCarrito = (
           lineas: lineas.map((linea) => ({
             econoluzReference: linea.econoluzReference,
             cantidad: linea.cantidad,
+            ...(linea.esperaAceptada ? { esperaAceptada: true } : {}),
           })),
         });
 

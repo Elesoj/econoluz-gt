@@ -4,11 +4,10 @@ import { guardarCarrito, leerCarrito } from "./carritoPersistencia";
 /**
  * El carrito, vivo, compartido por toda la aplicación.
  *
- * Es un store de módulo con suscripción, el mismo patrón que
- * `app/catalogo/floatingQuoteStore.ts`, y no un contexto de React: el contador
- * vive en la barra de navegación y las líneas en la página del carrito, que no
- * son parientes en el árbol. Un contexto obligaría a envolver el layout entero
- * y a convertir en cliente páginas que hoy se sirven desde el servidor.
+ * Es un store de módulo con suscripción y no un contexto de React: el botón
+ * flotante vive en el layout y las líneas en la página del carrito, que no son
+ * parientes en el árbol. Un contexto obligaría a envolver el layout entero y a
+ * convertir en cliente páginas que hoy se sirven desde el servidor.
  */
 
 /**

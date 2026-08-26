@@ -61,7 +61,6 @@ const restoredApplicationBySourceFamily: Readonly<Record<string, string>> = {
 /** Datos que no viven en el catálogo escrito, sino en la base de datos. */
 export type PublicProductExtras = {
   priceGtq?: number | null;
-  stock?: number | null;
 };
 
 export const toPublicProduct = (
@@ -96,11 +95,6 @@ export const toPublicProduct = (
   // un número finito significan "todavía sin precio".
   if (typeof extras?.priceGtq === "number" && Number.isFinite(extras.priceGtq)) {
     publicProduct.priceGtq = extras.priceGtq;
-  }
-
-  // Las existencias tienen que ser un entero: media luminaria no existe.
-  if (typeof extras?.stock === "number" && Number.isSafeInteger(extras.stock)) {
-    publicProduct.stock = extras.stock;
   }
 
   return publicProduct;

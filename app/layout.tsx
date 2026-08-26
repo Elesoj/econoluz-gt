@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
+import CarritoContador from "./tienda/CarritoContador";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -57,6 +58,7 @@ export default function RootLayout({
       <body className="flex min-h-full w-full max-w-full flex-col overflow-x-hidden">
         {children}
         <FloatingWhatsApp />
+        <CarritoContador />
       </body>
     </html>
   );

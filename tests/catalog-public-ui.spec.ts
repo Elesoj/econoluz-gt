@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("restores an actual stable-reference quote from the public catalog", async ({
-  page,
-}) => {
+test("una selección de cotización vieja no rompe el catálogo", async ({ page }) => {
+  // El catálogo dejó de tener cesto de cotización el 26/08/2026, pero en el
+  // navegador de quien lo visitó antes puede quedar la clave guardada. Ya no
+  // se restaura nada, y sobre todo no revienta la página.
   const pageErrors: string[] = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await page.addInitScript(() => {
@@ -13,7 +14,11 @@ test("restores an actual stable-reference quote from the public catalog", async 
   });
 
   await page.goto("/catalogo");
-  await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("2");
+  await page.getByRole("button", { name: "Mostrar todos los productos" }).click();
+  await expect(
+    page.getByRole("button", { name: "Agregar al carrito" }).first(),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /Ver selecci/i })).toHaveCount(0);
 
   expect(pageErrors).toEqual([]);
 });

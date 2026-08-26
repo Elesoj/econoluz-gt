@@ -1,5 +1,6 @@
 import type { PublicProduct } from "../data/publicProduct";
 import type { LineaCarrito } from "./carrito";
+import type { Disponibilidad } from "./disponibilidad";
 
 /**
  * Empareja las líneas del carrito con el catálogo del servidor y suma.
@@ -16,6 +17,17 @@ export type LineaResuelta = {
   subtotalCentavos: number;
   /** Se pidió más de lo apuntado en existencias. Avisa; no bloquea. */
   superaExistencias: boolean;
+  /**
+   * El cliente ya vio el aviso y dijo que prefiere esperar. Mientras sea
+   * `false` y `superaExistencias` sea `true`, la línea está pendiente de que
+   * decida: o se lleva lo disponible, o acepta el plazo.
+   */
+  esperaAceptada: boolean;
+  /**
+   * Unidades que hay apuntadas, cuando las hay. Es lo que se le ofrece al
+   * cliente como alternativa: «llévate estas ahora».
+   */
+  disponiblesAhora?: number;
 };
 
 export type CarritoResuelto = {
@@ -32,6 +44,12 @@ export const aQuetzales = (centavos: number) => centavos / 100;
 export const resolverCarrito = (
   lineas: readonly LineaCarrito[],
   catalogo: readonly PublicProduct[],
+  /**
+   * Lo que el servidor contestó sobre el inventario. Es opcional porque puede
+   * no haber llegado todavía, o no haber podido consultarse: mientras falte,
+   * el carrito funciona igual y no avisa de plazos que no puede comprobar.
+   */
+  disponibilidad?: Disponibilidad,
 ): CarritoResuelto => {
   const porReferencia = new Map(
     catalogo.map((producto) => [producto.econoluzReference, producto]),
@@ -53,16 +71,24 @@ export const resolverCarrito = (
 
     const precioCentavos = aCentavos(producto.priceGtq);
     const subtotalCentavos = precioCentavos * linea.cantidad;
+    // Mientras el servidor no diga lo contrario, se da por hecho que alcanza:
+    // no saber nada del inventario no autoriza a frenar una compra.
+    const respuesta = disponibilidad?.[linea.econoluzReference];
+    const superaExistencias = respuesta?.alcanza === false;
 
     resueltas.push({
       producto,
       cantidad: linea.cantidad,
       precioCentavos,
       subtotalCentavos,
-      // Existencias sin apuntar significa «no sé cuántos hay», no «no hay
-      // ninguno»: en ese caso no se avisa de un plazo que nadie ha calculado.
-      superaExistencias:
-        typeof producto.stock === "number" && linea.cantidad > producto.stock,
+      superaExistencias,
+      // La marca guardada solo cuenta mientras siga habiendo algo que esperar:
+      // si el inventario se repuso, la línea vuelve a ser normal sin que nadie
+      // tenga que limpiar nada.
+      esperaAceptada: superaExistencias && linea.esperaAceptada === true,
+      ...(superaExistencias && typeof respuesta?.disponiblesAhora === "number"
+        ? { disponiblesAhora: respuesta.disponiblesAhora }
+        : {}),
     });
 
     totalCentavos += subtotalCentavos;

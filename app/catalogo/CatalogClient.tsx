@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import {
   useCallback,
@@ -12,7 +11,6 @@ import {
 } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductTechnicalDrawer from "../components/ProductTechnicalDrawer";
-import QuoteDrawer from "../components/QuoteDrawer";
 import SectionHeader from "../components/SectionHeader";
 import SiteFooter from "../components/SiteFooter";
 import SiteNavbar from "../components/SiteNavbar";
@@ -29,7 +27,6 @@ import {
   filterCatalogProducts,
 } from "./catalogState";
 import useCatalogNavigation from "./useCatalogNavigation";
-import useQuoteSelection from "./useQuoteSelection";
 import useCarrito from "../tienda/useCarrito";
 import { mainNavItems } from "../data/siteData";
 
@@ -57,20 +54,10 @@ type CatalogClientProps = {
 };
 
 export default function CatalogClient({ products }: CatalogClientProps) {
-  const router = useRouter();
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [isQuoteOpen, setIsQuoteOpen] = useState(false);
   const [technicalProduct, setTechnicalProduct] = useState<PublicProduct | null>(null);
 
 
-  const {
-    items: quoteItems,
-    quoteCount,
-    add: addQuoteProduct,
-    decrease: decreaseQuoteProduct,
-    remove: removeQuoteProduct,
-    setQuantity: setQuoteQuantity,
-  } = useQuoteSelection(products);
   const {
     agregar: agregarAlCarrito,
     fijar: fijarEnCarrito,
@@ -177,12 +164,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     goToPage(nextPage, scroll);
   };
 
-  // Antes bajaba hasta el formulario, que estaba en esta misma página. Ahora
-  // la asesoría tiene página propia y hay que ir a ella.
-  const goToAdvicePage = useCallback(() => {
-    setIsQuoteOpen(false);
-    router.push("/asesoria");
-  }, [router]);
 
 
 
@@ -195,21 +176,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     };
   }, []);
 
-  const addToQuote = (product: PublicProduct, openQuote = true) => {
-    addQuoteProduct(product);
-
-    if (openQuote) {
-      setIsQuoteOpen(true);
-    }
-  };
-
-  const removeFromQuote = (econoluzReference: string) => {
-    removeQuoteProduct(econoluzReference);
-  };
-
-  const updateQuantity = (econoluzReference: string, quantity: number) => {
-    setQuoteQuantity(econoluzReference, quantity);
-  };
 
 
 
@@ -511,22 +477,11 @@ export default function CatalogClient({ products }: CatalogClientProps) {
 
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                 {visibleProducts.map((product) => {
-                  const selectedItem = quoteItems.find(
-                    (item) =>
-                      item.product.econoluzReference ===
-                      product.econoluzReference,
-                  );
-
                   return (
                     <ProductCard
                       key={product.id}
                       product={product}
-                      quantity={selectedItem?.quantity}
                       cartQuantity={cantidadEnCarrito(product.econoluzReference)}
-                      onAdd={() => addToQuote(product, false)}
-                      onDecrease={() =>
-                        decreaseQuoteProduct(product.econoluzReference)
-                      }
                       onAddToCart={() =>
                         agregarAlCarrito(product.econoluzReference)
                       }
@@ -615,8 +570,9 @@ export default function CatalogClient({ products }: CatalogClientProps) {
               ¿Necesitas cotizar un proyecto completo?
             </h2>
             <p className="mt-4 max-w-xl text-base leading-7 text-white/62">
-              Para volúmenes, varias áreas o especificación técnica, el equipo prepara una
-              cotización con asesoría. Las luminarias que hayas seleccionado te acompañan.
+              Para volúmenes, varias áreas o especificación técnica, el equipo prepara
+              una cotización con asesoría. Cuéntanos qué necesitas y te respondemos con
+              producto, cantidades y precio.
             </p>
           </div>
           <Link
@@ -628,51 +584,24 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         </div>
       </section>
 
-      {quoteCount > 0 && (
-        <button
-          type="button"
-          onClick={() => setIsQuoteOpen(true)}
-          className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full bg-tienda px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:bg-tienda-fuerte sm:bottom-8 sm:right-8"
-        >
-          Ver selección
-          <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">
-            {quoteCount}
-          </span>
-        </button>
-      )}
-
-      <QuoteDrawer
-        isOpen={isQuoteOpen}
-        items={quoteItems}
-        onClose={() => setIsQuoteOpen(false)}
-        onCompleteAdvice={goToAdvicePage}
-        onRemove={removeFromQuote}
-        onUpdateQuantity={updateQuantity}
-      />
-
       <ProductTechnicalDrawer
         key={technicalProduct?.id ?? "closed-technical-product"}
         product={technicalProduct}
         quantity={
           technicalProduct
-            ? quoteItems.find(
-                (item) =>
-                  item.product.econoluzReference ===
-                  technicalProduct.econoluzReference,
-              )?.quantity ?? 0
+            ? cantidadEnCarrito(technicalProduct.econoluzReference)
             : 0
         }
         onAdd={(product) => {
-          addToQuote(product, false);
+          agregarAlCarrito(product.econoluzReference);
         }}
         onDecrease={(product) => {
-          decreaseQuoteProduct(product.econoluzReference);
+          fijarEnCarrito(
+            product.econoluzReference,
+            cantidadEnCarrito(product.econoluzReference) - 1,
+          );
         }}
         onClose={() => setTechnicalProduct(null)}
-        onViewQuote={() => {
-          setTechnicalProduct(null);
-          setIsQuoteOpen(true);
-        }}
       />
 
       <SiteFooter />

@@ -1,15 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { PublicProduct } from "../data/publicProduct";
 import { formatPrice } from "../lib/formatters";
 
 type ProductCardProps = {
   product: PublicProduct;
-  /** Unidades en la selección de cotización. */
-  quantity?: number;
   /** Unidades en el carrito de compra. */
   cartQuantity?: number;
-  onAdd: () => void;
-  onDecrease: () => void;
   onAddToCart: () => void;
   onDecreaseFromCart: () => void;
   onViewDetails: () => void;
@@ -17,10 +14,7 @@ type ProductCardProps = {
 
 export default function ProductCard({
   product,
-  quantity = 0,
   cartQuantity = 0,
-  onAdd,
-  onDecrease,
   onAddToCart,
   onDecreaseFromCart,
   onViewDetails,
@@ -122,34 +116,16 @@ export default function ProductCard({
                 Agregar al carrito
               </button>
             )
-          ) : quantity > 0 ? (
-            <div className="inline-flex h-9 w-full items-center justify-between rounded-full bg-proyectos text-xs font-semibold text-white">
-              <button
-                type="button"
-                onClick={onDecrease}
-                className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/12"
-                aria-label={`Quitar una unidad de ${product.publicName}`}
-              >
-                -
-              </button>
-              <span className="min-w-0 text-center">Agregado ({quantity})</span>
-              <button
-                type="button"
-                onClick={onAdd}
-                className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/12"
-                aria-label={`Agregar una unidad de ${product.publicName}`}
-              >
-                +
-              </button>
-            </div>
           ) : (
-            <button
-              type="button"
-              onClick={onAdd}
+            /* Sin precio no se puede comprar, pero la tarjeta no puede quedarse
+               muda: hoy son casi trescientos productos. El enlace lleva a la
+               asesoría, que es donde se piden los precios de proyecto. */
+            <Link
+              href={`/asesoria?producto=${encodeURIComponent(product.econoluzReference)}`}
               className="inline-flex h-9 w-full items-center justify-center rounded-full bg-proyectos px-3 text-xs font-semibold text-white transition hover:opacity-90"
             >
-              Agregar a cotización
-            </button>
+              Consultar precio
+            </Link>
           )}
         </div>
       </div>

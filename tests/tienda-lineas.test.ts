@@ -83,15 +83,23 @@ test("una línea descartada no rompe las demás", () => {
 test("pedir más de lo que hay apuntado se marca, pero no se bloquea", () => {
   const resuelto = resolverCarrito(
     [{ econoluzReference: "ECO-IND-0048", cantidad: 10 }],
-    [producto("ECO-IND-0048", { priceGtq: 20, stock: 3 })],
+    [producto("ECO-IND-0048", { priceGtq: 20 })],
+    {
+      "ECO-IND-0048": {
+        econoluzReference: "ECO-IND-0048",
+        alcanza: false,
+        disponiblesAhora: 3,
+      },
+    },
   );
 
   assert.equal(resuelto.lineas[0].superaExistencias, true);
   assert.equal(resuelto.lineas[0].cantidad, 10);
+  assert.equal(resuelto.lineas[0].disponiblesAhora, 3);
 });
 
-test("sin existencias apuntadas no se avisa de nada", () => {
-  // Casilla vacía significa «no sé cuántos hay», no «no hay ninguno».
+test("sin respuesta del servidor no se avisa de nada", () => {
+  // Si el inventario no se ha podido consultar, el carrito no inventa plazos.
   const resuelto = resolverCarrito(
     [{ econoluzReference: "ECO-IND-0048", cantidad: 99 }],
     [producto("ECO-IND-0048", { priceGtq: 20 })],
@@ -103,7 +111,10 @@ test("sin existencias apuntadas no se avisa de nada", () => {
 test("pedir justo lo que hay no avisa", () => {
   const resuelto = resolverCarrito(
     [{ econoluzReference: "ECO-IND-0048", cantidad: 3 }],
-    [producto("ECO-IND-0048", { priceGtq: 20, stock: 3 })],
+    [producto("ECO-IND-0048", { priceGtq: 20 })],
+    {
+      "ECO-IND-0048": { econoluzReference: "ECO-IND-0048", alcanza: true },
+    },
   );
 
   assert.equal(resuelto.lineas[0].superaExistencias, false);
@@ -117,6 +128,56 @@ test("el precio cero es un precio y se puede comprar", () => {
 
   assert.equal(resuelto.lineas.length, 1);
   assert.equal(resuelto.totalCentavos, 0);
+});
+
+test("la espera aceptada llega a la línea resuelta", () => {
+  const resuelto = resolverCarrito(
+    [{ econoluzReference: "ECO-IND-0048", cantidad: 10, esperaAceptada: true }],
+    [producto("ECO-IND-0048", { priceGtq: 20 })],
+    {
+      "ECO-IND-0048": {
+        econoluzReference: "ECO-IND-0048",
+        alcanza: false,
+        disponiblesAhora: 3,
+      },
+    },
+  );
+
+  assert.equal(resuelto.lineas[0].superaExistencias, true);
+  assert.equal(resuelto.lineas[0].esperaAceptada, true);
+});
+
+test("una espera aceptada que ya no hace falta no se enseña", () => {
+  // Si el inventario se repuso, o si bajó la cantidad, la línea deja de tener
+  // nada que esperar aunque la marca siga guardada en el navegador.
+  const resuelto = resolverCarrito(
+    [{ econoluzReference: "ECO-IND-0048", cantidad: 2, esperaAceptada: true }],
+    [producto("ECO-IND-0048", { priceGtq: 20 })],
+    {
+      "ECO-IND-0048": { econoluzReference: "ECO-IND-0048", alcanza: true },
+    },
+  );
+
+  assert.equal(resuelto.lineas[0].superaExistencias, false);
+  assert.equal(resuelto.lineas[0].esperaAceptada, false);
+});
+
+test("sin decidir nada, la línea que supera existencias queda pendiente", () => {
+  const resuelto = resolverCarrito(
+    [{ econoluzReference: "ECO-IND-0048", cantidad: 10 }],
+    [producto("ECO-IND-0048", { priceGtq: 20 })],
+    {
+      "ECO-IND-0048": {
+        econoluzReference: "ECO-IND-0048",
+        alcanza: false,
+        disponiblesAhora: 3,
+      },
+    },
+  );
+
+  assert.equal(resuelto.lineas[0].superaExistencias, true);
+  assert.equal(resuelto.lineas[0].esperaAceptada, false);
+  assert.equal(resuelto.lineas[0].disponiblesAhora, 3);
 });
 
 test("los centavos redondean al céntimo más cercano", () => {

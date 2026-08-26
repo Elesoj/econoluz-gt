@@ -102,6 +102,52 @@ test("actuar sobre un producto que no está en el carrito no hace nada", () => {
   assert.equal(reducirCarrito(previo, { tipo: "quitar", econoluzReference: OTRA }), previo);
 });
 
+test("aceptar la espera marca la línea", () => {
+  const lineas = reducirCarrito([{ econoluzReference: REF, cantidad: 10 }], {
+    tipo: "aceptarEspera",
+    econoluzReference: REF,
+  });
+  assert.deepEqual(lineas, [
+    { econoluzReference: REF, cantidad: 10, esperaAceptada: true },
+  ]);
+});
+
+test("aceptar la espera dos veces no cambia nada", () => {
+  const previo: LineaCarrito[] = [
+    { econoluzReference: REF, cantidad: 10, esperaAceptada: true },
+  ];
+  assert.equal(
+    reducirCarrito(previo, { tipo: "aceptarEspera", econoluzReference: REF }),
+    previo,
+  );
+});
+
+test("cambiar la cantidad olvida la espera aceptada", () => {
+  // Quien acepta esperar diez unidades no ha aceptado esperar cuarenta: la
+  // decisión era sobre una cantidad concreta y hay que volver a pedirla.
+  const lineas = reducirCarrito(
+    [{ econoluzReference: REF, cantidad: 10, esperaAceptada: true }],
+    { tipo: "fijar", econoluzReference: REF, cantidad: 40 },
+  );
+  assert.deepEqual(lineas, [{ econoluzReference: REF, cantidad: 40 }]);
+});
+
+test("agregar una unidad más también olvida la espera aceptada", () => {
+  const lineas = reducirCarrito(
+    [{ econoluzReference: REF, cantidad: 10, esperaAceptada: true }],
+    { tipo: "agregar", econoluzReference: REF },
+  );
+  assert.deepEqual(lineas, [{ econoluzReference: REF, cantidad: 11 }]);
+});
+
+test("aceptar la espera de un producto que no está no hace nada", () => {
+  const previo: LineaCarrito[] = [{ econoluzReference: REF, cantidad: 1 }];
+  assert.equal(
+    reducirCarrito(previo, { tipo: "aceptarEspera", econoluzReference: OTRA }),
+    previo,
+  );
+});
+
 test("contar artículos suma todas las unidades", () => {
   assert.equal(
     contarArticulos([

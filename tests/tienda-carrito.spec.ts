@@ -53,14 +53,12 @@ test("cambiar la cantidad recalcula el total", async ({ page }) => {
   await expect(total).toHaveText(/^Total: Q/);
 });
 
-test("un producto sin precio sigue siendo de cotización, no de carrito", async ({
-  page,
-}) => {
+test("un producto sin precio ofrece consultar, no comprar", async ({ page }) => {
   await page.goto("/catalogo");
   await page.getByRole("button", { name: "Mostrar todos los productos" }).click();
 
-  // La regla «precio = a la venta» vista desde fuera: donde no hay precio, no
-  // hay botón de compra.
+  // La regla «precio = a la venta» vista desde fuera: donde no hay precio no
+  // hay botón de compra, pero la tarjeta tampoco se queda muda.
   const sinPrecio = page
     .locator("article")
     .filter({ hasText: "Precio a consultar" })
@@ -70,9 +68,31 @@ test("un producto sin precio sigue siendo de cotización, no de carrito", async 
   await expect(
     sinPrecio.getByRole("button", { name: "Agregar al carrito" }),
   ).toHaveCount(0);
-  await expect(
-    sinPrecio.getByRole("button", { name: "Agregar a cotización" }),
-  ).toBeVisible();
+
+  const consultar = sinPrecio.getByRole("link", { name: "Consultar precio" });
+  await expect(consultar).toBeVisible();
+  await expect(consultar).toHaveAttribute("href", /\/asesoria\?producto=ECO-/);
+});
+
+test("el catálogo ya no ofrece cotizar producto a producto", async ({ page }) => {
+  await page.goto("/catalogo");
+  await page.getByRole("button", { name: "Mostrar todos los productos" }).click();
+  await expect(page.getByRole("button", { name: "Agregar al carrito" }).first()).toBeVisible();
+
+  await expect(page.getByRole("button", { name: /Agregar a cotizaci/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Ver selección" })).toHaveCount(0);
+});
+
+test("el inventario no viaja al navegador", async ({ page }) => {
+  // El número de unidades es información del negocio: si estuviera en el HTML,
+  // cualquiera podría leer las existencias de los 313 productos sin comprar.
+  await page.goto("/catalogo");
+  await page.getByRole("button", { name: "Mostrar todos los productos" }).click();
+  await expect(page.getByRole("button", { name: "Agregar al carrito" }).first()).toBeVisible();
+
+  const html = await page.content();
+  expect(html).not.toMatch(/"stock"\s*:\s*\d/);
+  expect(html).not.toMatch(/stock\\\\":\d/);
 });
 
 test("el carrito vacío no enseña contador en la barra", async ({ page }) => {

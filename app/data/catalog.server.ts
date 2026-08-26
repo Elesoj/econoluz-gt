@@ -19,7 +19,7 @@ const CATALOG_REVALIDATE_SECONDS = 3600;
 // en el código, que no tiene precios— pero sí viaja al navegador desde que el
 // catálogo enseña precios. Llega como texto: `numeric` siempre lo hace.
 const catalogQuery = `
-  select ${CATALOG_COLUMNS.join(", ")}, price_gtq, stock
+  select ${CATALOG_COLUMNS.join(", ")}, price_gtq
   from products
   where published
   order by position
@@ -37,7 +37,6 @@ const readCatalogFromDatabase = async (): Promise<PublicProduct[]> => {
   const sql = neon(connectionString);
   const rows = (await sql.query(catalogQuery)) as (CatalogRow & {
     price_gtq: string | number | null;
-    stock: number | null;
   })[];
 
   // `toPublicProduct` es la frontera: recorta el producto a lo que puede ver
@@ -48,8 +47,6 @@ const readCatalogFromDatabase = async (): Promise<PublicProduct[]> => {
       // `Number(null)` es cero, y cero significaría "regalado": el producto sin
       // precio tiene que llegar como `null`, no como 0.
       priceGtq: row.price_gtq === null ? null : Number(row.price_gtq),
-      // `integer` sí llega como número, al contrario que `numeric`.
-      stock: row.stock,
     }),
   );
 };

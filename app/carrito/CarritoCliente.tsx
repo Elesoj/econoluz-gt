@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { PublicProduct } from "../data/publicProduct";
 import { formatPrice } from "../lib/formatters";
 import { CANTIDAD_MAXIMA_POR_LINEA } from "../tienda/carrito";
+import { consultarDisponibilidad } from "../tienda/disponibilidad.server";
+import type { Disponibilidad } from "../tienda/disponibilidad";
 import { aQuetzales, resolverCarrito } from "../tienda/lineas";
 import useCarrito from "../tienda/useCarrito";
 
@@ -14,11 +16,41 @@ type CarritoClienteProps = {
 };
 
 export default function CarritoCliente({ productos }: CarritoClienteProps) {
-  const { lineas, fijar, quitar, cantidadDe } = useCarrito();
+  const { lineas, fijar, quitar, aceptarEspera, cantidadDe } = useCarrito();
+  const [disponibilidad, setDisponibilidad] = useState<Disponibilidad>({});
+
+  // El inventario no viaja en el catálogo público —ahí cualquiera podría leer
+  // las existencias de los 313 productos—, así que se le pregunta al servidor
+  // solo por lo que esta persona lleva en el carrito. Mientras no conteste, el
+  // carrito funciona igual y no promete plazos.
+  useEffect(() => {
+    if (lineas.length === 0) {
+      // No se limpia lo que ya se sabía: `resolverCarrito` solo mira las
+      // referencias que siguen en el carrito, así que lo viejo es inofensivo.
+      return;
+    }
+
+    let vigente = true;
+
+    consultarDisponibilidad(lineas)
+      .then((respuesta) => {
+        if (vigente) {
+          setDisponibilidad(respuesta);
+        }
+      })
+      .catch(() => {
+        // Ya queda constancia en el servidor; aquí no hay nada que decirle al
+        // cliente, que puede seguir comprando.
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, [lineas]);
 
   const resuelto = useMemo(
-    () => resolverCarrito(lineas, productos),
-    [lineas, productos],
+    () => resolverCarrito(lineas, productos, disponibilidad),
+    [lineas, productos, disponibilidad],
   );
 
   return (
@@ -71,12 +103,53 @@ export default function CarritoCliente({ productos }: CarritoClienteProps) {
                   <p className="mt-1 text-sm tabular-nums text-neutral-600">
                     {formatPrice(aQuetzales(linea.precioCentavos))} por unidad
                   </p>
-                  {linea.superaExistencias && (
-                    <p className="mt-2 text-xs font-semibold text-tienda">
-                      Pediste más de las que tenemos en bodega: puede tardar unos
-                      días.
-                    </p>
-                  )}
+                  {/* Pedir más de lo que hay no bloquea la venta, pero tampoco
+                      se resuelve en silencio: se le dice cuántas hay y se le
+                      deja elegir entre llevarse esas o esperar por el resto. */}
+                  {linea.superaExistencias &&
+                    typeof linea.disponiblesAhora === "number" &&
+                    (linea.esperaAceptada ? (
+                      <p className="mt-2 text-xs font-semibold text-tienda">
+                        Esperarás por{" "}
+                        {linea.cantidad - linea.disponiblesAhora === 1
+                          ? "una unidad"
+                          : `${linea.cantidad - linea.disponiblesAhora} unidades`}
+                        : te contactaremos para confirmarte el plazo.
+                      </p>
+                    ) : (
+                      <div className="mt-2 border border-tienda/30 bg-tienda/5 p-3">
+                        <p className="text-xs font-semibold text-tienda">
+                          Tenemos {linea.disponiblesAhora}{" "}
+                          {linea.disponiblesAhora === 1
+                            ? "disponible"
+                            : "disponibles"}{" "}
+                          ahora mismo.
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              fijar(
+                                linea.producto.econoluzReference,
+                                linea.disponiblesAhora ?? linea.cantidad,
+                              )
+                            }
+                            className="inline-flex h-8 items-center rounded-full border border-neutral-300 bg-white px-3 text-xs font-semibold transition hover:border-tienda"
+                          >
+                            Dejar solo {linea.disponiblesAhora}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              aceptarEspera(linea.producto.econoluzReference)
+                            }
+                            className="inline-flex h-8 items-center rounded-full bg-tienda px-3 text-xs font-semibold text-white transition hover:bg-tienda-fuerte"
+                          >
+                            Quiero {linea.cantidad} y espero
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                 </div>
 
                 <div className="flex items-center gap-3">

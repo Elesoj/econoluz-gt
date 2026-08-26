@@ -11,7 +11,6 @@ export default defineConfig({
     "catalog-public-ui.spec.ts",
     "catalog-production-boundary.spec.ts",
     "catalog-navigation.spec.ts",
-    "catalog-quote.spec.ts",
     "admin-auth.spec.ts",
     "catalog-precio.spec.ts",
     "ui-botones.spec.ts",

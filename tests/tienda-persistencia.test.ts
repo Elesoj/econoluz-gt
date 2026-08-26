@@ -107,6 +107,29 @@ test("una referencia repetida se suma en una sola línea", () => {
   ]);
 });
 
+test("la espera aceptada sobrevive a cerrar el navegador", () => {
+  const almacen = almacenDePrueba();
+  const conEspera: LineaCarrito[] = [
+    { econoluzReference: "ECO-IND-0048", cantidad: 10, esperaAceptada: true },
+  ];
+
+  guardarCarrito(almacen, conEspera);
+  assert.deepEqual(leerCarrito(almacen), { estado: "ok", lineas: conEspera });
+});
+
+test("una espera guardada con cualquier otro valor no cuenta como aceptada", () => {
+  // Lo que se lee del navegador es dato ajeno: solo el `true` literal vale.
+  const guardado = JSON.stringify({
+    lineas: [
+      { econoluzReference: "ECO-IND-0048", cantidad: 10, esperaAceptada: "sí" },
+    ],
+  });
+
+  assert.deepEqual(parsearCarritoGuardado(guardado), [
+    { econoluzReference: "ECO-IND-0048", cantidad: 10 },
+  ]);
+});
+
 test("una cantidad guardada por encima del tope se recorta al tope", () => {
   const guardado = JSON.stringify({
     lineas: [{ econoluzReference: "ECO-IND-0048", cantidad: 5000 }],

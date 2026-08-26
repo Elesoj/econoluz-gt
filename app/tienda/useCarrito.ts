@@ -38,6 +38,12 @@ export default function useCarrito() {
     [],
   );
 
+  const aceptarEspera = useCallback(
+    (econoluzReference: string) =>
+      despachar({ tipo: "aceptarEspera", econoluzReference }),
+    [],
+  );
+
   const vaciar = useCallback(() => despachar({ tipo: "vaciar" }), []);
 
   const cantidades = useMemo(
@@ -56,6 +62,7 @@ export default function useCarrito() {
     agregar,
     quitar,
     fijar,
+    aceptarEspera,
     vaciar,
     cantidadDe,
   };

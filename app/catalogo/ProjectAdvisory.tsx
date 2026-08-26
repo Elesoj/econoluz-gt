@@ -16,8 +16,6 @@ import {
   quoteLightingTypes,
   quoteProjectTypes,
 } from "../data/siteData";
-import { buildPublicProductLine } from "./publicQuoteMessage";
-import useQuoteSelection from "./useQuoteSelection";
 
 type QuoteFormState = {
   fullName: string;
@@ -161,6 +159,21 @@ type ProjectAdvisoryProps = {
  * Es autónomo a propósito —su propio estado y su propia lectura de la
  * selección— para no depender del catálogo, que ya no lo contiene.
  */
+/**
+ * La referencia que llega en `?producto=`, si llega.
+ *
+ * Se lee con `useSyncExternalStore` y no en un efecto para que el servidor
+ * renderice siempre `null` y el cliente corrija tras hidratar, sin desajuste
+ * ni un `setState` de arranque. La query no cambia sin recargar la página, así
+ * que no hay nada a lo que suscribirse.
+ */
+const suscribirseAReferencia = () => () => {};
+
+const leerReferenciaConsultada = () => {
+  const referencia = new URLSearchParams(window.location.search).get("producto");
+  return referencia && referencia.length > 0 ? referencia : null;
+};
+
 export default function ProjectAdvisory({ products }: ProjectAdvisoryProps) {
   const [formState, setFormState] = useState<QuoteFormState>(buildInitialFormState);
   const [formErrors, setFormErrors] = useState<QuoteFormErrors>({});
@@ -168,7 +181,29 @@ export default function ProjectAdvisory({ products }: ProjectAdvisoryProps) {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
-  const { items: quoteItems, quoteCount } = useQuoteSelection(products);
+  // El catálogo ya no tiene cesto de cotización: desde una tarjeta sin precio
+  // se llega aquí con `?producto=ECO-…`, y esa referencia es todo lo que hay
+  // que recuperar. Se lee de `window` y no con `useSearchParams` para no
+  // obligar a envolver la página entera en un Suspense.
+  const referenciaConsultada = useSyncExternalStore(
+    suscribirseAReferencia,
+    leerReferenciaConsultada,
+    () => null,
+  );
+
+  const productoConsultado = useMemo(
+    () =>
+      referenciaConsultada
+        ? products.find(
+            (producto) => producto.econoluzReference === referenciaConsultada,
+          ) ?? null
+        : null,
+    [products, referenciaConsultada],
+  );
+
+  const lineaConsultada = productoConsultado
+    ? `${productoConsultado.publicName} (Ref. ${productoConsultado.econoluzReference})`
+    : "";
   const opensInSameTab = useSyncExternalStore(
     subscribeToUserAgent,
     isMetaInAppBrowser,
@@ -179,7 +214,6 @@ export default function ProjectAdvisory({ products }: ProjectAdvisoryProps) {
   >({ fullName: null, phone: null, email: null });
 
   const whatsappMessage = useMemo(() => {
-    const selectedProducts = quoteItems.map(buildPublicProductLine);
     const details = [
       formState.fullName ? `Nombre: ${formState.fullName}` : "",
       formState.phone ? `Teléfono: ${formState.phone}` : "",
@@ -188,7 +222,7 @@ export default function ProjectAdvisory({ products }: ProjectAdvisoryProps) {
       formState.estimatedArea ? `Área estimada: ${formState.estimatedArea} m²` : "",
       formState.budgetRange ? `Presupuesto: ${formState.budgetRange}` : "",
       formState.lightingType ? `Tipo de iluminación: ${formState.lightingType}` : "",
-      selectedProducts.length ? `Productos: ${selectedProducts.join(", ")}` : "",
+      lineaConsultada ? `Producto consultado: ${lineaConsultada}` : "",
       formState.message ? `Mensaje: ${formState.message}` : "",
       ledResultsSummary ? ledResultsSummary : "",
     ].filter(Boolean);
@@ -196,7 +230,7 @@ export default function ProjectAdvisory({ products }: ProjectAdvisoryProps) {
     return `${contact.whatsappDefaultMessage}${
       details.length ? `\n${details.join("\n")}` : ""
     }`;
-  }, [formState, ledResultsSummary, quoteItems]);
+  }, [formState, ledResultsSummary, lineaConsultada]);
 
   const whatsappHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
   const mailtoHref = `mailto:${contact.email}?subject=${encodeURIComponent(
@@ -275,7 +309,7 @@ export default function ProjectAdvisory({ products }: ProjectAdvisoryProps) {
         lightingType: formState.lightingType,
         message: formState.message,
         ledSummary: ledResultsSummary,
-        products: quoteItems.map(buildPublicProductLine),
+        products: lineaConsultada ? [lineaConsultada] : [],
         source: opensInSameTab ? "in-app" : "navegador",
         website: "",
       },
@@ -323,43 +357,29 @@ export default function ProjectAdvisory({ products }: ProjectAdvisoryProps) {
               Define tu proyecto de iluminación con asesoría especializada.
             </h2>
             <p className="mt-6 max-w-xl text-base leading-7 text-white/62 sm:text-lg sm:leading-8">
-              Las luminarias seleccionadas en el catálogo aparecen aquí automáticamente.
-              Completa los datos del proyecto para que el equipo pueda preparar una
-              recomendación más precisa.
+              Cuéntanos qué necesitas y el equipo prepara una recomendación con
+              producto, cantidades y precio para tu proyecto.
             </p>
 
-            <div className="mt-8 border border-white/12 p-5 transition duration-500 hover:border-white/24">
-              <div className="flex items-center justify-between gap-4">
+            {productoConsultado && (
+              <div className="mt-8 border border-white/12 p-5">
                 <p className="text-sm uppercase tracking-[0.2em] text-white/52">
-                  Resumen
+                  Producto que consultas
                 </p>
-                <p className="text-sm text-white/60">{quoteCount} unidades</p>
+                <p className="mt-4 font-semibold text-white">
+                  {productoConsultado.publicName}
+                </p>
+                <p className="mt-1 text-sm text-white/52">
+                  Ref. {productoConsultado.econoluzReference}
+                </p>
+                <p className="mt-4 text-sm leading-6 text-white/62">
+                  Va incluido en tu solicitud. Puedes añadir en el mensaje las
+                  unidades que necesitas o cualquier otro producto.
+                </p>
               </div>
+            )}
 
-              <div className="mt-5 grid max-h-72 min-h-0 gap-3 overflow-y-auto overscroll-contain pr-1">
-                {quoteItems.length === 0 ? (
-                  <p className="text-sm leading-6 text-white/52">
-                    Aún no hay luminarias seleccionadas. Puedes enviar la solicitud
-                    con datos del proyecto o agregar luminarias desde el catálogo.
-                  </p>
-                ) : (
-                  quoteItems.map((item) => (
-                    <div
-                      key={item.product.id}
-                      className="flex items-center justify-between gap-4 border-t border-white/10 pt-3"
-                    >
-                      <div>
-                        <p className="font-semibold text-white">{item.product.publicName}</p>
-                        <p className="mt-1 text-sm text-white/52">
-                          Ref. {item.product.econoluzReference} / {item.quantity} unidad{item.quantity > 1 ? "es" : ""}
-                        </p>
-                      </div>
-                      <p className="shrink-0 font-semibold">Por cotizar</p>
-                    </div>
-                  ))
-                )}
-              </div>
-
+            <div className="mt-8 border border-white/12 p-5">
               <div className="mt-5 flex items-center justify-between border-t border-white/12 pt-4">
                 <p className="text-sm uppercase tracking-[0.18em] text-white/52">
                   Modalidad
