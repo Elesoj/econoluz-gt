@@ -28,6 +28,55 @@ hace el dueño.
 > neutras son idénticas byte a byte. Producción sirve las 326 rutas neutras y no enlaza
 > ninguna ruta antigua. No hizo falta modificar Neon.
 
+> **El carrito existe (26/08/2026), fusionado en `main` y sin desplegar.** Motor en
+> `app/tienda/`, página `/carrito` con los totales calculados en el servidor, contador en
+> la barra de navegación que solo aparece con algo dentro, y la tarjeta del catálogo con
+> **un solo camino por producto**: con precio, «Agregar al carrito»; sin precio, «Agregar
+> a cotización». Diseño en
+> `docs/superpowers/specs/2026-08-26-tienda-carrito-design.md`, plan en
+> `docs/superpowers/plans/2026-08-26-tienda-carrito.md`.
+>
+> **La casilla `sellable_online` se retiró del panel**: ahora tener precio es estar a la
+> venta. La columna sigue en la base de datos, sin usar. Ver `CLAUDE.md` §2.
+
+---
+
+## 0.1 Qué hacer ahora (26/08/2026)
+
+**Todo lo construido está en `main`.** No quedan ramas de trabajo a medias: `tienda-carrito`
+y `ocultar-proveedores` están ambas fusionadas.
+
+### Lo que puede hacerse ya, sin esperar a nadie
+
+**La pieza B del paso 2: el checkout con datos fiscales (NIT).** No depende de la pasarela
+de pago, así que se puede construir entera mientras el dueño tramita el alta del comercio.
+Es lo siguiente en la lista de `CLAUDE.md` §11.
+
+Antes de empezar, **brainstorming con el dueño**: no hay diseño escrito de esta pieza
+todavía.
+
+### Lo que espera una decisión del dueño
+
+1. **Desplegar el carrito.** Está en `main` y probado, pero no publicado. Hay que
+   recordárselo antes: **al desplegar, los 25 productos con precio (`ECO-ELE-0001` a
+   `ECO-ELE-0025`) quedan a la venta automáticamente**, al precio que tengan ese día. Ya
+   no hay una segunda casilla que lo frene. No hay migración de base de datos.
+2. **Borrar las carpetas de imágenes antiguas.** `/catalogos/construlita/…`,
+   `/highlum/…` y `/artlite/…` siguen respondiendo 200 en producción si alguien conoce
+   la URL, aunque ninguna página las enlace. Borrarlas cierra la fuga del todo. **No
+   borrar sin su autorización expresa.**
+
+### Lo que el dueño tiene pendiente, sin código de por medio
+
+1. **Contratar una pasarela de pago.** No sabe cómo se hace; se le explicó el 26/08/2026
+   que empiece por su banco y pida presupuesto también a un procesador local, y qué cuatro
+   preguntas hacer (entorno de pruebas, si el pago ocurre dentro de la web, cómo avisan del
+   pago confirmado, comisión y plazo de depósito). **Bloquea la pieza C del paso 2.**
+2. **Contratar un certificador FEL.** Bloquea la pieza D.
+3. **Poner precios.** 25 de 313. Es la tarea más lenta del proyecto y no depende de nadie
+   más.
+4. **Apuntar el DNS de `econoluzgt.com`** a Vercel. Sigue sirviendo el WordPress viejo.
+
 > **El catálogo público ya muestra los precios (26/08/2026).** Lo decidió el dueño: si
 > va a ser una tienda B2C, el precio tiene que verse. `PublicProduct.priceGtq` es
 > **opcional a propósito** —cuando el producto no tiene precio el campo no existe y la

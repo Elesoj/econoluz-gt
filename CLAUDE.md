@@ -84,12 +84,44 @@ como acción principal, cotizar disponible sin competir.
 **Techo tensado** es una línea diferenciadora de la pista B. Ningún competidor local lo
 ofrece integrado con iluminación. Debe tener presencia propia, no quedar escondido.
 
-### Estado actual — la pista A todavía no existe
+### Estado actual — la pista A ya tiene carrito
 
 Lo construido es casi todo pista B: catálogo guiado, ficha técnica, lista de cotización
-y salida por WhatsApp. **De la pista A ya existe el precio**: el catálogo lo muestra en
-la tarjeta y en la ficha, y donde no hay precio cargado dice «Precio a consultar».
-Siguen sin existir **carrito, checkout, pasarela de pago ni facturación**.
+y salida por WhatsApp. **De la pista A ya existen el precio y el carrito**: el catálogo
+muestra el precio en la tarjeta y en la ficha, y donde no hay precio cargado dice
+«Precio a consultar». Siguen sin existir **checkout, pasarela de pago y facturación**.
+
+#### Tener precio es estar a la venta — regla vigente (26/08/2026)
+
+No hay ninguna casilla de «se vende en línea». **Un producto con precio se puede
+comprar; uno sin precio, no.** La columna `sellable_online` existe en la base de datos
+pero no se usa, y su casilla se retiró de la ficha del panel: obligaba a hacer dos cosas
+para vender una, y con más de trescientos productos administrados por una sola persona,
+cada casilla extra es una tarea multiplicada por trescientos y un producto más que puede
+quedar a medio configurar sin que nadie lo note. Lo decidió el dueño al preguntar qué era
+esa casilla. Se pierde poder enseñar un precio de referencia sin vender el producto; es
+un caso que hoy no existe, y la columna sigue ahí por si vuelve a hacer falta.
+
+**Consecuencia que hay que tener presente:** ponerle precio a un producto lo pone a la
+venta en cuanto se despliega. No hay una segunda confirmación.
+
+#### El carrito
+
+Vive en `app/tienda/`, separado a propósito del motor de cotización de
+`app/catalogo/quoteSelection.ts`: los dos flujos divergen desde el primer día y la
+cotización no debe cargar con precios ni existencias. La página es `/carrito` y el
+contador aparece en la barra de navegación **solo cuando hay algo dentro**.
+
+**Ningún importe que venga del navegador se acepta como bueno.** El navegador guarda
+referencia y cantidad, nunca precios: se resuelven contra el catálogo del servidor cada
+vez que se pinta. Si el importe viajara en el navegador, cualquiera podría editar su
+propio `localStorage` y comprar un panel por un quetzal. Esta regla se hereda al
+checkout y al cobro. El dinero se suma en **centavos enteros** (`app/tienda/lineas.ts`);
+`formatPrice` solo se usa al pintar.
+
+Las existencias **avisan, no bloquean**: pedir más de lo apuntado muestra que puede
+tardar unos días, y solo cuando hay un número apuntado —la casilla vacía significa «no
+se ha contado el inventario», que no es lo mismo que cero—.
 
 El precio se enseña **por decisión expresa del dueño (26/08/2026)**, aunque la tienda no
 esté: si el catálogo va a ser B2C, quien compra una o dos piezas necesita ver el precio
@@ -472,6 +504,11 @@ entrenamiento. Antes de escribir código, consulta la guía correspondiente en
   **sin acoplar la lógica de compra con la lógica de cotización**.
 - Todo formulario debe persistir el dato antes de abrir WhatsApp
   (ver "Deuda técnica conocida").
+- **Ningún importe que venga del navegador se acepta como bueno.** El navegador guarda
+  referencias y cantidades; los precios se resuelven siempre contra el catálogo del
+  servidor. Vale para el carrito, el checkout y el cobro.
+- **El dinero se suma en centavos enteros**, nunca en coma flotante. `formatPrice` solo
+  al pintar.
 - Accesibilidad: contraste suficiente, textos alternativos en imágenes,
   navegación por teclado funcional.
 - Rendimiento: las imágenes **ya están optimizadas** (430 archivos, 24 MB en total,
@@ -516,11 +553,16 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    408 identificadores normalizados y devuelve 0 coincidencias. La prueba específica
    confirma además que el panel conserva Artlite, Construlita, Highlum y Magnetrack Pro.
    Ver `docs/FUGAS-PROVEEDOR.md`.
+
+   **Queda un cabo suelto:** las carpetas de imágenes antiguas
+   (`/catalogos/construlita/…`) siguen existiendo y **responden 200 en producción** si
+   alguien conoce la URL —comprobado el 26/08/2026—, aunque ninguna página las enlaza ya.
+   Borrarlas cierra la fuga del todo y **necesita autorización expresa del dueño**.
 4. **Una prueba falla desde antes de la migración.**
-   `tests/catalog-quote.spec.ts:891` falla de forma determinista. Comprobado sobre el
-   código anterior a la base de datos: falla igual. En la batería del 25/08/2026 las
-   otras 95 pasan. No perder tiempo
-   creyendo que es una regresión.
+   `tests/catalog-quote.spec.ts:891` falla de forma determinista. **Comprobado otra vez el
+   26/08/2026** haciendo `git checkout main` y ejecutándola sin nada del trabajo nuevo:
+   falla igual. En la batería de ese día pasan las otras 103 y las 169 de unidad. No
+   perder tiempo creyendo que es una regresión.
 5. **Falta `og:image`** y el `twitter:card` está en `summary` en lugar de
    `summary_large_image`. Casi todo se comparte por WhatsApp en Guatemala.
 6. **Regresión de SEO.** El sitio viejo posiciona para "lámparas LED Guatemala".
@@ -629,11 +671,21 @@ el 26/08/2026: 326 rutas neutras, 0 rutas antiguas enlazadas y 0 identificadores
 en el HTML y los recursos públicos revisados. Las carpetas originales siguen presentes
 hasta recibir permiso separado para borrarlas.
 
-**Paso 2 — Tienda.** Precio y compra conviviendo con la cotización: carrito, checkout con
-NIT, cobro, factura FEL y existencias. Depende del paso 1, porque sin panel no hay dónde
-cargar precios ni stock.
+**Paso 2 — Tienda.** Precio y compra conviviendo con la cotización. Se descompone en
+cinco piezas, y solo la primera está hecha:
 
-**En paralelo, y sin código de por medio:** contratar certificador FEL, decidir el medio
-de cobro, redactar los textos legales de venta en línea y —lo más lento— fijar los precios.
+- ~~**A. El carrito.**~~ Terminado y **fusionado en `main` el 26/08/2026**, todavía sin
+  desplegar. Diseño en `docs/superpowers/specs/2026-08-26-tienda-carrito-design.md`,
+  plan en `docs/superpowers/plans/2026-08-26-tienda-carrito.md`.
+- **B. Checkout con datos fiscales (NIT).** No depende de nadie de fuera; es lo siguiente
+  que se puede construir.
+- **C. El cobro.** **Bloqueado**: depende de contratar una pasarela de pago, trámite que
+  el dueño todavía no ha empezado. Puede llevar semanas. Eligió cobro con tarjeta.
+- **D. Factura FEL.** Bloqueado: depende de contratar un certificador.
+- **E. Descuento de existencias.**
+
+**En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
+certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar
+los precios (hoy 25 de 313).
 
 **La cotización no se retira en ningún momento.**

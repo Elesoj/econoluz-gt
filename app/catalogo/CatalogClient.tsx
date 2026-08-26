@@ -30,6 +30,7 @@ import {
 } from "./catalogState";
 import useCatalogNavigation from "./useCatalogNavigation";
 import useQuoteSelection from "./useQuoteSelection";
+import useCarrito from "../tienda/useCarrito";
 import { mainNavItems } from "../data/siteData";
 
 
@@ -70,6 +71,11 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     remove: removeQuoteProduct,
     setQuantity: setQuoteQuantity,
   } = useQuoteSelection(products);
+  const {
+    agregar: agregarAlCarrito,
+    fijar: fijarEnCarrito,
+    cantidadDe: cantidadEnCarrito,
+  } = useCarrito();
   const catalogStageRef = useRef<HTMLDivElement>(null);
   const syncSearchDraftToLocation = useCallback((location: CatalogLocation) => {
     if (searchInputRef.current) {
@@ -516,9 +522,22 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                       key={product.id}
                       product={product}
                       quantity={selectedItem?.quantity}
+                      cartQuantity={cantidadEnCarrito(product.econoluzReference)}
                       onAdd={() => addToQuote(product, false)}
                       onDecrease={() =>
                         decreaseQuoteProduct(product.econoluzReference)
+                      }
+                      onAddToCart={() =>
+                        agregarAlCarrito(product.econoluzReference)
+                      }
+                      onDecreaseFromCart={() =>
+                        // Bajar con `fijar` y no con una acción de decremento:
+                        // al llegar a cero, `fijar` borra la línea, que es justo
+                        // lo que tiene que pasar.
+                        fijarEnCarrito(
+                          product.econoluzReference,
+                          cantidadEnCarrito(product.econoluzReference) - 1,
+                        )
                       }
                       onViewDetails={() => setTechnicalProduct(product)}
                     />

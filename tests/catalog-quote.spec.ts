@@ -688,7 +688,7 @@ test.describe("browser quote integration", () => {
     const firstPage = await firstContext.newPage();
     await firstPage.goto("/catalogo");
     const firstCard = await openProduct(firstPage);
-    await firstCard.getByRole("button", { name: "Agregar", exact: true }).click();
+    await firstCard.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
     await expect(firstPage.getByRole("button", { name: /Ver selecci/i })).toContainText("1");
     await expect
       .poll(() => firstPage.evaluate((key) => sessionStorage.getItem(key), QUOTE_KEY))
@@ -939,7 +939,7 @@ test.describe("browser quote integration", () => {
       hasText: `Ref. ${FIRST_REFERENCE}`,
     });
     await expect(card).toBeVisible();
-    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
 
     await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("3");
     expect(
@@ -1011,7 +1011,7 @@ test.describe("browser quote integration", () => {
       hasText: `Ref. ${FIRST_REFERENCE}`,
     });
     await expect(card).toBeVisible();
-    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
     expect(
       await page.evaluate(
         () =>
@@ -1077,7 +1077,7 @@ test.describe("browser quote integration", () => {
     page.on("pageerror", (error) => pageErrors.push(error.message));
 
     const card = await openProduct(page);
-    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
     await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("1");
     expect(pageErrors).toEqual([]);
   });
@@ -1097,7 +1097,7 @@ test.describe("browser quote integration", () => {
     page.on("pageerror", (error) => pageErrors.push(error.message));
 
     const card = await openProduct(page);
-    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
     await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("1");
     expect(pageErrors).toEqual([]);
   });
@@ -1140,7 +1140,7 @@ test.describe("browser quote integration", () => {
 
       if (failedOperation === "set") {
         const card = await openProduct(page);
-        await card.getByRole("button", { name: "Agregar", exact: true }).click();
+        await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
         await expect(page.getByRole("button", { name: /Ver selecci/i })).toContainText("1");
       } else {
         await page.goto("/catalogo");
@@ -1341,7 +1341,14 @@ test.describe("browser quote integration", () => {
               ).__task4LegacyFailureAttempts?.(),
           ),
         )
-        .toBe(1);
+        // Desde que existe la tienda hay dos consumidores de `localStorage` en
+        // la portada: esta limpieza de la clave heredada y la hidratación del
+        // carrito, que se hace una sola vez por carga. El getter bloqueado los
+        // cuenta a los dos; las otras dos variantes solo cuentan accesos a la
+        // clave heredada, que el carrito no toca porque usa la suya. La prueba
+        // sigue detectando lo que vigila: si la limpieza reintentara, el número
+        // subiría por encima de esto.
+        .toBe(failedAccess === "getter" ? 2 : 1);
       expect(pageErrors).toEqual([]);
     });
   }
@@ -1351,7 +1358,7 @@ test.describe("browser quote integration", () => {
     const floating = page.getByRole("link", { name: "Contactar por WhatsApp" });
     const defaultHref = await floating.getAttribute("href");
 
-    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
     await expect(floating).not.toHaveAttribute("href", defaultHref ?? "");
     const oneItemHref = await floating.getAttribute("href");
     expect(readWhatsAppMessage(oneItemHref ?? "")).toContain(
@@ -1391,7 +1398,7 @@ test.describe("browser quote integration", () => {
     const card = await openProduct(page);
     const floating = page.getByRole("link", { name: "Contactar por WhatsApp" });
     const defaultHref = await floating.getAttribute("href");
-    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
     const selectedHref = await floating.getAttribute("href");
     await expect
       .poll(() => page.evaluate((key) => sessionStorage.getItem(key), QUOTE_KEY))
@@ -1453,7 +1460,7 @@ test.describe("browser quote integration", () => {
     );
     const card = await openProduct(page);
     const publicName = (await card.getByRole("heading").textContent())?.trim() ?? "";
-    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
     await page.goto("/asesoria");
     await page.getByLabel("Nombre completo").fill("Persona de prueba");
     await page.getByLabel(/Tel.fono/i).fill("5555 5555");
@@ -1505,7 +1512,7 @@ test.describe("browser quote integration", () => {
 
   test("discloses temporary tab storage and no payment in the quote drawer", async ({ page }) => {
     const card = await openProduct(page);
-    await card.getByRole("button", { name: "Agregar", exact: true }).click();
+    await card.getByRole("button", { name: "Agregar a cotización", exact: true }).click();
     await page.getByRole("button", { name: /Ver selecci/i }).click();
 
     await expect(
