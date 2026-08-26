@@ -1,4 +1,5 @@
 import type { InternalProduct } from "./products";
+import { getApplicationId } from "./catalogTaxonomy";
 
 // Traducción entre el producto del catálogo y su fila en Postgres.
 //
@@ -165,7 +166,7 @@ export const fromProductRow = (row: CatalogRow): InternalProduct =>
     supplierBrand: row.supplier_brand,
     brand: row.supplier_brand,
     productType: row.product_type,
-    application: row.application,
+    application: getApplicationId(row.application),
     series: row.supplier_series,
     finish: row.finish,
 

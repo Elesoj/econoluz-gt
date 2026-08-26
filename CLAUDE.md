@@ -330,6 +330,8 @@ frontend/
       catalog.server.ts           lee el catálogo de Postgres, con caché por etiqueta
                                   (CATALOG_CACHE_TAG) y vuelta al código si falla
       catalogTaxonomy.ts          taxonomía pública de tipos y aplicaciones
+      publicProductContract.ts    contrato público seguro para componentes cliente
+      publicProductPrivacy.ts     anonimiza textos y rutas solo al salir al público
       catalogBrands.internal.ts   marcas del proveedor — NUNCA llega al cliente
       catalogSeries.internal.ts   series del proveedor — NUNCA llega al cliente
       productReferences.ts        referencias públicas de producto
@@ -358,7 +360,8 @@ frontend/
   tests/                          Playwright: catálogo, cotización y fronteras de datos
   public/
     logo_econoluz.png
-    catalogos/<marca>/<familia>/  imágenes de producto (artlite, construlita, highlum)
+    catalogos/                    imágenes de producto; las rutas públicas usan
+                                  arquitectonico/, lineal/ y electrico/
     proyectos/<obra>/             fotografía de obra ejecutada
     proveedores/                  logos de marcas representadas
     file|globe|next|vercel|window.svg   assets de create-next-app, sin usar
@@ -380,11 +383,17 @@ pantalla: tampoco pueden aparecer en el JavaScript que se descarga, y
 `tests/catalog-production-boundary.spec.ts` revisa los chunks compilados precisamente
 para eso.
 
-**Lo que todavía no está resuelto:** quedan nombres heredados del proveedor dentro de
-las rutas de las imágenes, de los textos de las descripciones y de la taxonomía —30
-nombres en unas 556 apariciones, ver la sección 7—. Es deuda conocida y documentada,
-no un descuido: la regla describe la intención y el mecanismo, no un estado ya
-alcanzado.
+**Resuelto en la rama `ocultar-proveedores`, pendiente de desplegar:**
+`publicProductPrivacy.ts` transforma únicamente la proyección pública. Las imágenes
+salen por `arquitectonico/`, `lineal/` y `electrico/`; los nombres de línea se retiran;
+y `Magnetrack Pro` pasa a «Microrriel magnético 48 V», incluido su identificador de
+filtro. `npm run catalogo:auditar` normaliza mayúsculas, tildes, espacios y guiones y
+devuelve **0 coincidencias**. El producto interno y las columnas `supplier_*` no se
+tocan: el panel conserva marca, serie, código y nombre del fabricante.
+
+Las 326 imágenes originales siguen en sus carpetas antiguas porque no se borra ningún
+archivo sin permiso. El catálogo ya no enlaza esas rutas; se retirarán solo después de
+desplegar, comprobar las rutas neutras en producción y recibir autorización expresa.
 
 **Alcance de la prohibición:** se refiere al **catálogo público y a cualquier visitante
 sin sesión**. El panel de administración, detrás de autenticación, necesariamente envía
@@ -418,6 +427,7 @@ npm run db:migrar          # aplica las migraciones de db/ que falten, repetible
 npm run catalogo:importar  # sube los productos del código a Neon y verifica el resultado
 npm run catalogo:verificar # ensayo de la migración, sin tocar la base de datos
 npm run catalogo:auditar   # busca nombres de proveedor en el catálogo público
+npm run test:proveedores   # frontera pública neutra e información interna intacta
 npm run proyectos:verificar # ensayo reversible de los 12 proyectos y 104 fotos
 npm run proyectos:importar  # importa a Neon de forma idempotente y relee el resultado
 npm run proyectos:probar    # prueba cambios reales en Neon y los restaura siempre
@@ -500,19 +510,12 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    revisarla a diario o el lead se guarda pero nadie se entera. Queda ahí una solicitud
    de prueba (`id = 1`, «PRUEBA TECNICA - no es un cliente») que sirvió para comprobar
    que producción guardaba de verdad; se puede borrar cuando el dueño quiera.
-3. **El catálogo público todavía nombra a los proveedores.** `npm run catalogo:auditar`
-   lo lista: **30 nombres distintos en unas 556 apariciones**, en dos formas.
-
-   - **Las rutas de las fotos** (`/catalogos/construlita/…`, `/highlum/…`, `/artlite/…`)
-     llevan la marca en el nombre de la carpeta, en los 313 productos. El nombre del
-     archivo sí está anonimizado; la carpeta no. Se ve con clic derecho sobre una foto.
-     Se arregla con código.
-   - **Los textos**: «Magnetrack Pro», «Nanovia», «Corvus», «Vialed», «Wallpack»,
-     «Softglow»… en 62 descripciones y 22 fichas técnicas. Y «Magnetrack Pro» y
-     «Wallpacks» son además **categorías visibles del filtro**. Esto será mucho más
-     fácil de corregir ahora que existe el panel y el dueño puede editar los textos él.
-
-   El dueño ya lo sabe. Es contenido, no un fallo: **no cambiarlo sin hablarlo con él.**
+3. **Exposición pública del proveedor: resuelta en `ocultar-proveedores`, pendiente de
+   desplegar.** La salida pública transforma rutas, nombres, descripciones, taxonomía y
+   ficha técnica sin modificar el producto interno. La auditoría revisa 313 productos y
+   408 identificadores normalizados y devuelve 0 coincidencias. La prueba específica
+   confirma además que el panel conserva Artlite, Construlita, Highlum y Magnetrack Pro.
+   Ver `docs/FUGAS-PROVEEDOR.md`.
 4. **Una prueba falla desde antes de la migración.**
    `tests/catalog-quote.spec.ts:891` falla de forma determinista. Comprobado sobre el
    código anterior a la base de datos: falla igual. En la batería del 25/08/2026 las
@@ -554,9 +557,10 @@ Aplican a la pista de tienda y condicionan el diseño del checkout:
   `insigne`, `laestacion`, `once`, `perfilesled`, `quo`, `sanmartin`, `veka`).
   `app/data/projects.ts` arma las rutas con el nombre de carpeta y de archivo literales:
   renombrar cualquiera de los dos rompe la galería sin que falle el build.
-- Las imágenes de catálogo en `/public/catalogos/` — 326 archivos organizados por
-  `marca/familia` y referenciados con ruta literal desde `app/data/products.ts`.
-  Mismo riesgo: mover o renombrar rompe el catálogo en silencio.
+- Las imágenes de catálogo en `/public/catalogos/`: las 326 originales organizadas por
+  proveedor y sus 326 copias públicas neutras. `app/data/products.ts` conserva las rutas
+  internas y `publicProductPrivacy.ts` decide la ruta que recibe el visitante. No borrar
+  las originales hasta verificar el despliegue y recibir autorización expresa.
   Los PDF fuente están excluidos del repositorio por `.gitignore` (`/public/catalogos/*.pdf`).
 - Los logos de `/public/proveedores/` — 11 marcas representadas. Los usa la cinta
   `SupplierMarquee` del home, con las rutas literales de `siteData.ts`.

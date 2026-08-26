@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import baseline from "./fixtures/catalog-baseline.json";
 import { products } from "../app/data/products";
 import nextConfig from "../next.config";
+import { sanitizePublicSupplierText } from "../app/data/publicProductPrivacy";
 import {
   getPopulatedApplicationIds,
   productTypes,
@@ -222,7 +223,16 @@ test("publishes every approved technical value and no internal specification", a
     const expectedSpecs = Object.fromEntries(
       expectedPublicTechnicalSpecKeys
         .filter((key) => internal.technicalSpecs?.[key] !== undefined)
-        .map((key) => [key, internal.technicalSpecs?.[key]]),
+        .map((key) => {
+          const value = internal.technicalSpecs?.[key];
+
+          return [
+            key,
+            Array.isArray(value)
+              ? value.map((entry) => sanitizePublicSupplierText(entry, internal))
+              : sanitizePublicSupplierText(value as string, internal),
+          ];
+        }),
     );
 
     expect(projected.technicalSpecs ?? {}).toEqual(expectedSpecs);
@@ -293,7 +303,7 @@ test("defensively omits applications that have no products", () => {
   ]);
 });
 
-test("preserves the unchanged physical image paths in the public projection", async () => {
+test("projects supplier image paths through neutral public directories", async () => {
   const publicProductModule = await loadPublicProductModule();
 
   expect(publicProductModule).not.toBeNull();
@@ -303,10 +313,14 @@ test("preserves the unchanged physical image paths in the public projection", as
       image: string;
       images?: string[];
     };
-    const expectedImages = internal.images?.length ? internal.images : [internal.image];
+    const publicImages = projected.images ?? [projected.image];
 
-    expect(projected.image).toBe(internal.image);
-    expect(projected.images ?? [projected.image]).toEqual(expectedImages);
+    expect(projected.image).toMatch(/^\/catalogos\/(arquitectonico|lineal|electrico)\//);
+    expect(publicImages).not.toEqual(internal.images?.length ? internal.images : [internal.image]);
+
+    for (const image of publicImages) {
+      expect(image).not.toMatch(/artlite|construlita|highlum|magnetrackpro/i);
+    }
   }
 });
 

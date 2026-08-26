@@ -20,10 +20,10 @@ const fixtureMetadata = catalogBaseline as unknown as {
 const verificationBaseline = {
   ...catalogBaseline,
   verificationAggregateHashes: {
-    publicCanonicalSha256: "69bf6aa565cdbf74268fd1e179a0adc070b867ed13df5675a720bae995093eca",
-    internalCanonicalSha256: "2dd3df91d58b4e00cbbfdd4a932a835263eb8052aa9db9c68243c6faea601d64",
+    publicCanonicalSha256: "dd4292fa0b1b43259d3fb95301e1e3ce95faaaf41eb34e1191ca476020fc51e9",
+    internalCanonicalSha256: "7266b816c4a7081c9cd7023bdc58261f70bbe0ca906c49c6c54eedfdf5b53863",
     referenceMapSha256: "57307a880fe854730ee43816b3f8f45153b3732e51a28e9aa6b332e7a8a3dcd9",
-    productHashMapSha256: "38e5c3779f41924dbf0f70ad0bfa64ed79e7b25543718bdf39cacd9c8c76617d",
+    productHashMapSha256: "549b4f30980322b2b37d1fd207da5cd6c02760599fe244bbdb21d0856f7e0170",
   },
 } as unknown as CatalogBaseline;
 

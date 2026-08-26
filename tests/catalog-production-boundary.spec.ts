@@ -37,17 +37,21 @@ const textArtifactExtensions = new Set([
   ".txt",
 ]);
 
-const knownPhysicalImagePaths = [
+const knownPublicImagePaths = [
   ...new Set(
-    products.flatMap((product) =>
-      product.images?.length ? product.images : [product.image],
-    ),
+    products.flatMap((product) => {
+      const publicProduct = toPublicProduct(product);
+
+      return publicProduct.images?.length
+        ? publicProduct.images
+        : [publicProduct.image];
+    }),
   ),
 ].sort((left, right) => right.length - left.length);
 
-const CAPTURED_PHYSICAL_IMAGE_PATH_COUNT = 326;
-const CAPTURED_PHYSICAL_IMAGE_PATH_SHA256 =
-  "75aeb25adffde0a579118a00a4097a2ac5594e6432a885b27b86d1771fca0d24";
+const CAPTURED_PUBLIC_IMAGE_PATH_COUNT = 326;
+const CAPTURED_PUBLIC_IMAGE_PATH_SHA256 =
+  "4a76256a2011a11e8ad6ba2a59733f24fae5f552a09c94077fe427f11c4fb165";
 
 const getPhysicalImagePathFingerprint = (imagePaths: readonly string[]) => {
   const canonicalPaths = [...new Set(imagePaths)].sort();
@@ -64,16 +68,16 @@ const validateCapturedPhysicalImagePaths = (imagePaths: readonly string[]) => {
   const fingerprint = getPhysicalImagePathFingerprint(imagePaths);
 
   if (
-    fingerprint.count !== CAPTURED_PHYSICAL_IMAGE_PATH_COUNT ||
-    fingerprint.sha256 !== CAPTURED_PHYSICAL_IMAGE_PATH_SHA256
+    fingerprint.count !== CAPTURED_PUBLIC_IMAGE_PATH_COUNT ||
+    fingerprint.sha256 !== CAPTURED_PUBLIC_IMAGE_PATH_SHA256
   ) {
     throw new Error(
-      `captured catalog image path fingerprint mismatch: expected ${CAPTURED_PHYSICAL_IMAGE_PATH_COUNT}/${CAPTURED_PHYSICAL_IMAGE_PATH_SHA256}, received ${fingerprint.count}/${fingerprint.sha256}`,
+      `captured catalog image path fingerprint mismatch: expected ${CAPTURED_PUBLIC_IMAGE_PATH_COUNT}/${CAPTURED_PUBLIC_IMAGE_PATH_SHA256}, received ${fingerprint.count}/${fingerprint.sha256}`,
     );
   }
 };
 
-validateCapturedPhysicalImagePaths(knownPhysicalImagePaths);
+validateCapturedPhysicalImagePaths(knownPublicImagePaths);
 
 const CAPTURED_PUBLIC_SERIES_REGISTRY_COUNT = 72;
 const CAPTURED_PUBLIC_SERIES_REGISTRY_SHA256 =
@@ -341,7 +345,7 @@ const approvedSerializedCollisionContexts: ApprovedSerializedCollisionContext[] 
         token,
         serialized: stripExactValues(
           serialized,
-          knownPhysicalImagePaths,
+          knownPublicImagePaths,
           PHYSICAL_IMAGE_MARKER,
         ).stripped,
       }));
@@ -352,7 +356,7 @@ const approvedSerializedCollisionContexts: ApprovedSerializedCollisionContext[] 
 
 const stripCapturedPhysicalImagePaths = (
   content: string,
-  imagePaths: readonly string[] = knownPhysicalImagePaths,
+  imagePaths: readonly string[] = knownPublicImagePaths,
 ) => {
   validateCapturedPhysicalImagePaths(imagePaths);
   return stripExactValues(content, imagePaths, PHYSICAL_IMAGE_MARKER);
@@ -412,7 +416,7 @@ test("does not exempt a longer collision in the wrong reference, field, or artif
 });
 
 test("rejects a changed physical image path before using it as an exemption", () => {
-  const changedImagePaths = [...knownPhysicalImagePaths];
+  const changedImagePaths = [...knownPublicImagePaths];
   changedImagePaths[0] = changedImagePaths[0].replace(
     /\.webp$/,
     "-changed.webp",

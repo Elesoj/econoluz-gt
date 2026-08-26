@@ -2,10 +2,9 @@
 //
 // Regla de negocio: el cliente no debe poder averiguar quién fabrica lo que
 // vende ECONOLUZ, o se irá a comprarle directamente. `sanitizeSupplierText`
-// en app/data/products.ts limpia las marcas (Artlite, Construlita, Highlum) y
-// los códigos de referencia, pero no conoce los nombres de línea del
-// fabricante (Corvus, Nanovia, Magnetrack Pro...), que siguen apareciendo en
-// descripciones, etiquetas y fichas técnicas.
+// en app/data/products.ts limpia marcas y códigos en el dato de respaldo.
+// `toPublicProduct` aplica además la frontera definitiva: anonimiza rutas y
+// nombres de línea sin alterar lo que ve el panel interno.
 //
 // Este script busca, dentro de todo lo que llega al navegador, cada marca y
 // cada nombre de serie del proveedor, y dice exactamente dónde aparece.
@@ -21,22 +20,79 @@ import { toPublicProduct } from "../app/data/publicProduct.ts";
 // descripciones en español que ECONOLUZ usa por su cuenta y que casualmente
 // coinciden con cómo el fabricante llamó a la línea.
 const generic = /^(perfil|luminario|luminaria|tubo|tira|manguera|modulo|módulo|lampara|lámpara|downlight|panel|proyector|emergencia|senalizacion|señalizacion|poste|bolardo|arbotante|riel|placa|driver|kit|alto montaje|bajo montaje)/i;
+const genericNormalizedPrefixes = [
+  "perfil",
+  "luminario",
+  "luminaria",
+  "tubo",
+  "tira",
+  "manguera",
+  "modulo",
+  "lampara",
+  "downlight",
+  "panel",
+  "proyector",
+  "emergencia",
+  "senalizacion",
+  "poste",
+  "bolardo",
+  "arbotante",
+  "riel",
+  "placa",
+  "driver",
+  "kit",
+  "altomontaje",
+  "bajomontaje",
+];
+
+const normalizeSupplierIdentifier = (value) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+
+// Coinciden con nombres de serie, pero son vocabulario normal del sector o
+// del español. Quitarlos empeoraría el catálogo sin ocultar al fabricante.
+const safePublicTerms = new Set(
+  [
+    "Bronce",
+    "Wallpack",
+    "Wallpack CCT",
+    "Uplight",
+    "Landscape",
+    "Slim",
+    "Bright",
+    "Canopy CCT",
+    "Spotlight COB",
+    "Module",
+    "Sombra",
+  ].map(normalizeSupplierIdentifier),
+);
 
 const buildNeedles = () => {
   const needles = new Map();
 
   const add = (value, origin) => {
     const text = (value ?? "").trim();
+    const normalized = normalizeSupplierIdentifier(text);
 
-    if (text.length < 4 || generic.test(text)) {
+    if (
+      text.length < 4 ||
+      normalized.length < 4 ||
+      !/[a-z]/.test(normalized) ||
+      generic.test(text) ||
+      genericNormalizedPrefixes.some((prefix) => normalized.startsWith(prefix)) ||
+      safePublicTerms.has(normalized)
+    ) {
       return;
     }
 
-    if (!needles.has(text)) {
-      needles.set(text, new Set());
+    if (!needles.has(normalized)) {
+      needles.set(normalized, { text, origins: new Set() });
     }
 
-    needles.get(text).add(origin);
+    needles.get(normalized).origins.add(origin);
   };
 
   for (const product of products) {
@@ -70,7 +126,12 @@ const walk = (value, path, visit) => {
 
 const requested = process.argv.slice(2);
 const needles = requested.length > 0
-  ? new Map(requested.map((value) => [value, new Set(["pedido a mano"])]))
+  ? new Map(
+      requested.map((value) => [
+        normalizeSupplierIdentifier(value),
+        { text: value, origins: new Set(["pedido a mano"]) },
+      ]),
+    )
   : buildNeedles();
 
 const findings = new Map();
@@ -79,8 +140,10 @@ for (const product of products) {
   const publicProduct = toPublicProduct(product);
 
   walk(publicProduct, "", (text, path) => {
-    for (const needle of needles.keys()) {
-      if (!text.includes(needle)) {
+    const normalizedText = normalizeSupplierIdentifier(text);
+
+    for (const [needle, metadata] of needles) {
+      if (!normalizedText.includes(needle)) {
         continue;
       }
 
@@ -88,7 +151,12 @@ for (const product of products) {
         findings.set(needle, []);
       }
 
-      findings.get(needle).push({ id: product.id, path, text });
+      findings.get(needle).push({
+        id: product.id,
+        path,
+        text,
+        needle: metadata.text,
+      });
     }
   });
 }
@@ -97,7 +165,7 @@ for (const product of products) {
 // nombre se cuele en la ruta de una imagen que en una etiqueta de filtro.
 const byField = new Map();
 
-for (const [needle, hits] of findings) {
+for (const hits of findings.values()) {
   for (const hit of hits) {
     const field = hit.path.replace(/\[\d+\]/g, "[]");
 
@@ -107,7 +175,7 @@ for (const [needle, hits] of findings) {
 
     const entry = byField.get(field);
     entry.total += 1;
-    entry.needles.add(needle);
+    entry.needles.add(hit.needle);
   }
 }
 
@@ -131,8 +199,8 @@ for (const [field, entry] of [...byField].sort((left, right) => right[1].total -
 
 console.log("");
 console.log("Ejemplos:");
-for (const [needle, hits] of [...findings].sort((left, right) => right[1].length - left[1].length).slice(0, 12)) {
+for (const [, hits] of [...findings].sort((left, right) => right[1].length - left[1].length).slice(0, 12)) {
   const example = hits[0];
-  console.log(`  "${needle}" (${hits.length}) -> ${example.id} . ${example.path}`);
+  console.log(`  "${example.needle}" (${hits.length}) -> ${example.id} . ${example.path}`);
   console.log(`      ${example.text.slice(0, 110)}`);
 }

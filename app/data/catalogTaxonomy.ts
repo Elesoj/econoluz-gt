@@ -20,7 +20,7 @@ export const productTypes = {
     applications: [
       "downlights",
       "luminarios_riel",
-      "magnetrack_pro",
+      "microrriel_magnetico_48v",
       "suspendidos",
       "empotrados_piso",
       "decorativos",
@@ -90,7 +90,10 @@ export const applications = {
   a_prueba_de_vapor: { id: "a_prueba_de_vapor", label: "A prueba de vapor" },
   downlights: { id: "downlights", label: "Downlights" },
   luminarios_riel: { id: "luminarios_riel", label: "Luminarios para riel" },
-  magnetrack_pro: { id: "magnetrack_pro", label: "Magnetrack Pro" },
+  microrriel_magnetico_48v: {
+    id: "microrriel_magnetico_48v",
+    label: "Microrriel magnético 48 V",
+  },
   suspendidos: { id: "suspendidos", label: "Suspendidos" },
   empotrados_piso: { id: "empotrados_piso", label: "Empotrados en piso" },
   decorativos: { id: "decorativos", label: "Decorativos" },
@@ -183,6 +186,7 @@ const applicationAliasesBySlug: Record<string, ApplicationId> = {
   barras: "barras_lineales",
   bronce: "decorativos",
   luz_de_cortesia_muro: "decorativos",
+  magnetrack_pro: "microrriel_magnetico_48v",
   senalizacion: "emergencia_senalizacion",
 };
 

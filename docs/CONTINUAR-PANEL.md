@@ -7,9 +7,9 @@ por ejemplo) pueda seguir el trabajo sin haber estado en las conversaciones prev
 Ahí están las reglas del proyecto, la marca, las convenciones y lo que no se toca.
 Este documento no las repite: las da por leídas.
 
-**Carpeta de trabajo: `frontend/`. Rama: `panel-admin`.** Todo el trabajo del panel está
-ya integrado ahí, así que no hace falta entrar en `.worktrees/`. Ese worktree se conserva
-por si hiciera falta consultarlo, pero **la rama viva es `panel-admin`**.
+**Carpeta de trabajo: `frontend/`.** El panel ya está integrado y publicado desde
+`main`. El trabajo actual para anonimizar el catálogo público vive en la rama
+`ocultar-proveedores`; no está fusionado ni desplegado.
 
 **Publicado el 26/08/2026:** `main` recibió los 50 commits y Vercel desplegó.
 `econoluz-gt.vercel.app` sirve el catálogo con precios, la galería desde Neon y el panel
@@ -18,7 +18,15 @@ hace el dueño.
 
 ---
 
-## 0. Estado en dos minutos (última actualización: 25/08/2026)
+## 0. Estado en dos minutos (última actualización: 26/08/2026)
+
+> **Exposición del proveedor resuelta en código (26/08/2026), pendiente de desplegar.**
+> `publicProductPrivacy.ts` transforma solo lo que recibe el visitante: rutas neutras,
+> nombres de línea anonimizados y «Microrriel magnético 48 V» en lugar de
+> `Magnetrack Pro`. El panel conserva marca, serie, código y nombre del fabricante.
+> `npm run catalogo:auditar` revisa 313 productos y 408 identificadores normalizados:
+> 0 coincidencias. Las 326 imágenes originales siguen sin borrarse; las 326 copias
+> neutras son idénticas byte a byte. No hace falta modificar Neon.
 
 > **El catálogo público ya muestra los precios (26/08/2026).** Lo decidió el dueño: si
 > va a ser una tienda B2C, el precio tiene que verse. `PublicProduct.priceGtq` es
@@ -178,6 +186,7 @@ npm run db:migrar          # aplica los .sql de db/ que falten, repetible
 npm run catalogo:importar  # mete los 313 productos del código y verifica el resultado
 npm run catalogo:verificar # ensayo de la migración sin tocar la base de datos
 npm run catalogo:auditar   # busca nombres de proveedor en el catálogo público
+npm run test:proveedores   # comprueba privacidad pública y datos internos intactos
 npm run typecheck          # tsc --noEmit
 npm run lint
 npx playwright test        # batería completa (usa msedge; chromium NO está instalado)
@@ -228,11 +237,12 @@ pueden aparecer en el JavaScript compilado**, y
 `tests/catalog-production-boundary.spec.ts` revisa los chunks del build buscándolos.
 **Esto no se puede romper.**
 
-**Deuda conocida, no garantizada.** Siguen apareciendo nombres heredados del proveedor
-dentro de las rutas de las imágenes, de los textos de las descripciones y de la
-taxonomía: 30 nombres en unas 556 apariciones (§10.1). Está documentado y el dueño lo
-sabe. No confundir una cosa con la otra: la regla describe la intención y el mecanismo,
-no un estado ya alcanzado.
+**Resuelto en `ocultar-proveedores`, pendiente de desplegar.** La proyección pública
+anonimiza rutas, textos, ficha técnica y el identificador de la aplicación antes de que
+los datos lleguen al navegador. La transformación no reescribe Neon ni el producto
+interno, de modo que el panel sigue enseñando la información necesaria al personal.
+`npm run catalogo:auditar` devuelve 0 coincidencias; `npm run test:proveedores` protege
+la separación en pruebas.
 
 **Alcance.** La prohibición se refiere al **catálogo público y a los visitantes sin
 sesión**. El panel, detrás de autenticación, tiene que enseñar esos datos a quien
@@ -879,23 +889,16 @@ Además, **nada se publica ni se despliega sin que él lo confirme.**
 No los causó la migración. Están documentados para que nadie pierda tiempo
 investigándolos ni los confunda con una regresión.
 
-### 10.1 Nombres de proveedor visibles en el catálogo público
+### 10.1 Nombres de proveedor visibles en el catálogo público — resuelto en código
 
-`npm run catalogo:auditar` lo lista. **30 nombres distintos en unas 556 apariciones**,
-en dos formas:
+El dueño autorizó ocultarlos el 26/08/2026. La rama `ocultar-proveedores` sirve las
+imágenes desde `arquitectonico/`, `lineal/` y `electrico/`, retira los nombres de línea
+de los campos públicos y renombra la familia `Magnetrack Pro` como «Microrriel magnético
+48 V». Los datos originales permanecen detrás de sesión en el panel.
 
-- **Las rutas de las fotos** llevan el nombre del proveedor: `/catalogos/construlita/…`,
-  `/catalogos/highlum/…`, `/catalogos/artlite/…`. Los 313 productos. El nombre del
-  archivo sí está anonimizado; la carpeta no. Se ve con clic derecho sobre cualquier
-  foto. **Requiere código** (reescritura de rutas o mover archivos).
-- **Los textos**: «Magnetrack Pro», «Nanovia», «Corvus», «Vialed», «Wallpack»,
-  «Softglow»… en 62 descripciones y 22 fichas técnicas. Y **«Magnetrack Pro» y
-  «Wallpacks» son categorías visibles del filtro** del catálogo. Esto es mucho más
-  fácil de corregir **después** del panel, porque entonces el dueño puede editar los
-  textos él mismo.
-
-El dueño ya sabe que existe. **No arreglarlo sin hablarlo con él**: es un cambio de
-contenido, no un bug.
+No se han borrado las carpetas antiguas y no se ha desplegado. Después del despliegue
+hay que verificar las rutas neutras en producción y pedir permiso antes de retirar los
+originales. El diagnóstico y el procedimiento están en `docs/FUGAS-PROVEEDOR.md`.
 
 ### 10.2 Una prueba que falla
 

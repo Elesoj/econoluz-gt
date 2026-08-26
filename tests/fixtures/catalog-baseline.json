@@ -7,10 +7,10 @@
     "productHashMapSha256": "3d238e8fc944bf4b697d90515e0a1753e0e69010de751b708d8054b72dbf466c"
   },
   "verificationAggregateHashes": {
-    "publicCanonicalSha256": "69bf6aa565cdbf74268fd1e179a0adc070b867ed13df5675a720bae995093eca",
-    "internalCanonicalSha256": "2dd3df91d58b4e00cbbfdd4a932a835263eb8052aa9db9c68243c6faea601d64",
+    "publicCanonicalSha256": "dd4292fa0b1b43259d3fb95301e1e3ce95faaaf41eb34e1191ca476020fc51e9",
+    "internalCanonicalSha256": "7266b816c4a7081c9cd7023bdc58261f70bbe0ca906c49c6c54eedfdf5b53863",
     "referenceMapSha256": "57307a880fe854730ee43816b3f8f45153b3732e51a28e9aa6b332e7a8a3dcd9",
-    "productHashMapSha256": "38e5c3779f41924dbf0f70ad0bfa64ed79e7b25543718bdf39cacd9c8c76617d"
+    "productHashMapSha256": "549b4f30980322b2b37d1fd207da5cd6c02760599fe244bbdb21d0856f7e0170"
   },
   "references": [
     "ECO-ELE-0001",
@@ -1117,175 +1117,175 @@
     {
       "id": "construlita-magnetrack-pro-linear",
       "econoluzReference": "ECO-CAT-0132",
-      "contentSha256": "231abfc08c7134c0552a306eb5dea438e73b45d650073deca9afb05c898fb4f7",
+      "contentSha256": "16110ff8d40273e61a524712daf226e395c9627a2b079b6cfb4084135220f7fb",
       "technicalSpecsSha256": "a3074db0c8891f686c06ee3763c4744144809dee94d08e99f908e0b5e980d251"
     },
     {
       "id": "construlita-magnetrack-pro-multispot",
       "econoluzReference": "ECO-CAT-0133",
-      "contentSha256": "3dc1ba677bf51913ea8e2369c7c869f4fe8e5e68e77292b65e4f85ef46d5571e",
+      "contentSha256": "a5ab79d877e9aea47c30c4d9c36b59f4330c1450e4482cba307e1189ad178599",
       "technicalSpecsSha256": "f62efb235440ab5b526f788d5744efe45b3208f6e2d1581c5c5dea46eb6ce409"
     },
     {
       "id": "construlita-magnetrack-pro-grazer",
       "econoluzReference": "ECO-CAT-0134",
-      "contentSha256": "c1eddd5f7a1dbcdc6528ffb05c46b05dd182db402967cd7d0634c2a6230e91a2",
+      "contentSha256": "76db03211f9ffd37ae342ff3d301d2bb33862c3eb4aba385fd26af505a388b62",
       "technicalSpecsSha256": "15e0810e9fa34bf6a8381967490f4ddcc0676a3acae666044a844c1aff0f16bb"
     },
     {
       "id": "construlita-magnetrack-pro-washer",
       "econoluzReference": "ECO-CAT-0135",
-      "contentSha256": "d72bc3cd84e58ddab0db7a17ed71632712891c7e333d69864fd705bc418f9620",
+      "contentSha256": "cb51670c18f286a97138a3fb8c8f51ff33bd17fcefc661e5dd0418b614e5f1a7",
       "technicalSpecsSha256": "be434a8ad0794477bcb8c8a8d29481d6622348dd1b18619786d3974c3c0d260b"
     },
     {
       "id": "construlita-magnetrack-pro-spot",
       "econoluzReference": "ECO-CAT-0136",
-      "contentSha256": "2ed09ed7a210d815ba080adacc20033f6b60f2de3965d4fdcd80ff459f3dc195",
+      "contentSha256": "d2e1d11d7a340dbde17d94315635d10d6431f8a7311bd31328831a265febe841",
       "technicalSpecsSha256": "3d0e939f2b726bc2506541e1f821054d754b88b2527c53bc637f85492dc92c3f"
     },
     {
       "id": "construlita-magnetrack-pro-pipe",
       "econoluzReference": "ECO-CAT-0137",
-      "contentSha256": "ce235d17b84cf79f736b9daa6d1e73a9501e5f56b7b93859ca1b9679ee7bf8e3",
+      "contentSha256": "28305b7070669359706613309e4209d3372e6124c746af1874f00d995c818c3b",
       "technicalSpecsSha256": "e0481f524d35b4107acdb712f3a2a81829c2365f78b3becc516b2a292d30c613"
     },
     {
       "id": "construlita-magnetrack-pro-moon",
       "econoluzReference": "ECO-CAT-0138",
-      "contentSha256": "8b686bd0bc32f8475eb829e18a217a8675aa0491bfd92e7df9ebffa39dfd4bb0",
+      "contentSha256": "176412ef6b967b08c7ea92ee2581ed5133caa6d4358f97590d442cf548fa85bb",
       "technicalSpecsSha256": "0e4401c2d77d2a5b007cdbab6af40c2bd02262bea833b5afde543a4a6e9d317b"
     },
     {
       "id": "construlita-magnetrack-pro-microrriel",
       "econoluzReference": "ECO-CAT-0139",
-      "contentSha256": "dac1d4440957c33ae4ba65f0f014efc1a0bcd2c0fe1fccd000386366499e4539",
+      "contentSha256": "cefd1b73ec8248bb5e0773ad2f8e06245e8cc693f3af0eec62fc0e61b9c08c0f",
       "technicalSpecsSha256": "2fc82799125c785cb33afd0398f8d73a3b028f62eabae869d67318c98115df09"
     },
     {
       "id": "construlita-magnetrack-pro-ac5610n-conector-codo-empotrable",
       "econoluzReference": "ECO-CAT-0140",
-      "contentSha256": "5681981530e78e8f3d1346ee5eb7d1df5449b73ea7701c80ce5b48025a031b0d",
+      "contentSha256": "84049d506e51a73203e5101f14ed10a8c42a10ad7e70663b3cc8588a9487fce9",
       "technicalSpecsSha256": "2d5c3e1ee58f6407597e35a3deb77cf6790007c7179c351c72e3abd61cb5e533"
     },
     {
       "id": "construlita-magnetrack-pro-ac5611n-codo-interno-empotrable",
       "econoluzReference": "ECO-CAT-0141",
-      "contentSha256": "e29d126efdbc1acb1ac32beac4f6c70d40d2a471fefc42aff509b8b9d7f6d20e",
+      "contentSha256": "69859b7a3863d00129089338721c70d88d6dc6e739f79c09302a4d70b0115dca",
       "technicalSpecsSha256": "4d7d28ee836dccaecc073420b18963eb4d2f09c68c20223a21d50dda8776aea1"
     },
     {
       "id": "construlita-magnetrack-pro-ac5612n-codo-externo-empotrable",
       "econoluzReference": "ECO-CAT-0142",
-      "contentSha256": "bcd6d991a0df0a128e8aee06e26f4eeb9e7f929975662ab4ada742ba255a8e66",
+      "contentSha256": "4d0336a61def7f6b8b7b7155e114363880b8d559def59536eb432ceb35f06f7a",
       "technicalSpecsSha256": "e6b851b4d9423a791ccfd7d368f197cc41f8d2f66dab87c2ed52f39c0912023f"
     },
     {
       "id": "construlita-magnetrack-pro-ac5639n-conector-t-empotrable",
       "econoluzReference": "ECO-CAT-0143",
-      "contentSha256": "07dc48eba6a230c2d158f84f913f4ff1ee8c04411a5428f87abb6ddf92ec40aa",
+      "contentSha256": "593e6e4323c46f436f2f0775357522a608ff67597785f23e5dae05b41842f63a",
       "technicalSpecsSha256": "d2a6e92136361fcc256e7931b761e233652518d9a177bb1fe3789e87893c0448"
     },
     {
       "id": "construlita-magnetrack-pro-ac5640n-conector-x-empotrable",
       "econoluzReference": "ECO-CAT-0144",
-      "contentSha256": "d949522e1d9d0c6d97e2bdedfd92f9cc7fd5b6ad966b34a20b906c2571623781",
+      "contentSha256": "1caabe585e1a3770f75e9d507acb142fb825c5516d94dd5c6b37869af34c814b",
       "technicalSpecsSha256": "ba7685e2a39a14ee94a4ad7038aa1309f46fde351d4b10911b0cffdbaeb72fce"
     },
     {
       "id": "construlita-magnetrack-pro-ac5630n-conector-codo-empotrable",
       "econoluzReference": "ECO-CAT-0145",
-      "contentSha256": "2d56354c537b7365515d365807aece962a7a66ab2f15932f2c00d87368ea8297",
+      "contentSha256": "8d08d39e3cad5e740ffa8760fe0b9ccb6aba922d6c4d1e54b17a6fc0266e1547",
       "technicalSpecsSha256": "2ad0b911f15f90a80f19910157f70cb31bb61d1207680c84e559d4b8857ba8c3"
     },
     {
       "id": "construlita-magnetrack-pro-ac5637n-conector-t-suspendido-sobrepuesto",
       "econoluzReference": "ECO-CAT-0146",
-      "contentSha256": "74cfea9159430b91e4ae560a7dc1cf4308b9480ce3ed8314845a4d4bbf7a55f3",
+      "contentSha256": "b1631649eb832875d1a5360fdf6269243b9e59068c1212a59e3ab01c2296c171",
       "technicalSpecsSha256": "e03997afa6b7f3c43b7f64849d96aea9ad5245fddf91cf3710da01e592ad7a2f"
     },
     {
       "id": "construlita-magnetrack-pro-ac5638n-conector-x-suspendido-sobrepuesto",
       "econoluzReference": "ECO-CAT-0147",
-      "contentSha256": "2a9823caaee57153f0146ce463cb655a28d7d08053b87a1625e0ecd7373011f6",
+      "contentSha256": "cce56b790732f61abc66e8abeea5ae1e58f28024fb8ca34d60309c2b1d89e48f",
       "technicalSpecsSha256": "bcc0bf556c394a5a987e22ae98a7b3c93d485ede334454bad0cc5d4193ef25c1"
     },
     {
       "id": "construlita-magnetrack-pro-ac5710n-conector-codo-suspendido-sobrepuesto",
       "econoluzReference": "ECO-CAT-0148",
-      "contentSha256": "f6eb49aa7e15f8e79881996fde5898de91df8f5c2d6e44866d1a9b09137b05fd",
+      "contentSha256": "a79d98b32a2d05d07b01a588458c8188f6dd280e82932eb9fdc6956fd9bc198a",
       "technicalSpecsSha256": "834e4a4b07e2b676e3cc67fdd251a7345ed090eda68e5927f47e25c2a6b0e2ca"
     },
     {
       "id": "construlita-magnetrack-pro-ac5711n-codo-interno-suspendido-sobrepuesto",
       "econoluzReference": "ECO-CAT-0149",
-      "contentSha256": "449a21d33715aff8d5c7ab09c94b13909e87e2d9b32e65a30c84e159c7ebce8e",
+      "contentSha256": "a13349bb175fb5a8ddce973d16d99a94d1f3809051bef841ca91a50a4e9e0830",
       "technicalSpecsSha256": "d6964a465aa3c9e3917b9da6ca02c4ba8105d0bf178dbaf0d4ee5b90423023fe"
     },
     {
       "id": "construlita-magnetrack-pro-ac5712n-codo-externo-suspendido-sobrepuesto",
       "econoluzReference": "ECO-CAT-0150",
-      "contentSha256": "2cbbfabf5b2b95c5550b2c6c3caf7bccdc8a28c3865f2617c726c30cf4283a70",
+      "contentSha256": "2ee94eaec1bf9d624eeae6b492092bedfff9cb4fc8164389431dd7c1ae5ee56f",
       "technicalSpecsSha256": "d631bcf2de372f0a0d55b87bdb7c97dc4e2d2bd86f699802bb66925a01043dd3"
     },
     {
       "id": "construlita-magnetrack-pro-ac5730n-tapa-riel-suspendido-sobrepuesto",
       "econoluzReference": "ECO-CAT-0151",
-      "contentSha256": "369fbd649d0abcc2f58d223fd6b202858c4570f700e06f937429fd376f936de2",
+      "contentSha256": "09cbae536e1d8a7a7bffb4fb25bb3c38f22b071613ced84b25275026837b96bf",
       "technicalSpecsSha256": "6e3250eb9be70745d8f87a528d751b1b85d9d1884a25aaaa2d551b01afc24c43"
     },
     {
       "id": "construlita-magnetrack-pro-ac5530-interconector-flex",
       "econoluzReference": "ECO-CAT-0152",
-      "contentSha256": "323ee228814305a3b8e4445eb7e59875379cccc78ae66d715778155d8a58a53e",
+      "contentSha256": "86bb3638bc226a35927c79f14a9329ad1bc02d0b63af776cb27867b794a60165",
       "technicalSpecsSha256": "1c09c3e9f87f6cc2d94a6f12d8c4b1ab5ae7641f43456b1f7b631284497c3c38"
     },
     {
       "id": "construlita-magnetrack-pro-ac5635n-interconector-t",
       "econoluzReference": "ECO-CAT-0153",
-      "contentSha256": "4e064907c2757b970c6859c2026476e62af97cafc56851e0c287ea660235dc04",
+      "contentSha256": "d2a3a497e9a0dccdee7d0ee11c04964225e48819043c2dd8fc8a2416cf41496d",
       "technicalSpecsSha256": "3a8c0e84de47d6f69ca9563b9ca356677cc734b622ca11acdbbaf85429e14482"
     },
     {
       "id": "construlita-magnetrack-pro-ac5631n-interconector-lineal",
       "econoluzReference": "ECO-CAT-0154",
-      "contentSha256": "f8546f16c0d56ad4ba25494eba2dcf62b961a97eaa2dbd2fcef8a7d9efdd813a",
+      "contentSha256": "838b03df474df142af5dc3abeaaf8ee34a409fcda848258ab1be816bae42844d",
       "technicalSpecsSha256": "c68b885792287e73d6c2c8987474294f6d863de9ed97efd65afba36ad91daa45"
     },
     {
       "id": "construlita-magnetrack-pro-ac5633n-placa-interconexion-mecanica",
       "econoluzReference": "ECO-CAT-0155",
-      "contentSha256": "c06fdbcf69f7badd8e4247e94b55ef788df209a3bf23f780dca636c3ad5af5a3",
+      "contentSha256": "e740af4e14cbadd4fa3ba18194fe9767213773fa7905cf317924f5e214cb119e",
       "technicalSpecsSha256": "438e6b025a4f7690d5af7b2ac92712a8d737ef48c4a3ee931115305915df293a"
     },
     {
       "id": "construlita-magnetrack-pro-ac5632n-arnes-sobreponer-microrriel",
       "econoluzReference": "ECO-CAT-0156",
-      "contentSha256": "924d929835e24bd378692853bfae59a714a2ac6ce8c140e4ec9e8ae64a1c3f41",
+      "contentSha256": "d9f9dc0c57a125abd9b8f6476d84326d2f02c0fee983c8356f331459efa95936",
       "technicalSpecsSha256": "6cab18c5865ea57426842aaf020c83ec86c5b7b5a2e1b69c26d6e4c932057bba"
     },
     {
       "id": "construlita-magnetrack-pro-ac5745-kit-suspension-microrriel",
       "econoluzReference": "ECO-CAT-0157",
-      "contentSha256": "bb81b356123ce8dfa3e505d9defe0dbb3af160c97fe8d8d8b4f1e51e50b9871f",
+      "contentSha256": "04cd7c77b493f6aa67891159bd397352b2def9628b8c1b282dd04e0bc08f2a09",
       "technicalSpecsSha256": "c178dc06ce5a9b1cc530fd5af5bafc5e25ed784736fb581f7cbecc03c650c953"
     },
     {
       "id": "construlita-magnetrack-pro-ac78150-driver-150w",
       "econoluzReference": "ECO-CAT-0158",
-      "contentSha256": "859805d4fe6c663345b381e97477fce8fd6b5663e55b2174f5853f7f44e50367",
+      "contentSha256": "c658aa1d8ae1c0706238ee965bcd3b101dd09e67dac36ec9fc743b42611a95a6",
       "technicalSpecsSha256": "887589d7ee54da92a336d614c6640a2e03eb278c189f4bdfaca7a9d1a08e29ef"
     },
     {
       "id": "construlita-magnetrack-pro-ac78200-driver-200w",
       "econoluzReference": "ECO-CAT-0159",
-      "contentSha256": "3a85f60b0aaa75df71b8a79227cb31ee22d408bd3046a8713d09a84311cbb21f",
+      "contentSha256": "47f9c66a14cd83a3687b4ae496a3aa15c4e0dae14bc577b5140ec5479c369d2f",
       "technicalSpecsSha256": "778e571543f36123cd979ddddedf41f6c1622a6b6bb665aadb6ffbc8385e0fcf"
     },
     {
       "id": "construlita-magnetrack-pro-ac78350-driver-350w",
       "econoluzReference": "ECO-CAT-0160",
-      "contentSha256": "edf3f43fb2da37658e3edd9125e3cc208528acc01af1c742a1c66a995d4f8b5a",
+      "contentSha256": "e4b9d1739f8224b89c298a00acca6da8ffe651912a42aa42a9caafed995ffd69",
       "technicalSpecsSha256": "8a95d6a28c9433a2e058c1d231cfa0839b08a2097d9791dca8179093df6cd82d"
     },
     {

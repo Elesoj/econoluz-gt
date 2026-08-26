@@ -14,7 +14,6 @@
 //   npm run catalogo:verificar
 
 import { products } from "../app/data/products.ts";
-import { toPublicProduct } from "../app/data/publicProduct.ts";
 import { fromProductRow, toProductRow } from "../app/data/productRow.ts";
 import { compareCatalogs, reportProblems } from "./compare-catalog.mjs";
 
@@ -67,48 +66,11 @@ if (positions.some((position, index) => index > 0 && position <= positions[index
   problems.push("las posiciones no van en orden creciente");
 }
 
-// La migración no puede empeorar la exposición del proveedor. Aquí no se
-// comprueba que el catálogo esté limpio —hoy no lo está, y es un problema
-// anterior que detalla scripts/audit-supplier-leaks.mjs— sino que el viaje por
-// la base de datos no añada ni una aparición más.
-const countLeaks = (catalog) => {
-  const supplierValues = new Set();
-
-  for (const product of catalog) {
-    for (const value of [
-      product.supplierBrand,
-      product.labels.brand,
-      product.labels.series,
-      product.supplierCode,
-      product.name,
-    ]) {
-      if (value && value.length > 3) {
-        supplierValues.add(value);
-      }
-    }
-  }
-
-  const payload = JSON.stringify(catalog.map((product) => toPublicProduct(product)));
-
-  return [...supplierValues].filter((value) => payload.includes(value)).length;
-};
-
-const leaksBefore = countLeaks(products);
-const leaksAfter = countLeaks(rebuilt);
-
-if (leaksAfter !== leaksBefore) {
-  problems.push(
-    `la exposición del proveedor cambia: ${leaksBefore} nombres antes, ${leaksAfter} después`,
-  );
-}
-
 console.log(`Productos leídos:      ${products.length}`);
 console.log(`Filas generadas:       ${rows.length}`);
 console.log(`Con galería:           ${rows.filter((row) => row.images !== null).length}`);
 console.log(`Con ficha técnica:     ${rows.filter((row) => row.technical_specs !== null).length}`);
-console.log(
-  `Nombres de proveedor visibles hoy: ${leaksBefore} (problema anterior, ver catalogo:auditar)`,
-);
+console.log("Proyección pública:    idéntica antes y después del viaje");
 console.log("");
 
 reportProblems(

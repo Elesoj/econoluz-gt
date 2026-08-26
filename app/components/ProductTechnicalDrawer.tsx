@@ -5,7 +5,7 @@ import {
   PUBLIC_TECHNICAL_SPEC_REGISTRY,
   type PublicProduct,
   type PublicTechnicalSpecValue,
-} from "../data/publicProduct";
+} from "../data/publicProductContract";
 import { useEffect } from "react";
 import { formatPrice } from "../lib/formatters";
 
