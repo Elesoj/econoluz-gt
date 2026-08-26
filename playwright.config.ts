@@ -14,6 +14,7 @@ export default defineConfig({
     "catalog-quote.spec.ts",
     "admin-auth.spec.ts",
     "catalog-precio.spec.ts",
+    "ui-botones.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,

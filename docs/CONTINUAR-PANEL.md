@@ -62,6 +62,12 @@ a todo este trabajo y no debe confundirse con una regresión.
 > proyecto. Si hay un `npm run dev` abierto, las pruebas de navegador fallan con
 > «Process from config.webServer was not able to start». Cerrar el `dev` primero.
 
+> **Ojo al tocar `app/globals.css` con `npm run dev` abierto.** El servidor de desarrollo
+> puede seguir sirviendo el CSS anterior aunque el archivo ya esté cambiado, y da la
+> impresión de que la modificación no funciona. Se comprobó con `npm run build`: la regla
+> estaba en el CSS compilado y no en el que servía el `dev`. **Reiniciar el `dev`** y
+> recargar sin caché.
+
 > **Ojo con el worktree y ESLint.** `.worktrees/` vive dentro de `frontend/` y lleva su
 > propia copia del código y de `node_modules`. `eslint.config.mjs` lo excluye a propósito;
 > sin esa exclusión, `npm run lint` analiza el proyecto dos veces y saca cientos de

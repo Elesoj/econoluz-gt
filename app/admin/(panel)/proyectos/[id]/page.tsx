@@ -73,13 +73,13 @@ export default async function ProjectDetailPage({ params, searchParams }: { para
                         <input type="hidden" name="id" value={project.id} />
                         <input type="hidden" name="imageId" value={image.id} />
                         <input type="hidden" name="direction" value="up" />
-                        <button disabled={index === 0} className="min-h-10 rounded-full border border-proyectos/30 px-3 text-xs font-semibold text-proyectos disabled:cursor-not-allowed disabled:opacity-35">Anterior</button>
+                        <button disabled={index === 0} className="min-h-10 rounded-full border border-proyectos/30 px-3 text-xs font-semibold text-proyectos transition duration-300 hover:bg-proyectos hover:text-white active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-proyectos disabled:active:scale-100">Anterior</button>
                       </form>
                       <form action={moveProjectImageAction}>
                         <input type="hidden" name="id" value={project.id} />
                         <input type="hidden" name="imageId" value={image.id} />
                         <input type="hidden" name="direction" value="down" />
-                        <button disabled={index === project.images.length - 1} className="min-h-10 rounded-full border border-proyectos/30 px-3 text-xs font-semibold text-proyectos disabled:cursor-not-allowed disabled:opacity-35">Siguiente</button>
+                        <button disabled={index === project.images.length - 1} className="min-h-10 rounded-full border border-proyectos/30 px-3 text-xs font-semibold text-proyectos transition duration-300 hover:bg-proyectos hover:text-white active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-proyectos disabled:active:scale-100">Siguiente</button>
                       </form>
                       <form action={setProjectImageVisibleAction}>
                         <input type="hidden" name="id" value={project.id} />

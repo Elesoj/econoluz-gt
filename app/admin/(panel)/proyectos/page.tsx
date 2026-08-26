@@ -62,12 +62,12 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
                 <form action={moveProjectAction}>
                   <input type="hidden" name="id" value={project.id} />
                   <input type="hidden" name="direction" value="up" />
-                  <button disabled={index === 0} className="min-h-11 rounded-full border border-proyectos/30 px-4 text-sm font-semibold text-proyectos disabled:cursor-not-allowed disabled:opacity-35">Subir</button>
+                  <button disabled={index === 0} className="min-h-11 rounded-full border border-proyectos/30 px-4 text-sm font-semibold text-proyectos transition duration-300 hover:bg-proyectos hover:text-white active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-proyectos disabled:active:scale-100">Subir</button>
                 </form>
                 <form action={moveProjectAction}>
                   <input type="hidden" name="id" value={project.id} />
                   <input type="hidden" name="direction" value="down" />
-                  <button disabled={index === projects.length - 1} className="min-h-11 rounded-full border border-proyectos/30 px-4 text-sm font-semibold text-proyectos disabled:cursor-not-allowed disabled:opacity-35">Bajar</button>
+                  <button disabled={index === projects.length - 1} className="min-h-11 rounded-full border border-proyectos/30 px-4 text-sm font-semibold text-proyectos transition duration-300 hover:bg-proyectos hover:text-white active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-proyectos disabled:active:scale-100">Bajar</button>
                 </form>
                 <form action={setProjectPublishedAction}>
                   <input type="hidden" name="id" value={project.id} />

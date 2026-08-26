@@ -48,6 +48,18 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Tailwind v4 cambió el preflight y los <button> pasaron a `cursor: default`,
+   es decir, la flecha normal en vez de la manita. El efecto es que ningún botón
+   del sitio parece pulsable al pasar el ratón por encima. Se devuelve el cursor
+   de siempre a todo lo que se puede accionar, salvo lo deshabilitado, que ya
+   tiene el suyo. */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+label[for],
+summary {
+  cursor: pointer;
+}
+
 /* Foco visible en todo el sitio. Antes cada control dependía del anillo por
    defecto del navegador, y los campos del formulario lo anulaban con
    `outline-none` dejando solo un cambio de borde. */
