@@ -9,6 +9,7 @@ import {
   setProjectPublishedAction,
 } from "../../../proyectos/actions";
 import { getAdminProject, getProjectTypes } from "../../../proyectos/repository.server";
+import ProjectImageUploader from "./ProjectImageUploader";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,7 @@ export default async function ProjectDetailPage({ params, searchParams }: { para
           <section className="mt-12 border-t border-neutral-200 pt-8">
             <h2 className="text-2xl font-semibold text-proyectos">Fotografías</h2>
             <p className="mt-2 text-sm leading-6 text-neutral-600">La primera fotografía visible será la imagen inicial. Ocultar no borra el archivo: podrás volver a mostrarlo cuando quieras.</p>
+            <ProjectImageUploader projectId={project.id} />
             {project.images.length > 0 ? (
               <ul className="mt-5 grid gap-5 sm:grid-cols-2">
                 {project.images.map((image, index) => (

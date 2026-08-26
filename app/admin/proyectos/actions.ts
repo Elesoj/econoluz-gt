@@ -7,6 +7,7 @@ import { PROJECTS_CACHE_TAG } from "../../data/projects.server";
 import { verificarSesionParaAccion } from "../auth/authorization.server";
 import {
   moveAdminProjectImage,
+  registerAdminProjectImage,
   setAdminProjectImageVisible,
 } from "./imagenes.server";
 import { validateProjectInput, type ProjectMoveDirection } from "./model";
@@ -19,9 +20,13 @@ import {
 
 const VALID_PROJECT_ID = /^[a-z0-9][a-z0-9-]{0,99}$/;
 
-function projectId(formData: FormData) {
-  const id = String(formData.get("id") ?? "");
+function validProjectId(value: unknown) {
+  const id = String(value ?? "");
   return VALID_PROJECT_ID.test(id) ? id : null;
+}
+
+function projectId(formData: FormData) {
+  return validProjectId(formData.get("id"));
 }
 
 function projectInput(formData: FormData) {
@@ -120,4 +125,14 @@ export async function setProjectImageVisibleAction(formData: FormData) {
   if (!result.ok) redirect(`/admin/proyectos/${id}?error=${encodeURIComponent(result.error)}`);
   updateTag(PROJECTS_CACHE_TAG);
   redirect(`/admin/proyectos/${id}?saved=1`);
+}
+
+export async function registerUploadedProjectImageAction(projectId: string, url: string) {
+  await verificarSesionParaAccion();
+  const id = validProjectId(projectId);
+  if (!id) throw new Error("Proyecto no válido.");
+
+  await registerAdminProjectImage(id, url);
+  updateTag(PROJECTS_CACHE_TAG);
+  return { ok: true as const };
 }
