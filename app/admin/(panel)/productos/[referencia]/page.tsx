@@ -358,15 +358,17 @@ export default async function FichaProductoPage({
               </div>
             </div>
 
-            <label className="flex items-center gap-3 text-sm text-proyectos">
-              <input
-                type="checkbox"
-                name="seVendeEnLinea"
-                defaultChecked={producto.seVendeEnLinea}
-                className="h-5 w-5 accent-[color:var(--tienda)]"
-              />
-              Se venderá en línea cuando exista la tienda
-            </label>
+            {/* Aquí había una casilla de «se venderá en línea». Se retiró al
+                construir el carrito: ahora el precio es lo que decide. Un
+                interruptor que ya no cambia nada es peor que no tenerlo, porque
+                haría creer que un producto no está a la venta cuando sí lo
+                está. La columna sigue en la base de datos por si vuelve a hacer
+                falta. */}
+            <p className="border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600">
+              Un producto con precio se puede comprar desde la web. Si todavía no
+              quieres venderlo en línea, déjalo sin precio: seguirá en el
+              catálogo, y quien lo vea pedirá asesoría.
+            </p>
 
             <label className="flex items-center gap-3 text-sm text-proyectos">
               <input
