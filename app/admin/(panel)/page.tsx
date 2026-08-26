@@ -15,9 +15,9 @@ const SECCIONES = [
   },
   {
     titulo: "Galería de proyectos",
-    descripcion: "La obra ejecutada, con el mismo tratamiento que los productos.",
-    estado: "En construcción",
-    href: null,
+    descripcion: "Crear, ordenar y publicar obras y sus fotografías.",
+    estado: "Disponible",
+    href: "/admin/proyectos",
   },
 ];
 

@@ -7,6 +7,17 @@ test("redirige al acceso y mantiene el panel fuera de buscadores", async ({ page
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
 });
 
+for (const route of [
+  "/admin/proyectos",
+  "/admin/proyectos/nuevo",
+  "/admin/proyectos/borghetto",
+]) {
+  test(`${route} exige sesión`, async ({ page }) => {
+    await page.goto(route);
+    await expect(page).toHaveURL(/\/admin\/entrar$/);
+  });
+}
+
 test("el acceso no muestra herramientas comerciales públicas", async ({ page }) => {
   await page.goto("/admin/entrar");
   await expect(page.getByRole("link", { name: "Contactar por WhatsApp" })).toHaveCount(0);

@@ -58,6 +58,7 @@ test("convierte posiciones y conteos de Postgres a números", async () => {
           published: true,
           visible_images: "3",
           total_images: "4",
+          cover_image: "/proyectos/hotel/1.webp",
         },
       ],
     ]),
@@ -72,6 +73,7 @@ test("convierte posiciones y conteos de Postgres a números", async () => {
     published: true,
     visibleImages: 3,
     totalImages: 4,
+    coverImage: "/proyectos/hotel/1.webp",
   });
 });
 
@@ -168,4 +170,3 @@ test("un identificador inexistente devuelve null", async () => {
   assert.equal(project, null);
   assert.equal(records.length, 1);
 });
-

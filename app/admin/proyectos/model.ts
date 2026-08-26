@@ -16,6 +16,7 @@ export type AdminProjectSummary = ProjectInput & {
   published: boolean;
   visibleImages: number;
   totalImages: number;
+  coverImage: string | null;
 };
 
 export type AdminProjectImage = {
@@ -56,6 +57,7 @@ function toSummary(row: Record<string, unknown>): AdminProjectSummary {
     published: Boolean(row.published),
     visibleImages: Number(row.visible_images),
     totalImages: Number(row.total_images),
+    coverImage: row.cover_image ? String(row.cover_image) : null,
   };
 }
 
@@ -66,6 +68,11 @@ const PROJECT_SUMMARY_SELECT = `
          p.type,
          p.description,
          p.published,
+         (select pi.url
+          from project_images pi
+          where pi.project_id = p.id and pi.visible
+          order by pi.position
+          limit 1) as cover_image,
          count(i.id) filter (where i.visible) as visible_images,
          count(i.id) as total_images
   from projects p
@@ -197,4 +204,3 @@ export async function moveProject(
     [id],
   );
 }
-
