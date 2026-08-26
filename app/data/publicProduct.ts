@@ -101,6 +101,15 @@ export type PublicProduct = {
    * congelada del catálogo dejaría de coincidir sin que nada haya cambiado.
    */
   priceGtq?: number;
+  /**
+   * Unidades apuntadas en el panel.
+   *
+   * Opcional por el mismo motivo que `priceGtq`, y con una distinción que
+   * importa: que no exista significa «no se ha contado el inventario», que es
+   * distinto de `0`, que significa «se agotó». La tienda solo avisa del plazo
+   * de entrega cuando hay un número apuntado; sin él no promete nada.
+   */
+  stock?: number;
 };
 
 const projectTechnicalSpecs = (
@@ -139,6 +148,7 @@ const restoredApplicationBySourceFamily: Readonly<Record<string, string>> = {
 /** Datos que no viven en el catálogo escrito, sino en la base de datos. */
 export type PublicProductExtras = {
   priceGtq?: number | null;
+  stock?: number | null;
 };
 
 export const toPublicProduct = (
@@ -172,6 +182,11 @@ export const toPublicProduct = (
   // un número finito significan "todavía sin precio".
   if (typeof extras?.priceGtq === "number" && Number.isFinite(extras.priceGtq)) {
     publicProduct.priceGtq = extras.priceGtq;
+  }
+
+  // Las existencias tienen que ser un entero: media luminaria no existe.
+  if (typeof extras?.stock === "number" && Number.isSafeInteger(extras.stock)) {
+    publicProduct.stock = extras.stock;
   }
 
   return publicProduct;
