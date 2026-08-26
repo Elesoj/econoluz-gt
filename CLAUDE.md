@@ -51,16 +51,21 @@ catálogo tiene que servir a los dos **sobre el mismo producto**.
 - **Flujo:** armar lista de especificación → solicitar cotización → asesoría.
 - **Salida esperada:** solicitud de cotización con datos completos del proyecto.
 
-### Las dos salidas conviven — decisión vigente
+### Las dos salidas conviven, pero no en la misma tarjeta — decisión vigente
 
-**El catálogo va a ser una tienda B2C sin dejar de ser un catálogo de cotización.** Un
-mismo producto ofrece las dos salidas: quien necesita dos luminarias las paga en línea,
-y quien necesita doscientas pide cotización, porque nadie compra un proyecto con tarjeta.
+**El catálogo es una tienda; la cotización vive en `/asesoria`.** Las dos salidas siguen
+existiendo, pero cada producto ofrece **una sola**: el que tiene precio se compra, y el
+que no lo tiene lleva a la asesoría con su referencia puesta. Quien necesita doscientas
+luminarias sigue teniendo su vía, porque nadie compra un proyecto con tarjeta.
 
-Esto **sustituye a la regla anterior**, que exigía separar las dos pistas en interfaces,
-flujos y componentes distintos, y describía la tienda como una sección aparte. Se
-descartó: obligaba a duplicar el catálogo entero y a que el visitante eligiera bando
-antes de haber visto un producto.
+**Redacción anterior, derogada el 26/08/2026:** «un mismo producto ofrece las dos
+salidas». Estuvo vigente unas horas y el dueño la retiró al verla: dos botones que
+empiezan igual —«Agregar a cotización» y «Agregar al carrito»— obligan al visitante a
+elegir sin saber en qué se diferencian, y dejaban dos cestos abiertos a la vez.
+
+Y **antes de eso**, la regla exigía separar las dos pistas en interfaces y componentes
+distintos, con la tienda como sección aparte. También se descartó: obligaba a duplicar
+el catálogo entero.
 
 **La asesoría tiene página propia desde el 26/08/2026.** El formulario de proyecto vivía
 dentro de `/catalogo` y ocupaba media página: el dueño señaló que ahí no cabe un
@@ -91,6 +96,18 @@ y salida por WhatsApp. **De la pista A ya existen el precio y el carrito**: el c
 muestra el precio en la tarjeta y en la ficha, y donde no hay precio cargado dice
 «Precio a consultar». Siguen sin existir **checkout, pasarela de pago y facturación**.
 
+#### El catálogo es una tienda — regla vigente (26/08/2026)
+
+**El catálogo dejó de ofrecer cotización producto a producto.** Ya no hay cesto de
+selección, ni cajón lateral, ni botón «Ver selección»: se retiraron por decisión del
+dueño junto con sus 671 líneas de código y 1.581 de pruebas. Deroga la redacción
+anterior de «§2 Las dos salidas conviven» en lo que toca al catálogo.
+
+Lo que sí convive, y no se retira: la página `/asesoria` sigue siendo la vía para
+proyectos grandes. Las tarjetas **sin precio** llevan a ella con
+`?producto=ECO-…`, porque son 288 de 313 y sin esa salida se quedarían sin ninguna
+acción posible.
+
 #### Tener precio es estar a la venta — regla vigente (26/08/2026)
 
 No hay ninguna casilla de «se vende en línea». **Un producto con precio se puede
@@ -119,9 +136,17 @@ propio `localStorage` y comprar un panel por un quetzal. Esta regla se hereda al
 checkout y al cobro. El dinero se suma en **centavos enteros** (`app/tienda/lineas.ts`);
 `formatPrice` solo se usa al pintar.
 
-Las existencias **avisan, no bloquean**: pedir más de lo apuntado muestra que puede
-tardar unos días, y solo cuando hay un número apuntado —la casilla vacía significa «no
-se ha contado el inventario», que no es lo mismo que cero—.
+Las existencias **avisan y dejan elegir, nunca bloquean**: cuando se piden más
+unidades de las apuntadas, la línea ofrece llevarse las disponibles o esperar por el
+resto, y la espera aceptada queda marcada para poder contactar al cliente. Solo pasa
+cuando hay un número apuntado —la casilla vacía significa «no se ha contado el
+inventario», que no es lo mismo que cero—.
+
+**El inventario NO baja al catálogo público.** Estuvo saliendo en el HTML de los 313
+productos entre el 26/08/2026 y ese mismo día, y llegó a producción: cualquiera podía
+leer las existencias enteras sin comprar nada. Ahora el carrito pregunta al servidor
+(`app/tienda/disponibilidad.server.ts`) solo por lo que lleva dentro, y el número se
+revela únicamente cuando no alcanza. `tests/tienda-carrito.spec.ts` lo vigila.
 
 El precio se enseña **por decisión expresa del dueño (26/08/2026)**, aunque la tienda no
 esté: si el catálogo va a ser B2C, quien compra una o dos piezas necesita ver el precio

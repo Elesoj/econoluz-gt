@@ -39,12 +39,34 @@ hace el dueño.
 > **La casilla `sellable_online` se retiró del panel**: ahora tener precio es estar a la
 > venta. La columna sigue en la base de datos, sin usar. Ver `CLAUDE.md` §2.
 
+> **El catálogo dejó de cotizar (26/08/2026, sin desplegar).** Por decisión del dueño se
+> retiró el cesto de cotización del catálogo —671 líneas de código y 1.581 de pruebas,
+> borradas con su autorización—. Las tarjetas sin precio ofrecen **«Consultar precio»**,
+> que lleva a `/asesoria?producto=ECO-…`; la página de asesoría sigue viva y enseña el
+> producto consultado. El carrito pasó a **botón flotante** abajo a la derecha. Y cuando
+> se piden más unidades de las que hay, la línea ofrece **«Dejar solo N»** o **«Quiero N y
+> espero»**, y la espera aceptada queda marcada.
+>
+> **El inventario ya no baja al navegador.** Estuvo en el HTML de los 313 productos y
+> llegó a producción; se corrigió el mismo día. El carrito ahora pregunta al servidor
+> (`app/tienda/disponibilidad.server.ts`) solo por lo que lleva dentro. **Producción
+> sigue sirviendo la versión con el fallo hasta que se despliegue esto.**
+>
+> **Ya no hay ninguna prueba en rojo**: 182 de unidad, 3 de privacidad y 67 de navegador.
+> El fallo histórico de `catalog-quote.spec.ts:891` desapareció con el archivo borrado.
+
 ---
 
 ## 0.1 Qué hacer ahora (26/08/2026)
 
 **Todo lo construido está en `main`.** No quedan ramas de trabajo a medias: `tienda-carrito`
 y `ocultar-proveedores` están ambas fusionadas.
+
+### Lo primero: desplegar
+
+Hay trabajo terminado y probado **sin desplegar**, y una de las cosas que arregla está
+viva en producción: el inventario visible en el HTML. Conviene publicarlo pronto.
+Requiere confirmación expresa del dueño, como todo despliegue.
 
 ### Lo que puede hacerse ya, sin esperar a nadie
 
