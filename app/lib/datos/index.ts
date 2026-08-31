@@ -54,29 +54,52 @@ export function leerPublico<T>(
 }
 
 /**
+ * El código SQLSTATE del error original de Postgres, si lo hay —`"23505"`,
+ * `"42501"`—. Es un escalar corto que no lleva nombres de tabla ni de
+ * columna, así que registrarlo no viola la regla de no filtrar texto de
+ * Postgres. Si no hay código, no se añade el campo.
+ */
+function codigoSqlDe(error: unknown): string | undefined {
+  const causaOriginal = error instanceof ErrorDeDatos ? error.cause : undefined;
+  if (
+    typeof causaOriginal === "object" &&
+    causaOriginal !== null &&
+    "code" in causaOriginal &&
+    typeof (causaOriginal as { code: unknown }).code === "string"
+  ) {
+    return (causaOriginal as { code: string }).code;
+  }
+  return undefined;
+}
+
+/**
  * Escritura dentro de transacción. Exige `runtime = "nodejs"` en quien la use.
  *
  * Es el único punto de la capa que registra: una lectura fallida ya la maneja
  * quien la pidió, pero una escritura que se deshace es un suceso que hay que
- * poder encontrar después en el log por su `idPeticion`.
+ * poder encontrar después en el log por su `idPeticion`. `suceso` permite
+ * distinguir qué escritura falló en el log; por defecto es `"transaccion"`.
  */
 export async function escribir<T>(
   trabajo: (ejecutar: Ejecutor) => Promise<T>,
-  opciones?: { msMaximo?: number },
+  opciones?: { msMaximoPorSentencia?: number; suceso?: string },
 ): Promise<T> {
+  const suceso = opciones?.suceso ?? "transaccion";
   const idPeticion = nuevoIdPeticion();
   const comienzo = Date.now();
 
   try {
     const resultado = await enTransaccion(obtenerPool(), trabajo, opciones);
-    registrar("info", "transaccion", { idPeticion, ms: Date.now() - comienzo });
+    registrar("info", suceso, { idPeticion, ms: Date.now() - comienzo });
     return resultado;
   } catch (error) {
-    registrar("error", "transaccion", {
+    const codigoSql = codigoSqlDe(error);
+    registrar("error", suceso, {
       idPeticion,
       ms: Date.now() - comienzo,
       // La causa, no el mensaje de Postgres: eso lleva nombres de tablas.
       causa: error instanceof ErrorDeDatos ? error.causa : "indisponible",
+      ...(codigoSql ? { codigoSql } : {}),
     });
     throw error;
   }
