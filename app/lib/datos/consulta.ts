@@ -10,8 +10,29 @@ export type Ejecutor = (
   parametros?: readonly unknown[],
 ) => Promise<Record<string, unknown>[]>;
 
-/** Diez segundos. Ninguna consulta legítima de este sitio tarda más. */
-const MS_MAXIMO_POR_DEFECTO = 10_000;
+/**
+ * Diez segundos. Ninguna consulta legítima de este sitio tarda más. Es la
+ * única declaración de este valor: `enTransaccion` lo importa de aquí en vez
+ * de mantener su propia copia.
+ */
+export const MS_MAXIMO_POR_DEFECTO = 10_000;
+
+/**
+ * Da por bueno `valor` solo si es un número finito y mayor que cero; en
+ * cualquier otro caso devuelve el valor por defecto.
+ *
+ * Hace falta porque `??` únicamente cubre `null`/`undefined`: un `0` se
+ * colaría tal cual, y `0` significa cosas opuestas y ambas malas según quien
+ * lo reciba —rechazo instantáneo en `consultar`, límite desactivado en
+ * `set local statement_timeout` de `enTransaccion`—. Un `NaN`, un negativo o
+ * un `Infinity` son igual de inválidos: el primero produce una espera nula o
+ * corrompe el SQL, y el segundo desactiva el límite igual que el cero.
+ */
+export function resolverMsMaximo(valor: number | undefined): number {
+  return typeof valor === "number" && Number.isFinite(valor) && valor > 0
+    ? valor
+    : MS_MAXIMO_POR_DEFECTO;
+}
 
 /**
  * Ejecuta una consulta dentro de un plazo máximo. El navegador deja de esperar tras
@@ -26,7 +47,7 @@ export async function consultar<T>(
   parametros: readonly unknown[] = [],
   opciones: { msMaximo?: number } = {},
 ): Promise<T[]> {
-  const msMaximo = opciones.msMaximo ?? MS_MAXIMO_POR_DEFECTO;
+  const msMaximo = resolverMsMaximo(opciones.msMaximo);
   let temporizador: NodeJS.Timeout | undefined;
 
   const limite = new Promise<never>((_, rechazar) => {
