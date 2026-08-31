@@ -1,6 +1,9 @@
 import type { PublicProduct } from "../data/publicProduct";
+import { aCentavos } from "../lib/dinero";
 import type { LineaCarrito } from "./carrito";
 import type { Disponibilidad } from "./disponibilidad";
+
+export { aCentavos, aQuetzales } from "../lib/dinero";
 
 /**
  * Empareja las líneas del carrito con el catálogo del servidor y suma.
@@ -36,10 +39,6 @@ export type CarritoResuelto = {
   descartadas: string[];
   totalCentavos: number;
 };
-
-export const aCentavos = (quetzales: number) => Math.round(quetzales * 100);
-
-export const aQuetzales = (centavos: number) => centavos / 100;
 
 export const resolverCarrito = (
   lineas: readonly LineaCarrito[],

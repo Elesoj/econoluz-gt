@@ -33,7 +33,7 @@ create table if not exists public_products (
   -- producto se enseña pero no se compra, y la tarjeta ofrece consultar.
   -- Cero no es un precio: significaría regalar el producto, así que la
   -- restricción de abajo lo rechaza igual que a los negativos.
-  price_cents        integer,
+  price_cents        bigint,
 
   updated_at         timestamptz not null default now(),
 

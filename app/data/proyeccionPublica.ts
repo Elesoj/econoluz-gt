@@ -1,5 +1,6 @@
 import type { InternalProduct } from "./products";
 import { toPublicProduct, type PublicProduct } from "./publicProduct";
+import { aCentavos, aQuetzales } from "../lib/dinero";
 
 /**
  * Traducción entre el producto interno y su fila en `public_products`.
@@ -28,8 +29,6 @@ export type FilaProyeccion = {
   technical_specs: Record<string, string | string[]> | null;
   price_cents: number | null;
 };
-
-export const aCentavos = (quetzales: number) => Math.round(quetzales * 100);
 
 export function aFilaProyeccion(
   producto: InternalProduct,
@@ -96,7 +95,7 @@ export function desdeFilaProyeccion(fila: FilaProyeccion): PublicProduct {
     Number.isFinite(fila.price_cents) &&
     fila.price_cents > 0
   ) {
-    producto.priceGtq = fila.price_cents / 100;
+    producto.priceGtq = aQuetzales(fila.price_cents);
   }
 
   return producto;

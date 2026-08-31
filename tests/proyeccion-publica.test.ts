@@ -4,6 +4,7 @@ import { products } from "../app/data/products";
 import { toPublicProduct } from "../app/data/publicProduct";
 import { positionForIndex } from "../app/data/productRow";
 import { aFilaProyeccion, desdeFilaProyeccion } from "../app/data/proyeccionPublica";
+import { construirUpsertProyeccion } from "../app/data/proyeccionPublicaSql";
 
 test("los 313 productos proyectados son idénticos a la salida pública de hoy", () => {
   for (const [indice, producto] of products.entries()) {
@@ -46,6 +47,47 @@ test("una fila con centavos inválidos tampoco reconstruye precio", () => {
     const fila = { ...aFilaProyeccion(products[0], 150, 10), price_cents: invalido };
     assert.equal("priceGtq" in desdeFilaProyeccion(fila), false);
   }
+});
+
+test("el upsert comparte columnas y serializa únicamente los campos jsonb", () => {
+  const consulta = construirUpsertProyeccion({
+    id: "eco-prueba-0001",
+    econoluz_reference: "ECO-PRUEBA-0001",
+    position: 10,
+    public_name: "Producto público",
+    public_description: "Descripción pública",
+    image: "/producto.webp",
+    images: ["/uno.webp", "/dos.webp"],
+    product_type: "tipo",
+    application: "aplicacion",
+    finish: "acabado",
+    label_product_type: "Tipo",
+    label_application: "Aplicación",
+    label_finish: "Acabado",
+    technical_specs: { potencia: "10 W", colores: ["rojo", "azul"] },
+    price_cents: 12550,
+  });
+
+  assert.match(consulta.texto, /\$7::jsonb/);
+  assert.match(consulta.texto, /\$14::jsonb/);
+  assert.match(consulta.texto, /on conflict \(id\) do update set/);
+  assert.deepEqual(consulta.parametros, [
+    "eco-prueba-0001",
+    "ECO-PRUEBA-0001",
+    10,
+    "Producto público",
+    "Descripción pública",
+    "/producto.webp",
+    '["/uno.webp","/dos.webp"]',
+    "tipo",
+    "aplicacion",
+    "acabado",
+    "Tipo",
+    "Aplicación",
+    "Acabado",
+    '{"potencia":"10 W","colores":["rojo","azul"]}',
+    12550,
+  ]);
 });
 
 /**
@@ -113,10 +155,11 @@ const TERMINOS_PUBLICOS_SEGUROS = new Set(
   ].map(normalizar),
 );
 
-test("ninguna fila proyectada lleva marca, serie ni código del proveedor", () => {
+test("ninguna fila proyectada lleva nombre interno, marca, serie ni código del proveedor", () => {
   const identificadores = new Set<string>();
   for (const producto of products) {
     for (const valor of [
+      producto.name,
       producto.supplierBrand,
       producto.labels.brand,
       producto.labels.series,

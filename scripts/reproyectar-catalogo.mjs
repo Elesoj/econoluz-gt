@@ -6,6 +6,7 @@
 import { Client, neonConfig } from "@neondatabase/serverless";
 import { fromProductRow, CATALOG_COLUMNS } from "../app/data/productRow.ts";
 import { aFilaProyeccion } from "../app/data/proyeccionPublica.ts";
+import { construirUpsertProyeccion } from "../app/data/proyeccionPublicaSql.ts";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -37,40 +38,8 @@ try {
       fila.position,
     );
 
-    await client.query(
-      `insert into public_products (
-         id, econoluz_reference, position, public_name, public_description,
-         image, images, product_type, application, finish,
-         label_product_type, label_application, label_finish,
-         technical_specs, price_cents
-       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-       on conflict (id) do update set
-         econoluz_reference = excluded.econoluz_reference,
-         position = excluded.position,
-         public_name = excluded.public_name,
-         public_description = excluded.public_description,
-         image = excluded.image,
-         images = excluded.images,
-         product_type = excluded.product_type,
-         application = excluded.application,
-         finish = excluded.finish,
-         label_product_type = excluded.label_product_type,
-         label_application = excluded.label_application,
-         label_finish = excluded.label_finish,
-         technical_specs = excluded.technical_specs,
-         price_cents = excluded.price_cents,
-         updated_at = now()`,
-      [
-        proyectada.id, proyectada.econoluz_reference, proyectada.position,
-        proyectada.public_name, proyectada.public_description, proyectada.image,
-        proyectada.images === null ? null : JSON.stringify(proyectada.images),
-        proyectada.product_type, proyectada.application, proyectada.finish,
-        proyectada.label_product_type, proyectada.label_application,
-        proyectada.label_finish,
-        proyectada.technical_specs === null ? null : JSON.stringify(proyectada.technical_specs),
-        proyectada.price_cents,
-      ],
-    );
+    const consulta = construirUpsertProyeccion(proyectada);
+    await client.query(consulta.texto, consulta.parametros);
   }
 
   // Lo que ya no está publicado deja de existir para el visitante.

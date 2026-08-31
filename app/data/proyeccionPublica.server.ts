@@ -2,28 +2,8 @@ import "server-only";
 
 import { escribir } from "../lib/datos";
 import { fromProductRow, CATALOG_COLUMNS, type CatalogRow } from "./productRow";
-import { aFilaProyeccion, type FilaProyeccion } from "./proyeccionPublica";
-
-const COLUMNAS = [
-  "id", "econoluz_reference", "position", "public_name", "public_description",
-  "image", "images", "product_type", "application", "finish",
-  "label_product_type", "label_application", "label_finish",
-  "technical_specs", "price_cents",
-] as const;
-
-const marcadores = COLUMNAS.map((_, indice) => `$${indice + 1}`).join(", ");
-const actualizaciones = COLUMNAS.slice(1)
-  .map((columna) => `${columna} = excluded.${columna}`)
-  .join(", ");
-
-const valoresDe = (fila: FilaProyeccion) =>
-  COLUMNAS.map((columna) => {
-    const valor = fila[columna];
-    // jsonb necesita texto; el resto va tal cual.
-    return columna === "images" || columna === "technical_specs"
-      ? valor === null ? null : JSON.stringify(valor)
-      : valor;
-  });
+import { aFilaProyeccion } from "./proyeccionPublica";
+import { construirUpsertProyeccion } from "./proyeccionPublicaSql";
 
 /** Reescribe la proyección de un producto. Idempotente. */
 export async function proyectarProducto(referencia: string) {
@@ -50,11 +30,8 @@ export async function proyectarProducto(referencia: string) {
         fila.position,
       );
 
-      await ejecutar(
-        `insert into public_products (${COLUMNAS.join(", ")}) values (${marcadores})
-         on conflict (id) do update set ${actualizaciones}, updated_at = now()`,
-        valoresDe(proyectada),
-      );
+      const consulta = construirUpsertProyeccion(proyectada);
+      await ejecutar(consulta.texto, consulta.parametros);
     },
     { suceso: "proyectar-producto" },
   );
