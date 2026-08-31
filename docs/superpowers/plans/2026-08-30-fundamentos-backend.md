@@ -38,8 +38,8 @@ desde la especificación: quien ejecute debe leer las dos.
 | Tareas 1–6 | ✅ Terminadas y revisadas | Capa de datos, 16 commits sobre la base del plan |
 | Cobertura de `escribir()` | ✅ Terminada | `cdc1864` y corrección antifuga `ed5e7f7` |
 | Tarea 7, implementación local | ✅ Terminada y revisada | `e2a7220` y ronda de arreglo `ebd8011` |
-| Tarea 7, integración en Neon | ⛔ Pendiente de autorización | Falta ejecutar migración 005 y reproyección en una rama aislada |
-| Tareas 8–12 | ⏳ No empezadas | Empiezan después de cerrar la integración de la tarea 7 |
+| Tarea 7, integración en Neon | ✅ Terminada y verificada | Rama aislada `fundamentos-backend-dev`: migración 005, dos reproyecciones 313/0, privacidad e idempotencia |
+| Tareas 8–12 | ⏳ No empezadas | El siguiente paso es la tarea 8: rol público y prueba de permisos |
 
 La revisión de la tarea 7 cambió detalles respecto a los ejemplos originales de abajo:
 la conversión a centavos vive en `app/lib/dinero.ts`, el `upsert` compartido en
@@ -53,12 +53,22 @@ Verificación local tras la revisión: `test:datos` 39/39, `test:admin` 196/196,
 fallos de prueba, pero su proceso quedó colgado durante el apagado del servidor en
 Windows y se interrumpió después de la prueba 67.
 
+Integración de la tarea 7 verificada el 31/08/2026 exclusivamente en la rama aislada de
+Neon `fundamentos-backend-dev`: `005_proyeccion_publica.sql` aplicada; dos ejecuciones de
+`catalogo:reproyectar` con **313 proyectados y 0 retirados**; huella del contenido estable
+sin contar `updated_at`; 313 filas y los mismos 25 precios, con una huella idéntica a la
+conexión principal; ninguna columna prohibida; y **0 coincidencias** al buscar en la
+proyección real los 408 identificadores del proveedor.
+La batería fresca dio `test:datos` 39/39, `test:admin` 196/196, `test:proveedores` 3/3,
+`typecheck` y `lint` limpios, y `catalogo:auditar` 313/408/0.
+
 ### Próximo punto de control
 
-Con autorización expresa del dueño, usar una **rama aislada de Neon de desarrollo** para
-ejecutar `npm run db:migrar` y `npm run catalogo:reproyectar`; comprobar 313 filas,
-privacidad e idempotencia. No usar producción. No iniciar la tarea 8 hasta cerrar esa
-comprobación. No se ha hecho push, fusión ni despliegue.
+Empezar la tarea 8: crear el rol `econoluz_publico` sin credenciales en la migración,
+documentar su activación y rotación fuera del repositorio, añadir
+`DATABASE_URL_PUBLIC` y verificar `current_user` y los permisos tabla por tabla. Aplicar
+y probar primero en `fundamentos-backend-dev`, nunca en producción. No se ha hecho push,
+fusión ni despliegue.
 
 ## Restricciones globales
 

@@ -98,43 +98,52 @@ El trabajo activo ya no está solo en `main`. Continúa en:
 
 - **Worktree:** `.worktrees/fundamentos-backend`
 - **Rama:** `feat/fundamentos-backend`
-- **Commit verificado:** `ebd8011`
+- **Base documental anterior a la integración:** `b14a931`
 - **Plan:** `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`
 
 ### Qué está terminado
 
-Las tareas 1–6 del subproyecto 1 están implementadas y revisadas. También está terminada
-la **parte local de la tarea 7**: migración `005`, proyección pública, escritor por
-producto, reproyección total, conversión monetaria compartida y pruebas de paridad y
+Las tareas 1–7 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
+incluye la migración `005`, la proyección pública, el escritor por producto, la
+reproyección total, la conversión monetaria compartida y las pruebas de paridad y
 privacidad. No hay que rehacer ninguna de esas piezas.
 
-La última verificación local dio `test:datos` **39/39**, `test:admin` **196/196**,
-`typecheck` y `lint` limpios y `build` correcto. Playwright completó sus **67 pruebas sin
-fallos de prueba**, pero el proceso se quedó colgado al apagar el servidor en Windows y
-se interrumpió después de la prueba 67; no se debe presentar ese cierre como una salida
-limpia del ejecutor.
+La integración se comprobó exclusivamente en la rama aislada de Neon
+`fundamentos-backend-dev`: la migración quedó aplicada y las dos reproyecciones dieron
+**313 proyectados y 0 retirados**. La huella del contenido público —sin `updated_at`— no
+cambió entre ejecuciones. La tabla conserva los **25 precios**, cuya huella coincide con
+la conexión principal; no tiene columnas prohibidas y la lectura real de sus 313 filas
+dio **0 coincidencias** al buscar los 408 identificadores del proveedor.
+
+La verificación fresca posterior dio `test:datos` **39/39**, `test:admin` **196/196**,
+`test:proveedores` **3/3**, `typecheck` y `lint` limpios y `catalogo:auditar` con 313
+productos, 408 identificadores y 0 coincidencias. La comprobación completa previa del
+mismo código dejó `build` correcto. Playwright completó sus **67 pruebas sin fallos de
+prueba**, pero el proceso se quedó colgado al apagar el servidor en Windows y se
+interrumpió después de la prueba 67; no se presenta ese cierre como una salida limpia.
 
 ### El siguiente paso exacto
 
-Completar la tarea 7 contra una **rama aislada de Neon de desarrollo**:
+Empezar la **tarea 8**, sin adelantar ninguna de las posteriores:
 
-1. Obtener o crear la rama aislada y poner su cadena privilegiada en `DATABASE_URL`
-   local, sin copiarla a documentación ni registros.
-2. Ejecutar `npm run db:migrar` para aplicar `db/005_proyeccion_publica.sql`.
-3. Ejecutar `npm run catalogo:reproyectar` y comprobar **313 proyectados y 0 retirados**.
-4. Verificar en solo lectura que las 313 filas no contienen datos del proveedor.
-5. Repetir la reproyección y confirmar que el resultado no cambia.
+1. Crear `db/006_rol_publico.sql` sin contraseña y con permisos mínimos: solo `SELECT`
+   sobre `public_products`.
+2. Crear `scripts/verificar-permisos.mjs` y comprobar primero que `current_user` sea
+   realmente `econoluz_publico`; después, denegar una por una todas las tablas protegidas.
+3. Escribir `docs/OPERACION-ROL-PUBLICO.md` con creación o activación, contraseña fuera
+   del repositorio, rotación, obtención de la cadena y configuración por entorno.
+4. Añadir `DATABASE_URL_PUBLIC` sin valor a `.env.example` y el comando
+   `test:permisos` a `package.json`.
+5. Aplicar y verificar primero en `fundamentos-backend-dev`. No usar producción.
 
-**No ejecutar esos pasos sin autorización expresa del dueño:** escriben en Neon aunque
-sea una rama de desarrollo. Cuando pasen, se cierra la tarea 7 y empieza la tarea 8: rol
-`econoluz_publico`, permisos mínimos, contraseña fuera del repositorio y
-`DATABASE_URL_PUBLIC`.
+La tarea 8 todavía no se ha empezado y `DATABASE_URL_PUBLIC` no está configurada.
 
 ### Estado de integración
 
-No se ha escrito en Neon, ni fusionado la rama, ni hecho push ni desplegado. `main` sigue
+Solo se ha escrito en la rama aislada `fundamentos-backend-dev` para integrar la tarea 7.
+No se ha escrito en producción, fusionado la rama, hecho push ni desplegado. `main` sigue
 en `19d0106` y `origin/main` en `a4defad`; la implementación vive solo en el worktree.
-Los 25 precios existentes se dejan tal cual por decisión del dueño.
+Los 25 precios existentes permanecen intactos por decisión del dueño.
 
 ### Otras decisiones que siguen pendientes
 

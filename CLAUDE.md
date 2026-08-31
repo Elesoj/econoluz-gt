@@ -53,31 +53,38 @@ autorización: ambas siguen necesitando el visto bueno expreso del dueño en su 
 ### 0.4 Estado de ejecución del subproyecto 1 (31/08/2026)
 
 El plan de fundamentos **ya está en ejecución** en el worktree
-`.worktrees/fundamentos-backend`, rama `feat/fundamentos-backend`. El estado confirmado
-es el commit `ebd8011`:
+`.worktrees/fundamentos-backend`, rama `feat/fundamentos-backend`. La base de código
+integrada y documentada antes de la comprobación en Neon es el commit `b14a931`:
 
 - **Tareas 1–6 terminadas:** errores tipados, registro estructurado, conexión y consultas
   con tiempo máximo, transacciones interactivas, frontera única de la capa de datos y
   verificación del migrador.
 - **Contrato de `escribir()` cubierto** con un pool inyectado y una prueba antifuga que
   se comprobó que falla cuando se rompe deliberadamente la protección.
-- **Tarea 7 terminada en local:** migración `005`, traducción y escritura de la proyección
+- **Tarea 7 terminada de extremo a extremo:** migración `005`, traducción y escritura de la proyección
   pública, comando idempotente de reproyección y seis pruebas de paridad, privacidad y
   precios. La revisión posterior centralizó la conversión monetaria, unificó el `upsert`,
   tipó los campos JSON y cambió `price_cents` a `bigint`.
-- **Verificación local:** `test:datos` 39/39, `test:admin` 196/196, `typecheck` y `lint`
-  limpios, y `build` correcto. Las 67 pruebas de Playwright terminaron sin fallo de
-  prueba; en Windows el proceso se quedó colgado al apagar su servidor y se interrumpió
-  después de la prueba 67.
+- **Integración en Neon verificada:** se usó exclusivamente la rama aislada de desarrollo
+  `fundamentos-backend-dev`. `005_proyeccion_publica.sql` quedó aplicada; las dos
+  reproyecciones dieron **313 proyectados y 0 retirados**; la huella del contenido,
+  excluido `updated_at`, fue idéntica antes y después. La tabla contiene 313 filas, los
+  mismos 25 precios —con una huella idéntica a la conexión principal— y ninguna columna
+  prohibida; se buscaron los 408 identificadores del proveedor y hubo **0 coincidencias**.
+- **Verificación fresca tras integrar:** `test:datos` 39/39, `test:admin` 196/196,
+  `test:proveedores` 3/3, `typecheck` y `lint` limpios, y `catalogo:auditar` con 313
+  productos, 408 identificadores y 0 coincidencias. La verificación completa previa del
+  mismo código mantiene `build` correcto; las 67 pruebas de Playwright terminaron sin
+  fallo de prueba, aunque en Windows el proceso quedó colgado al apagar su servidor y se
+  interrumpió después de la prueba 67. No se presenta ese cierre como salida limpia.
 
-**La tarea 7 todavía no está cerrada de extremo a extremo.** Falta aplicar la migración
-`005` y ejecutar `npm run catalogo:reproyectar` contra una **rama aislada de Neon de
-desarrollo**, comprobar las 313 filas y repetir la reproyección para demostrar que es
-idempotente. Eso escribe fuera del repositorio y requiere autorización expresa del
-dueño. Después empieza la tarea 8: crear y verificar el rol `econoluz_publico` y su
-`DATABASE_URL_PUBLIC`.
+**Lo siguiente es la tarea 8, todavía no empezada:** crear y verificar el rol
+`econoluz_publico`, concederle solo lectura de `public_products`, documentar la creación
+y rotación de su credencial y configurar `DATABASE_URL_PUBLIC`. Toda aplicación y prueba
+real se hace primero en `fundamentos-backend-dev`; no se toca producción.
 
-No se ha escrito en Neon, ni fusionado, ni hecho push ni desplegado este trabajo.
+Solo se ha escrito en la rama aislada de Neon. No se ha fusionado, hecho push ni
+desplegado este trabajo, y producción permanece intacta.
 
 ---
 
