@@ -11,6 +11,11 @@
  */
 
 export type CausaDeError =
+  // "no-encontrado" no la produce `traducirErrorDePostgres`: Postgres no tiene
+  // un código de error para «la consulta no devolvió filas». La construye
+  // quien hace la consulta, con `new ErrorDeDatos("no-encontrado")`, cuando el
+  // resultado esperado no aparece. Por eso no hay ningún camino de traducción
+  // que la genere, y no hace falta ninguno: es responsabilidad del llamante.
   | "no-encontrado"
   | "conflicto"
   | "permiso-denegado"
