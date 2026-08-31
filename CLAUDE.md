@@ -50,6 +50,35 @@ parece pedirlo, está derogado por esta sección.
 Leer esta documentación **no ejecuta** ninguna de esas retiradas ni basta como
 autorización: ambas siguen necesitando el visto bueno expreso del dueño en su momento.
 
+### 0.4 Estado de ejecución del subproyecto 1 (31/08/2026)
+
+El plan de fundamentos **ya está en ejecución** en el worktree
+`.worktrees/fundamentos-backend`, rama `feat/fundamentos-backend`. El estado confirmado
+es el commit `ebd8011`:
+
+- **Tareas 1–6 terminadas:** errores tipados, registro estructurado, conexión y consultas
+  con tiempo máximo, transacciones interactivas, frontera única de la capa de datos y
+  verificación del migrador.
+- **Contrato de `escribir()` cubierto** con un pool inyectado y una prueba antifuga que
+  se comprobó que falla cuando se rompe deliberadamente la protección.
+- **Tarea 7 terminada en local:** migración `005`, traducción y escritura de la proyección
+  pública, comando idempotente de reproyección y seis pruebas de paridad, privacidad y
+  precios. La revisión posterior centralizó la conversión monetaria, unificó el `upsert`,
+  tipó los campos JSON y cambió `price_cents` a `bigint`.
+- **Verificación local:** `test:datos` 39/39, `test:admin` 196/196, `typecheck` y `lint`
+  limpios, y `build` correcto. Las 67 pruebas de Playwright terminaron sin fallo de
+  prueba; en Windows el proceso se quedó colgado al apagar su servidor y se interrumpió
+  después de la prueba 67.
+
+**La tarea 7 todavía no está cerrada de extremo a extremo.** Falta aplicar la migración
+`005` y ejecutar `npm run catalogo:reproyectar` contra una **rama aislada de Neon de
+desarrollo**, comprobar las 313 filas y repetir la reproyección para demostrar que es
+idempotente. Eso escribe fuera del repositorio y requiere autorización expresa del
+dueño. Después empieza la tarea 8: crear y verificar el rol `econoluz_publico` y su
+`DATABASE_URL_PUBLIC`.
+
+No se ha escrito en Neon, ni fusionado, ni hecho push ni desplegado este trabajo.
+
 ---
 
 ## 1. Qué es este proyecto
@@ -236,8 +265,10 @@ técnica— y **dar de alta productos nuevos**, con la referencia puesta automá
 la foto subida desde el navegador a Vercel Blob. Las fichas de producto son de servidor,
 que es lo que mantiene los datos del proveedor fuera del JavaScript descargable.
 
-Su portada muestra el estado real del catálogo leído de Postgres —hoy **313 productos,
-313 publicados, 0 con precio**—, que es la forma de ver de un vistazo lo que falta.
+Su portada muestra el estado real del catálogo leído de Postgres —**313 productos y
+313 publicados**—, que es la forma de ver de un vistazo lo que falta. A 31/08/2026 hay
+**25 con precio**; el dueño decidió dejarlos como están hasta que él o un trabajador de
+ECONOLUZ cargue y revise los precios definitivos.
 
 **El panel de proyectos está terminado y activo en Neon.** Permite crear, editar,
 ordenar, publicar y ocultar proyectos; ordenar y retirar fotografías de forma reversible;
@@ -780,9 +811,11 @@ especificación, su plan, sus pruebas y un punto de revisión con el dueño:
 **No existe un subproyecto 4:** era inventario y reservas, y desapareció con la decisión
 de §0.2.
 
-**Lo siguiente que se puede construir es el subproyecto 1**, no la pieza B. El orden y el
-motivo están en la sección 10 del diseño global. Nada de eso empieza sin autorización
-expresa del dueño para el plan y, después, para la implementación.
+**El subproyecto 1 está en marcha**; su estado preciso está en §0.4 y en
+`docs/superpowers/plans/2026-08-30-fundamentos-backend.md`. Lo siguiente no es volver a
+empezarlo: es completar la integración de su tarea 7 en una rama aislada de Neon y, tras
+esa comprobación, continuar con la tarea 8. Ninguna escritura en Neon, fusión, push o
+despliegue se da por autorizada por esta documentación.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar

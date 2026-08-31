@@ -25,6 +25,41 @@ conecta— y este plan **generaliza ese patrón, no lo sustituye**.
 `docs/superpowers/specs/2026-08-30-backend-relacional-v2-design.md`). El plan argumenta
 desde la especificación: quien ejecute debe leer las dos.
 
+## Estado de ejecución (31/08/2026)
+
+> **Este bloque manda sobre las casillas sin marcar que quedan en el plan original.**
+> Las casillas describen el procedimiento previsto; no se fueron editando durante las
+> rondas de implementación y revisión. No repetir una tarea que esta tabla marque como
+> terminada.
+
+| Bloque | Estado | Evidencia principal |
+|---|---|---|
+| Plan y worktree | ✅ Terminado | Plan en `19d0106`; rama `feat/fundamentos-backend` |
+| Tareas 1–6 | ✅ Terminadas y revisadas | Capa de datos, 16 commits sobre la base del plan |
+| Cobertura de `escribir()` | ✅ Terminada | `cdc1864` y corrección antifuga `ed5e7f7` |
+| Tarea 7, implementación local | ✅ Terminada y revisada | `e2a7220` y ronda de arreglo `ebd8011` |
+| Tarea 7, integración en Neon | ⛔ Pendiente de autorización | Falta ejecutar migración 005 y reproyección en una rama aislada |
+| Tareas 8–12 | ⏳ No empezadas | Empiezan después de cerrar la integración de la tarea 7 |
+
+La revisión de la tarea 7 cambió detalles respecto a los ejemplos originales de abajo:
+la conversión a centavos vive en `app/lib/dinero.ts`, el `upsert` compartido en
+`app/data/proyeccionPublicaSql.ts`, los dos escritores usan esa misma sentencia, los
+campos JSON llevan conversión explícita a `jsonb` y `price_cents` es `bigint`. **El código
+del commit `ebd8011` es la referencia ejecutable; no copiar sobre él los fragmentos
+anteriores del plan.**
+
+Verificación local tras la revisión: `test:datos` 39/39, `test:admin` 196/196,
+`typecheck` y `lint` limpios, `build` correcto. Playwright completó las 67 pruebas sin
+fallos de prueba, pero su proceso quedó colgado durante el apagado del servidor en
+Windows y se interrumpió después de la prueba 67.
+
+### Próximo punto de control
+
+Con autorización expresa del dueño, usar una **rama aislada de Neon de desarrollo** para
+ejecutar `npm run db:migrar` y `npm run catalogo:reproyectar`; comprobar 313 filas,
+privacidad e idempotencia. No usar producción. No iniciar la tarea 8 hasta cerrar esa
+comprobación. No se ha hecho push, fusión ni despliegue.
+
 ## Restricciones globales
 
 Aplican a **todas** las tareas. Están copiadas de la especificación y de `CLAUDE.md`.

@@ -92,41 +92,53 @@ Leer esta documentación no ejecuta esa retirada ni basta como autorización.
 
 ---
 
-## 0.1 Qué hacer ahora (26/08/2026)
+## 0.1 Qué hacer ahora (31/08/2026)
 
-**Todo lo construido está en `main`.** No quedan ramas de trabajo a medias: `tienda-carrito`
-y `ocultar-proveedores` están ambas fusionadas.
+El trabajo activo ya no está solo en `main`. Continúa en:
 
-### Lo primero: desplegar
+- **Worktree:** `.worktrees/fundamentos-backend`
+- **Rama:** `feat/fundamentos-backend`
+- **Commit verificado:** `ebd8011`
+- **Plan:** `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`
 
-Hay trabajo terminado y probado **sin desplegar**, y una de las cosas que arregla está
-viva en producción: el inventario visible en el HTML. Conviene publicarlo pronto.
-Requiere confirmación expresa del dueño, como todo despliegue.
+### Qué está terminado
 
-### Lo que puede hacerse ya, sin esperar a nadie
+Las tareas 1–6 del subproyecto 1 están implementadas y revisadas. También está terminada
+la **parte local de la tarea 7**: migración `005`, proyección pública, escritor por
+producto, reproyección total, conversión monetaria compartida y pruebas de paridad y
+privacidad. No hay que rehacer ninguna de esas piezas.
 
-> **Actualizado el 30/08/2026.** Lo que decía aquí —empezar por la pieza B, el checkout
-> con NIT— quedó superado por el rediseño aprobado. El checkout sigue siendo necesario,
-> pero ya no se construye suelto sobre el backend actual: es el **subproyecto 6** y
-> depende de **cuatro** subproyectos anteriores: **2. identidad de clientes**,
-> **3. catálogo relacional v2**, **5. carrito persistente** y **9. envíos**.
+La última verificación local dio `test:datos` **39/39**, `test:admin` **196/196**,
+`typecheck` y `lint` limpios y `build` correcto. Playwright completó sus **67 pruebas sin
+fallos de prueba**, pero el proceso se quedó colgado al apagar el servidor en Windows y
+se interrumpió después de la prueba 67; no se debe presentar ese cierre como una salida
+limpia del ejecutor.
 
-**Lo siguiente es el subproyecto 1: fundamentos del backend y capa de acceso a datos.**
-Su especificación está escrita y aprobada en
-`docs/superpowers/specs/2026-08-30-fundamentos-backend-design.md`. Ya no hace falta
-brainstorming: hace falta el plan de implementación, y **escribirlo necesita autorización
-expresa del dueño**, igual que ejecutarlo después.
+### El siguiente paso exacto
 
-Antes del primer commit de ese subproyecto hay una tarea previa sin código: dejar esta
-documentación al día, que es justo lo que hizo la actualización del 30/08/2026.
+Completar la tarea 7 contra una **rama aislada de Neon de desarrollo**:
 
-### Lo que espera una decisión del dueño
+1. Obtener o crear la rama aislada y poner su cadena privilegiada en `DATABASE_URL`
+   local, sin copiarla a documentación ni registros.
+2. Ejecutar `npm run db:migrar` para aplicar `db/005_proyeccion_publica.sql`.
+3. Ejecutar `npm run catalogo:reproyectar` y comprobar **313 proyectados y 0 retirados**.
+4. Verificar en solo lectura que las 313 filas no contienen datos del proveedor.
+5. Repetir la reproyección y confirmar que el resultado no cambia.
 
-1. **Desplegar el carrito.** Está en `main` y probado, pero no publicado. Hay que
-   recordárselo antes: **al desplegar, los 25 productos con precio (`ECO-ELE-0001` a
-   `ECO-ELE-0025`) quedan a la venta automáticamente**, al precio que tengan ese día. Ya
-   no hay una segunda casilla que lo frene. No hay migración de base de datos.
-2. **Borrar las carpetas de imágenes antiguas.** `/catalogos/construlita/…`,
+**No ejecutar esos pasos sin autorización expresa del dueño:** escriben en Neon aunque
+sea una rama de desarrollo. Cuando pasen, se cierra la tarea 7 y empieza la tarea 8: rol
+`econoluz_publico`, permisos mínimos, contraseña fuera del repositorio y
+`DATABASE_URL_PUBLIC`.
+
+### Estado de integración
+
+No se ha escrito en Neon, ni fusionado la rama, ni hecho push ni desplegado. `main` sigue
+en `19d0106` y `origin/main` en `a4defad`; la implementación vive solo en el worktree.
+Los 25 precios existentes se dejan tal cual por decisión del dueño.
+
+### Otras decisiones que siguen pendientes
+
+1. **Borrar las carpetas de imágenes antiguas.** `/catalogos/construlita/…`,
    `/highlum/…` y `/artlite/…` siguen respondiendo 200 en producción si alguien conoce
    la URL, aunque ninguna página las enlace. Borrarlas cierra la fuga del todo. **No
    borrar sin su autorización expresa.**
@@ -138,8 +150,8 @@ documentación al día, que es justo lo que hizo la actualización del 30/08/202
    preguntas hacer (entorno de pruebas, si el pago ocurre dentro de la web, cómo avisan del
    pago confirmado, comisión y plazo de depósito). **Bloquea la pieza C del paso 2.**
 2. **Contratar un certificador FEL.** Bloquea la pieza D.
-3. **Poner precios.** 25 de 313. Es la tarea más lenta del proyecto y no depende de nadie
-   más.
+3. **Revisar y completar precios al final.** Hay 25 de 313 y el dueño decidió dejarlos
+   como están por ahora; él o un trabajador de ECONOLUZ los revisará más adelante.
 4. **Apuntar el DNS de `econoluzgt.com`** a Vercel. Sigue sirviendo el WordPress viejo.
 
 > **El catálogo público ya muestra los precios (26/08/2026).** Lo decidió el dueño: si
