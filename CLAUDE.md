@@ -7,11 +7,67 @@ Léelo completo antes de proponer o escribir código.
 
 ---
 
+## 0. Estado de las decisiones (30/08/2026) — léelo antes que nada
+
+El 30/08/2026 el dueño aprobó el rediseño del backend y del modelo de datos. La referencia
+son estos dos documentos:
+
+- `docs/superpowers/specs/2026-08-30-backend-relacional-v2-design.md` — el diseño global.
+- `docs/superpowers/specs/2026-08-30-fundamentos-backend-design.md` — el primer subproyecto.
+
+Ese rediseño **deroga reglas que todavía aparecen más abajo en este archivo**. Para que
+nadie confunda lo que existe con lo que se decidió, lo afectado se reparte en tres
+categorías.
+
+### 0.1 Lo que existe hoy en el código y en producción
+
+- El carrito avisa cuando se piden más unidades de las apuntadas en `products.stock` y
+  ofrece «Dejar solo N» o «Quiero N y espero».
+  `app/tienda/disponibilidad.server.ts` lo resuelve consultando la base de datos.
+- El panel permite escribir existencias en el listado y en la ficha del producto.
+- La columna `products.stock` existe y tiene valor en 24 de los 313 productos.
+- El sitio menciona la sede de Quetzaltenango en el pie, en el home y en `siteData.ts`.
+
+**Todo eso sigue funcionando y no se toca todavía.**
+
+### 0.2 Decisiones futuras ya aprobadas por el dueño
+
+- **ECONOLUZ no manejará stock, inventario, bodegas ni reservas.** La empresa no almacena
+  mercancía: cada producto se le pide al proveedor cuando alguien lo compra. El modelo
+  nuevo no tiene ninguna tabla de inventario, y **`stock` no debe reaparecer en la API
+  nueva bajo ninguna forma**. Lo que ocupa su lugar es el plazo de entrega estimado, el
+  estado «pendiente de confirmar con el proveedor» y el reembolso si no puede servirlo.
+- **Se retirará todo lo relacionado con Quetzaltenango.** La sede deja de existir. El
+  alcance de la retirada es la web, los textos, los datos, el SEO, la documentación y
+  cualquier referencia restante. **El dueño ya aprobó expresamente esta retirada el
+  30/08/2026**; lo que falta es ejecutarla, en su tarea propia.
+
+**Ninguna propuesta nueva puede reintroducir inventario ni contenido de Xela.** Si un
+párrafo de este archivo parece pedirlo, está derogado por esta sección.
+
+### 0.3 Lo que solo se elimina después, en su tarea correspondiente
+
+| Qué | Cuándo | Requisito |
+|---|---|---|
+| `products.stock`, `app/tienda/disponibilidad.server.ts`, el aviso del carrito y sus pruebas | Subproyecto 11 | Autorización expresa del dueño |
+| `app/data/products.ts` como respaldo | Subproyecto 11 | Autorización expresa |
+| Código, contenido, datos y SEO de Quetzaltenango | Tarea propia y separada, posterior a esta actualización documental | **Ya aprobada.** Rama propia; no se mezcla con el backend |
+
+Actualizar esta documentación **no ejecuta** ninguna de esas retiradas. Para las dos
+primeras, además, no basta como autorización: siguen necesitando el visto bueno expreso
+del dueño en su momento.
+
+---
+
 ## 1. Qué es este proyecto
 
 Rediseño completo del sitio web de **ECONOLUZ (Asesoría Profesional en Iluminación, S.A.)**,
 empresa guatemalteca de iluminación fundada en 2006, con sede en Guatemala City
-(21 Avenida 0-18, Vista Hermosa 2, Zona 15) y presencia en Quetzaltenango.
+(21 Avenida 0-18, Vista Hermosa 2, Zona 15).
+
+> **La sede de Quetzaltenango cerró (30/08/2026).** El sitio todavía la menciona en el
+> pie, en el home y en `app/data/siteData.ts`; retirarla es una tarea propia y separada
+> (§0.3). No la menciones en textos nuevos.
 
 El sitio anterior (`econoluzgt.com`) está construido en WordPress + Elementor y funciona
 como landing page informativa. Este proyecto lo reemplaza por completo.
@@ -35,7 +91,7 @@ catálogo tiene que servir a los dos **sobre el mismo producto**.
 ### Pista A — TIENDA (B2C, transaccional)
 
 - **Quién:** cliente individual, compra 1 a 5 luminarias para su casa.
-- **Qué necesita:** precio visible, foto grande, disponibilidad, carrito, pago en línea, envío.
+- **Qué necesita:** precio visible, foto grande, plazo de entrega, carrito, pago en línea, envío.
 - **Decisión:** rápida, visual, guiada por precio y estética.
 - **Navegación:** filtros por ambiente (sala, cocina, dormitorio, exterior), estilo y precio.
 - **Salida esperada:** compra completada en línea.
@@ -136,6 +192,10 @@ propio `localStorage` y comprar un panel por un quetzal. Esta regla se hereda al
 checkout y al cobro. El dinero se suma en **centavos enteros** (`app/tienda/lineas.ts`);
 `formatPrice` solo se usa al pintar.
 
+> **Comportamiento actual, con retirada ya aprobada (§0.2).** Lo que sigue describe lo
+> que hace hoy el carrito en producción. La empresa no maneja inventario, así que este
+> aviso desaparecerá en el subproyecto 11. No construyas nada nuevo encima.
+
 Las existencias **avisan y dejan elegir, nunca bloquean**: cuando se piden más
 unidades de las apuntadas, la línea ofrece llevarse las disponibles o esperar por el
 resto, y la espera aceptada queda marcada para poder contactar al cliente. Solo pasa
@@ -174,7 +234,7 @@ persistente de intentos y caducidad tras doce horas sin actividad. `/admin` redi
 `docs/superpowers/plans/2026-08-25-admin-auth.md`.
 
 **Toda la tienda B2C sigue por construir**, y con ella los requisitos operativos de la
-sección 8 (FEL, pago, inventario, marco legal).
+sección 8 (FEL, pago, marco legal).
 
 **El panel ya está activo en local (25/08/2026).** `db/003_admin.sql` está aplicado en
 Neon, `ADMIN_SESSION_SECRET` está en `.env.local`, y el primer administrador se creó con
@@ -345,8 +405,9 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
   cambiar el DNS es tarea del dueño del proyecto, no del código.
 - Base de datos: **Postgres 18 en Neon**, con `@neondatabase/serverless`, creada desde el
-  Marketplace de Vercel (región AWS US East 1). Tablas: `leads`, `products` y
-  `schema_migrations`. Las migraciones se aplican con `npm run db:migrar`, que es
+  Marketplace de Vercel (región AWS US East 1). Ocho tablas: `leads`, `products`,
+  `admin_users`, `admin_sessions`, `admin_login_attempts`, `projects`, `project_images`
+  y `schema_migrations`. Las migraciones se aplican con `npm run db:migrar`, que es
   repetible. `DATABASE_URL` está en `.env.local` (ignorado por git) y en Vercel.
 - Pasarela de pago: `TODO — pendiente de decidir`
 - Certificador FEL: `TODO — pendiente de decidir`
@@ -594,8 +655,11 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    El título nuevo ("Catálogo de iluminación por cotización") no lo busca nadie.
    Hay que conservar las palabras clave reales y mapear redirects 301 desde las
    URLs viejas de WordPress.
-7. **Xela está subrepresentado.** El sitio anterior tenía páginas dedicadas
-   que probablemente generan tráfico local; ahora solo hay menciones en el footer.
+7. **Retirar del sitio todo lo que quede de Quetzaltenango.** La sede cerró, y hay que
+   quitar sus menciones en la web, los textos, los datos, el SEO y la documentación.
+   Es una tarea propia, ya aprobada, que se ejecuta aparte del backend (§0.3).
+   *(Nota: hasta el 30/08/2026 esta deuda pedía lo contrario —recuperar páginas locales
+   para posicionar en Xela—. Quedó derogada.)*
 8. **`app/components/ui/FilterChip.tsx` quedó sin usar** al retirar el filtro de series.
    No se borró porque la sección 9 prohíbe borrar archivos sin preguntar antes.
 
@@ -612,8 +676,14 @@ Aplican a la pista de tienda y condicionan el diseño del checkout:
 - **Marco legal:** términos y condiciones, política de privacidad, política de envíos
   y política de devoluciones específica para compra en línea (la actual fue redactada
   para otro contexto). Obligaciones de información al consumidor ante DIACO.
-- **Inventario:** definir si la tienda sincroniza con el inventario interno o mantiene
-  el suyo. No debe poderse vender producto inexistente.
+- **Plazo de entrega y confirmación del proveedor:** ECONOLUZ no almacena mercancía, así
+  que **no hay inventario que gestionar ni sincronizar**. Cada producto se le pide al
+  proveedor cuando alguien lo compra. Lo que sí hay que resolver es el plazo de entrega
+  que se le promete al cliente y qué ocurre cuando el proveedor no puede servir algo ya
+  pagado: el pedido queda «pendiente de confirmar con el proveedor», y si no puede
+  servirse se cancela y se reembolsa. Ver §0.2.
+  *(Nota: hasta el 30/08/2026 este punto pedía definir la sincronización con un
+  inventario interno. Quedó derogado.)*
 
 ---
 
@@ -651,7 +721,7 @@ Aplican a la pista de tienda y condicionan el diseño del checkout:
 - Trabajo por ramas de git: cada bloque grande (tienda, proyectos, migración SEO)
   en su propia rama.
 - **Quiero cargar y corregir el contenido yo mismo**, sin pedírselo a un programador.
-  Cualquier dato que yo vaya a mantener —productos, precios, existencias, fotos— no
+  Cualquier dato que yo vaya a mantener —productos, precios, fotos— no
   debería nacer escrito dentro del código.
 - Recuérdame en qué punto del plan general estamos, no solo el plan de la tarea de hoy.
 - **Mantén los `.md` al día mientras trabajas, no al final.** Actualizar este archivo y
@@ -697,17 +767,38 @@ en el HTML y los recursos públicos revisados. Las carpetas originales siguen pr
 hasta recibir permiso separado para borrarlas.
 
 **Paso 2 — Tienda.** Precio y compra conviviendo con la cotización. Se descompone en
-cinco piezas, y solo la primera está hecha:
+cuatro piezas, y solo la primera está hecha:
 
 - ~~**A. El carrito.**~~ Terminado y **fusionado en `main` el 26/08/2026**, todavía sin
   desplegar. Diseño en `docs/superpowers/specs/2026-08-26-tienda-carrito-design.md`,
   plan en `docs/superpowers/plans/2026-08-26-tienda-carrito.md`.
-- **B. Checkout con datos fiscales (NIT).** No depende de nadie de fuera; es lo siguiente
-  que se puede construir.
+- **B. Checkout con datos fiscales (NIT).** No depende de nadie de fuera de la empresa,
+  pero sí de cuatro subproyectos anteriores: 2 (identidad), 3 (catálogo relacional),
+  5 (carrito persistente) y 9 (envíos). Es el subproyecto 6.
 - **C. El cobro.** **Bloqueado**: depende de contratar una pasarela de pago, trámite que
   el dueño todavía no ha empezado. Puede llevar semanas. Eligió cobro con tarjeta.
 - **D. Factura FEL.** Bloqueado: depende de contratar un certificador.
-- **E. Descuento de existencias.**
+
+*(Nota: hubo una pieza E, «descuento de existencias». Se retiró el 30/08/2026 porque no
+hay existencias que descontar, ver §0.2.)*
+
+### El paso 2 se reorganizó el 30/08/2026
+
+Las piezas B, C y D siguen siendo necesarias, pero **ya no se construyen sueltas sobre el
+backend actual**. El diseño aprobado las reparte en diez subproyectos, cada uno con su
+especificación, su plan, sus pruebas y un punto de revisión con el dueño:
+
+1. Fundamentos y capa de datos · 2. Identidad de clientes · 3. Catálogo relacional v2 ·
+5. Carrito persistente · 6. Checkout y pedidos · 7. Pasarela de pago (bloqueado) ·
+8. Facturación FEL (bloqueado) · 9. Envíos · 10. API v1 y preparación móvil ·
+11. Migración final y retirada del modelo antiguo.
+
+**No existe un subproyecto 4:** era inventario y reservas, y desapareció con la decisión
+de §0.2.
+
+**Lo siguiente que se puede construir es el subproyecto 1**, no la pieza B. El orden y el
+motivo están en la sección 10 del diseño global. Nada de eso empieza sin autorización
+expresa del dueño para el plan y, después, para la implementación.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar

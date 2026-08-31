@@ -17,7 +17,50 @@ hace el dueño.
 
 ---
 
-## 0. Estado en dos minutos (última actualización: 26/08/2026)
+## Dirección aprobada el 30/08/2026 — léelo antes que el resto de este documento
+
+El dueño aprobó el rediseño del backend y del modelo de datos. La referencia son
+`docs/superpowers/specs/2026-08-30-backend-relacional-v2-design.md` (diseño global) y
+`docs/superpowers/specs/2026-08-30-fundamentos-backend-design.md` (primer subproyecto),
+y `CLAUDE.md` §0 resume lo mismo.
+
+**Buena parte de lo que sigue en este documento describe un estado anterior.** Para no
+confundir lo que existe con lo que se decidió:
+
+**1. Lo que existe hoy en el código y en producción.** El carrito avisa cuando se piden
+más unidades de las apuntadas en `products.stock` y ofrece «Dejar solo N» o «Quiero N y
+espero», resuelto por `app/tienda/disponibilidad.server.ts`. El panel deja escribir
+existencias en el listado y en la ficha. La columna `products.stock` tiene valor en 24 de
+313 productos. El sitio menciona la sede de Quetzaltenango. **Nada de esto se toca
+todavía.**
+
+**2. Decisiones futuras ya aprobadas.**
+
+- **ECONOLUZ no manejará stock, inventario, bodegas ni reservas.** La empresa no almacena:
+  cada producto se le pide al proveedor cuando alguien lo compra. El modelo nuevo no lleva
+  ninguna tabla de inventario y `stock` no reaparece en la API nueva. Lo sustituyen el
+  plazo de entrega estimado, el estado «pendiente de confirmar con el proveedor» y el
+  reembolso si el proveedor no puede servirlo.
+- **Se retirará todo lo relacionado con Quetzaltenango**: web, textos, datos, SEO,
+  documentación y cualquier referencia restante. **Aprobado expresamente por el dueño el
+  30/08/2026**; lo que falta es ejecutarlo.
+
+**3. Lo que solo se elimina después, en su tarea correspondiente.** `products.stock`,
+`disponibilidad.server.ts`, el aviso del carrito y `app/data/products.ts` se retiran en el
+**subproyecto 11**, y para eso sí hace falta el visto bueno expreso del dueño en su
+momento. **La retirada de Quetzaltenango ya está aprobada**: no forma parte de esta
+actualización documental, se ejecutará después como tarea propia en su propia rama, y no
+se mezcla con el backend. Actualizar esta documentación no ejecuta ninguna de las dos
+cosas.
+
+---
+
+## 0. Estado en dos minutos — fotografía del 26/08/2026
+
+> **Esta sección es una fotografía histórica del 26/08/2026 y no se ha reescrito.**
+> Describe el estado del código en esa fecha, que en su mayor parte sigue siendo el actual.
+> **La dirección vigente es la del bloque de arriba, del 30/08/2026**, y manda sobre
+> cualquier cosa que se lea aquí.
 
 > **Exposición del proveedor resuelta y desplegada (26/08/2026).**
 > `publicProductPrivacy.ts` transforma solo lo que recibe el visitante: rutas neutras,
@@ -70,12 +113,20 @@ Requiere confirmación expresa del dueño, como todo despliegue.
 
 ### Lo que puede hacerse ya, sin esperar a nadie
 
-**La pieza B del paso 2: el checkout con datos fiscales (NIT).** No depende de la pasarela
-de pago, así que se puede construir entera mientras el dueño tramita el alta del comercio.
-Es lo siguiente en la lista de `CLAUDE.md` §11.
+> **Actualizado el 30/08/2026.** Lo que decía aquí —empezar por la pieza B, el checkout
+> con NIT— quedó superado por el rediseño aprobado. El checkout sigue siendo necesario,
+> pero ya no se construye suelto sobre el backend actual: es el **subproyecto 6** y
+> depende de **cuatro** subproyectos anteriores: **2. identidad de clientes**,
+> **3. catálogo relacional v2**, **5. carrito persistente** y **9. envíos**.
 
-Antes de empezar, **brainstorming con el dueño**: no hay diseño escrito de esta pieza
-todavía.
+**Lo siguiente es el subproyecto 1: fundamentos del backend y capa de acceso a datos.**
+Su especificación está escrita y aprobada en
+`docs/superpowers/specs/2026-08-30-fundamentos-backend-design.md`. Ya no hace falta
+brainstorming: hace falta el plan de implementación, y **escribirlo necesita autorización
+expresa del dueño**, igual que ejecutarlo después.
+
+Antes del primer commit de ese subproyecto hay una tarea previa sin código: dejar esta
+documentación al día, que es justo lo que hizo la actualización del 30/08/2026.
 
 ### Lo que espera una decisión del dueño
 
@@ -200,7 +251,9 @@ cumplido en local**: ambos viven en Postgres y tienen pantallas de administraci�
   confirmar el push o despliegue de `panel-admin`.
 
 Después de eso empieza el **paso 2**, la tienda B2C, que es otro proyecto entero
-(carrito, checkout con NIT, cobro, factura FEL, existencias).
+(carrito, checkout con NIT, cobro, factura FEL). **Sin descuento de existencias:** desde
+el 30/08/2026 no hay inventario que descontar. El paso 2 se reorganizó en diez
+subproyectos; ver `CLAUDE.md` §11 y el diseño global.
 
 ---
 
@@ -369,6 +422,10 @@ llama exactamente al mismo código interno que `revalidateTag(tag)` sin perfil.
 `price_gtq`, `stock`, `sellable_online` y `published` las administra la persona.
 `scripts/import-products.mjs` las respeta a propósito. Cualquier script nuevo que
 escriba en `products` debe hacer lo mismo.
+
+> `stock` sigue en esa lista porque **hoy existe y tiene datos**, y pisarla seguiría
+> siendo un error. Su retirada está aprobada para el subproyecto 11; hasta entonces se
+> respeta igual que las demás.
 
 ### 4.4 El panel también tiene que parecer de ECONOLUZ
 
@@ -744,6 +801,9 @@ Campos, agrupados como en `db/002_products.sql`:
   de encontrar el producto. Acabado y familia sí son texto.
 - **Proveedor (interno):** marca, serie, código, nombre y descripción del fabricante.
 - **Tienda:** precio en quetzales, existencias, si se vende en línea.
+  *(Descripción de lo construido en agosto de 2026. El campo de existencias sigue ahí y
+  funciona, pero su retirada está aprobada para el subproyecto 11: no lo repliques en
+  pantallas nuevas.)*
 - **Publicado**: sí o no.
 
 ### Validación
