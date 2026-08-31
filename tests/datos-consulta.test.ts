@@ -28,7 +28,7 @@ test("un fallo del ejecutor sale como ErrorDeDatos, no como error crudo", async 
   );
 });
 
-test("una consulta que se pasa del tiempo máximo se corta", async () => {
+test("una consulta que se pasa del tiempo máximo deja de esperarse", async () => {
   await assert.rejects(
     () =>
       consultar(

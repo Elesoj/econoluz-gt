@@ -9,8 +9,8 @@ import type { Ejecutor } from "./consulta";
  * catálogo y `/api/leads`.
  *
  * Hay dos cadenas y no una. `DATABASE_URL` es la de la aplicación y puede
- * escribir. `DATABASE_URL_PUBLIC` es la del rol de lectura pública, que solo
- * ve la proyección `public_products`.
+ * escribir. `DATABASE_URL_PUBLIC` es la del rol de lectura pública, restringido
+ * a la proyección `public_products` que se creará en una tarea posterior.
  */
 
 const desdeCadena = (cadena: string): Ejecutor => {

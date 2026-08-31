@@ -13,6 +13,13 @@ export type Ejecutor = (
 /** Diez segundos. Ninguna consulta legítima de este sitio tarda más. */
 const MS_MAXIMO_POR_DEFECTO = 10_000;
 
+/**
+ * Ejecuta una consulta dentro de un plazo máximo. El navegador deja de esperar tras
+ * agotar el tiempo, pero la petición HTTP subyacente puede seguir viva en el servidor
+ * hasta que lo cierre. Es aceptable porque por aquí solo pasan lecturas idempotentes;
+ * las escrituras van por `enTransaccion` con `statement_timeout`, que sí cancela en el
+ * servidor.
+ */
 export async function consultar<T>(
   ejecutor: Ejecutor,
   texto: string,
