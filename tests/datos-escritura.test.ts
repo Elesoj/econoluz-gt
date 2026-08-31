@@ -52,9 +52,16 @@ function capturarRegistro() {
   };
 }
 
+type RegistroCapturado = ReturnType<typeof capturarRegistro>;
+
 test("éxito: devuelve el valor de trabajo y registra una línea info con idPeticion", async () => {
-  const captura = capturarRegistro();
+  // La sustitución de console.log/console.error se arma como primera línea
+  // del `try`: así, si `capturarRegistro` está armada, `finally` siempre la
+  // encuentra y la restaura, y si no llegó a armarse `captura` sigue `undefined`
+  // y `finally` no hace nada (no hay nada que restaurar todavía).
+  let captura: RegistroCapturado | undefined;
   try {
+    captura = capturarRegistro();
     const resultado = await escribirConPool(poolDeMentira(), async () => "valor-de-prueba");
     assert.equal(resultado, "valor-de-prueba");
 
@@ -66,13 +73,14 @@ test("éxito: devuelve el valor de trabajo y registra una línea info con idPeti
     // `nuevoIdPeticion`.
     assert.match(objeto.idPeticion, /^[0-9a-f]{16}$/);
   } finally {
-    captura.restaurar();
+    captura?.restaurar();
   }
 });
 
 test("dos llamadas seguidas producen idPeticion distintos", async () => {
-  const captura = capturarRegistro();
+  let captura: RegistroCapturado | undefined;
   try {
+    captura = capturarRegistro();
     await escribirConPool(poolDeMentira(), async () => null);
     await escribirConPool(poolDeMentira(), async () => null);
 
@@ -80,16 +88,17 @@ test("dos llamadas seguidas producen idPeticion distintos", async () => {
     const [primero, segundo] = captura.lineas.map((linea) => JSON.parse(linea).idPeticion);
     assert.notEqual(primero, segundo);
   } finally {
-    captura.restaurar();
+    captura?.restaurar();
   }
 });
 
 test("ErrorDeDatos: un fallo de Postgres con code 23505 registra causa conflicto y codigoSql, sin el mensaje original", async () => {
-  const captura = capturarRegistro();
+  let captura: RegistroCapturado | undefined;
   const mensajeDePostgres = 'duplicate key value violates unique constraint "products_pkey"';
   const errorDePostgres = Object.assign(new Error(mensajeDePostgres), { code: "23505" });
 
   try {
+    captura = capturarRegistro();
     await assert.rejects(
       () =>
         escribirConPool(poolDeMentira(), async () => {
@@ -107,24 +116,33 @@ test("ErrorDeDatos: un fallo de Postgres con code 23505 registra causa conflicto
 
     assert.equal(captura.lineas.length, 1);
     const linea = captura.lineas[0];
-    // El mensaje original de Postgres no debe aparecer en ninguna parte de
-    // la línea serializada, ni siquiera dentro de otro campo.
+    // El mensaje original de Postgres no debe aparecer en ninguna parte de la
+    // línea serializada, ni siquiera dentro de otro campo. Ojo con
+    // `JSON.stringify`: escapa las comillas, así que
+    // `constraint "products_pkey"` queda como `constraint \"products_pkey\"`
+    // dentro del JSON, y comparar solo contra el texto sin escapar deja
+    // pasar la fuga sin que la prueba se entere. Por eso se comprueba también
+    // la forma escapada y un fragmento sin comillas que sobrevive intacto a
+    // la serialización.
     assert.ok(!linea.includes(mensajeDePostgres));
+    assert.ok(!linea.includes(JSON.stringify(mensajeDePostgres).slice(1, -1)));
+    assert.ok(!linea.includes("products_pkey"));
 
     const objeto = JSON.parse(linea);
     assert.equal(objeto.nivel, "error");
     assert.equal(objeto.causa, "conflicto");
     assert.equal(objeto.codigoSql, "23505");
   } finally {
-    captura.restaurar();
+    captura?.restaurar();
   }
 });
 
 test("error desconocido: un Error corriente sin code registra causa indisponible y no trae codigoSql", async () => {
-  const captura = capturarRegistro();
+  let captura: RegistroCapturado | undefined;
   const errorOriginal = new Error("fallo sin code reconocible");
 
   try {
+    captura = capturarRegistro();
     await assert.rejects(
       () =>
         escribirConPool(poolDeMentira(), async () => {
@@ -139,11 +157,12 @@ test("error desconocido: un Error corriente sin code registra causa indisponible
     );
 
     const objeto = JSON.parse(captura.lineas[0]);
+    assert.equal(objeto.nivel, "error");
     assert.equal(objeto.causa, "indisponible");
     // No basta con que sea `undefined`: el campo no debe existir.
     assert.equal("codigoSql" in objeto, false);
   } finally {
-    captura.restaurar();
+    captura?.restaurar();
   }
 });
 
@@ -187,7 +206,7 @@ test("la etiqueta suceso personalizada se usa en fallo y por defecto es transacc
   }
 });
 
-test("relanzado: en éxito y en fallo el campo ms es un número finito y no negativo", async () => {
+test("ms es un número finito y no negativo, tanto en éxito como en fallo", async () => {
   const captura = capturarRegistro();
   try {
     await escribirConPool(poolDeMentira(), async () => null);
