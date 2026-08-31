@@ -29,7 +29,6 @@ export type ProductoAdmin = {
   imagen: string;
   precio: number | null;
   existencias: number | null;
-  seVendeEnLinea: boolean;
   publicado: boolean;
 };
 
@@ -113,7 +112,6 @@ export async function leerProductosAdmin(
       image,
       price_gtq,
       stock,
-      sellable_online,
       published,
       count(*) over () as total_filtrado
     from products
@@ -133,7 +131,6 @@ export async function leerProductosAdmin(
     imagen: String(fila.image),
     precio: aNumeroONulo(fila.price_gtq),
     existencias: aNumeroONulo(fila.stock),
-    seVendeEnLinea: Boolean(fila.sellable_online),
     publicado: Boolean(fila.published),
   }));
 
@@ -149,8 +146,15 @@ export async function leerProductosAdmin(
 
 /**
  * Acepta el precio tal y como se escribe de verdad: con separador de miles,
- * con coma decimal o con la Q delante. Vacío significa "todavía sin precio",
- * que es un estado legítimo y distinto de cero.
+ * con coma decimal o con la Q delante.
+ *
+ * Vacío significa "todavía sin precio", que es un estado legítimo: el producto
+ * se enseña en el catálogo pero no se compra, y la tarjeta ofrece consultar.
+ * Borrar el precio es, de hecho, la forma de retirar un producto de la venta.
+ *
+ * Cero, en cambio, no se acepta: significaría regalar el producto, y nadie
+ * carga un cero queriendo eso. Casi siempre es un dedo o un campo a medio
+ * escribir, y el precio se publica en cuanto se guarda.
  */
 export function parsearPrecio(entrada: string): ValorNumerico {
   const limpio = entrada.replace(/[Qq\s]/g, "").replace(/,/g, "");
@@ -162,8 +166,11 @@ export function parsearPrecio(entrada: string): ValorNumerico {
   if (!Number.isFinite(numero)) {
     return { ok: false, error: "Ese precio no es un número." };
   }
-  if (numero < 0) {
-    return { ok: false, error: "El precio no puede ser negativo." };
+  if (numero <= 0) {
+    return {
+      ok: false,
+      error: "El precio tiene que ser mayor que cero. Déjalo vacío si aún no lo tienes.",
+    };
   }
 
   // Dos decimales: es dinero, no una medida.

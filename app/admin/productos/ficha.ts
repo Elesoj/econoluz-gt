@@ -183,7 +183,6 @@ export type ProductoFicha = {
   proveedorDescripcion: string;
   precio: number | null;
   existencias: number | null;
-  seVendeEnLinea: boolean;
   publicado: boolean;
 };
 
@@ -207,7 +206,7 @@ export async function leerProductoPorReferencia(
         econoluz_reference, public_name, public_description, image, images,
         technical_specs, product_type, application, finish, finish_label,
         family_label, supplier_brand_label, supplier_series_label, supplier_code,
-        supplier_name, supplier_description, price_gtq, stock, sellable_online,
+        supplier_name, supplier_description, price_gtq, stock,
         published
       from products
       where econoluz_reference = $1
@@ -240,7 +239,6 @@ export async function leerProductoPorReferencia(
     proveedorDescripcion: comoTexto(fila.supplier_description),
     precio: comoNumeroONulo(fila.price_gtq),
     existencias: comoNumeroONulo(fila.stock),
-    seVendeEnLinea: Boolean(fila.sellable_online),
     publicado: Boolean(fila.published),
   };
 }
@@ -264,7 +262,6 @@ export type CambioFicha = {
   proveedorDescripcion: string;
   precio: number | null;
   existencias: number | null;
-  seVendeEnLinea: boolean;
   publicado: boolean;
 };
 
@@ -304,9 +301,8 @@ export async function guardarFichaProducto(
           supplier_description = $15,
           price_gtq = $16,
           stock = $17,
-          sellable_online = $18,
-          published = $19
-      where econoluz_reference = $20
+          published = $18
+      where econoluz_reference = $19
     `,
     [
       cambio.nombre,
@@ -326,7 +322,6 @@ export async function guardarFichaProducto(
       cambio.proveedorDescripcion,
       cambio.precio,
       cambio.existencias,
-      cambio.seVendeEnLinea,
       cambio.publicado,
       cambio.referencia,
     ],

@@ -120,14 +120,39 @@ test("pedir justo lo que hay no avisa", () => {
   assert.equal(resuelto.lineas[0].superaExistencias, false);
 });
 
-test("el precio cero es un precio y se puede comprar", () => {
-  const resuelto = resolverCarrito(
-    [{ econoluzReference: "ECO-IND-0048", cantidad: 2 }],
-    [producto("ECO-IND-0048", { priceGtq: 0 })],
-  );
+test("un precio que no es un importe comprable se descarta", () => {
+  // `toPublicProduct` ya filtra esto antes de que el catálogo salga al
+  // navegador, pero el motor del carrito no puede confiar en que siempre lo
+  // llamen a él: cualquier `PublicProduct` construido por otro camino llegaría
+  // aquí con lo que fuera. Cero significaría regalar el producto, y NaN o
+  // Infinity envenenarían el total de todo el carrito.
+  for (const invalido of [0, -1, -0.01, Number.NaN, Number.POSITIVE_INFINITY]) {
+    const resuelto = resolverCarrito(
+      [{ econoluzReference: "ECO-IND-0048", cantidad: 2 }],
+      [producto("ECO-IND-0048", { priceGtq: invalido })],
+    );
 
-  assert.equal(resuelto.lineas.length, 1);
-  assert.equal(resuelto.totalCentavos, 0);
+    assert.deepEqual(resuelto.lineas, [], `${invalido} no debería resolverse`);
+    assert.deepEqual(resuelto.descartadas, ["ECO-IND-0048"]);
+    assert.equal(resuelto.totalCentavos, 0);
+  }
+});
+
+test("los precios positivos normales se resuelven igual que siempre", () => {
+  for (const [precio, centavos] of [
+    [0.01, 2],
+    [125.5, 25100],
+    [1250, 250000],
+  ] as const) {
+    const resuelto = resolverCarrito(
+      [{ econoluzReference: "ECO-IND-0048", cantidad: 2 }],
+      [producto("ECO-IND-0048", { priceGtq: precio })],
+    );
+
+    assert.equal(resuelto.lineas.length, 1);
+    assert.equal(resuelto.totalCentavos, centavos);
+    assert.deepEqual(resuelto.descartadas, []);
+  }
 });
 
 test("la espera aceptada llega a la línea resuelta", () => {
@@ -183,4 +208,35 @@ test("sin decidir nada, la línea que supera existencias queda pendiente", () =>
 test("los centavos redondean al céntimo más cercano", () => {
   assert.equal(aCentavos(0.1 + 0.2), 30);
   assert.equal(aCentavos(1250.555), 125056);
+});
+
+test("un carrito antiguo con un producto sin precio lo descarta", () => {
+  // El visitante guardó la referencia cuando la tarjeta ofrecía comprarla. Si
+  // después se le quita el precio desde el panel, el catálogo del servidor deja
+  // de traer `priceGtq` y la línea no puede resolverse: se descarta, se avisa
+  // en pantalla y no suma al total. No hay forma de comprar por el precio
+  // viejo, porque el precio viejo nunca estuvo en el navegador.
+  const resuelto = resolverCarrito(
+    [{ econoluzReference: "ECO-ELE-0001", cantidad: 4 }],
+    [producto("ECO-ELE-0001")],
+  );
+
+  assert.deepEqual(resuelto.lineas, []);
+  assert.deepEqual(resuelto.descartadas, ["ECO-ELE-0001"]);
+  assert.equal(resuelto.totalCentavos, 0);
+});
+
+test("en un carrito mixto solo sobrevive lo que conserva su precio", () => {
+  const resuelto = resolverCarrito(
+    [
+      { econoluzReference: "CON-PRECIO", cantidad: 2 },
+      { econoluzReference: "SIN-PRECIO", cantidad: 7 },
+    ],
+    [producto("CON-PRECIO", { priceGtq: 50 }), producto("SIN-PRECIO")],
+  );
+
+  assert.equal(resuelto.lineas.length, 1);
+  assert.equal(resuelto.lineas[0].producto.econoluzReference, "CON-PRECIO");
+  assert.deepEqual(resuelto.descartadas, ["SIN-PRECIO"]);
+  assert.equal(resuelto.totalCentavos, 10000);
 });

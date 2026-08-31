@@ -62,9 +62,21 @@ export const resolverCarrito = (
   for (const linea of lineas) {
     const producto = porReferencia.get(linea.econoluzReference);
 
-    // Sin producto o sin precio no hay compra posible. Se descarta esa línea
-    // y se sigue: una referencia caducada no puede tumbar el carrito entero.
-    if (!producto || typeof producto.priceGtq !== "number") {
+    // Sin producto o sin precio comprable no hay compra posible. Se descarta
+    // esa línea y se sigue: una referencia caducada no puede tumbar el carrito
+    // entero.
+    //
+    // «Comprable» es número finito y mayor que cero, la misma regla que aplica
+    // `toPublicProduct` al salir al navegador. Se repite aquí a propósito: este
+    // motor recibe un `PublicProduct` y no puede dar por hecho que siempre lo
+    // haya construido esa frontera. Cero significaría regalar el producto, y un
+    // `NaN` o un `Infinity` envenenarían el total del carrito entero.
+    if (
+      !producto ||
+      typeof producto.priceGtq !== "number" ||
+      !Number.isFinite(producto.priceGtq) ||
+      producto.priceGtq <= 0
+    ) {
       descartadas.push(linea.econoluzReference);
       continue;
     }

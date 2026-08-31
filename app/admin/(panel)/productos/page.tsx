@@ -89,10 +89,9 @@ export default async function ProductosPage({
             cambios de la página de una vez. Pulsa el nombre para abrir su ficha completa.
           </p>
           <p className="mt-3 max-w-2xl border-l-2 border-tienda-claro pl-4 text-sm text-white/70">
-            Los precios se guardan pero <strong className="font-semibold text-white">todavía no
-            aparecen en la web</strong>: el catálogo público no los muestra hasta que exista la
-            tienda en línea. Cargarlos ahora adelanta ese trabajo. Publicar y despublicar sí se
-            nota al momento.
+            <strong className="font-semibold text-white">Un producto publicado con precio
+            aparece a la venta.</strong> Si se deja vacío, muestra «Consultar precio» y lleva a
+            la asesoría. Publicar, despublicar y cambiar el precio se notan al momento.
           </p>
         </div>
       </section>

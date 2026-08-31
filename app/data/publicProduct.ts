@@ -91,9 +91,21 @@ export const toPublicProduct = (
     publicProduct.images = product.images.map(toPublicImagePath);
   }
 
-  // Cero es un precio válido; `null`, `undefined` y cualquier cosa que no sea
-  // un número finito significan "todavía sin precio".
-  if (typeof extras?.priceGtq === "number" && Number.isFinite(extras.priceGtq)) {
+  // Un producto publicado con precio válido está a la venta; sin precio, la
+  // tarjeta dice «Consultar precio». Eso es todo: no hay ninguna otra casilla
+  // que autorice la venta.
+  //
+  // «Válido» significa número finito y **mayor que cero**. El panel ya impide
+  // guardar un cero, pero esta frontera no se fía de eso: un cero podría venir
+  // de una carga anterior o de una escritura directa en la base, y publicarlo
+  // pondría el producto a la venta regalado.
+  //
+  // `null`, `undefined`, `NaN` y los negativos significan "todavía sin precio".
+  if (
+    typeof extras?.priceGtq === "number" &&
+    Number.isFinite(extras.priceGtq) &&
+    extras.priceGtq > 0
+  ) {
     publicProduct.priceGtq = extras.priceGtq;
   }
 

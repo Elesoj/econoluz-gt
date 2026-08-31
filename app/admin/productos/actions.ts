@@ -161,7 +161,6 @@ export async function guardarFicha(datos: FormData) {
     proveedorDescripcion: String(datos.get("proveedorDescripcion") ?? "").trim(),
     precio: precio.valor,
     existencias: existencias.valor,
-    seVendeEnLinea: datos.get("seVendeEnLinea") === "on",
     publicado: datos.get("publicado") === "on",
   });
 

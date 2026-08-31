@@ -26,10 +26,12 @@ const FILA = {
   image: "/catalogos/x/y.jpg",
   price_gtq: "1250.00",
   stock: "4",
-  sellable_online: true,
   published: true,
   total_filtrado: "313",
 };
+// La fila lleva solo lo que la consulta del listado selecciona de verdad.
+// `sellable_online` sigue existiendo en la base, pero el panel dejó de leerla:
+// lo que decide la venta es el precio.
 
 test("los importes de Postgres llegan como números, no como texto", async () => {
   const { productos, total } = await leerProductosAdmin(queryFalsa([FILA]), {});
@@ -99,6 +101,22 @@ test("el precio acepta la forma en que se escribe de verdad", () => {
 test("el precio rechaza lo que no es un importe, y lo dice", () => {
   assert.equal(parsearPrecio("-5").ok, false);
   assert.equal(parsearPrecio("gratis").ok, false);
+});
+
+test("el precio rechaza el cero y cualquier valor por debajo", () => {
+  // Vacío es «todavía sin precio» y es legítimo. Cero no: significaría regalar
+  // el producto, y nadie carga un cero queriendo eso. Casi siempre es un dedo.
+  assert.equal(parsearPrecio("0").ok, false);
+  assert.equal(parsearPrecio("0.00").ok, false);
+  assert.equal(parsearPrecio("Q 0").ok, false);
+  assert.equal(parsearPrecio("-0.01").ok, false);
+});
+
+test("quitar el precio deja el producto sin precio, no a cero", () => {
+  // Es la vía para retirar un producto de la venta: se borra el precio y la
+  // tarjeta vuelve a «Consultar precio».
+  assert.deepEqual(parsearPrecio(""), { ok: true, valor: null });
+  assert.deepEqual(parsearPrecio("   "), { ok: true, valor: null });
 });
 
 test("las existencias son unidades enteras", () => {
