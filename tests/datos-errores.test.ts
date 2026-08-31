@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { ErrorDeDatos, traducirErrorDePostgres } from "../app/lib/datos/errores";
+import { traducirErrorDePostgres } from "../app/lib/datos/errores";
 
 test("una violación de unicidad es un conflicto, no un fallo de servicio", () => {
   const error = traducirErrorDePostgres(Object.assign(new Error("duplicate key"), { code: "23505" }));
