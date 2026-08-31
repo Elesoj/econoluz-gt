@@ -48,3 +48,6 @@ next-env.d.ts
 /public/catalogos/*.pdf
 /pdf_streams_decoded.txt
 /pdf_text_crude.txt
+
+# espacio de trabajo de subagent-driven-development (scratch, no versionable)
+/.superpowers/
