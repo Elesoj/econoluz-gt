@@ -26,7 +26,7 @@ export function formatearRegistro(
     ),
   );
 
-  return JSON.stringify({ nivel, suceso, momento: momento.toISOString(), ...escalares });
+  return JSON.stringify({ ...escalares, nivel, suceso, momento: momento.toISOString() });
 }
 
 export function registrar(

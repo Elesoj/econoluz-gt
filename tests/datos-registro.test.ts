@@ -24,3 +24,17 @@ test("los datos que no son escalares no se registran", () => {
   assert.equal(linea.ok, true);
   assert.equal("correo" in linea, false);
 });
+
+test("los campos canónicos no se pueden sobrescribir", () => {
+  const linea = JSON.parse(
+    formatearRegistro(
+      "error",
+      "pago-fallido",
+      { nivel: "info", suceso: "otro", momento: "falso" } as never,
+      new Date(0),
+    ),
+  );
+  assert.equal(linea.nivel, "error");
+  assert.equal(linea.suceso, "pago-fallido");
+  assert.equal(linea.momento, "1970-01-01T00:00:00.000Z");
+});
