@@ -72,17 +72,12 @@ export default function SiteFooter() {
           </div>
 
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em]">Sucursales</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em]">Dirección</p>
             <div className="mt-4 grid gap-4 text-sm leading-6 text-neutral-600">
               <p>
                 <span className="font-semibold text-black">Guatemala</span>
                 <br />
                 {contact.address}
-              </p>
-              <p>
-                <span className="font-semibold text-black">Quetzaltenango</span>
-                <br />
-                Atención para hogares, comercios y proyectos en Xela.
               </p>
             </div>
           </div>

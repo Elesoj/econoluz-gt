@@ -26,7 +26,6 @@ categorías.
   `app/tienda/disponibilidad.server.ts` lo resuelve consultando la base de datos.
 - El panel permite escribir existencias en el listado y en la ficha del producto.
 - La columna `products.stock` existe y tiene valor en 24 de los 313 productos.
-- El sitio menciona la sede de Quetzaltenango en el pie, en el home y en `siteData.ts`.
 
 **Todo eso sigue funcionando y no se toca todavía.**
 
@@ -37,13 +36,9 @@ categorías.
   nuevo no tiene ninguna tabla de inventario, y **`stock` no debe reaparecer en la API
   nueva bajo ninguna forma**. Lo que ocupa su lugar es el plazo de entrega estimado, el
   estado «pendiente de confirmar con el proveedor» y el reembolso si no puede servirlo.
-- **Se retirará todo lo relacionado con Quetzaltenango.** La sede deja de existir. El
-  alcance de la retirada es la web, los textos, los datos, el SEO, la documentación y
-  cualquier referencia restante. **El dueño ya aprobó expresamente esta retirada el
-  30/08/2026**; lo que falta es ejecutarla, en su tarea propia.
 
-**Ninguna propuesta nueva puede reintroducir inventario ni contenido de Xela.** Si un
-párrafo de este archivo parece pedirlo, está derogado por esta sección.
+**Ninguna propuesta nueva puede reintroducir inventario.** Si un párrafo de este archivo
+parece pedirlo, está derogado por esta sección.
 
 ### 0.3 Lo que solo se elimina después, en su tarea correspondiente
 
@@ -51,11 +46,9 @@ párrafo de este archivo parece pedirlo, está derogado por esta sección.
 |---|---|---|
 | `products.stock`, `app/tienda/disponibilidad.server.ts`, el aviso del carrito y sus pruebas | Subproyecto 11 | Autorización expresa del dueño |
 | `app/data/products.ts` como respaldo | Subproyecto 11 | Autorización expresa |
-| Código, contenido, datos y SEO de Quetzaltenango | Tarea propia y separada, posterior a esta actualización documental | **Ya aprobada.** Rama propia; no se mezcla con el backend |
 
-Actualizar esta documentación **no ejecuta** ninguna de esas retiradas. Para las dos
-primeras, además, no basta como autorización: siguen necesitando el visto bueno expreso
-del dueño en su momento.
+Leer esta documentación **no ejecuta** ninguna de esas retiradas ni basta como
+autorización: ambas siguen necesitando el visto bueno expreso del dueño en su momento.
 
 ---
 
@@ -64,10 +57,6 @@ del dueño en su momento.
 Rediseño completo del sitio web de **ECONOLUZ (Asesoría Profesional en Iluminación, S.A.)**,
 empresa guatemalteca de iluminación fundada en 2006, con sede en Guatemala City
 (21 Avenida 0-18, Vista Hermosa 2, Zona 15).
-
-> **La sede de Quetzaltenango cerró (30/08/2026).** El sitio todavía la menciona en el
-> pie, en el home y en `app/data/siteData.ts`; retirarla es una tarea propia y separada
-> (§0.3). No la menciones en textos nuevos.
 
 El sitio anterior (`econoluzgt.com`) está construido en WordPress + Elementor y funciona
 como landing page informativa. Este proyecto lo reemplaza por completo.
@@ -655,12 +644,7 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    El título nuevo ("Catálogo de iluminación por cotización") no lo busca nadie.
    Hay que conservar las palabras clave reales y mapear redirects 301 desde las
    URLs viejas de WordPress.
-7. **Retirar del sitio todo lo que quede de Quetzaltenango.** La sede cerró, y hay que
-   quitar sus menciones en la web, los textos, los datos, el SEO y la documentación.
-   Es una tarea propia, ya aprobada, que se ejecuta aparte del backend (§0.3).
-   *(Nota: hasta el 30/08/2026 esta deuda pedía lo contrario —recuperar páginas locales
-   para posicionar en Xela—. Quedó derogada.)*
-8. **`app/components/ui/FilterChip.tsx` quedó sin usar** al retirar el filtro de series.
+7. **`app/components/ui/FilterChip.tsx` quedó sin usar** al retirar el filtro de series.
    No se borró porque la sección 9 prohíbe borrar archivos sin preguntar antes.
 
 ---

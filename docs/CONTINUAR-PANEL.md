@@ -31,27 +31,19 @@ confundir lo que existe con lo que se decidió:
 más unidades de las apuntadas en `products.stock` y ofrece «Dejar solo N» o «Quiero N y
 espero», resuelto por `app/tienda/disponibilidad.server.ts`. El panel deja escribir
 existencias en el listado y en la ficha. La columna `products.stock` tiene valor en 24 de
-313 productos. El sitio menciona la sede de Quetzaltenango. **Nada de esto se toca
-todavía.**
+313 productos. **Nada de esto se toca todavía.**
 
-**2. Decisiones futuras ya aprobadas.**
-
-- **ECONOLUZ no manejará stock, inventario, bodegas ni reservas.** La empresa no almacena:
-  cada producto se le pide al proveedor cuando alguien lo compra. El modelo nuevo no lleva
-  ninguna tabla de inventario y `stock` no reaparece en la API nueva. Lo sustituyen el
-  plazo de entrega estimado, el estado «pendiente de confirmar con el proveedor» y el
-  reembolso si el proveedor no puede servirlo.
-- **Se retirará todo lo relacionado con Quetzaltenango**: web, textos, datos, SEO,
-  documentación y cualquier referencia restante. **Aprobado expresamente por el dueño el
-  30/08/2026**; lo que falta es ejecutarlo.
+**2. La decisión futura ya aprobada.** **ECONOLUZ no manejará stock, inventario, bodegas
+ni reservas.** La empresa no almacena: cada producto se le pide al proveedor cuando
+alguien lo compra. El modelo nuevo no lleva ninguna tabla de inventario y `stock` no
+reaparece en la API nueva. Lo sustituyen el plazo de entrega estimado, el estado
+«pendiente de confirmar con el proveedor» y el reembolso si el proveedor no puede
+servirlo.
 
 **3. Lo que solo se elimina después, en su tarea correspondiente.** `products.stock`,
 `disponibilidad.server.ts`, el aviso del carrito y `app/data/products.ts` se retiran en el
-**subproyecto 11**, y para eso sí hace falta el visto bueno expreso del dueño en su
-momento. **La retirada de Quetzaltenango ya está aprobada**: no forma parte de esta
-actualización documental, se ejecutará después como tarea propia en su propia rama, y no
-se mezcla con el backend. Actualizar esta documentación no ejecuta ninguna de las dos
-cosas.
+**subproyecto 11**, y para eso hace falta el visto bueno expreso del dueño en su momento.
+Leer esta documentación no ejecuta esa retirada ni basta como autorización.
 
 ---
 

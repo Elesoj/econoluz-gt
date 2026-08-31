@@ -2,8 +2,9 @@
 
 **Fecha:** 30/08/2026
 **Diseño global del que depende:** `docs/superpowers/specs/2026-08-30-backend-relacional-v2-design.md`
-**Estado:** aprobado por el dueño con correcciones incorporadas; pendiente de su revisión
-completa. **No autoriza escribir código ni ejecutar migraciones.**
+**Estado:** aprobado definitivamente por el dueño el 30/08/2026. Listo para redactar su
+plan de implementación cuando el dueño lo autorice. No autoriza escribir código ni
+ejecutar migraciones.
 
 ---
 
@@ -291,13 +292,9 @@ Se conecta con la cadena del rol público y:
   único mientras la paridad y la privacidad no estén demostradas sobre los 313.
 - **Activar `relational_v2`.** Queda para el subproyecto 3 y necesita autorización expresa
   del dueño. Aquí la bandera se queda en `legacy`.
-- **Actualizar `CLAUDE.md` y `docs/CONTINUAR-PANEL.md`.** Es una tarea documental separada
-  y ya aprobada, que se hace **antes** de empezar esta implementación y no forma parte de
+- **Actualizar `CLAUDE.md` y `docs/CONTINUAR-PANEL.md`.** Fue una tarea documental
+  separada, hecha el 30/08/2026 antes de empezar esta implementación. No forma parte de
   ella.
-- **Retirar el contenido de Quetzaltenango.** Tarea propia y separada, posterior a la
-  actualización documental. **No se mezcla con este subproyecto ni comparte su rama.**
-- El cambio de contenido por el cierre de la sede de Quetzaltenango, que va en su propia
-  rama y es independiente de esto.
 
 ---
 
@@ -369,8 +366,8 @@ todas las pruebas en verde y **autorización expresa del dueño**.
 separada**, después de cerrar y aprobar los dos documentos de diseño y **antes** de
 empezar cualquier implementación. Debe distinguir lo que existe hoy en producción, las
 decisiones futuras ya aprobadas, y lo que no puede eliminarse hasta el subproyecto 11.
-**Actualizar la documentación no autoriza a retirar `stock`, borrar
-`disponibilidad.server.ts`, eliminar el carrito actual ni tocar nada de Quetzaltenango.**
+**Esa actualización no autorizó a retirar `stock`, borrar `disponibilidad.server.ts` ni
+eliminar el carrito actual.**
 
 **4. Recuento y nomenclatura.** 33 tablas físicas nuevas: 31 de negocio y contenido,
 `app_settings` de configuración y `public_products` de proyección pública derivada.
@@ -389,5 +386,6 @@ legales, precios y DNS— están en la sección 11 del diseño global y ninguna 
 | Fecha | Cambio |
 |---|---|
 | 30/08/2026 | Documento inicial, con las tres correcciones del dueño ya incorporadas: nunca usar la conexión privilegiada como respaldo del camino público, criterio correcto de gestión del pool, y ninguna contraseña del rol en migraciones ni en el repositorio, con `current_user` comprobado en la prueba de permisos |
-| 30/08/2026 (cierre) | Las cuatro decisiones abiertas, aprobadas e incorporadas: la proyección entra en este subproyecto **como proyección derivada de prueba**, sin sustituir al catálogo del visitante; `relational_v2` no se activa aquí en ningún caso y la bandera queda en `legacy`; la actualización de `CLAUDE.md` y `CONTINUAR-PANEL.md` es tarea documental separada, previa a la implementación y sin autorización para retirar código; y `public_products` se describe como «tabla de proyección pública derivada y sincronizada», nunca como vista materializada. Añadido a «fuera de alcance» que la retirada de Quetzaltenango es tarea aparte y no comparte rama. La sección 10 pasa de preguntas abiertas a decisiones resueltas |
+| 30/08/2026 (contenido) | Retiradas de «fuera de alcance» y de la sección 10 las referencias a una tarea de contenido ya ejecutada en su propia rama; la actualización documental pasa a tiempo pasado |
+| 30/08/2026 (cierre) | Las cuatro decisiones abiertas, aprobadas e incorporadas: la proyección entra en este subproyecto **como proyección derivada de prueba**, sin sustituir al catálogo del visitante; `relational_v2` no se activa aquí en ningún caso y la bandera queda en `legacy`; la actualización de `CLAUDE.md` y `CONTINUAR-PANEL.md` es tarea documental separada, previa a la implementación y sin autorización para retirar código; y `public_products` se describe como «tabla de proyección pública derivada y sincronizada», nunca como vista materializada. La sección 10 pasa de preguntas abiertas a decisiones resueltas |
 | 30/08/2026 (revisión del dueño) | Seis correcciones: alcance de la regla de importación limitado a `app/**` con `scripts/**` excluido; el migrador **ya es transaccional** y la tarea pasa a verificarlo y probarlo; precisión de qué es atómico en la creación del pedido y qué no; `005` pasa de vista a **proyección materializada** por el contexto que necesita la limpieza de privacidad; la frontera de privacidad actual no se retira ni se desactiva; y criterios de aceptación 10, 11 y 12 |

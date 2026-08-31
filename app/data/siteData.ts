@@ -72,7 +72,7 @@ export const companyHighlights = [
   },
   {
     title: "Cobertura",
-    text: "Atención en Guatemala y Quetzaltenango para hogares, comercios y proyectos arquitectónicos.",
+    text: "Atención en la ciudad de Guatemala para hogares, comercios y proyectos arquitectónicos.",
   },
 ];
 

@@ -209,7 +209,7 @@ export default async function Home() {
           <div>
             <p className="text-base leading-7 text-white/66 sm:text-lg sm:leading-8">
               Agenda una asesoría para revisar ambientes, acabados y requerimientos
-              técnicos. También atendemos proyectos y clientes en Quetzaltenango.
+              técnicos.
             </p>
             <div className="mt-8 grid gap-3">
               <Link
@@ -239,10 +239,6 @@ export default async function Home() {
               <p>
                 <span className="font-semibold text-white">Guatemala:</span>{" "}
                 {contact.address}
-              </p>
-              <p>
-                <span className="font-semibold text-white">Xela:</span> asesoría y
-                venta de luminarias LED para hogares, comercios y proyectos.
               </p>
               <p>{contact.hours}.</p>
             </div>

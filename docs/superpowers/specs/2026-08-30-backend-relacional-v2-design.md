@@ -1,9 +1,8 @@
 # Diseño global: backend relacional v2 de ECONOLUZ
 
 **Fecha:** 30/08/2026
-**Estado:** aprobado por secciones por el dueño; pendiente de su revisión completa.
-**Alcance:** diseño. No autoriza escribir código, crear tablas, ejecutar migraciones ni
-tocar producción.
+**Estado:** aprobado definitivamente por el dueño el 30/08/2026. Diseño cerrado. No
+autoriza escribir código, crear tablas, ejecutar migraciones ni tocar producción.
 
 ---
 
@@ -18,28 +17,18 @@ especificación y su propio plan, y ninguno empieza sin autorización expresa. L
 especificación del primer subproyecto está en
 `docs/superpowers/specs/2026-08-30-fundamentos-backend-design.md`.
 
-**Relación con `CLAUDE.md` y `docs/CONTINUAR-PANEL.md`.** Este diseño **no es compatible
-con todo lo que dicen hoy esos dos archivos**: una vez aprobado, sustituye reglas vigentes
-en materia de existencias —el aviso del carrito, la columna `stock` y el flujo de
-disponibilidad— y en materia de la sede de Quetzaltenango. Esos archivos **se actualizarán
-por separado, fuera de esta tarea**, y al hacerlo tendrán que distinguir con claridad tres
-cosas distintas que hoy se confunden con facilidad:
+**Relación con `CLAUDE.md` y `docs/CONTINUAR-PANEL.md`.** Este diseño sustituye reglas que
+esos dos archivos daban por vigentes en materia de existencias: el aviso del carrito, la
+columna `stock` y el flujo de disponibilidad. **Ambos archivos ya se actualizaron el
+30/08/2026** y distinguen con claridad tres cosas que antes se confundían:
 
 1. **El comportamiento que existe hoy** y sigue funcionando en producción.
 2. **La decisión futura ya aprobada**, que todavía no está implementada.
 3. **Lo que no puede retirarse hasta el subproyecto 11**, y solo con autorización expresa.
 
-Mientras esa actualización no ocurra, quien retome el proyecto debe leer este documento
-junto a los otros dos, no en lugar de ellos.
-
-**Cuándo se hace, decidido el 30/08/2026:** es una **tarea documental separada, ya
-aprobada**, que se ejecuta **después** de cerrar y aprobar estos dos documentos y
-**antes** de empezar cualquier implementación.
-
-> **Actualizar la documentación no autoriza a tocar nada de código.** No autoriza a
-> retirar `stock`, ni a borrar `app/tienda/disponibilidad.server.ts`, ni a eliminar el
-> carrito actual, ni a hacer cambio alguno relacionado con Quetzaltenango. Solo cambia lo
-> que dicen los documentos.
+> **Leer esta documentación no autoriza a tocar código.** No autoriza a retirar `stock`,
+> ni a borrar `app/tienda/disponibilidad.server.ts`, ni a eliminar el carrito actual. Cada
+> una de esas retiradas necesita el visto bueno expreso del dueño en su momento.
 
 `docs/superpowers/plans/2026-08-19-econoluz-hardening.md` sigue siendo un documento
 histórico cuyas restricciones no están vigentes.
@@ -1061,53 +1050,11 @@ paridad total, y esa invisibilidad es precisamente lo que lo hace seguro.
 
 ---
 
-## 12. Anexo: cierre de la sede de Quetzaltenango
-
-**Esta sección no forma parte del rediseño del backend y no se deriva de él.** Es una
-decisión de negocio que el dueño comunicó expresamente el 30/08/2026, en sus propias
-palabras, al revisar la sección 1 de este diseño: que hay que quitar todo lo que tenga que
-ver con la sucursal de Xela porque ya no va a estar, y que así se lo indicaron a él.
-
-Queda registrada aquí solo para que no se pierda entre conversaciones. Es contenido, no
-backend, y se ejecuta en una rama propia, aparte de este rediseño y con su autorización.
-**Ninguna decisión técnica de este documento se justifica en ella.**
-
-**Confirmación expresa del dueño (30/08/2026):** la sede de Quetzaltenango deja de existir
-y ha pedido retirar del proyecto todo lo relacionado con ella.
-
-**Alcance de la retirada:** la web, los textos, los datos, el SEO, la documentación y
-cualquier referencia restante.
-
-**Orden de ejecución, y es parte de la decisión:**
-
-1. Primero se cierran y aprueban los dos documentos de diseño.
-2. Después se actualiza la documentación (`CLAUDE.md` y `docs/CONTINUAR-PANEL.md`).
-3. **Solo después**, y como **tarea propia y separada**, se eliminan el código y el
-   contenido de Quetzaltenango, verificando que no quede ninguna referencia.
-
-> **Esta confirmación no autoriza a mezclar esos cambios con el subproyecto 1.** Son dos
-> trabajos distintos y no comparten rama.
-
-Aparece hoy en siete lugares:
-
-- `app/components/SiteFooter.tsx` (el bloque de la sede y su texto)
-- `app/data/siteData.ts` (el texto de atención en dos ciudades)
-- `app/page.tsx` (dos menciones)
-- `CLAUDE.md` (la descripción de la empresa y la deuda técnica nº 7)
-
-**La deuda técnica nº 7 de `CLAUDE.md` —«Xela está subrepresentado», que proponía
-recuperar páginas locales para posicionar allí— queda derogada.** Volver a proponerla
-sería trabajar en contra de una decisión de la empresa.
-
-La decisión 5 (solo envío por mensajería) se tomó **antes** de conocerse este cierre y por
-razones propias; no depende de él ni se apoya en él.
-
----
-
-## 13. Historial
+## 12. Historial
 
 | Fecha | Cambio |
 |---|---|
 | 30/08/2026 | Documento inicial, aprobado por secciones con correcciones del dueño incorporadas: `firebase-admin` en lugar de `jose`, webhooks fuera de `/api/v1`, lista explícita de tablas prohibidas con prueba, `details` sin información interna, transacciones interactivas en runtime Node, borrado de cuenta que conserva la contabilidad, proyecciones públicas en lugar de tablas base, cola duradera de webhooks, criterio correcto de idempotencia y bandera de transición en `app_settings` |
-| 30/08/2026 (cierre) | Las cuatro decisiones pendientes, aprobadas e incorporadas: la proyección pública entra en el subproyecto 1 pero como proyección derivada **de prueba**, sin sustituir al catálogo del visitante y con la frontera actual intacta; la bandera queda en `legacy` al terminar el subproyecto 1, `shadow` solo compara, y `relational_v2` únicamente en el subproyecto 3 con autorización expresa; la actualización de `CLAUDE.md` y `CONTINUAR-PANEL.md` es tarea documental separada, aprobada, posterior a estos documentos y anterior a implementar, y no autoriza a retirar nada de código; y el recuento de 33 tablas físicas, con `public_products` descrita como «tabla de proyección pública derivada y sincronizada» para no confundirla con una `MATERIALIZED VIEW`. Añadida la confirmación expresa del cierre de Quetzaltenango, su alcance y su orden de ejecución |
-| 30/08/2026 (revisión del dueño) | Ocho correcciones tras su lectura completa: recuento exacto de tablas (33, desglosado en 31 de negocio, `app_settings` y la proyección derivada); auditoría corregida porque **el migrador ya es transaccional**; la factura FEL se solicita solo tras la confirmación del proveedor, no al confirmarse el pago; precisión de qué es atómico en la creación del pedido y qué no (el cobro externo nunca lo es); **la proyección pública pasa de vista a tabla materializada** porque la limpieza de privacidad usa los datos del proveedor como contexto; la regla de importación del controlador se limita a `app/**` y excluye `scripts/**`; se explicita que este diseño sustituye reglas vigentes de `CLAUDE.md` y `CONTINUAR-PANEL.md`, que se actualizarán aparte; y el cierre de Quetzaltenango pasa a anexo, sin presentarse como consecuencia técnica |
+| 30/08/2026 (contenido) | Retirado el antiguo anexo 12, que recogía una tarea de contenido ya ejecutada en su propia rama, y renumerado el historial a §12. La sección 0 pasa a tiempo pasado: `CLAUDE.md` y `docs/CONTINUAR-PANEL.md` ya están actualizados |
+| 30/08/2026 (cierre) | Las cuatro decisiones pendientes, aprobadas e incorporadas: la proyección pública entra en el subproyecto 1 pero como proyección derivada **de prueba**, sin sustituir al catálogo del visitante y con la frontera actual intacta; la bandera queda en `legacy` al terminar el subproyecto 1, `shadow` solo compara, y `relational_v2` únicamente en el subproyecto 3 con autorización expresa; la actualización de `CLAUDE.md` y `CONTINUAR-PANEL.md` es tarea documental separada, aprobada, posterior a estos documentos y anterior a implementar, y no autoriza a retirar nada de código; y el recuento de 33 tablas físicas, con `public_products` descrita como «tabla de proyección pública derivada y sincronizada» para no confundirla con una `MATERIALIZED VIEW` |
+| 30/08/2026 (revisión del dueño) | Ocho correcciones tras su lectura completa: recuento exacto de tablas (33, desglosado en 31 de negocio, `app_settings` y la proyección derivada); auditoría corregida porque **el migrador ya es transaccional**; la factura FEL se solicita solo tras la confirmación del proveedor, no al confirmarse el pago; precisión de qué es atómico en la creación del pedido y qué no (el cobro externo nunca lo es); **la proyección pública pasa de vista a tabla materializada** porque la limpieza de privacidad usa los datos del proveedor como contexto; la regla de importación del controlador se limita a `app/**` y excluye `scripts/**`; se explicita que este diseño sustituye reglas vigentes de `CLAUDE.md` y `CONTINUAR-PANEL.md`, que se actualizarán aparte |
