@@ -41,7 +41,8 @@ desde la especificación: quien ejecute debe leer las dos.
 | Tarea 7, integración en Neon | ✅ Terminada y verificada | Rama aislada `fundamentos-backend-dev`: migración 005, dos reproyecciones 313/0, privacidad e idempotencia |
 | Tarea 8 | ✅ Terminada y verificada | Migración 006 y prueba real del rol en `fundamentos-backend-dev` |
 | Tarea 9 | ✅ Terminada y verificada | Migraciones 007 y 008 aplicadas en `fundamentos-backend-dev`, `app/lib/ajustes.ts` y seis pruebas |
-| Tareas 10–12 | ⏳ No empezadas | El siguiente paso es la tarea 10: trasladar los once accesos |
+| Tarea 10 | ✅ Terminada y verificada | Once commits de traslado, `EXCEPCIONES_TRANSITORIAS` vacía y Playwright 67/67 |
+| Tareas 11–12 | ⏳ No empezadas | El siguiente paso es la tarea 11: comportamiento sin `DATABASE_URL_PUBLIC` |
 
 La revisión de la tarea 7 cambió detalles respecto a los ejemplos originales de abajo:
 la conversión a centavos vive en `app/lib/dinero.ts`, el `upsert` compartido en
@@ -102,14 +103,55 @@ identificadores y 0 coincidencias. **No se ejecutó Playwright**: la tarea no to
 ruta ni componente —`obtenerModeloDeCatalogo` no lo llama nadie todavía— y su último
 estado real sigue siendo el descrito más arriba.
 
+Tarea 10 terminada el 31/08/2026. Los once accesos pasaron a `app/lib/datos`, **uno por
+commit**, con la batería entre uno y otro y retirando su entrada de
+`EXCEPCIONES_TRANSITORIAS` en el mismo commit. La lista quedó **vacía**: dentro de
+`app/**`, solo `app/lib/datos` importa el controlador. Se comprobó que la regla no se ha
+vuelto trivial introduciendo un archivo que importaba el controlador y viendo fallar la
+prueba, que lo nombró en el mensaje.
+
+Los once van por `leer`, incluidas las escrituras: cada una resuelve **una sola
+sentencia**, así que el camino y la atomicidad quedan como estaban. La comprobación de
+`DATABASE_URL` se conservó en cada archivo con su mensaje exacto —en varios era `Falta
+DATABASE_URL.` y en el catálogo y la galería `falta DATABASE_URL`, que es justamente lo
+que dispara su respaldo—, porque delegarla en `leer` habría retrasado el error hasta la
+primera consulta y el momento del fallo también es comportamiento.
+
+**Dos efectos que sí cambian, y conviene no llamarlos «sin cambio de comportamiento» a
+secas.** Primero, estas consultas pasan a tener un **plazo máximo de diez segundos**,
+donde antes no tenían ninguno; es lo que la capa aporta, pero si una escritura de una
+sentencia agotara el plazo, quien llama recibiría indisponibilidad aunque la sentencia
+pudiera completarse después en el servidor. Segundo, los fallos llegan como `ErrorDeDatos`
+**sin el texto de Postgres**, así que los registros existentes pierden ese detalle y ganan
+la garantía de no filtrar SQL. El comentario de `app/lib/datos/consulta.ts`, que decía que
+por ahí solo pasaban lecturas idempotentes, se reescribió porque había dejado de ser
+cierto.
+
+**Dos decisiones quedan para el dueño, y no se han tomado por cuenta propia.** Hay cuatro
+operaciones que leen antes de escribir sin transacción —el alta de producto, que encadena
+tres sentencias, `setProjectPublished`, `moveProjectImage` y `setProjectImageVisible`—.
+Ya era así antes del traslado; encerrarlas en `escribir` cambiaría su atomicidad y es una
+decisión suya, no de este paso. Y ninguna escritura usa todavía `escribir()`: la
+transaccionalidad de la capa está construida y probada, pero aún no la consume nadie.
+
+Verificación de la tarea 10: `test:datos` **45/45** —con la regla estructural por fin sin
+excepciones—, `test:admin` **196/196**, `test:proveedores` **3/3**, `test:permisos`
+correcto, `typecheck` y `lint` limpios, `build` correcto y **Playwright 67/67, esta vez
+con salida limpia** en 1,6 minutos. `catalogo:auditar` sigue en 313 productos, 408
+identificadores y 0 coincidencias. En `fundamentos-backend-dev`: `modelo_catalogo` sigue
+en `legacy`, 313 productos con **25 precios**, 313 filas en la proyección, `audit_log`
+vacía y la única fila histórica de `leads` intacta. El `insert` reescrito de
+`/api/leads` se probó contra esa rama dentro de una transacción deshecha: guarda lo mismo,
+con las doce columnas en orden y `products` como `jsonb`.
+
 ### Próximo punto de control
 
-Empezar la tarea 10: trasladar los once accesos a la capa de datos, **uno por commit y sin
-cambiar comportamiento**, sacando cada archivo de `EXCEPCIONES_TRANSITORIAS` en
-`tests/datos-frontera-controlador.test.ts` a medida que deja de importar el controlador.
-La bandera sigue en `legacy` y el catálogo público no cambia de fuente. Toda comprobación
-real se hace en `fundamentos-backend-dev`, nunca en producción. No se ha hecho push,
-fusión ni despliegue.
+Empezar la tarea 11: dejar por escrito y probado qué pasa cuando falta
+`DATABASE_URL_PUBLIC`. **La conexión privilegiada no se usa nunca como respaldo del camino
+público**; en producción se sirve el respaldo estático y queda registrado un error de
+configuración. La bandera sigue en `legacy`. Toda comprobación real se hace en
+`fundamentos-backend-dev`, nunca en producción. No se ha hecho push, fusión ni
+despliegue.
 
 ## Restricciones globales
 
@@ -1930,12 +1972,12 @@ const filas = await leer<FilaProyecto>(consulta);
   no responde, y **no cambia de fuente**: sigue leyendo `products` con la conexión de la
   aplicación. La bandera se queda en `legacy`.
 
-- [ ] **Paso 1: trasladar el primer archivo**
+- [x] **Paso 1: trasladar el primer archivo**
 
 Empezar por `app/admin/panelStats.server.ts`, que es el más pequeño y ya usa el patrón del
 ejecutor.
 
-- [ ] **Paso 2: ejecutar la batería completa**
+- [x] **Paso 2: ejecutar la batería completa**
 
 ```bash
 npm run test:admin
@@ -1947,19 +1989,19 @@ npm run typecheck
 
 Esperado: 182 pruebas en verde y sin errores de tipos, **antes y después** del traslado.
 
-- [ ] **Paso 3: confirmar ese archivo**
+- [x] **Paso 3: confirmar ese archivo**
 
 ```bash
 git add app/admin/panelStats.server.ts
 git commit -m "refactor(datos): la portada del panel usa la capa de acceso"
 ```
 
-- [ ] **Paso 4: repetir los pasos 1 a 3 con los diez restantes**
+- [x] **Paso 4: repetir los pasos 1 a 3 con los diez restantes**
 
 Un archivo por commit, con la batería entre cada uno. **No agrupar**: si algo cambia de
 comportamiento, un commit por archivo dice exactamente cuál fue.
 
-- [ ] **Paso 5: comprobar que la prueba de frontera pasa a verde**
+- [x] **Paso 5: comprobar que la prueba de frontera pasa a verde**
 
 ```bash
 npm run test:datos
@@ -1968,7 +2010,7 @@ npm run test:datos
 Esperado: **ahora sí**, «solo app/lib/datos importa el controlador de Neon» en verde. Ese
 es el momento en que la regla estructural empieza a proteger de verdad.
 
-- [ ] **Paso 6: batería completa**
+- [x] **Paso 6: batería completa**
 
 Cerrar cualquier `npm run dev` abierto antes de Playwright.
 

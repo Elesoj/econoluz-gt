@@ -83,20 +83,32 @@ trabajo ha seguido sobre él hasta cerrar la tarea 9:
   sola fila con el mismo valor, `audit_log` quedó vacía con sus dos índices y su
   restricción rechazó un `actor_tipo` inventado, y `test:permisos` pasó de decir que las
   dos tablas «todavía no existen» a **denegarlas**.
+- **Tarea 10 terminada y verificada:** los **once accesos** que abrían su propia conexión
+  pasaron a `app/lib/datos`, un commit por archivo. `EXCEPCIONES_TRANSITORIAS` quedó
+  **vacía**, así que dentro de `app/**` solo `app/lib/datos` importa el controlador de
+  Neon; se comprobó metiendo a propósito un archivo que lo importaba y viendo fallar la
+  prueba. El catálogo público **no cambió de fuente** y la disponibilidad del carrito
+  conserva su lógica intacta. **Playwright volvió a pasar 67/67, esta vez con salida
+  limpia.**
+  - **Dos efectos reales del traslado**, que no conviene leer como «nada cambió»: estas
+    consultas pasan a tener un **plazo máximo de diez segundos** donde antes no tenían
+    ninguno, y sus fallos llegan como `ErrorDeDatos` **sin el texto de Postgres**.
+  - **Sigue pendiente de decisión del dueño** poner en transacción las cuatro operaciones
+    que leen antes de escribir —el alta de producto y tres del panel de proyectos—. Era
+    así antes del traslado y se dejó igual a propósito. Ver `docs/CONTINUAR-PANEL.md`.
+
 - **Verificación fresca del último cierre:** `test:datos` 45/45, `test:admin` 196/196,
   `test:proveedores` 3/3, `test:permisos` correcto, `typecheck` y `lint` limpios, `build`
-  correcto y `catalogo:auditar` con 313 productos, 408 identificadores y 0 coincidencias.
-  Playwright no se ha vuelto a ejecutar desde la tarea 7, porque las tareas 8 y 9 no tocan
-  ninguna ruta ni componente; en aquella ocasión sus 67 pruebas terminaron sin fallo de
-  prueba, pero en Windows el proceso quedó colgado al apagar su servidor y se interrumpió
-  después de la prueba 67. No se presenta ese cierre como salida limpia.
+  correcto, **Playwright 67/67 con salida limpia** y `catalogo:auditar` con 313 productos,
+  408 identificadores y 0 coincidencias. En `fundamentos-backend-dev`: `modelo_catalogo`
+  en `legacy`, 313 productos con **25 precios**, 313 filas en la proyección y `audit_log`
+  vacía.
 
-**Lo siguiente es la tarea 10, todavía no empezada:** trasladar a `app/lib/datos` los once
-archivos que hoy abren su propia conexión, **uno por commit y sin cambiar comportamiento**,
-sacando cada uno de la lista `EXCEPCIONES_TRANSITORIAS` de
-`tests/datos-frontera-controlador.test.ts` en el mismo commit. El catálogo público no
-cambia de fuente y la bandera sigue en `legacy`. Toda aplicación y prueba real se hace
-primero en `fundamentos-backend-dev`; no se toca producción.
+**Lo siguiente es la tarea 11, todavía no empezada:** dejar probado qué hace el sitio
+cuando falta `DATABASE_URL_PUBLIC`. **La conexión privilegiada no se usa nunca como
+respaldo del camino público**: en producción se sirve el respaldo estático y queda
+registrado un error de configuración. La bandera sigue en `legacy`. Toda aplicación y
+prueba real se hace primero en `fundamentos-backend-dev`; no se toca producción.
 
 Solo se ha escrito en la rama aislada de Neon. No se ha fusionado, hecho push ni
 desplegado este trabajo, y producción permanece intacta.

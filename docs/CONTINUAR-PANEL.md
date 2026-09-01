@@ -103,7 +103,7 @@ El trabajo activo ya no está solo en `main`. Continúa en:
 
 ### Qué está terminado
 
-Las tareas 1–9 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
+Las tareas 1–10 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
 incluye la migración `005`, la proyección pública, el escritor por producto, la
 reproyección total, la conversión monetaria compartida y las pruebas de paridad y
 privacidad. No hay que rehacer ninguna de esas piezas.
@@ -156,30 +156,60 @@ correcto y `catalogo:auditar` con 313 productos, 408 identificadores y 0 coincid
 **Playwright no se ejecutó en esta tarea**, porque no toca ninguna ruta ni componente; su
 último estado real es el descrito más arriba.
 
+La tarea 10 trasladó a `app/lib/datos` los **once accesos** que abrían su propia conexión,
+un commit por archivo y con la batería entre uno y otro. `EXCEPCIONES_TRANSITORIAS`, en
+`tests/datos-frontera-controlador.test.ts`, **quedó vacía**: dentro de `app/**` solo
+`app/lib/datos` importa el controlador de Neon, y se comprobó que la regla sigue mordiendo
+metiendo a propósito un archivo que lo importaba y viendo fallar la prueba.
+
+El catálogo público **no cambió de fuente** —sigue leyendo `products` con la conexión de la
+aplicación, con su caché por etiqueta y su respaldo—, la disponibilidad del carrito sigue
+consultando `products.stock` sin tocar su lógica, y `modelo_catalogo` sigue en `legacy`.
+
+**Dos cosas sí cambiaron, y no conviene leer «sin cambio de comportamiento» como si nada
+hubiera cambiado.** Estas consultas pasan a tener un **plazo máximo de diez segundos**
+donde antes no tenían ninguno, y sus fallos llegan como `ErrorDeDatos` **sin el texto de
+Postgres**: los registros pierden ese detalle y ganan la garantía de no filtrar SQL.
+
+La verificación dio `test:datos` **45/45**, `test:admin` **196/196**, `test:proveedores`
+**3/3**, `test:permisos` correcto, `typecheck` y `lint` limpios, `build` correcto y
+**Playwright 67/67 con salida limpia** —esta vez el proceso no se colgó al apagar el
+servidor—. `catalogo:auditar` sigue en 313/408/0, y en `fundamentos-backend-dev` quedan
+313 productos con **25 precios**, 313 filas en la proyección, `audit_log` vacía y la única
+fila histórica de `leads` intacta.
+
 ### El siguiente paso exacto
 
-Empezar la **tarea 10**, sin adelantar ninguna de las posteriores:
+Empezar la **tarea 11**, sin adelantar la 12:
 
-1. Trasladar a `app/lib/datos` los once archivos que hoy abren su propia conexión. Están
-   listados en `EXCEPCIONES_TRANSITORIAS`, dentro de
-   `tests/datos-frontera-controlador.test.ts`.
-2. **Un archivo por commit y sin cambiar comportamiento**, sacando su entrada de esa lista
-   en el mismo commit y pasando la batería completa entre uno y otro.
-3. El catálogo público **no cambia de fuente**: sigue leyendo `products`, y la bandera
-   sigue en `legacy`.
+1. Dejar probado qué hace el sitio cuando falta `DATABASE_URL_PUBLIC`.
+2. **La conexión privilegiada no se usa nunca como respaldo del camino público.** En
+   producción se sirve el respaldo estático y queda registrado un error de configuración;
+   que el sitio siguiera funcionando sin barrera es justamente el fallo que hay que
+   evitar.
+3. La bandera sigue en `legacy`.
 4. Verificar en `fundamentos-backend-dev`. No usar producción.
 
 ### Estado de integración
 
 Solo se ha escrito en la rama aislada `fundamentos-backend-dev` para integrar las tareas
-7, 8 y 9.
+7, 8, 9 y 10.
 No se ha escrito en producción, fusionado la rama, hecho push ni desplegado. `main` sigue
 en `19d0106` y `origin/main` en `a4defad`; la implementación vive solo en el worktree.
 Los 25 precios existentes permanecen intactos por decisión del dueño.
 
 ### Otras decisiones que siguen pendientes
 
-1. **Borrar las carpetas de imágenes antiguas.** `/catalogos/construlita/…`,
+1. **Poner en transacción las cuatro operaciones que leen antes de escribir.** El alta de
+   producto encadena tres sentencias —pedir el número de la secuencia, mirar la última
+   posición e insertar— y `setProjectPublished`, `moveProjectImage` y
+   `setProjectImageVisible` leen y después escriben. Era así antes del traslado y se dejó
+   igual a propósito: la capa ya ofrece `escribir()`, probado, pero encerrarlas cambia su
+   atomicidad y con ello lo que ocurre si algo falla a mitad. **Es una decisión del
+   dueño.** El riesgo real es pequeño —una sola persona administra el panel—, y por eso
+   no urge.
+
+2. **Borrar las carpetas de imágenes antiguas.** `/catalogos/construlita/…`,
    `/highlum/…` y `/artlite/…` siguen respondiendo 200 en producción si alguien conoce
    la URL, aunque ninguna página las enlace. Borrarlas cierra la fuga del todo. **No
    borrar sin su autorización expresa.**
