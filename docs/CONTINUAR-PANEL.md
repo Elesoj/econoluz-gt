@@ -96,18 +96,20 @@ Leer esta documentación no ejecuta esa retirada ni basta como autorización.
 
 El subproyecto 1 ya no está pendiente de integración:
 
-- **`main` local:** `4ffc547`, con `feat/fundamentos-backend` fusionada por avance rápido
+- **`main`:** contiene `4ffc547`, con `feat/fundamentos-backend` fusionada por avance
+  rápido, y la documentación del despliegue publicada desde `7d882f6`
 - **Worktree conservado:** `.worktrees/fundamentos-backend`, limpio y en el mismo commit
 - **Plan terminado:** `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`
 - **Siguiente desarrollo:** subproyecto 2, identidad de clientes; todavía no iniciado
 
-### El subproyecto 1 está terminado y preparado para producción (01/09/2026)
+### El subproyecto 1 está terminado y desplegado (01/09/2026)
 
 **Las doce tareas están hechas, verificadas, documentadas y fusionadas.** El dueño
 autorizó por separado la fusión y después la preparación y el despliegue. En producción
 ya están aplicadas las migraciones `005` a `008`, `public_products` tiene 313 filas, el
 rol `econoluz_publico` pasó la prueba completa de permisos y `DATABASE_URL_PUBLIC` está
-guardada como secreto de Production en Vercel.
+guardada como secreto de Production en Vercel. GitHub recibió `main` hasta `7d882f6` y
+Vercel marcó ese despliegue como `Ready` y `Current`.
 
 Estado de la última verificación completa, toda ella en el worktree y —cuando hacía falta
 base de datos— solo contra `fundamentos-backend-dev`:
@@ -260,8 +262,12 @@ Estado comprobado el 01/09/2026:
 5. `DATABASE_URL_PUBLIC` quedó guardada como **Secret** solo para Production en Vercel.
 6. Los portapapeles temporales usados para trasladar el secreto se vaciaron; ninguna
    credencial se escribió en el repositorio ni apareció en los documentos.
-7. La publicación de `main` fue autorizada. El push de la actualización documental
-   inicia el despliegue automático de Vercel y debe verificarse antes de dar el cierre.
+7. La publicación de `main` fue autorizada y llegó a GitHub en `7d882f6`. Vercel marcó
+   el despliegue como `Ready` y `Current`.
+8. La comprobación directa encontró operativas la portada, el catálogo, el producto
+   `ECO-ELE-0001` con `Q100.00` y acción de compra, el carrito y la redirección de
+   `/admin` a `/admin/entrar`; los nombres conocidos del proveedor no aparecieron en el
+   resultado público revisado.
 
 Después de eso, y solo con su autorización, vendría el **subproyecto 2 (identidad de
 clientes)**. El subproyecto 3 es el que enganchará la proyección, la bandera y la política
@@ -270,11 +276,14 @@ dueño** y no se hace por el hecho de que las piezas estén probadas.
 
 ### Estado de integración
 
-`main` local y `feat/fundamentos-backend` apuntan a `4ffc547`; el worktree se conserva
-limpio. Neon de producción ya tiene las migraciones `005` a `008`, la proyección de 313
-filas y el rol público restringido. Los **25 precios existentes permanecen intactos**,
-`modelo_catalogo` sigue en `legacy` y ninguna ruta pública ha cambiado de fuente: el
-enganche se hará en el subproyecto 3 con autorización expresa.
+`feat/fundamentos-backend` y su worktree se conservan limpios en `4ffc547`; `main` contiene
+esa integración y los commits documentales posteriores. Neon de producción ya tiene las
+migraciones `005` a `008`, la proyección de 313 filas y el rol público restringido. Los
+**25 precios existentes permanecen intactos**, `modelo_catalogo` sigue en `legacy` y
+ninguna ruta pública ha cambiado de fuente: el enganche se hará en el subproyecto 3 con
+autorización expresa. `origin/main` y el despliegue de producción incluyen ya todo el
+subproyecto 1; el commit documental de cierre se publica a continuación sin cambios de
+aplicación.
 
 ### Otras decisiones que siguen pendientes
 

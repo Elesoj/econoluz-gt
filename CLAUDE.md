@@ -131,9 +131,10 @@ los 313 productos, se activó y comprobó el rol `econoluz_publico` y se añadi�
 producción y el despliegue fueron autorizados expresamente el 01/09/2026. Las migraciones
 `005` a `008` están aplicadas en producción, `public_products` contiene 313 filas, el rol
 público pasó `test:permisos` con las diez tablas protegidas denegadas y
-`DATABASE_URL_PUBLIC` está guardada como secreto de Production en Vercel. La publicación
-de `main` y la comprobación del despliegue cierran la operación; el subproyecto 2 no ha
-empezado.
+`DATABASE_URL_PUBLIC` está guardada como secreto de Production en Vercel. `main` se
+publicó en GitHub hasta `7d882f6` y Vercel lo dejó `Ready` y `Current`. Se comprobaron la
+portada, el catálogo, un producto con precio y compra, el carrito y la redirección del
+panel a la entrada; el subproyecto 2 no ha empezado.
 
 **Tres piezas quedan construidas y probadas pero sin consumidor**, y no deben darse por
 activas: nadie llama a `proyectarProducto` —la proyección **no se mantiene sola**—, nadie
@@ -932,12 +933,13 @@ especificación, su plan, sus pruebas y un punto de revisión con el dueño:
 **No existe un subproyecto 4:** era inventario y reservas, y desapareció con la decisión
 de §0.2.
 
-**El subproyecto 1 está terminado**; su estado preciso está en §0.4 y en
+**El subproyecto 1 está terminado y desplegado**; su estado preciso está en §0.4 y en
 `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`. Se cerraron sus doce tareas,
-se fusionó en `main`, se preparó Neon de producción y el dueño autorizó su publicación el
-01/09/2026. El siguiente desarrollo es el **subproyecto 2, identidad de clientes**; debe
-empezar con su propio diseño y punto de aprobación. El catálogo relacional corresponde al
-subproyecto 3 y no se adelanta.
+se fusionó en `main`, se preparó Neon de producción y se publicó con autorización expresa
+el 01/09/2026. Vercel marcó el despliegue como `Ready` y `Current`, y las rutas críticas se
+comprobaron directamente. El siguiente desarrollo es el **subproyecto 2, identidad de
+clientes**; debe empezar con su propio diseño y punto de aprobación. El catálogo
+relacional corresponde al subproyecto 3 y no se adelanta.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar
