@@ -119,10 +119,26 @@ trabajo ha seguido sobre él hasta cerrar la tarea 9:
   `modelo_catalogo` en `legacy`, 313 productos con **25 precios**, 313 filas en la
   proyección y `audit_log` vacía.
 
-**Lo siguiente es la tarea 12, la última del subproyecto 1:** cierre y documentación, con
-los doce criterios de aceptación comprobados uno a uno. **Al terminarla hay punto de
-revisión con el dueño antes de empezar el subproyecto 2.** La bandera sigue en `legacy` y
-el catálogo público no ha cambiado de fuente.
+- **Tarea 12 terminada:** baterías completas, los **doce criterios de aceptación
+  comprobados uno a uno con su evidencia** —están en el plan, sección «Cierre del
+  subproyecto 1»— y `.env.example`, `docs/OPERACION-ROL-PUBLICO.md`, este archivo y
+  `docs/CONTINUAR-PANEL.md` al día.
+
+**El subproyecto 1 está terminado y esperando la revisión del dueño.** No se empieza el
+subproyecto 2, no se fusiona, no se empuja y no se despliega sin su autorización expresa.
+Lo que hace falta antes de integrar está en `docs/CONTINUAR-PANEL.md`, en «Antes de
+integrar esta rama»: autorizar fusión y despliegue por separado, aplicar las migraciones
+005 a 008 en producción, crear allí el rol público y añadir `DATABASE_URL_PUBLIC` a Vercel.
+
+**Tres piezas quedan construidas y probadas pero sin consumidor**, y no deben darse por
+activas: nadie llama a `proyectarProducto` —la proyección **no se mantiene sola**—, nadie
+llama a `obtenerModeloDeCatalogo` ni al camino público de lectura, y ninguna escritura del
+panel usa `escribir()`. Son del subproyecto 3. Por eso **desplegar este código sin aplicar
+las migraciones nuevas en producción no rompe nada**: ninguna ruta toca esas tablas.
+
+La bandera sigue en `legacy` y el catálogo público no ha cambiado de fuente. **Cambiarla
+requiere autorización expresa del dueño**, y que las piezas estén probadas no es
+autorización.
 
 Solo se ha escrito en la rama aislada de Neon. No se ha fusionado, hecho push ni
 desplegado este trabajo, y producción permanece intacta.
@@ -529,7 +545,23 @@ frontend/
       projects.server.ts          lectura pública desde Neon, caché y respaldo local
       projectsQuery.ts            consulta y reconstrucción del contrato público
       siteData.ts                 navegación, contacto, home, FAQ, proveedores
-    lib/formatters.ts             formateo de números y moneda
+      proyeccionPublica.ts        producto interno -> fila de `public_products`
+      proyeccionPublica.server.ts escribe la proyección dentro de transacción
+      proyeccionPublicaSql.ts     el `upsert` compartido por los dos escritores
+      origenPublico.ts            de dónde sale el catálogo público; aún sin consumidor
+    lib/
+      formatters.ts               formateo de números y moneda
+      dinero.ts                   quetzales <-> centavos enteros
+      ajustes.ts                  lectura tipada de `app_settings`, conservadora
+      ajustes.server.ts           la misma lectura con caché breve
+      datos/                      LA ÚNICA CARPETA QUE IMPORTA EL CONTROLADOR DE NEON
+        index.ts                  la superficie pública: leer, leerPublico, escribir
+        conexion.ts               las dos conexiones, creadas de forma perezosa
+        consulta.ts               consultar por HTTP con tiempo máximo y tipado
+        transaccion.ts            BEGIN/COMMIT/ROLLBACK y liberación garantizada
+        escritura.ts              el contrato de `escribir`, con registro
+        errores.ts                los cuatro errores tipados
+        registro.ts               registro estructurado, sin datos personales
     admin/                        el panel, detrás de autenticación
       layout.tsx                  metadata `noindex` del panel entero
       entrar/                     pantalla de acceso pública
@@ -550,6 +582,7 @@ frontend/
     008_audit_log.sql             quién cambió qué, con el antes y el después
   scripts/                        utilidades de línea de comandos (ver "Comandos")
   docs/CONTINUAR-PANEL.md         hoja de traspaso: qué falta y cómo hacerlo
+  docs/OPERACION-ROL-PUBLICO.md   crear, rotar y verificar la credencial del rol público
   tests/                          Playwright: catálogo, cotización y fronteras de datos
   public/
     logo_econoluz.png
@@ -674,6 +707,15 @@ entrenamiento. Antes de escribir código, consulta la guía correspondiente en
   servidor. Vale para el carrito, el checkout y el cobro.
 - **El dinero se suma en centavos enteros**, nunca en coma flotante. `formatPrice` solo
   al pintar.
+- **Todo acceso a Postgres desde `app/**` pasa por `app/lib/datos`.** Ningún otro archivo
+  importa `@neondatabase/serverless`, y `tests/datos-frontera-controlador.test.ts` lo
+  vigila con una lista de excepciones que hoy está vacía. `scripts/**` queda fuera a
+  propósito: `scripts/migrate.mjs` crea el esquema del que depende la capa.
+  Las lecturas y las escrituras de una sola sentencia van por `leer`; `escribir` es para
+  las operaciones que necesitan transacción.
+- **La conexión privilegiada nunca sustituye al rol público en producción.** Si falta
+  `DATABASE_URL_PUBLIC`, se sirve el respaldo estático y se registra el error; ver
+  `app/data/origenPublico.ts`.
 - Accesibilidad: contraste suficiente, textos alternativos en imágenes,
   navegación por teclado funcional.
 - Rendimiento: las imágenes **ya están optimizadas** (430 archivos, 24 MB en total,
@@ -734,7 +776,19 @@ Problemas ya identificados en la versión actual. No los repitas y ayúdame a re
    El título nuevo ("Catálogo de iluminación por cotización") no lo busca nadie.
    Hay que conservar las palabras clave reales y mapear redirects 301 desde las
    URLs viejas de WordPress.
-7. **`app/components/ui/FilterChip.tsx` quedó sin usar** al retirar el filtro de series.
+7. **Cuatro operaciones del panel leen antes de escribir sin transacción.** El alta de
+   producto encadena tres sentencias —pedir el número de la secuencia, mirar la última
+   posición e insertar— y `setProjectPublished`, `moveProjectImage` y
+   `setProjectImageVisible` leen y después escriben. **Ya era así antes** de que existiera
+   la capa de datos; el traslado del subproyecto 1 las dejó igual a propósito, porque
+   encerrarlas en `escribir()` cambia su atomicidad y con ello lo que ocurre si algo falla
+   a mitad. La capa ya ofrece `escribir()`, construido y probado, así que el arreglo es
+   pequeño cuando se decida. **Es una decisión del dueño**, y no urge: una sola persona
+   administra el panel, de modo que dos escrituras simultáneas sobre el mismo proyecto son
+   improbables. El riesgo real es quedarse con una posición repetida o una foto a medio
+   mover si Neon corta justo entre las dos sentencias.
+
+8. **`app/components/ui/FilterChip.tsx` quedó sin usar** al retirar el filtro de series.
    No se borró porque la sección 9 prohíbe borrar archivos sin preguntar antes.
 
 ---

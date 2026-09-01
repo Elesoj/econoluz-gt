@@ -97,6 +97,16 @@ con el de `DATABASE_URL` del mismo worktree y ser el endpoint de
 | Staging | Rama dedicada de staging | Secreto del entorno Preview de Vercel | No reutilizar la rama ni la credencial de producción. |
 | Producción | Rama de producción | Secreto del entorno Production de Vercel | Nunca usar `DATABASE_URL` como sustituto; configurar solo con autorización de despliegue. |
 
+**Qué pasa si la cadena falta.** No es una pregunta abierta: la regla vive en
+`app/data/origenPublico.ts` y la fijan las doce pruebas de
+`tests/datos-respaldo-configuracion.test.ts`. En producción se sirve el catálogo escrito
+en el código y se registra `catalogo-publico-sin-cadena-publica`, **y la conexión
+privilegiada no llega a invocarse**; en desarrollo local sí se usa, dejando el aviso
+`catalogo-publico-con-conexion-privilegiada`, para no exigir credenciales del rol público
+solo para arrancar el sitio. Dos de esas pruebas vigilan que `ejecutorPublico` y
+`leerPublico` no puedan degradar a la conexión privilegiada, y se comprobó que fallan
+cuando esa protección se rompe a propósito.
+
 Aplicar las migraciones con la conexión administrativa de cada rama y activar allí el
 rol. Las credenciales de una rama no se dan por válidas en otra. Limitar el secreto de
 Vercel al entorno correspondiente y provocar un despliegue nuevo después de cambiarlo.
@@ -116,6 +126,12 @@ La prueba exige, en este orden:
 2. que cada tabla protegida deniegue la lectura o todavía no exista;
 3. que `public_products` sea legible;
 4. que no haya tablas o vistas públicas sin clasificar.
+
+Desde la tarea 9 **las diez tablas protegidas existen todas** —`app_settings` y
+`audit_log` incluidas— y las diez deniegan la lectura: ya no queda ninguna que pase la
+comprobación por no existir todavía. El cuarto punto también está probado de verdad: se
+creó una vista sin clasificar en la rama de desarrollo, la prueba falló nombrándola y
+terminó con código 1, y al retirarla volvió a pasar.
 
 Un resultado correcto termina con `Todo correcto.` y código cero. Una cadena del
 propietario falla en el primer punto. Repetir la prueba después de cada migración, cambio

@@ -101,9 +101,45 @@ El trabajo activo ya no está solo en `main`. Continúa en:
 - **Base documental anterior a la integración:** `b14a931`
 - **Plan:** `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`
 
-### Qué está terminado
+### El subproyecto 1 está terminado (31/08/2026)
 
-Las tareas 1–11 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
+**Las doce tareas están hechas, verificadas y documentadas.** La rama espera la revisión
+del dueño: no se ha fusionado, ni empujado, ni desplegado, y producción sigue intacta.
+
+Estado de la última verificación completa, toda ella en el worktree y —cuando hacía falta
+base de datos— solo contra `fundamentos-backend-dev`:
+
+| Comprobación | Resultado |
+|---|---|
+| `test:datos` | 57/57 |
+| `test:admin` | 196/196 (la batería tal como estaba en `main`: 190/190) |
+| `test:proveedores` | 3/3 |
+| `test:permisos` | correcto |
+| `typecheck` y `lint` | limpios |
+| `build` | correcto |
+| Playwright | **67/67 con salida limpia** |
+| `catalogo:auditar` | 313 productos, 408 identificadores, **0** coincidencias |
+| `catalogo:verificar` | 313 filas, idénticas antes y después del viaje |
+| En Neon dev | `modelo_catalogo = legacy`, 313 productos con **25 precios**, 313 en la proyección, `audit_log` vacía |
+
+Los doce criterios de aceptación están comprobados **uno a uno, con su evidencia**, en el
+plan: `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`, sección «Cierre del
+subproyecto 1».
+
+**Tres piezas están construidas y probadas pero todavía sin consumidor**, y conviene no
+darlas por activas: nadie llama a `proyectarProducto` —así que la proyección **no se
+mantiene sola** y se desincronizaría en cuanto se editara un producto—, nadie llama a
+`obtenerModeloDeCatalogo` ni al camino público de lectura, y ninguna escritura del panel
+usa `escribir()`. Todo eso es del subproyecto 3. La consecuencia práctica es tranquila:
+**desplegar este código sin aplicar las migraciones 005 a 008 en producción no rompe
+nada**, porque ninguna ruta toca las tablas nuevas.
+
+### Historial de verificación, tarea por tarea
+
+> Las cifras de cada párrafo son las de su momento y no se han reescrito. El estado
+> vigente es el de la tabla de arriba.
+
+Las tareas 1–12 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
 incluye la migración `005`, la proyección pública, el escritor por producto, la
 reproyección total, la conversión monetaria compartida y las pruebas de paridad y
 privacidad. No hay que rehacer ninguna de esas piezas.
@@ -205,21 +241,37 @@ Verificación: `test:datos` **57/57**, `test:admin` **196/196**, `test:proveedor
 `catalogo:auditar` 313/408/0. Playwright no se repitió en esta tarea, que no toca ninguna
 ruta; su último estado real es el 67/67 con salida limpia de la tarea 10.
 
-### El siguiente paso exacto
+### Antes de integrar esta rama
 
-Empezar la **tarea 12**, que es la última del subproyecto 1:
+Nada de lo que sigue está hecho, y **ninguno de estos pasos se da por autorizado**: cada
+uno necesita el visto bueno expreso del dueño.
 
-1. Cierre y documentación: repasar `.env.example`, `docs/OPERACION-ROL-PUBLICO.md`,
-   `CLAUDE.md` y este documento, y comprobar los doce criterios de aceptación de la
-   especificación uno a uno.
-2. La bandera sigue en `legacy` y el catálogo público no cambia de fuente.
-3. **Al terminar hay punto de revisión con el dueño**, antes de empezar el subproyecto 2.
-4. Nada de esto autoriza a fusionar, empujar ni desplegar.
+1. **Autorizar la fusión** de `feat/fundamentos-backend` en `main`, y **por separado** el
+   despliegue. Son dos decisiones, no una.
+2. **Aplicar las migraciones 005 a 008 en la rama de producción de Neon** con
+   `npm run db:migrar`. Hoy producción solo tiene las cuatro primeras. No es urgente:
+   ninguna ruta toca las tablas nuevas, así que el código funciona igual sin ellas.
+3. **Crear el rol `econoluz_publico` en la rama de producción** y generar su contraseña,
+   siguiendo `docs/OPERACION-ROL-PUBLICO.md`. La migración crea el rol sin acceso; darle
+   `login` y contraseña es un paso manual y deliberado.
+4. **Añadir `DATABASE_URL_PUBLIC` a Vercel** como secreto del entorno Production. Mientras
+   no exista, el camino público simplemente no se usa; **nunca** poner ahí la cadena
+   administrativa.
+5. **Si se aplican las migraciones, poblar la proyección** con `catalogo:reproyectar`
+   apuntando a producción. Y tener presente que **se quedará desactualizada**: nadie la
+   reproyecta al guardar un producto todavía.
+6. **Repetir la batería completa** después de fusionar, incluido Playwright con el `dev`
+   cerrado.
+
+Después de eso, y solo con su autorización, vendría el **subproyecto 2 (identidad de
+clientes)**. El subproyecto 3 es el que enganchará la proyección, la bandera y la política
+de origen; **cambiar la fuente del catálogo público necesita autorización expresa del
+dueño** y no se hace por el hecho de que las piezas estén probadas.
 
 ### Estado de integración
 
-Solo se ha escrito en la rama aislada `fundamentos-backend-dev` para integrar las tareas
-7, 8, 9, 10 y 11.
+Solo se ha escrito en la rama aislada `fundamentos-backend-dev`, para integrar y verificar
+las tareas 7 a 12.
 No se ha escrito en producción, fusionado la rama, hecho push ni desplegado. `main` sigue
 en `19d0106` y `origin/main` en `a4defad`; la implementación vive solo en el worktree.
 Los 25 precios existentes permanecen intactos por decisión del dueño.

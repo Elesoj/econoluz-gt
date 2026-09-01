@@ -43,7 +43,7 @@ desde la especificación: quien ejecute debe leer las dos.
 | Tarea 9 | ✅ Terminada y verificada | Migraciones 007 y 008 aplicadas en `fundamentos-backend-dev`, `app/lib/ajustes.ts` y seis pruebas |
 | Tarea 10 | ✅ Terminada y verificada | Once commits de traslado, `EXCEPCIONES_TRANSITORIAS` vacía y Playwright 67/67 |
 | Tarea 11 | ✅ Terminada y verificada | `origenPublico.ts` y doce pruebas; el enganche al catálogo queda para el subproyecto 3 |
-| Tarea 12 | ⏳ No empezada | El siguiente paso es el cierre y la documentación del subproyecto |
+| Tarea 12 | ✅ Terminada | Baterías completas, los doce criterios comprobados uno a uno y la documentación al día |
 
 La revisión de la tarea 7 cambió detalles respecto a los ejemplos originales de abajo:
 la conversión a centavos vive en `app/lib/dinero.ts`, el `upsert` compartido en
@@ -189,11 +189,58 @@ Batería: `test:datos` **57/57**, `test:admin` **196/196**, `test:proveedores` *
 ni componente y el código de rutas es el mismo que pasó 67/67 con salida limpia en la
 tarea 10.
 
+### Cierre del subproyecto 1 — los doce criterios, uno por uno (31/08/2026)
+
+Todo lo que sigue se comprobó en el worktree y, cuando hacía falta base de datos,
+**exclusivamente contra la rama aislada `fundamentos-backend-dev`**.
+
+| # | Criterio | Evidencia |
+|---|---|---|
+| 1 | Solo `app/lib/datos` importa el controlador, dentro de `app/**` | `grep` devuelve `conexion.ts` e `index.ts` y nada más; `EXCEPCIONES_TRANSITORIAS` vacía; la prueba falla si se mete un archivo que lo importe |
+| 2 | Las baterías pasan igual que antes | La batería `test:admin` **tal como estaba en `main`**, ejecutada sobre el código nuevo: **190/190**. Hoy son 196 porque la tarea 7 añadió seis. Playwright **67/67 con salida limpia**; `typecheck`, `lint` y `build` correctos |
+| 3 | El catálogo devuelve los mismos 313 | `catalogo:verificar`: 313 filas, 64 con galería, 313 con ficha, «idéntica antes y después del viaje»; `catalog-data-baseline.spec.ts` en verde |
+| 4 | La prueba de permisos verifica identidad, tablas y objetos sin clasificar | `test:permisos`: `current_user` correcto, **diez** tablas denegadas y la proyección legible. Se creó una vista sin clasificar en dev: la prueba falló nombrándola y salió con código 1; retirada, volvió a pasar |
+| 5 | Una transacción que falla no deja nada escrito | Contra dev: dos `insert` en `audit_log`, el segundo inválido (23514). La tabla quedó en **0 filas** |
+| 6 | El pool queda sano tras una transacción fallida | En la misma prueba real: 1 conexión, **1 inactiva, 0 esperando**; una transacción posterior funcionó; al cerrar el pool, cero |
+| 7 | Una migración defectuosa no deja rastro ni queda registrada | Se aplicó en dev un `db/999` que creaba una tabla y luego fallaba: la migración reventó, `schema_migrations` quedó **sin la fila** y la tabla parcial **no se creó**. Más las cuatro pruebas de `datos-migrador.test.ts` |
+| 8 | Sin `DATABASE_URL_PUBLIC` en producción, respaldo estático y error registrado | Las doce pruebas de `datos-respaldo-configuracion.test.ts`, con espías que demuestran que la conexión privilegiada **no llega a invocarse**, y dos pruebas estructurales que se comprobó que muerden |
+| 9 | Ninguna contraseña ni cadena en el repositorio ni en los registros | Las tres apariciones de `postgresql://` son marcadores (`<CONTRASEÑA>`, `ejemplo.invalid`, `host.neon.tech`); `.env.local` no está versionado y `.gitignore` cubre `.env*`; los scripts imprimen solo `new URL(...).host`; el registro de una transacción fallida salió con `causa` y `codigoSql`, sin texto de Postgres |
+| 10 | Paridad de la proyección con `toPublicProduct` | Lectura real **con el rol público** de las 313 filas y comparación campo por campo contra `aFilaProyeccion`: **0 diferencias**, 25 precios. La comparación ordena las claves porque `jsonb` no conserva el orden de inserción |
+| 11 | Privacidad sobre la proyección | `catalogo:auditar` 313/408/**0**; sobre el contenido real de `public_products`, **ninguna** marca conocida y las imágenes solo por `/catalogos/arquitectonico`, `/lineal` y `/electrico`; `test:proveedores` 3/3; ninguna columna prohibida entre las 16 |
+| 12 | La frontera de privacidad sigue intacta y la bandera en `legacy` | `git diff main` **vacío** para `publicProduct.ts` y `publicProductPrivacy.ts`, que además siguen usándose desde `catalog.server.ts` y desde la proyección; `modelo_catalogo = legacy` |
+
+**Un aviso de la primera medición, por si alguien repite el ejercicio.** Al comprobar los
+criterios 10 y 11 con un script propio salieron 312 «diferencias» y 2 «fugas». Las dos
+alarmas eran del script: `jsonb` devuelve las claves en otro orden, y el filtrado de
+identificadores no replicaba el del auditor oficial —construía 352 agujas en vez de 408—.
+Con la comparación insensible al orden y apoyándose en el auditor de verdad, ambos
+criterios salen limpios. **No reimplementar `catalogo:auditar` para verificar nada.**
+
+### Lo que este subproyecto deja construido pero sin consumidor
+
+Conviene saberlo antes de dar nada por activo:
+
+- **Nadie llama a `proyectarProducto`.** El panel no reproyecta al guardar un producto, así
+  que la proyección **no se mantiene sola**: hoy está al día porque se reconstruyó entera
+  con `catalogo:reproyectar`, y se desincronizaría en cuanto alguien editara un producto.
+  No hace daño porque tampoco la lee nadie, pero engancharla es requisito antes de que
+  sirva para algo.
+- **Nadie llama a `obtenerModeloDeCatalogo`, `leerPublico` ni `servirCatalogoPublico`.** La
+  bandera, el camino público y la política de origen están probados y esperando al
+  subproyecto 3.
+- **Ninguna escritura usa `escribir()`** salvo la propia proyección. Las cuatro operaciones
+  que leen antes de escribir siguen sin transacción, por decisión del dueño.
+
+La consecuencia práctica es tranquilizadora: **desplegar este código sin aplicar las
+migraciones 005 a 008 en producción no rompe nada**, porque ninguna ruta toca las tablas
+nuevas.
+
 ### Próximo punto de control
 
-Empezar la tarea 12, la última: cierre y documentación del subproyecto, y **punto de
-revisión con el dueño antes de tocar el subproyecto 2**. La bandera sigue en `legacy` y
-nada de esto se ha fusionado, empujado ni desplegado.
+**El subproyecto 1 está terminado y esperando la revisión del dueño.** Las doce tareas
+están hechas y verificadas. No se empieza el subproyecto 2, no se fusiona, no se empuja y
+no se despliega sin su autorización expresa. Lo que hace falta antes de una futura
+integración está en `docs/CONTINUAR-PANEL.md`, en «Antes de integrar esta rama».
 
 ## Restricciones globales
 
@@ -2195,7 +2242,7 @@ git commit -m "feat(datos): el respaldo publico nunca usa la conexion privilegia
 
 ## Tarea 12: Cierre y documentación
 
-- [ ] **Paso 1: ejecutar todo**
+- [x] **Paso 1: ejecutar todo**
 
 ```bash
 npm run test:datos
@@ -2225,7 +2272,7 @@ npm run build
 npx playwright test
 ```
 
-- [ ] **Paso 2: comprobar los doce criterios de aceptación**
+- [x] **Paso 2: comprobar los doce criterios de aceptación**
 
 Recorrer uno por uno la sección 6 de la especificación y anotar la evidencia de cada uno.
 **El criterio 12 exige comprobar que la bandera sigue en `legacy`** y que
@@ -2237,20 +2284,20 @@ git diff main --stat -- app/data/publicProduct.ts app/data/publicProductPrivacy.
 
 Esperado: salida vacía.
 
-- [ ] **Paso 3: actualizar la documentación**
+- [x] **Paso 3: actualizar la documentación**
 
 `CLAUDE.md` (§4, comandos nuevos y la carpeta `app/lib/datos/`) y
 `docs/CONTINUAR-PANEL.md` (§0.1, qué hacer a continuación). **Sin retirar nada de lo que
 la sección 0 protege.**
 
-- [ ] **Paso 4: confirmar**
+- [x] **Paso 4: confirmar**
 
 ```bash
 git add CLAUDE.md docs/CONTINUAR-PANEL.md
 git commit -m "docs: dejar por escrito la capa de acceso a datos"
 ```
 
-- [ ] **Paso 5: punto de revisión con el dueño**
+- [x] **Paso 5: punto de revisión con el dueño**
 
 Presentarle: los doce criterios con su evidencia, la batería completa, y **lo que hay que
 hacer en Neon y en Vercel antes de desplegar** —crear el rol, generar su contraseña y
