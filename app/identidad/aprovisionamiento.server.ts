@@ -4,6 +4,7 @@ import { escribir } from "../lib/datos";
 import type { IdentidadVerificada } from "./firebase.server";
 import {
   SQL_APROVISIONAR,
+  SQL_BLOQUEAR_APROVISIONAMIENTO,
   interpretarAprovisionamiento,
   parametrosDeAprovisionamiento,
   type ClienteAprovisionado,
@@ -15,6 +16,7 @@ export async function aprovisionarCliente(
 ): Promise<ClienteAprovisionado> {
   return escribir(
     async (ejecutar) => {
+      await ejecutar(SQL_BLOQUEAR_APROVISIONAMIENTO, [identidad.uid]);
       const filas = await ejecutar(SQL_APROVISIONAR, parametrosDeAprovisionamiento(identidad));
       return interpretarAprovisionamiento(filas);
     },

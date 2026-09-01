@@ -87,6 +87,24 @@ try {
     await cliente.query("rollback to savepoint direccion_duplicada");
   }
 
+  for (let i = 0; i < 10; i += 1) {
+    await cliente.query(
+      "insert into auth_events (tipo, resultado, ip_huella) values ('fallo', 'fallido', $1)",
+      ["huelladeprueba0000000000000000000"],
+    );
+  }
+  const { rows: fallos10 } = await cliente.query(
+    `select count(*)::int as n from auth_events
+     where ip_huella = $1 and resultado = 'fallido'
+       and ocurrido_en > now() - ($2 || ' minutes')::interval`,
+    ["huelladeprueba0000000000000000000", "15"],
+  );
+  if (fallos10[0].n === 10) {
+    bien("la ventana cuenta los diez fallos de la misma huella");
+  } else {
+    mal(`contó ${fallos10[0].n} fallos y debería contar 10`);
+  }
+
   console.log(fallos === 0 ? "\nTodo correcto." : `\n${fallos} fallo(s).`);
   process.exitCode = fallos === 0 ? 0 : 1;
 } finally {

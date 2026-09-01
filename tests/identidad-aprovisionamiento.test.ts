@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   SQL_APROVISIONAR,
+  SQL_BLOQUEAR_APROVISIONAMIENTO,
   interpretarAprovisionamiento,
   parametrosDeAprovisionamiento,
 } from "../app/identidad/aprovisionamiento";
@@ -26,6 +27,11 @@ test("el correo llega normalizado a la base, o la restricción lo rechazaría", 
 test("la sentencia resuelve el conflicto por firebase_uid y no por correo", () => {
   assert.match(SQL_APROVISIONAR, /on conflict \(firebase_uid\)/);
   assert.equal(SQL_APROVISIONAR.includes("on conflict (email)"), false);
+});
+
+test("dos aprovisionamientos del mismo uid se serializan dentro de la transacción", () => {
+  assert.match(SQL_BLOQUEAR_APROVISIONAMIENTO, /pg_advisory_xact_lock/);
+  assert.match(SQL_BLOQUEAR_APROVISIONAMIENTO, /\$1/);
 });
 
 test("la sentencia no pisa datos que el cliente edita en su perfil", () => {

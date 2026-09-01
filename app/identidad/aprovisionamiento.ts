@@ -13,6 +13,15 @@ import { normalizarCorreo } from "./sesion";
 export type ClienteAprovisionado = { id: string; recienCreada: boolean };
 
 /**
+ * El índice único parcial de correo y el de `firebase_uid` pueden competir si
+ * dos primeras peticiones llegan a la vez. Este bloqueo transaccional
+ * serializa únicamente el mismo UID; otros clientes siguen en paralelo.
+ */
+export const SQL_BLOQUEAR_APROVISIONAMIENTO = `
+  select pg_advisory_xact_lock(hashtextextended($1, 0))
+`;
+
+/**
  * `xmax = 0` es el modo habitual de distinguir en un `upsert` si la fila se
  * acaba de crear, pero se apoya en una columna interna de PostgreSQL y no en
  * el estándar. Se usa porque evita una consulta previa y la carrera que trae
