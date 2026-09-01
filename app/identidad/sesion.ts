@@ -55,3 +55,45 @@ export function debeRenovarse(expira: Date, ahora: Date): boolean {
   const restante = expira.getTime() - ahora.getTime();
   return restante > 0 && restante < MS_DE_SESION / 2;
 }
+
+export type EstadoDeSesion =
+  | { estado: "sin-sesion" }
+  | { estado: "invalida" }
+  | { estado: "indisponible" }
+  | { estado: "valida" };
+
+export type FalloDeSesion = "invalida" | "indisponible";
+
+/**
+ * Distingue navegación anónima, una credencial inválida y un fallo operativo.
+ * Solo la credencial inválida debe sacar al visitante.
+ */
+export function interpretarSesion(entrada: {
+  hayCookie: boolean;
+  verificada: boolean;
+  fallo: FalloDeSesion | null;
+}): EstadoDeSesion {
+  if (!entrada.hayCookie) return { estado: "sin-sesion" };
+  if (entrada.verificada) return { estado: "valida" };
+  return { estado: entrada.fallo === "indisponible" ? "indisponible" : "invalida" };
+}
+
+const CODIGOS_DE_SESION_INVALIDA = new Set([
+  "auth/argument-error",
+  "auth/session-cookie-expired",
+  "auth/session-cookie-revoked",
+  "auth/user-disabled",
+  "auth/user-not-found",
+]);
+
+/** Un error de Firebase no implica necesariamente que la cookie sea inválida. */
+export function clasificarFalloDeSesion(fallo: unknown): FalloDeSesion {
+  const codigo =
+    typeof fallo === "object" && fallo !== null && "code" in fallo
+      ? (fallo as { code?: unknown }).code
+      : null;
+
+  return typeof codigo === "string" && CODIGOS_DE_SESION_INVALIDA.has(codigo)
+    ? "invalida"
+    : "indisponible";
+}
