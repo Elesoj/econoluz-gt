@@ -39,7 +39,8 @@ desde la especificación: quien ejecute debe leer las dos.
 | Cobertura de `escribir()` | ✅ Terminada | `cdc1864` y corrección antifuga `ed5e7f7` |
 | Tarea 7, implementación local | ✅ Terminada y revisada | `e2a7220` y ronda de arreglo `ebd8011` |
 | Tarea 7, integración en Neon | ✅ Terminada y verificada | Rama aislada `fundamentos-backend-dev`: migración 005, dos reproyecciones 313/0, privacidad e idempotencia |
-| Tareas 8–12 | ⏳ No empezadas | El siguiente paso es la tarea 8: rol público y prueba de permisos |
+| Tarea 8 | ✅ Terminada y verificada | Migración 006 y prueba real del rol en `fundamentos-backend-dev` |
+| Tareas 9–12 | ⏳ No empezadas | El siguiente paso es la tarea 9: `app_settings` y `audit_log` |
 
 La revisión de la tarea 7 cambió detalles respecto a los ejemplos originales de abajo:
 la conversión a centavos vive en `app/lib/dinero.ts`, el `upsert` compartido en
@@ -62,13 +63,20 @@ proyección real los 408 identificadores del proveedor.
 La batería fresca dio `test:datos` 39/39, `test:admin` 196/196, `test:proveedores` 3/3,
 `typecheck` y `lint` limpios, y `catalogo:auditar` 313/408/0.
 
+Integración de la tarea 8 verificada el 31/08/2026 exclusivamente en
+`fundamentos-backend-dev`: `006_rol_publico.sql` aplicada; rol sin atributos elevados ni
+membresías; `USAGE` sin `CREATE` sobre el esquema; `SELECT` sobre `public_products`; y 0
+tablas adicionales y 0 secuencias accesibles. La prueba con la credencial pública confirmó
+`current_user = econoluz_publico`, denegó las ocho tablas protegidas existentes, confirmó
+que `app_settings` y `audit_log` todavía no existen, leyó la proyección y no encontró
+objetos sin clasificar. La contraseña y `DATABASE_URL_PUBLIC` solo existen fuera del
+repositorio.
+
 ### Próximo punto de control
 
-Empezar la tarea 8: crear el rol `econoluz_publico` sin credenciales en la migración,
-documentar su activación y rotación fuera del repositorio, añadir
-`DATABASE_URL_PUBLIC` y verificar `current_user` y los permisos tabla por tabla. Aplicar
-y probar primero en `fundamentos-backend-dev`, nunca en producción. No se ha hecho push,
-fusión ni despliegue.
+Empezar la tarea 9: crear `app_settings` y `audit_log`, manteniendo
+`modelo_catalogo = legacy` y sin activar ningún camino nuevo. Aplicar y probar primero en
+`fundamentos-backend-dev`, nunca en producción. No se ha hecho push, fusión ni despliegue.
 
 ## Restricciones globales
 
@@ -1493,7 +1501,7 @@ git commit -m "feat(datos): proyeccion publica derivada del catalogo"
   `docs/OPERACION-ROL-PUBLICO.md`
 - Modificar: `package.json` (script `test:permisos`), `.env.example`
 
-- [ ] **Paso 1: escribir la migración, sin una sola contraseña**
+- [x] **Paso 1: escribir la migración, sin una sola contraseña**
 
 `db/006_rol_publico.sql`:
 
@@ -1523,7 +1531,7 @@ grant select on public_products to econoluz_publico;
 alter default privileges in schema public revoke all on tables from econoluz_publico;
 ```
 
-- [ ] **Paso 2: escribir la prueba de permisos**
+- [x] **Paso 2: escribir la prueba de permisos**
 
 `scripts/verificar-permisos.mjs`:
 
@@ -1614,7 +1622,7 @@ consulta del punto 4 para incluir `VIEW`.
 "test:permisos": "node --env-file-if-exists=.env.local ./scripts/verificar-permisos.mjs"
 ```
 
-- [ ] **Paso 3: escribir el documento de operación**
+- [x] **Paso 3: escribir el documento de operación**
 
 `docs/OPERACION-ROL-PUBLICO.md`, con los cinco apartados que exige la sección 4 de la
 especificación: creación o activación del rol con capacidad de acceso; generación de la
@@ -1622,7 +1630,7 @@ contraseña y **procedimiento de rotación**; obtención de `DATABASE_URL_PUBLIC
 configuración en desarrollo, pruebas, staging y producción; y verificación de que la
 cadena usa realmente el rol público. **Ninguna credencial real en el documento.**
 
-- [ ] **Paso 4: añadir la variable a `.env.example`**
+- [x] **Paso 4: añadir la variable a `.env.example`**
 
 ```bash
 # --- Rol de lectura pública — OBLIGATORIA en producción ------------------
@@ -1633,7 +1641,7 @@ cadena usa realmente el rol público. **Ninguna credencial real en el documento.
 DATABASE_URL_PUBLIC=
 ```
 
-- [ ] **Paso 5: aplicar y verificar contra la rama de Neon de desarrollo**
+- [x] **Paso 5: aplicar y verificar contra la rama de Neon de desarrollo**
 
 ```bash
 npm run db:migrar
@@ -1646,7 +1654,7 @@ npm run test:permisos
 Esperado: `current_user` es `econoluz_publico`, error de permisos en **todas** las tablas
 prohibidas, lectura correcta de `public_products`, y ninguna tabla sin clasificar.
 
-- [ ] **Paso 6: confirmar**
+- [x] **Paso 6: confirmar**
 
 ```bash
 git add db/006_rol_publico.sql scripts/verificar-permisos.mjs docs/OPERACION-ROL-PUBLICO.md .env.example package.json

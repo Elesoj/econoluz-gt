@@ -103,7 +103,7 @@ El trabajo activo ya no está solo en `main`. Continúa en:
 
 ### Qué está terminado
 
-Las tareas 1–7 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
+Las tareas 1–8 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
 incluye la migración `005`, la proyección pública, el escritor por producto, la
 reproyección total, la conversión monetaria compartida y las pruebas de paridad y
 privacidad. No hay que rehacer ninguna de esas piezas.
@@ -122,25 +122,36 @@ mismo código dejó `build` correcto. Playwright completó sus **67 pruebas sin 
 prueba**, pero el proceso se quedó colgado al apagar el servidor en Windows y se
 interrumpió después de la prueba 67; no se presenta ese cierre como una salida limpia.
 
+La tarea 8 añade `006_rol_publico.sql`, `DATABASE_URL_PUBLIC`, la prueba
+`test:permisos` y la guía `docs/OPERACION-ROL-PUBLICO.md`. Se integró exclusivamente en
+`fundamentos-backend-dev`: el rol no tiene atributos elevados ni membresías, puede usar
+el esquema sin crear objetos, lee únicamente `public_products` y no accede a secuencias.
+La prueba real confirmó el usuario `econoluz_publico`, denegó las ocho tablas protegidas
+existentes, confirmó que `app_settings` y `audit_log` todavía no existen, leyó la
+proyección y no encontró tablas o vistas sin clasificar. Ninguna credencial entró en el
+repositorio.
+
+La verificación fresca de este cierre dio `test:permisos` correcto, `test:datos` **39/39**,
+`test:admin` **196/196**, `test:proveedores` **3/3**, `typecheck` y `lint` limpios y
+`catalogo:auditar` con 313 productos, 408 identificadores y 0 coincidencias. No se
+repitieron `build` ni Playwright para esta tarea documental y de permisos; su último
+estado real sigue siendo el descrito en el párrafo anterior.
+
 ### El siguiente paso exacto
 
-Empezar la **tarea 8**, sin adelantar ninguna de las posteriores:
+Empezar la **tarea 9**, sin adelantar ninguna de las posteriores:
 
-1. Crear `db/006_rol_publico.sql` sin contraseña y con permisos mínimos: solo `SELECT`
-   sobre `public_products`.
-2. Crear `scripts/verificar-permisos.mjs` y comprobar primero que `current_user` sea
-   realmente `econoluz_publico`; después, denegar una por una todas las tablas protegidas.
-3. Escribir `docs/OPERACION-ROL-PUBLICO.md` con creación o activación, contraseña fuera
-   del repositorio, rotación, obtención de la cadena y configuración por entorno.
-4. Añadir `DATABASE_URL_PUBLIC` sin valor a `.env.example` y el comando
-   `test:permisos` a `package.json`.
-5. Aplicar y verificar primero en `fundamentos-backend-dev`. No usar producción.
-
-La tarea 8 todavía no se ha empezado y `DATABASE_URL_PUBLIC` no está configurada.
+1. Crear `db/007_app_settings.sql` con `modelo_catalogo = legacy` y
+   `db/008_audit_log.sql`.
+2. Añadir la lectura tipada y conservadora de `app_settings`, con `legacy` ante cualquier
+   valor desconocido o fallo.
+3. Mantener la bandera en `legacy`: no activar `shadow` ni `relational_v2`.
+4. Aplicar y verificar primero en `fundamentos-backend-dev`. No usar producción.
 
 ### Estado de integración
 
-Solo se ha escrito en la rama aislada `fundamentos-backend-dev` para integrar la tarea 7.
+Solo se ha escrito en la rama aislada `fundamentos-backend-dev` para integrar las tareas
+7 y 8.
 No se ha escrito en producción, fusionado la rama, hecho push ni desplegado. `main` sigue
 en `19d0106` y `origin/main` en `a4defad`; la implementación vive solo en el worktree.
 Los 25 precios existentes permanecen intactos por decisión del dueño.
