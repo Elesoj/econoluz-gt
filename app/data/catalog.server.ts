@@ -1,6 +1,6 @@
 import "server-only";
 
-import { neon } from "@neondatabase/serverless";
+import { leer } from "../lib/datos";
 import { unstable_cache } from "next/cache";
 import { products } from "./products";
 import { CATALOG_COLUMNS, fromProductRow, type CatalogRow } from "./productRow";
@@ -26,18 +26,19 @@ const catalogQuery = `
 `;
 
 const readCatalogFromDatabase = async (): Promise<PublicProduct[]> => {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
+  // La comprobación se queda aquí con su mensaje de siempre: lanzar es lo que
+  // hace que `getPublicCatalog` caiga al catálogo escrito en el código.
+  if (!process.env.DATABASE_URL) {
     throw new Error("falta DATABASE_URL");
   }
 
-  // Se crea aquí y no a nivel de módulo, igual que en /api/leads: así la falta
-  // de DATABASE_URL en local no revienta la importación del módulo entero.
-  const sql = neon(connectionString);
-  const rows = (await sql.query(catalogQuery)) as (CatalogRow & {
-    price_gtq: string | number | null;
-  })[];
+  // La lectura va por la capa de datos, que crea la conexión de forma perezosa:
+  // así la falta de DATABASE_URL en local no revienta la importación del módulo
+  // entero. La fuente **no cambia** —sigue siendo `products` con la conexión de
+  // la aplicación— y la proyección pública no entra aquí todavía.
+  const rows = await leer<CatalogRow & { price_gtq: string | number | null }>(
+    catalogQuery,
+  );
 
   // `toPublicProduct` es la frontera: recorta el producto a lo que puede ver
   // el navegador y deja fuera marca, serie y códigos del proveedor, que sí

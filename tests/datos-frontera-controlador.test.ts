@@ -20,7 +20,6 @@ const PERMITIDO = "app/lib/datos";
  */
 const EXCEPCIONES_TRANSITORIAS = [
   "app/api/leads/route.ts",
-  "app/data/catalog.server.ts",
 ];
 
 function archivosDe(carpeta: string): string[] {
