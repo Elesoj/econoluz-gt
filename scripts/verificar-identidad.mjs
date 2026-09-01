@@ -105,6 +105,85 @@ try {
     mal(`contó ${fallos10[0].n} fallos y debería contar 10`);
   }
 
+  const { rows: altaParaBorrar } = await alta("uid-para-borrar", "borrame@example.com");
+  const idParaBorrar = altaParaBorrar[0].id;
+  await cliente.query(
+    `insert into user_addresses
+       (user_id, destinatario, telefono, departamento, municipio, direccion)
+     values ($1, 'Quien Recibe', '4042 8790', 'Guatemala', 'Guatemala', 'Calle')`,
+    [idParaBorrar],
+  );
+  await cliente.query(
+    "insert into user_consents (user_id, tipo, version) values ($1, 'terminos', '2026-09-01')",
+    [idParaBorrar],
+  );
+  const { rows: eventosParaBorrar } = await cliente.query(
+    "insert into auth_events (user_id, tipo, resultado) values ($1, 'acceso', 'correcto') returning id",
+    [idParaBorrar],
+  );
+  const idEvento = eventosParaBorrar[0].id;
+
+  await cliente.query("delete from user_addresses where user_id = $1", [idParaBorrar]);
+  await cliente.query("update auth_events set user_id = null where user_id = $1", [idParaBorrar]);
+  await cliente.query(
+    `update users
+     set email = $2, firebase_uid = $3, nombre = '', telefono = null, nit = null,
+         nombre_fiscal = null, email_verificado = false, estado = 'anonimizada',
+         anonimizado_en = now(), actualizado_en = now()
+     where id = $1 and estado = 'activa'`,
+    [idParaBorrar, `borrado+${idParaBorrar}@invalid`, `borrado:${idParaBorrar}`],
+  );
+
+  const { rows: trasBorrado } = await cliente.query("select * from users where id = $1", [
+    idParaBorrar,
+  ]);
+  const filaBorrada = trasBorrado[0];
+  const datosLimpios =
+    filaBorrada.nombre === "" &&
+    filaBorrada.telefono === null &&
+    filaBorrada.nit === null &&
+    filaBorrada.nombre_fiscal === null &&
+    filaBorrada.email === `borrado+${idParaBorrar}@invalid` &&
+    filaBorrada.firebase_uid === `borrado:${idParaBorrar}` &&
+    filaBorrada.email_verificado === false &&
+    filaBorrada.estado === "anonimizada" &&
+    filaBorrada.anonimizado_en !== null;
+  if (datosLimpios) {
+    bien("tras el borrado no queda dato personal en users");
+  } else {
+    mal("quedaron datos personales en users");
+  }
+
+  const { rows: direccionesTrasBorrado } = await cliente.query(
+    "select count(*)::int as n from user_addresses where user_id = $1",
+    [idParaBorrar],
+  );
+  if (direccionesTrasBorrado[0].n === 0) {
+    bien("las direcciones se borraron");
+  } else {
+    mal("quedaron direcciones");
+  }
+
+  const { rows: consentimientosTrasBorrado } = await cliente.query(
+    "select count(*)::int as n from user_consents where user_id = $1",
+    [idParaBorrar],
+  );
+  if (consentimientosTrasBorrado[0].n === 1) {
+    bien("el consentimiento se conserva como prueba");
+  } else {
+    mal("se perdió el consentimiento");
+  }
+
+  const { rows: eventosTrasBorrado } = await cliente.query(
+    "select user_id from auth_events where id = $1",
+    [idEvento],
+  );
+  if (eventosTrasBorrado[0]?.user_id === null) {
+    bien("los eventos quedaron desligados");
+  } else {
+    mal("los eventos siguen enganchados");
+  }
+
   console.log(fallos === 0 ? "\nTodo correcto." : `\n${fallos} fallo(s).`);
   process.exitCode = fallos === 0 ? 0 : 1;
 } finally {
