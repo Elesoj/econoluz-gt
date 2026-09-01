@@ -50,12 +50,14 @@ parece pedirlo, está derogado por esta sección.
 Leer esta documentación **no ejecuta** ninguna de esas retiradas ni basta como
 autorización: ambas siguen necesitando el visto bueno expreso del dueño en su momento.
 
-### 0.4 Estado de ejecución del subproyecto 1 (31/08/2026)
+### 0.4 Estado del subproyecto 1 (01/09/2026)
 
-El plan de fundamentos **ya está en ejecución** en el worktree
-`.worktrees/fundamentos-backend`, rama `feat/fundamentos-backend`. La base de código
-integrada y documentada antes de la comprobación en Neon fue el commit `b14a931`, y el
-trabajo ha seguido sobre él hasta cerrar la tarea 9:
+El plan de fundamentos **está terminado**. La rama `feat/fundamentos-backend` cerró las
+doce tareas en `4ffc547` y se fusionó por avance rápido en el `main` local. El dueño
+autorizó por separado la preparación y el despliegue el 01/09/2026. Antes de publicar se
+aplicaron las migraciones `005` a `008` en la rama principal de Neon, se reproyectaron
+los 313 productos, se activó y comprobó el rol `econoluz_publico` y se añadió
+`DATABASE_URL_PUBLIC` como secreto de Production en Vercel:
 
 - **Tareas 1–6 terminadas:** errores tipados, registro estructurado, conexión y consultas
   con tiempo máximo, transacciones interactivas, frontera única de la capa de datos y
@@ -107,9 +109,10 @@ trabajo ha seguido sobre él hasta cerrar la tarea 9:
   siguió denegada. Las dos pruebas estructurales se rompieron a propósito para verlas
   fallar antes de deshacer la rotura.
   - **Desviación deliberada:** el plan pedía enganchar la decisión en
-    `app/data/catalog.server.ts` y **no se hizo**. Producción no tiene
-    `DATABASE_URL_PUBLIC`, así que engancharla haría que el sitio sirviera el catálogo del
-    código y dejara de mostrar lo editado en el panel. Es del subproyecto 3.
+    `app/data/catalog.server.ts` y **no se hizo**. Durante la implementación producción no
+    tenía `DATABASE_URL_PUBLIC`; desde el 01/09/2026 ya está configurada, pero la fuente
+    sigue sin cambiar porque el enganche pertenece al subproyecto 3. El catálogo continúa
+    mostrando lo editado en el panel mediante el camino `legacy`.
 
 - **Verificación fresca del último cierre:** `test:datos` 57/57, `test:admin` 196/196,
   `test:proveedores` 3/3, `test:permisos` correcto, `typecheck` y `lint` limpios, `build`
@@ -124,11 +127,13 @@ trabajo ha seguido sobre él hasta cerrar la tarea 9:
   subproyecto 1»— y `.env.example`, `docs/OPERACION-ROL-PUBLICO.md`, este archivo y
   `docs/CONTINUAR-PANEL.md` al día.
 
-**El subproyecto 1 está terminado y esperando la revisión del dueño.** No se empieza el
-subproyecto 2, no se fusiona, no se empuja y no se despliega sin su autorización expresa.
-Lo que hace falta antes de integrar está en `docs/CONTINUAR-PANEL.md`, en «Antes de
-integrar esta rama»: autorizar fusión y despliegue por separado, aplicar las migraciones
-005 a 008 en producción, crear allí el rol público y añadir `DATABASE_URL_PUBLIC` a Vercel.
+**El subproyecto 1 está terminado, revisado y fusionado localmente.** La preparación de
+producción y el despliegue fueron autorizados expresamente el 01/09/2026. Las migraciones
+`005` a `008` están aplicadas en producción, `public_products` contiene 313 filas, el rol
+público pasó `test:permisos` con las diez tablas protegidas denegadas y
+`DATABASE_URL_PUBLIC` está guardada como secreto de Production en Vercel. La publicación
+de `main` y la comprobación del despliegue cierran la operación; el subproyecto 2 no ha
+empezado.
 
 **Tres piezas quedan construidas y probadas pero sin consumidor**, y no deben darse por
 activas: nadie llama a `proyectarProducto` —la proyección **no se mantiene sola**—, nadie
@@ -140,8 +145,10 @@ La bandera sigue en `legacy` y el catálogo público no ha cambiado de fuente. *
 requiere autorización expresa del dueño**, y que las piezas estén probadas no es
 autorización.
 
-Solo se ha escrito en la rama aislada de Neon. No se ha fusionado, hecho push ni
-desplegado este trabajo, y producción permanece intacta.
+Además de la rama aislada de desarrollo, ya se escribió en la rama principal de Neon
+para aplicar las cuatro migraciones y poblar la proyección. Los 25 precios permanecen
+intactos y `modelo_catalogo` sigue en `legacy`. La rama y el worktree de desarrollo se
+conservan hasta recibir autorización separada para retirarlos.
 
 ---
 
@@ -489,13 +496,14 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
   cambiar el DNS es tarea del dueño del proyecto, no del código.
 - Base de datos: **Postgres 18 en Neon**, con `@neondatabase/serverless`, creada desde el
-  Marketplace de Vercel (región AWS US East 1). **En producción hay ocho tablas**:
+  Marketplace de Vercel (región AWS US East 1). **En producción hay once tablas**:
   `leads`, `products`, `admin_users`, `admin_sessions`, `admin_login_attempts`,
-  `projects`, `project_images` y `schema_migrations`. La rama aislada de desarrollo
-  `fundamentos-backend-dev` tiene además `public_products`, `app_settings` y `audit_log`,
-  creadas por las migraciones 005 a 008 del subproyecto 1 (§0.4); a producción no han
-  llegado. Las migraciones se aplican con `npm run db:migrar`, que es repetible.
-  `DATABASE_URL` está en `.env.local` (ignorado por git) y en Vercel.
+  `projects`, `project_images`, `schema_migrations`, `public_products`, `app_settings` y
+  `audit_log`. Las migraciones `005` a `008` llegaron a producción el 01/09/2026; la
+  proyección quedó poblada con 313 filas y el rol `econoluz_publico` solo puede leerla.
+  Las migraciones se aplican con `npm run db:migrar`, que es repetible. `DATABASE_URL`
+  está en `.env.local` (ignorado por git) y en Vercel; `DATABASE_URL_PUBLIC` está en
+  Vercel como secreto exclusivo de Production.
 - Pasarela de pago: `TODO — pendiente de decidir`
 - Certificador FEL: `TODO — pendiente de decidir`
 
@@ -924,11 +932,12 @@ especificación, su plan, sus pruebas y un punto de revisión con el dueño:
 **No existe un subproyecto 4:** era inventario y reservas, y desapareció con la decisión
 de §0.2.
 
-**El subproyecto 1 está en marcha**; su estado preciso está en §0.4 y en
-`docs/superpowers/plans/2026-08-30-fundamentos-backend.md`. Lo siguiente no es volver a
-empezarlo: es completar la integración de su tarea 7 en una rama aislada de Neon y, tras
-esa comprobación, continuar con la tarea 8. Ninguna escritura en Neon, fusión, push o
-despliegue se da por autorizada por esta documentación.
+**El subproyecto 1 está terminado**; su estado preciso está en §0.4 y en
+`docs/superpowers/plans/2026-08-30-fundamentos-backend.md`. Se cerraron sus doce tareas,
+se fusionó en `main`, se preparó Neon de producción y el dueño autorizó su publicación el
+01/09/2026. El siguiente desarrollo es el **subproyecto 2, identidad de clientes**; debe
+empezar con su propio diseño y punto de aprobación. El catálogo relacional corresponde al
+subproyecto 3 y no se adelanta.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar

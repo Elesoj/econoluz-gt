@@ -92,19 +92,22 @@ Leer esta documentación no ejecuta esa retirada ni basta como autorización.
 
 ---
 
-## 0.1 Qué hacer ahora (31/08/2026)
+## 0.1 Qué hacer ahora (01/09/2026)
 
-El trabajo activo ya no está solo en `main`. Continúa en:
+El subproyecto 1 ya no está pendiente de integración:
 
-- **Worktree:** `.worktrees/fundamentos-backend`
-- **Rama:** `feat/fundamentos-backend`
-- **Base documental anterior a la integración:** `b14a931`
-- **Plan:** `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`
+- **`main` local:** `4ffc547`, con `feat/fundamentos-backend` fusionada por avance rápido
+- **Worktree conservado:** `.worktrees/fundamentos-backend`, limpio y en el mismo commit
+- **Plan terminado:** `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`
+- **Siguiente desarrollo:** subproyecto 2, identidad de clientes; todavía no iniciado
 
-### El subproyecto 1 está terminado (31/08/2026)
+### El subproyecto 1 está terminado y preparado para producción (01/09/2026)
 
-**Las doce tareas están hechas, verificadas y documentadas.** La rama espera la revisión
-del dueño: no se ha fusionado, ni empujado, ni desplegado, y producción sigue intacta.
+**Las doce tareas están hechas, verificadas, documentadas y fusionadas.** El dueño
+autorizó por separado la fusión y después la preparación y el despliegue. En producción
+ya están aplicadas las migraciones `005` a `008`, `public_products` tiene 313 filas, el
+rol `econoluz_publico` pasó la prueba completa de permisos y `DATABASE_URL_PUBLIC` está
+guardada como secreto de Production en Vercel.
 
 Estado de la última verificación completa, toda ella en el worktree y —cuando hacía falta
 base de datos— solo contra `fundamentos-backend-dev`:
@@ -241,27 +244,24 @@ Verificación: `test:datos` **57/57**, `test:admin` **196/196**, `test:proveedor
 `catalogo:auditar` 313/408/0. Playwright no se repitió en esta tarea, que no toca ninguna
 ruta; su último estado real es el 67/67 con salida limpia de la tarea 10.
 
-### Antes de integrar esta rama
+### Integración y preparación de producción
 
-Nada de lo que sigue está hecho, y **ninguno de estos pasos se da por autorizado**: cada
-uno necesita el visto bueno expreso del dueño.
+El dueño autorizó la fusión y, en una decisión separada, la preparación y el despliegue.
+Estado comprobado el 01/09/2026:
 
-1. **Autorizar la fusión** de `feat/fundamentos-backend` en `main`, y **por separado** el
-   despliegue. Son dos decisiones, no una.
-2. **Aplicar las migraciones 005 a 008 en la rama de producción de Neon** con
-   `npm run db:migrar`. Hoy producción solo tiene las cuatro primeras. No es urgente:
-   ninguna ruta toca las tablas nuevas, así que el código funciona igual sin ellas.
-3. **Crear el rol `econoluz_publico` en la rama de producción** y generar su contraseña,
-   siguiendo `docs/OPERACION-ROL-PUBLICO.md`. La migración crea el rol sin acceso; darle
-   `login` y contraseña es un paso manual y deliberado.
-4. **Añadir `DATABASE_URL_PUBLIC` a Vercel** como secreto del entorno Production. Mientras
-   no exista, el camino público simplemente no se usa; **nunca** poner ahí la cadena
-   administrativa.
-5. **Si se aplican las migraciones, poblar la proyección** con `catalogo:reproyectar`
-   apuntando a producción. Y tener presente que **se quedará desactualizada**: nadie la
-   reproyecta al guardar un producto todavía.
-6. **Repetir la batería completa** después de fusionar, incluido Playwright con el `dev`
-   cerrado.
+1. `feat/fundamentos-backend` se fusionó por avance rápido en el `main` local, commit
+   `4ffc547`.
+2. `npm run db:migrar` aplicó `005_proyeccion_publica.sql`, `006_rol_publico.sql`,
+   `007_app_settings.sql` y `008_audit_log.sql` en la rama principal de Neon.
+3. `catalogo:reproyectar` dejó **313 proyectados y 0 retirados** en producción.
+4. `econoluz_publico` tiene `LOGIN`, no tiene privilegios elevados y la batería
+   `test:permisos` confirmó `current_user`, denegó las diez tablas protegidas y permitió
+   únicamente `public_products`.
+5. `DATABASE_URL_PUBLIC` quedó guardada como **Secret** solo para Production en Vercel.
+6. Los portapapeles temporales usados para trasladar el secreto se vaciaron; ninguna
+   credencial se escribió en el repositorio ni apareció en los documentos.
+7. La publicación de `main` fue autorizada. El push de la actualización documental
+   inicia el despliegue automático de Vercel y debe verificarse antes de dar el cierre.
 
 Después de eso, y solo con su autorización, vendría el **subproyecto 2 (identidad de
 clientes)**. El subproyecto 3 es el que enganchará la proyección, la bandera y la política
@@ -270,11 +270,11 @@ dueño** y no se hace por el hecho de que las piezas estén probadas.
 
 ### Estado de integración
 
-Solo se ha escrito en la rama aislada `fundamentos-backend-dev`, para integrar y verificar
-las tareas 7 a 12.
-No se ha escrito en producción, fusionado la rama, hecho push ni desplegado. `main` sigue
-en `19d0106` y `origin/main` en `a4defad`; la implementación vive solo en el worktree.
-Los 25 precios existentes permanecen intactos por decisión del dueño.
+`main` local y `feat/fundamentos-backend` apuntan a `4ffc547`; el worktree se conserva
+limpio. Neon de producción ya tiene las migraciones `005` a `008`, la proyección de 313
+filas y el rol público restringido. Los **25 precios existentes permanecen intactos**,
+`modelo_catalogo` sigue en `legacy` y ninguna ruta pública ha cambiado de fuente: el
+enganche se hará en el subproyecto 3 con autorización expresa.
 
 ### Otras decisiones que siguen pendientes
 
