@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "db:migrar": "node --env-file-if-exists=.env.local ./scripts/migrate.mjs",
+    "identidad:adc": "node --env-file-if-exists=.env.local ./scripts/comprobar-adc.mjs",
     "test:permisos": "node --env-file-if-exists=.env.local ./scripts/verificar-permisos.mjs",
     "catalogo:importar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/import-products.mjs",
     "catalogo:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs ./scripts/verify-product-rows.mjs",

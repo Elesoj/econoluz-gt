@@ -5,28 +5,68 @@ import { join, relative, sep } from "node:path";
 
 const RAIZ = join(import.meta.dirname, "..");
 
+/**
+ * Se miran también `.mjs` y `.js`, no solo TypeScript: los scripts de este
+ * proyecto son `.mjs`, y una primera versión de esta prueba decía escanear
+ * `scripts/` mientras en realidad no miraba ni un archivo.
+ */
 function archivosDe(carpeta: string): string[] {
   if (!existsSync(carpeta)) return [];
   return readdirSync(carpeta, { withFileTypes: true }).flatMap((entrada) => {
     const ruta = join(carpeta, entrada.name);
     if (entrada.isDirectory()) return archivosDe(ruta);
-    return /\.tsx?$/.test(entrada.name) ? [ruta] : [];
+    return /\.(tsx?|mjs|js)$/.test(entrada.name) ? [ruta] : [];
   });
 }
 
 const aPosix = (ruta: string) => relative(RAIZ, ruta).split(sep).join("/");
 
-test("solo firebase.server.ts importa firebase-admin", () => {
-  const infractores = [...archivosDe(join(RAIZ, "app")), ...archivosDe(join(RAIZ, "scripts"))]
-    .filter((ruta) => readFileSync(ruta, "utf8").includes("firebase-admin"))
+const usaFirebaseAdmin = (ruta: string) =>
+  /from "firebase-admin|require\("firebase-admin/.test(readFileSync(ruta, "utf8"));
+
+/**
+ * Dentro de `app/**` solo hay una puerta a `firebase-admin`, y no admite
+ * excepciones.
+ */
+test("dentro de app/, solo firebase.server.ts importa firebase-admin", () => {
+  const infractores = archivosDe(join(RAIZ, "app"))
+    .filter(usaFirebaseAdmin)
     .map(aPosix)
     .filter((ruta) => ruta !== "app/identidad/firebase.server.ts");
 
   assert.deepEqual(
     infractores,
     [],
-    `Solo app/identidad/firebase.server.ts puede importar firebase-admin. Lo importan ` +
-      `además:\n${infractores.join("\n")}`,
+    `Solo app/identidad/firebase.server.ts puede importar firebase-admin dentro de app/. ` +
+      `Lo importan además:\n${infractores.join("\n")}`,
+  );
+});
+
+/**
+ * `scripts/` tiene su propia frontera, con excepciones declaradas una a una.
+ * Es el mismo trato que `tests/datos-frontera-controlador.test.ts` da a
+ * `scripts/migrate.mjs` con el controlador de Neon: un script de terminal no
+ * puede importar un módulo con `server-only`, así que se conecta por su cuenta.
+ *
+ * La prueba falla en dos direcciones: si aparece un script nuevo que importa
+ * `firebase-admin` sin estar en la lista, y si uno de estos deja de importarlo
+ * y nadie borra su entrada, para que la lista nunca mienta.
+ */
+const SCRIPTS_QUE_PUEDEN = [
+  // Comprueba que ADC funciona antes de dar por buena la configuración local.
+  // No puede pasar por app/identidad/firebase.server.ts, que lleva "server-only".
+  "scripts/comprobar-adc.mjs",
+];
+
+test("en scripts/, solo los declarados importan firebase-admin", () => {
+  const encontrados = archivosDe(join(RAIZ, "scripts")).filter(usaFirebaseAdmin).map(aPosix);
+
+  assert.deepEqual(
+    [...encontrados].sort(),
+    [...SCRIPTS_QUE_PUEDEN].sort(),
+    `La lista de scripts autorizados ya no coincide con la realidad.\n` +
+      `Importan firebase-admin:\n${encontrados.join("\n") || "(ninguno)"}\n\n` +
+      `Declarados:\n${SCRIPTS_QUE_PUEDEN.join("\n") || "(ninguno)"}`,
   );
 });
 
@@ -36,7 +76,9 @@ test("la identidad de clientes no importa nada del panel, ni al revés", () => {
     ...archivosDe(join(RAIZ, "app", "cuenta")),
   ];
   const invasores = clientes
-    .filter((ruta) => /from "[^"]*app\/admin|from "\.\.\/admin|from "\.\.\/\.\.\/admin/.test(readFileSync(ruta, "utf8")))
+    .filter((ruta) =>
+      /from "[^"]*app\/admin|from "\.\.\/admin|from "\.\.\/\.\.\/admin/.test(readFileSync(ruta, "utf8")),
+    )
     .map(aPosix);
 
   assert.deepEqual(invasores, [], `Módulos de clientes que importan del panel:\n${invasores.join("\n")}`);
@@ -55,4 +97,28 @@ test("nadie verifica tokens de Firebase con jose", () => {
     .map(aPosix);
 
   assert.deepEqual(conJose, [], "Los tokens de Firebase se verifican con firebase-admin, nunca con jose.");
+});
+
+/**
+ * La política de la organización prohíbe generar claves de cuenta de servicio,
+ * y el código no debe pedirlas por ninguna vía: ni `cert()`, ni una clave
+ * privada en el entorno, ni un JSON de credenciales dentro del repositorio.
+ */
+test("no se usan claves privadas de cuenta de servicio", () => {
+  const sospechosos = [...archivosDe(join(RAIZ, "app")), ...archivosDe(join(RAIZ, "scripts"))]
+    .filter((ruta) => {
+      const fuente = readFileSync(ruta, "utf8");
+      return (
+        /from "firebase-admin[^"]*";?[\s\S]*\bcert\s*\(/.test(fuente) ||
+        fuente.includes("FIREBASE_PRIVATE_KEY")
+      );
+    })
+    .map(aPosix);
+
+  assert.deepEqual(
+    sospechosos,
+    [],
+    `La organización prohíbe las claves de cuenta de servicio: se usan credenciales ` +
+      `predeterminadas (ADC). Archivos que las piden:\n${sospechosos.join("\n")}`,
+  );
 });

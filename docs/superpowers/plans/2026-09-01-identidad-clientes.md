@@ -32,6 +32,9 @@ Aplican a **todas** las tareas. Copiadas de la especificación y de `CLAUDE.md`.
   No se traducen nombres de variables, funciones, rutas ni salidas de terminal.
 - **Una sola dependencia nueva: `firebase-admin`.** Ninguna más. **`jose` no se usa para
   verificar tokens de Firebase** bajo ningún concepto.
+- **No hay claves privadas de cuenta de servicio.** La organización las prohíbe por
+  política y no se pide excepción: se usan credenciales predeterminadas (ADC). Ni `cert()`
+  ni `FIREBASE_PRIVATE_KEY` aparecen en el código, y la prueba de frontera lo vigila.
 - **`firebase-admin` se importa solo desde `app/identidad/firebase.server.ts`.**
 - **No se toca el panel.** `admin_users`, `admin_sessions`, `admin_login_attempts` y todo
   `app/admin/**` quedan sin modificar. `git diff` sobre ellos debe salir vacío al terminar.
@@ -57,12 +60,23 @@ Aplican a **todas** las tareas. Copiadas de la especificación y de `CLAUDE.md`.
 Sin esto, las tareas 2 en adelante no pueden verificarse:
 
 1. Crear el **proyecto de Firebase de desarrollo** y activar los proveedores de correo y
-   Google, con la opción de **una cuenta por dirección de correo**.
-2. Descargar la credencial de servicio y ponerla en `.env.local`.
+   Google, con la opción de **una cuenta por dirección de correo**. Hoy es
+   `econoluz-dev-d30ab`.
+2. **Autenticarse con credenciales predeterminadas (ADC).** La organización `econoluz.net`
+   **prohíbe generar claves de cuenta de servicio**, así que no hay ningún JSON que
+   descargar ni pegar: se instala `gcloud`, se ejecuta `gcloud auth application-default
+   login` con la cuenta corporativa y se fija el proyecto de cuota. El procedimiento está
+   en `docs/OPERACION-FIREBASE.md`. En `.env.local` solo va `FIREBASE_PROJECT_ID`.
+   Comprobarlo con `npm run identidad:adc` antes de seguir.
 3. Crear la **rama de Neon `identidad-clientes-dev`** y poner su `DATABASE_URL` y
    `DATABASE_URL_PUBLIC` en el `.env.local` del worktree.
 4. Generar la pimienta: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
    y guardarla como `AUTH_EVENT_IP_PEPPER`.
+
+**El despliegue está bloqueado hasta que exista una identidad federada.** Vercel no tiene
+ADC de serie y no hay claves que pegar, así que la autenticación de producción se resuelve
+con Workload Identity Federation, en trabajo aparte y **antes** de desplegar nada que
+dependa de Firebase. Ver `docs/OPERACION-FIREBASE.md` §3.
 
 ---
 
@@ -90,6 +104,8 @@ Sin esto, las tareas 2 en adelante no pueden verificarse:
 | `app/cuenta/**` | Las pantallas |
 | `db/009_identidad_clientes.sql` | Las cuatro tablas |
 | `scripts/reconciliar-identidades.mjs` | El barrido que termina los borrados a medias |
+| `scripts/comprobar-adc.mjs` | Comprueba que `firebase-admin` se autentica con ADC |
+| `docs/OPERACION-FIREBASE.md` | ADC en local, y por qué producción sigue bloqueada |
 | `tests/identidad-*.test.ts` | Las pruebas de unidad y estructurales |
 
 **Se modifican:** `package.json` (dependencia y scripts), `scripts/verificar-permisos.mjs`
@@ -100,7 +116,8 @@ Sin esto, las tareas 2 en adelante no pueden verificarse:
 ## Tarea 1: La puerta única a `firebase-admin` y la frontera con el panel
 
 **Archivos:**
-- Crear: `app/identidad/firebase.server.ts`, `tests/identidad-frontera.test.ts`
+- Crear: `app/identidad/firebase.server.ts`, `tests/identidad-frontera.test.ts`,
+  `scripts/comprobar-adc.mjs`, `docs/OPERACION-FIREBASE.md`
 - Modificar: `package.json`
 
 **Interfaces:**
@@ -108,8 +125,15 @@ Sin esto, las tareas 2 en adelante no pueden verificarse:
 - Produce: `verificarIdToken(idToken: string): Promise<IdentidadVerificada>`,
   `crearCookieDeSesion(idToken: string, msDuracion: number): Promise<string>`,
   `verificarCookieDeSesion(cookie: string): Promise<IdentidadVerificada>`,
-  `revocarYBorrarUsuario(uid: string): Promise<void>`, y el tipo
+  `revocarYBorrarUsuario(uid: string): Promise<void>`,
+  `comprobarCredenciales(): Promise<{ projectId: string; segundosDeVida: number }>`,
+  y el tipo
   `IdentidadVerificada = { uid: string; email: string; emailVerificado: boolean; nombre: string; proveedor: string }`.
+
+**Se autentica con ADC, no con una clave.** La organización prohíbe las claves de cuenta
+de servicio, así que `applicationDefault()` resuelve las credenciales: en local las de
+`gcloud`, y en producción una identidad federada que **todavía no existe** y bloquea el
+despliegue. Ver `docs/OPERACION-FIREBASE.md`.
 
 - [ ] **Paso 1: escribir la prueba estructural que falla**
 
@@ -199,7 +223,13 @@ npm install firebase-admin
 ```ts
 import "server-only";
 
-import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
+import {
+  applicationDefault,
+  getApps,
+  initializeApp,
+  type App,
+  type Credential,
+} from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
 /**
@@ -207,11 +237,31 @@ import { getAuth } from "firebase-admin/auth";
  *
  * Es la misma regla que protege el controlador de Neon en `app/lib/datos`, y
  * por la misma razón: cuando la dependencia entra por un solo sitio, cambiarla
- * o simularla en pruebas es un trabajo acotado. `tests/identidad-frontera.test.ts`
- * lo vigila.
+ * o simularla en pruebas es un trabajo acotado.
+ * `tests/identidad-frontera.test.ts` lo vigila.
+ *
+ * ## Cómo se autentica, y por qué así
+ *
+ * **No hay ninguna clave privada de cuenta de servicio, ni la habrá.** La
+ * organización `econoluz.net` prohíbe generarlas por política, y esa política
+ * es correcta: una clave descargada es un secreto permanente que se copia, se
+ * pega en un chat y sobrevive a quien la creó.
+ *
+ * En su lugar se usan las **credenciales predeterminadas de la aplicación**
+ * (ADC), que `applicationDefault()` resuelve sola:
+ *
+ * - **En desarrollo local**, las que deja `gcloud auth application-default
+ *   login`. Viven en el perfil del usuario, **nunca dentro del repositorio**.
+ * - **En producción, todavía no está resuelto.** Vercel no es infraestructura
+ *   de Google, así que ahí no hay ADC de serie. Antes de desplegar hay que
+ *   montar una integración **sin claves permanentes** —Workload Identity
+ *   Federation con los testigos OIDC de Vercel es el camino previsto—, y eso
+ *   es trabajo aparte que no se hace aquí. Ver `docs/OPERACION-FIREBASE.md`.
  *
  * La inicialización es perezosa: sin credenciales, el sitio tiene que arrancar
- * igual, como ya hacen el catálogo y `/api/leads`.
+ * igual, como ya hacen el catálogo y `/api/leads`. Y falla de forma segura: si
+ * falta el proyecto o no hay credenciales, se lanza un error claro en vez de
+ * seguir a medias.
  */
 
 export type IdentidadVerificada = {
@@ -222,29 +272,57 @@ export type IdentidadVerificada = {
   proveedor: string;
 };
 
-function credenciales() {
+/**
+ * El proyecto no se deduce ni se adivina: sin él, `firebase-admin` podría
+ * apuntar a un proyecto distinto del previsto y verificar tokens que no son
+ * nuestros.
+ */
+function proyecto(): string {
   const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  // La clave privada viaja con "\n" escapados en las variables de entorno.
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-
-  if (!projectId || !clientEmail || !privateKey) {
-    throw new Error("Faltan las credenciales de servicio de Firebase.");
+  if (!projectId) {
+    throw new Error(
+      "Falta FIREBASE_PROJECT_ID. En local, ponlo en .env.local y autentícate con " +
+        "gcloud auth application-default login. Ver docs/OPERACION-FIREBASE.md.",
+    );
   }
-
-  return { projectId, clientEmail, privateKey };
+  return projectId;
 }
 
+let credencial: Credential | null = null;
 let app: App | null = null;
+
+function obtenerCredencial(): Credential {
+  if (!credencial) {
+    credencial = applicationDefault();
+  }
+  return credencial;
+}
 
 function obtenerApp(): App {
   if (!app) {
-    app = getApps()[0] ?? initializeApp({ credential: cert(credenciales()) });
+    app = getApps()[0] ?? initializeApp({ credential: obtenerCredencial(), projectId: proyecto() });
   }
   return app;
 }
 
 const auth = () => getAuth(obtenerApp());
+
+/**
+ * Comprueba que las credenciales de verdad funcionan.
+ *
+ * `applicationDefault()` no falla al crearse: resuelve las credenciales
+ * perezosamente, así que un entorno sin ADC parecería estar bien hasta la
+ * primera operación real. Pedir un testigo de acceso es la única forma de
+ * saberlo antes. **No devuelve el testigo**, solo cuánto le queda de vida.
+ */
+export async function comprobarCredenciales(): Promise<{
+  projectId: string;
+  segundosDeVida: number;
+}> {
+  const projectId = proyecto();
+  const testigo = await obtenerCredencial().getAccessToken();
+  return { projectId, segundosDeVida: testigo.expires_in };
+}
 
 /** El proveedor con el que se autenticó esta vez, o "desconocido". */
 function proveedorDe(claims: Record<string, unknown>): string {
@@ -303,10 +381,28 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/re
 
 Esperado: sin errores y 3 pruebas en verde.
 
-- [ ] **Paso 6: confirmar**
+- [ ] **Paso 6: comprobar que ADC funciona de verdad**
+
+`applicationDefault()` no falla al crearse: resuelve las credenciales perezosamente, así
+que un entorno sin ADC parecería estar bien hasta la primera operación real. El script
+`scripts/comprobar-adc.mjs` pide un testigo y después ejercita un permiso real de Firebase
+Authentication, sin imprimir ni el testigo ni las credenciales.
 
 ```bash
-git add package.json package-lock.json app/identidad/firebase.server.ts tests/identidad-frontera.test.ts
+npm run identidad:adc
+```
+
+Esperado: dos `ok` y «Todo correcto». **Si falla el primero**, faltan credenciales: seguir
+`docs/OPERACION-FIREBASE.md` §2. **Si falla el segundo**, hay credenciales pero la cuenta
+no tiene rol sobre el proyecto.
+
+Esta comprobación **necesita que el dueño haya hecho su parte**; hasta entonces la tarea
+queda cerrada en código y pendiente de esta verificación.
+
+- [ ] **Paso 7: confirmar**
+
+```bash
+git add package.json package-lock.json app/identidad/firebase.server.ts tests/identidad-frontera.test.ts scripts/comprobar-adc.mjs docs/OPERACION-FIREBASE.md
 git commit -m "feat(identidad): puerta unica a firebase-admin y frontera con el panel"
 ```
 
@@ -2477,28 +2573,23 @@ git commit -m "feat(identidad): borrado de cuenta con anonimizacion"
 // Sin --aplicar solo informa; nunca escribe por sorpresa.
 
 import { Client, neonConfig } from "@neondatabase/serverless";
-import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
 neonConfig.webSocketConstructor = globalThis.WebSocket;
 
 const aplicar = process.argv.includes("--aplicar");
 
-const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-if (!process.env.DATABASE_URL || !privateKey) {
-  console.error("Faltan DATABASE_URL o las credenciales de Firebase.");
+// Credenciales predeterminadas (ADC): no hay claves privadas de cuenta de
+// servicio, la organizacion las prohibe. En local, las de `gcloud auth
+// application-default login`. Ver docs/OPERACION-FIREBASE.md.
+const projectId = process.env.FIREBASE_PROJECT_ID;
+if (!process.env.DATABASE_URL || !projectId) {
+  console.error("Faltan DATABASE_URL o FIREBASE_PROJECT_ID.");
   process.exit(1);
 }
 
-const app =
-  getApps()[0] ??
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey,
-    }),
-  });
+const app = getApps()[0] ?? initializeApp({ credential: applicationDefault(), projectId });
 const auth = getAuth(app);
 
 const cliente = new Client(process.env.DATABASE_URL);
@@ -2575,18 +2666,32 @@ npm run identidad:reconciliar
 Esperado: `No hay identidades huerfanas.` sobre una base limpia, y **modo «solo
 informar»** en la cabecera.
 
-- [ ] **Paso 3: comprobar la frontera**
+- [ ] **Paso 3: declararlo en la prueba de frontera y comprobarla**
 
-El script vive en `scripts/`, así que **la prueba de la tarea 1 lo permite**: solo exige
-que dentro de `app/**` nadie más importe `firebase-admin`. Confirmarlo:
+La prueba de la tarea 1 lleva una lista de los scripts autorizados a importar
+`firebase-admin`, y **falla si aparece uno que no esté declarado**. Añadir la entrada, con
+su motivo, junto a la que ya existe:
+
+```ts
+const SCRIPTS_QUE_PUEDEN = [
+  // Comprueba que ADC funciona antes de dar por buena la configuración local.
+  // No puede pasar por app/identidad/firebase.server.ts, que lleva "server-only".
+  "scripts/comprobar-adc.mjs",
+  // El barrido de reconciliación necesita preguntar a Firebase si una identidad
+  // sigue existiendo, y tampoco puede importar el módulo con "server-only".
+  "scripts/reconciliar-identidades.mjs",
+];
+```
+
+Confirmarlo:
 
 ```bash
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/identidad-frontera.test.ts
 ```
 
-Esperado: 3 en verde. **Si falla**, la prueba está mirando `scripts/` y hay que ajustar su
-filtro para que la excepción sea explícita y esté comentada, igual que se hizo con
-`scripts/migrate.mjs` en `tests/datos-frontera-controlador.test.ts`.
+Esperado: 5 en verde. **Si falla la de `scripts/`**, la lista no coincide con la realidad:
+o falta declarar este script, o sobra una entrada de algo que ya no importa
+`firebase-admin`.
 
 - [ ] **Paso 4: confirmar**
 
@@ -3050,12 +3155,15 @@ En `.env.example`, un bloque nuevo:
 
 ```bash
 # --- Identidad de clientes (Firebase) — OBLIGATORIAS para /cuenta ----------
-# Credenciales de servicio del proyecto de Firebase. Se descargan de la consola
-# y NO se guardan en el repositorio. La clave privada lleva los saltos de línea
-# escapados como \n.
+# NO hay clave privada de cuenta de servicio: la organización las prohíbe por
+# política, y esa política es correcta. El servidor se autentica con las
+# credenciales predeterminadas de la aplicación (ADC):
+#   - en local, las de `gcloud auth application-default login`, que viven en el
+#     perfil del usuario y nunca dentro del repositorio;
+#   - en producción, con una identidad federada que TODAVÍA NO EXISTE y que
+#     bloquea el despliegue. Ver docs/OPERACION-FIREBASE.md §3.
+# Aquí solo hace falta a qué proyecto pertenecen los tokens que se verifican.
 FIREBASE_PROJECT_ID=
-FIREBASE_CLIENT_EMAIL=
-FIREBASE_PRIVATE_KEY=
 
 # Configuración pública del cliente: llega al navegador a propósito, no es un
 # secreto. Sin ella, la pantalla de entrada no puede autenticar.

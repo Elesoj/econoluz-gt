@@ -1,6 +1,12 @@
 import "server-only";
 
-import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
+import {
+  applicationDefault,
+  getApps,
+  initializeApp,
+  type App,
+  type Credential,
+} from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
 /**
@@ -11,8 +17,28 @@ import { getAuth } from "firebase-admin/auth";
  * o simularla en pruebas es un trabajo acotado.
  * `tests/identidad-frontera.test.ts` lo vigila.
  *
+ * ## Cómo se autentica, y por qué así
+ *
+ * **No hay ninguna clave privada de cuenta de servicio, ni la habrá.** La
+ * organización `econoluz.net` prohíbe generarlas por política, y esa política
+ * es correcta: una clave descargada es un secreto permanente que se copia, se
+ * pega en un chat y sobrevive a quien la creó.
+ *
+ * En su lugar se usan las **credenciales predeterminadas de la aplicación**
+ * (ADC), que `applicationDefault()` resuelve sola:
+ *
+ * - **En desarrollo local**, las que deja `gcloud auth application-default
+ *   login`. Viven en el perfil del usuario, **nunca dentro del repositorio**.
+ * - **En producción, todavía no está resuelto.** Vercel no es infraestructura
+ *   de Google, así que ahí no hay ADC de serie. Antes de desplegar hay que
+ *   montar una integración **sin claves permanentes** —Workload Identity
+ *   Federation con los testigos OIDC de Vercel es el camino previsto—, y eso
+ *   es trabajo aparte que no se hace aquí. Ver `docs/OPERACION-FIREBASE.md`.
+ *
  * La inicialización es perezosa: sin credenciales, el sitio tiene que arrancar
- * igual, como ya hacen el catálogo y `/api/leads`.
+ * igual, como ya hacen el catálogo y `/api/leads`. Y falla de forma segura: si
+ * falta el proyecto o no hay credenciales, se lanza un error claro en vez de
+ * seguir a medias.
  */
 
 export type IdentidadVerificada = {
@@ -23,29 +49,57 @@ export type IdentidadVerificada = {
   proveedor: string;
 };
 
-function credenciales() {
+/**
+ * El proyecto no se deduce ni se adivina: sin él, `firebase-admin` podría
+ * apuntar a un proyecto distinto del previsto y verificar tokens que no son
+ * nuestros.
+ */
+function proyecto(): string {
   const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  // La clave privada viaja con "\n" escapados en las variables de entorno.
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-
-  if (!projectId || !clientEmail || !privateKey) {
-    throw new Error("Faltan las credenciales de servicio de Firebase.");
+  if (!projectId) {
+    throw new Error(
+      "Falta FIREBASE_PROJECT_ID. En local, ponlo en .env.local y autentícate con " +
+        "gcloud auth application-default login. Ver docs/OPERACION-FIREBASE.md.",
+    );
   }
-
-  return { projectId, clientEmail, privateKey };
+  return projectId;
 }
 
+let credencial: Credential | null = null;
 let app: App | null = null;
+
+function obtenerCredencial(): Credential {
+  if (!credencial) {
+    credencial = applicationDefault();
+  }
+  return credencial;
+}
 
 function obtenerApp(): App {
   if (!app) {
-    app = getApps()[0] ?? initializeApp({ credential: cert(credenciales()) });
+    app = getApps()[0] ?? initializeApp({ credential: obtenerCredencial(), projectId: proyecto() });
   }
   return app;
 }
 
 const auth = () => getAuth(obtenerApp());
+
+/**
+ * Comprueba que las credenciales de verdad funcionan.
+ *
+ * `applicationDefault()` no falla al crearse: resuelve las credenciales
+ * perezosamente, así que un entorno sin ADC parecería estar bien hasta la
+ * primera operación real. Pedir un testigo de acceso es la única forma de
+ * saberlo antes. **No devuelve el testigo**, solo cuánto le queda de vida.
+ */
+export async function comprobarCredenciales(): Promise<{
+  projectId: string;
+  segundosDeVida: number;
+}> {
+  const projectId = proyecto();
+  const testigo = await obtenerCredencial().getAccessToken();
+  return { projectId, segundosDeVida: testigo.expires_in };
+}
 
 /** El proveedor con el que se autenticó esta vez, o "desconocido". */
 function proveedorDe(claims: Record<string, unknown>): string {

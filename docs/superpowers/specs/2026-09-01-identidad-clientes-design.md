@@ -482,11 +482,22 @@ de la §3.1.
 
 - **Nunca se escribe en producción durante el desarrollo.** Toda migración y toda prueba
   real van primero contra `identidad-clientes-dev`.
-- **Un proyecto de Firebase aparte para desarrollo**, distinto del de producción. Las
-  credenciales de servicio de uno no valen en el otro.
-- Variables nuevas, todas fuera del repositorio: las credenciales de servicio de Firebase,
-  la configuración pública del cliente y `AUTH_EVENT_IP_PEPPER`. Se documentan en
-  `.env.example` **sin valores**.
+- **Un proyecto de Firebase aparte para desarrollo**, distinto del de producción.
+- **No hay claves privadas de cuenta de servicio, y no las habrá.** La organización
+  `econoluz.net` lo prohíbe por política, y la política es correcta: una clave descargada
+  es un secreto permanente que se copia, se pega en un chat y sobrevive a quien la creó.
+  El servidor se autentica con **credenciales predeterminadas de la aplicación (ADC)**.
+  - **En local**, las que deja `gcloud auth application-default login`, guardadas en el
+    perfil del usuario y **nunca dentro del repositorio**.
+  - **En producción, sin resolver.** Vercel no es infraestructura de Google y no tiene ADC
+    de serie. Hará falta una identidad federada sin claves permanentes —**Workload
+    Identity Federation** con los testigos OIDC de Vercel es el camino previsto—,
+    montada **antes de desplegar** cualquier cosa que dependa de Firebase. Es trabajo
+    aparte y **no entra en este subproyecto**. El procedimiento y su estado viven en
+    `docs/OPERACION-FIREBASE.md`.
+- Variables nuevas, todas fuera del repositorio: `FIREBASE_PROJECT_ID`, la configuración
+  pública del cliente —que no es secreta: llega al navegador a propósito— y
+  `AUTH_EVENT_IP_PEPPER`. Se documentan en `.env.example` **sin valores**.
 
 ---
 
@@ -506,8 +517,10 @@ de la §3.1.
    registrarse con ese mismo correo**, comprobado igual.
 6. Ningún token de Firebase se verifica fuera del servidor, y **`jose` no participa** en
    esa verificación.
-7. `firebase-admin` se importa **solo** desde `app/identidad/firebase.server.ts`,
-   comprobado por prueba.
+7. `firebase-admin` se importa **solo** desde `app/identidad/firebase.server.ts` dentro de
+   `app/**`, comprobado por prueba; en `scripts/**` las excepciones están declaradas una a
+   una. **Ninguna clave privada de cuenta de servicio participa**: ni `cert()` ni
+   `FIREBASE_PRIVATE_KEY` aparecen en el código, también comprobado por prueba.
 8. **Ningún módulo de clientes importa código del panel, ni al revés**, comprobado por
    prueba. `admin_users`, `admin_sessions` y `admin_login_attempts` quedan **sin
    modificar**, comprobado con `git diff`.
@@ -611,4 +624,5 @@ estar escrito aquí.
 | Fecha | Cambio |
 |---|---|
 | 01/09/2026 | Documento inicial, con las cinco decisiones del dueño ya incorporadas: retención fiscal indefinida y provisional, anonimización logística a los doce meses, borrado inmediato con reautenticación, correo y Google con Facebook preparado, y cookie de sesión de Firebase de cinco días renovable |
+| 01/09/2026 (ADC) | La organización `econoluz.net` prohíbe generar claves de cuenta de servicio, así que el servidor pasa a autenticarse con **credenciales predeterminadas (ADC)**: `gcloud` en local, y **Workload Identity Federation pendiente y bloqueante** para producción. Desaparecen `FIREBASE_PRIVATE_KEY` y `FIREBASE_CLIENT_EMAIL`; queda `FIREBASE_PROJECT_ID`. El criterio 7 se amplía para vigilar que nadie reintroduzca una clave |
 | 01/09/2026 (revisión) | Tres correcciones antes de aprobar el plan. Faltaba el invariante de **un correo, una cuenta activa**: se añade el índice único parcial `users_email_activo` y su criterio de aceptación, porque la garantía vivía solo en la configuración de Firebase. Los marcadores de anonimización pasan de «un valor sin significado» a estar **especificados** (`borrado+<id>@invalid` y `borrado:<id>`). Y se deja dicho que `xmax = 0` se apoya en una columna interna de PostgreSQL, con la prueba real que debe cubrirlo y la alternativa si dejara de servir |
