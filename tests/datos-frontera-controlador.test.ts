@@ -19,7 +19,6 @@ const PERMITIDO = "app/lib/datos";
  * el estado real de la migración.
  */
 const EXCEPCIONES_TRANSITORIAS = [
-  "app/admin/proyectos/imagenes.server.ts",
   "app/api/leads/route.ts",
   "app/data/catalog.server.ts",
   "app/data/projects.server.ts",

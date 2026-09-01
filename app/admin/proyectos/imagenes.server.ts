@@ -1,6 +1,6 @@
 import "server-only";
 
-import { neon } from "@neondatabase/serverless";
+import { leer } from "../../lib/datos";
 import {
   moveProjectImage,
   projectExists,
@@ -10,12 +10,19 @@ import {
 } from "./imagenes";
 import type { ProjectMoveDirection } from "./model";
 
+/**
+ * Solo la conexión, ahora por la capa de datos, con la comprobación de
+ * `DATABASE_URL` en el mismo sitio que antes del traslado.
+ *
+ * `moveProjectImage` y `setProjectImageVisible` leen antes de escribir sin
+ * transacción. Se deja igual: este paso traslada el acceso sin cambiar
+ * comportamiento, y esa atomicidad es una decisión aparte, anotada en
+ * `docs/CONTINUAR-PANEL.md`.
+ */
 function connect() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("Falta DATABASE_URL.");
-  const sql = neon(connectionString);
+  if (!process.env.DATABASE_URL) throw new Error("Falta DATABASE_URL.");
   return (text: string, params: readonly (string | number | boolean | null)[]) =>
-    sql.query(text, [...params]) as Promise<Record<string, unknown>[]>;
+    leer<Record<string, unknown>>(text, params);
 }
 
 export function adminProjectExists(projectId: string): Promise<boolean> {
