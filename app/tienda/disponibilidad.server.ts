@@ -2,7 +2,7 @@
 
 import "server-only";
 
-import { neon } from "@neondatabase/serverless";
+import { leer } from "../lib/datos";
 import { CANTIDAD_MAXIMA_POR_LINEA, type LineaCarrito } from "./carrito";
 import { decidirDisponibilidad, type Disponibilidad } from "./disponibilidad";
 
@@ -35,9 +35,7 @@ export async function consultarDisponibilidad(
     return {};
   }
 
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
+  if (!process.env.DATABASE_URL) {
     // Sin base de datos no se sabe nada del inventario, y no saber nada no
     // autoriza a frenar una compra: se contesta que alcanza.
     return Object.fromEntries(
@@ -48,14 +46,13 @@ export async function consultarDisponibilidad(
     );
   }
 
-  const sql = neon(connectionString);
   const referencias = validas.map((linea) => linea.econoluzReference);
 
   try {
-    const filas = (await sql.query(
+    const filas = await leer<{ econoluz_reference: string; stock: number | null }>(
       "select econoluz_reference, stock from products where econoluz_reference = any($1)",
       [referencias],
-    )) as { econoluz_reference: string; stock: number | null }[];
+    );
 
     const existenciasPorReferencia = new Map(
       filas.map((fila) => [fila.econoluz_reference, fila.stock]),

@@ -22,7 +22,6 @@ const EXCEPCIONES_TRANSITORIAS = [
   "app/api/leads/route.ts",
   "app/data/catalog.server.ts",
   "app/data/projects.server.ts",
-  "app/tienda/disponibilidad.server.ts",
 ];
 
 function archivosDe(carpeta: string): string[] {
