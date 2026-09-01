@@ -24,6 +24,10 @@ const PROHIBIDAS = [
   "schema_migrations",
   "app_settings",
   "audit_log",
+  "users",
+  "user_addresses",
+  "user_consents",
+  "auth_events",
 ];
 
 const identificador = (nombre) => {
