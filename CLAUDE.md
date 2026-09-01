@@ -97,18 +97,32 @@ trabajo ha seguido sobre él hasta cerrar la tarea 9:
     que leen antes de escribir —el alta de producto y tres del panel de proyectos—. Era
     así antes del traslado y se dejó igual a propósito. Ver `docs/CONTINUAR-PANEL.md`.
 
-- **Verificación fresca del último cierre:** `test:datos` 45/45, `test:admin` 196/196,
-  `test:proveedores` 3/3, `test:permisos` correcto, `typecheck` y `lint` limpios, `build`
-  correcto, **Playwright 67/67 con salida limpia** y `catalogo:auditar` con 313 productos,
-  408 identificadores y 0 coincidencias. En `fundamentos-backend-dev`: `modelo_catalogo`
-  en `legacy`, 313 productos con **25 precios**, 313 filas en la proyección y `audit_log`
-  vacía.
+- **Tarea 11 terminada y verificada:** `app/data/origenPublico.ts` deja escrita y probada
+  la regla más importante del subproyecto —**la conexión privilegiada nunca sustituye al
+  rol público en producción**— con doce pruebas. Con `DATABASE_URL_PUBLIC` se usa el rol
+  público; sin ella, en producción se sirve el catálogo escrito en el código y se registra
+  un error de configuración, **sin llegar a invocar la privilegiada**; en desarrollo local
+  sí se usa, con aviso. Comprobado contra `fundamentos-backend-dev`: `current_user` fue
+  `econoluz_publico`, se leyeron 313 filas con 25 precios de `public_products` y `products`
+  siguió denegada. Las dos pruebas estructurales se rompieron a propósito para verlas
+  fallar antes de deshacer la rotura.
+  - **Desviación deliberada:** el plan pedía enganchar la decisión en
+    `app/data/catalog.server.ts` y **no se hizo**. Producción no tiene
+    `DATABASE_URL_PUBLIC`, así que engancharla haría que el sitio sirviera el catálogo del
+    código y dejara de mostrar lo editado en el panel. Es del subproyecto 3.
 
-**Lo siguiente es la tarea 11, todavía no empezada:** dejar probado qué hace el sitio
-cuando falta `DATABASE_URL_PUBLIC`. **La conexión privilegiada no se usa nunca como
-respaldo del camino público**: en producción se sirve el respaldo estático y queda
-registrado un error de configuración. La bandera sigue en `legacy`. Toda aplicación y
-prueba real se hace primero en `fundamentos-backend-dev`; no se toca producción.
+- **Verificación fresca del último cierre:** `test:datos` 57/57, `test:admin` 196/196,
+  `test:proveedores` 3/3, `test:permisos` correcto, `typecheck` y `lint` limpios, `build`
+  correcto y `catalogo:auditar` con 313 productos, 408 identificadores y 0 coincidencias.
+  Playwright no se repitió en la tarea 11, que no toca ninguna ruta; su último estado real
+  es el **67/67 con salida limpia** de la tarea 10. En `fundamentos-backend-dev`:
+  `modelo_catalogo` en `legacy`, 313 productos con **25 precios**, 313 filas en la
+  proyección y `audit_log` vacía.
+
+**Lo siguiente es la tarea 12, la última del subproyecto 1:** cierre y documentación, con
+los doce criterios de aceptación comprobados uno a uno. **Al terminarla hay punto de
+revisión con el dueño antes de empezar el subproyecto 2.** La bandera sigue en `legacy` y
+el catálogo público no ha cambiado de fuente.
 
 Solo se ha escrito en la rama aislada de Neon. No se ha fusionado, hecho push ni
 desplegado este trabajo, y producción permanece intacta.

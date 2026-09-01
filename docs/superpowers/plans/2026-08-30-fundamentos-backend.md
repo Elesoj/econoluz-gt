@@ -42,7 +42,8 @@ desde la especificación: quien ejecute debe leer las dos.
 | Tarea 8 | ✅ Terminada y verificada | Migración 006 y prueba real del rol en `fundamentos-backend-dev` |
 | Tarea 9 | ✅ Terminada y verificada | Migraciones 007 y 008 aplicadas en `fundamentos-backend-dev`, `app/lib/ajustes.ts` y seis pruebas |
 | Tarea 10 | ✅ Terminada y verificada | Once commits de traslado, `EXCEPCIONES_TRANSITORIAS` vacía y Playwright 67/67 |
-| Tareas 11–12 | ⏳ No empezadas | El siguiente paso es la tarea 11: comportamiento sin `DATABASE_URL_PUBLIC` |
+| Tarea 11 | ✅ Terminada y verificada | `origenPublico.ts` y doce pruebas; el enganche al catálogo queda para el subproyecto 3 |
+| Tarea 12 | ⏳ No empezada | El siguiente paso es el cierre y la documentación del subproyecto |
 
 La revisión de la tarea 7 cambió detalles respecto a los ejemplos originales de abajo:
 la conversión a centavos vive en `app/lib/dinero.ts`, el `upsert` compartido en
@@ -144,14 +145,55 @@ vacía y la única fila histórica de `leads` intacta. El `insert` reescrito de
 `/api/leads` se probó contra esa rama dentro de una transacción deshecha: guarda lo mismo,
 con las doce columnas en orden y `products` como `jsonb`.
 
+Tarea 11 terminada el 31/08/2026, y **con una desviación deliberada que conviene leer
+antes de tocar nada**. El plan pedía que `catalog.server.ts` importara la decisión y
+actuara según ella. Hacerlo hoy cambiaría la fuente del catálogo: producción no tiene
+`DATABASE_URL_PUBLIC`, así que en cuanto se desplegara pasaría a servir el catálogo escrito
+en el código y dejaría de verse lo que se edita en el panel. Eso choca con las
+restricciones globales de este mismo plan —el catálogo público no cambia de fuente y la
+bandera se queda en `legacy`— y con la decisión del dueño del 30/08. **La política se
+implementa entera y se prueba; el enganche corresponde al subproyecto 3**, cuando el
+catálogo pase a leer la proyección. `catalog.server.ts` no se tocó.
+
+`app/data/origenPublico.ts` contiene las dos piezas: `decidirOrigenPublico`, que elige el
+origen, y `servirCatalogoPublico`, que la ejecuta. La segunda existe porque saber que la
+decisión *dice* «respaldo-estatico» no demuestra que nadie llame a la conexión
+privilegiada; con espas se comprueba cuál de las tres fuentes se usó de verdad. No lleva
+`catch`: si el rol público está configurado y falla, eso es una avería y no autoriza a
+probar suerte con la privilegiada.
+
+Las doce pruebas de `tests/datos-respaldo-configuracion.test.ts` cubren los cuatro
+comportamientos exigidos: con cadena pública se usa el rol público en cualquier entorno; en
+producción sin ella se sirve el respaldo estático y se registra
+`catalogo-publico-sin-cadena-publica`; en producción la conexión privilegiada **no llega a
+invocarse**; y en desarrollo sí se usa, con el aviso
+`catalogo-publico-con-conexion-privilegiada`.
+
+Dos de esas pruebas son estructurales, sobre el texto de `conexion.ts` e `index.ts`,
+porque `server-only` no se resuelve fuera del empaquetador de Next y esos módulos no se
+pueden importar desde `node:test`. **Se comprobó que muerden**: al hacer que
+`ejecutorPublico` cayera a `DATABASE_URL` y al hacer que `leerPublico` usara
+`ejecutorDeLectura` de respaldo, cada rotura puso su prueba en rojo con su mensaje; ambas
+se deshicieron después. Y no pasan en falso: si alguien renombra las funciones, fallan en
+vez de quedarse sin nada que mirar.
+
+Verificación contra `fundamentos-backend-dev` con la cadena pública puesta: el origen
+resuelto fue `rol-publico`, `current_user` resultó `econoluz_publico`, se leyeron **313
+filas con 25 precios** de `public_products`, no se registró nada y `products` siguió
+**denegada (42501)** para ese rol. La fuente privilegiada estaba preparada para lanzar si
+alguien la llamaba, y no se llamó.
+
+Batería: `test:datos` **57/57**, `test:admin` **196/196**, `test:proveedores` **3/3**,
+`test:permisos` correcto, `typecheck` y `lint` limpios, `build` correcto y
+`catalogo:auditar` 313/408/0. **Playwright no se ejecutó**: la tarea no toca ninguna ruta
+ni componente y el código de rutas es el mismo que pasó 67/67 con salida limpia en la
+tarea 10.
+
 ### Próximo punto de control
 
-Empezar la tarea 11: dejar por escrito y probado qué pasa cuando falta
-`DATABASE_URL_PUBLIC`. **La conexión privilegiada no se usa nunca como respaldo del camino
-público**; en producción se sirve el respaldo estático y queda registrado un error de
-configuración. La bandera sigue en `legacy`. Toda comprobación real se hace en
-`fundamentos-backend-dev`, nunca en producción. No se ha hecho push, fusión ni
-despliegue.
+Empezar la tarea 12, la última: cierre y documentación del subproyecto, y **punto de
+revisión con el dueño antes de tocar el subproyecto 2**. La bandera sigue en `legacy` y
+nada de esto se ha fusionado, empujado ni desplegado.
 
 ## Restricciones globales
 
@@ -2033,6 +2075,13 @@ que antes de empezar el subproyecto: eso es la paridad.**
 
 ## Tarea 11: Comportamiento ante la falta de `DATABASE_URL_PUBLIC`
 
+> **Cómo se ejecutó (31/08/2026).** Se hizo todo salvo una cosa: **`catalog.server.ts` no
+> se modificó**. Engancharle la decisión hoy haría que producción, que no tiene
+> `DATABASE_URL_PUBLIC`, sirviera el catálogo escrito en el código y dejara de mostrar lo
+> que se edita en el panel. El enganche es del subproyecto 3, cuando el catálogo pase a
+> leer la proyección. La política sí está implementada y probada, y `origenPublico.ts`
+> añade `servirCatalogoPublico` para poder demostrar con espías qué fuente se usa.
+
 **Archivos:**
 - Crear: `app/data/origenPublico.ts`
 - Modificar: `app/data/catalog.server.ts`
@@ -2048,7 +2097,7 @@ es lógica pura y se prueba sin base de datos, así que vive en un módulo puro 
 se usa como respaldo del camino público. Hacerlo convertiría un descuido de configuración
 en la desaparición silenciosa de la protección que este subproyecto construye.
 
-- [ ] **Paso 1: escribir la prueba que falla**
+- [x] **Paso 1: escribir la prueba que falla**
 
 ```ts
 import assert from "node:assert/strict";
@@ -2082,7 +2131,7 @@ test("con cadena pública se usa el rol público en cualquier entorno", () => {
 });
 ```
 
-- [ ] **Paso 2: ejecutar la prueba y comprobar que falla**
+- [x] **Paso 2: ejecutar la prueba y comprobar que falla**
 
 ```bash
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/datos-respaldo-configuracion.test.ts
@@ -2090,7 +2139,7 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/re
 
 Esperado: falla con «Cannot find module '../app/data/origenPublico'».
 
-- [ ] **Paso 3: escribir la implementación mínima**
+- [x] **Paso 3: escribir la implementación mínima**
 
 `app/data/origenPublico.ts`, y después `catalog.server.ts` lo importa y actúa según lo que
 devuelva:
@@ -2127,7 +2176,7 @@ export function decidirOrigenPublico(entorno: {
 }
 ```
 
-- [ ] **Paso 4: ejecutar la prueba y comprobar que pasa**
+- [x] **Paso 4: ejecutar la prueba y comprobar que pasa**
 
 ```bash
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/datos-respaldo-configuracion.test.ts
@@ -2135,7 +2184,7 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/re
 
 Esperado: 4 pruebas en verde.
 
-- [ ] **Paso 5: confirmar**
+- [x] **Paso 5: confirmar**
 
 ```bash
 git add app/data/origenPublico.ts app/data/catalog.server.ts tests/datos-respaldo-configuracion.test.ts package.json

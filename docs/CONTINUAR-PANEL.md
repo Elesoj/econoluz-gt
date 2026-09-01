@@ -103,7 +103,7 @@ El trabajo activo ya no está solo en `main`. Continúa en:
 
 ### Qué está terminado
 
-Las tareas 1–10 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
+Las tareas 1–11 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
 incluye la migración `005`, la proyección pública, el escritor por producto, la
 reproyección total, la conversión monetaria compartida y las pruebas de paridad y
 privacidad. No hay que rehacer ninguna de esas piezas.
@@ -178,22 +178,48 @@ servidor—. `catalogo:auditar` sigue en 313/408/0, y en `fundamentos-backend-de
 313 productos con **25 precios**, 313 filas en la proyección, `audit_log` vacía y la única
 fila histórica de `leads` intacta.
 
+La tarea 11 dejó escrita y probada la regla más importante del subproyecto: **la conexión
+privilegiada nunca sustituye al rol público en producción.** Vive en
+`app/data/origenPublico.ts`, con doce pruebas en
+`tests/datos-respaldo-configuracion.test.ts`. Con `DATABASE_URL_PUBLIC` se usa el rol
+público en cualquier entorno; sin ella, en producción se sirve el catálogo escrito en el
+código y se registra un error de configuración, y **la privilegiada no llega a
+invocarse**; en desarrollo local sí se usa, con aviso, para no exigir credenciales del rol
+público solo para arrancar el sitio.
+
+Se comprobó contra `fundamentos-backend-dev` que el camino público funciona de verdad:
+`current_user` fue `econoluz_publico`, se leyeron **313 filas con 25 precios** de
+`public_products` y `products` siguió denegada para ese rol. Y se comprobó que las dos
+pruebas estructurales muerden, rompiendo a propósito cada protección y viendo el rojo
+antes de deshacer la rotura.
+
+**Una desviación deliberada, y hay que conocerla:** el plan pedía enganchar la decisión en
+`app/data/catalog.server.ts`, y **no se hizo**. Producción no tiene `DATABASE_URL_PUBLIC`,
+así que engancharla haría que el sitio pasara a servir el catálogo escrito en el código y
+dejara de mostrar lo que se edita en el panel. El enganche es del subproyecto 3, cuando el
+catálogo lea la proyección. Hoy `catalog.server.ts` sigue leyendo `products` con la
+conexión de la aplicación, y `modelo_catalogo` sigue en `legacy`.
+
+Verificación: `test:datos` **57/57**, `test:admin` **196/196**, `test:proveedores` **3/3**,
+`test:permisos` correcto, `typecheck` y `lint` limpios, `build` correcto y
+`catalogo:auditar` 313/408/0. Playwright no se repitió en esta tarea, que no toca ninguna
+ruta; su último estado real es el 67/67 con salida limpia de la tarea 10.
+
 ### El siguiente paso exacto
 
-Empezar la **tarea 11**, sin adelantar la 12:
+Empezar la **tarea 12**, que es la última del subproyecto 1:
 
-1. Dejar probado qué hace el sitio cuando falta `DATABASE_URL_PUBLIC`.
-2. **La conexión privilegiada no se usa nunca como respaldo del camino público.** En
-   producción se sirve el respaldo estático y queda registrado un error de configuración;
-   que el sitio siguiera funcionando sin barrera es justamente el fallo que hay que
-   evitar.
-3. La bandera sigue en `legacy`.
-4. Verificar en `fundamentos-backend-dev`. No usar producción.
+1. Cierre y documentación: repasar `.env.example`, `docs/OPERACION-ROL-PUBLICO.md`,
+   `CLAUDE.md` y este documento, y comprobar los doce criterios de aceptación de la
+   especificación uno a uno.
+2. La bandera sigue en `legacy` y el catálogo público no cambia de fuente.
+3. **Al terminar hay punto de revisión con el dueño**, antes de empezar el subproyecto 2.
+4. Nada de esto autoriza a fusionar, empujar ni desplegar.
 
 ### Estado de integración
 
 Solo se ha escrito en la rama aislada `fundamentos-backend-dev` para integrar las tareas
-7, 8, 9 y 10.
+7, 8, 9, 10 y 11.
 No se ha escrito en producción, fusionado la rama, hecho push ni desplegado. `main` sigue
 en `19d0106` y `origin/main` en `a4defad`; la implementación vive solo en el worktree.
 Los 25 precios existentes permanecen intactos por decisión del dueño.
