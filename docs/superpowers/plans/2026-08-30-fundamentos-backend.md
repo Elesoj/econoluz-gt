@@ -40,7 +40,8 @@ desde la especificación: quien ejecute debe leer las dos.
 | Tarea 7, implementación local | ✅ Terminada y revisada | `e2a7220` y ronda de arreglo `ebd8011` |
 | Tarea 7, integración en Neon | ✅ Terminada y verificada | Rama aislada `fundamentos-backend-dev`: migración 005, dos reproyecciones 313/0, privacidad e idempotencia |
 | Tarea 8 | ✅ Terminada y verificada | Migración 006 y prueba real del rol en `fundamentos-backend-dev` |
-| Tareas 9–12 | ⏳ No empezadas | El siguiente paso es la tarea 9: `app_settings` y `audit_log` |
+| Tarea 9 | ✅ Terminada y verificada | Migraciones 007 y 008 aplicadas en `fundamentos-backend-dev`, `app/lib/ajustes.ts` y seis pruebas |
+| Tareas 10–12 | ⏳ No empezadas | El siguiente paso es la tarea 10: trasladar los once accesos |
 
 La revisión de la tarea 7 cambió detalles respecto a los ejemplos originales de abajo:
 la conversión a centavos vive en `app/lib/dinero.ts`, el `upsert` compartido en
@@ -72,11 +73,43 @@ que `app_settings` y `audit_log` todavía no existen, leyó la proyección y no 
 objetos sin clasificar. La contraseña y `DATABASE_URL_PUBLIC` solo existen fuera del
 repositorio.
 
+Tarea 9 terminada y verificada el 31/08/2026, también solo en
+`fundamentos-backend-dev`. `007_app_settings.sql` y `008_audit_log.sql` quedaron aplicadas
+por `db:migrar`; `app_settings` nació con **`modelo_catalogo = legacy`** y repetir su
+`insert` dejó **una sola fila y el mismo valor**; `audit_log` quedó vacía, con sus dos
+índices, y su restricción rechazó un `actor_tipo` inventado con SQLSTATE 23514 dentro de una
+transacción deshecha. La lectura real de la bandera con el módulo puro devolvió `legacy`, y
+también lo devolvió ante una tabla inexistente. `npm run test:permisos` pasó de decir que
+`app_settings` y `audit_log` «todavía no existen» a **denegarlas**, que era el cabo suelto
+que dejó abierto la tarea 8. Los 313 productos y los 25 precios siguen intactos.
+
+La bandera **se queda en `legacy`**: no se activó `shadow` ni `relational_v2`, y ningún
+código la consulta todavía.
+
+Dos decisiones de la tarea 9 se apartan de los fragmentos de abajo, y son deliberadas.
+`app/lib/ajustes.server.ts` lee por `leer()` de `app/lib/datos`, no por
+`ejecutorDeLectura()` en crudo: `index.ts` es la única superficie que consume el resto de
+`app/**`, y así la consulta hereda el tiempo máximo y los errores tipados de la capa —sin
+ese límite, una base colgada dejaría esperando a cada página que preguntase por la
+bandera—. Y cuando el respaldo se activa se registra el suceso `ajustes-modelo-catalogo`
+con la causa y sin texto de Postgres, porque un respaldo silencioso es un respaldo que
+nadie arregla.
+
+Verificación de la tarea 9: `test:datos` **45/45** (las 39 anteriores más seis nuevas),
+`test:admin` **196/196**, `test:proveedores` **3/3**, `test:permisos` correcto, `typecheck`
+y `lint` limpios, `build` correcto y `catalogo:auditar` con 313 productos, 408
+identificadores y 0 coincidencias. **No se ejecutó Playwright**: la tarea no toca ninguna
+ruta ni componente —`obtenerModeloDeCatalogo` no lo llama nadie todavía— y su último
+estado real sigue siendo el descrito más arriba.
+
 ### Próximo punto de control
 
-Empezar la tarea 9: crear `app_settings` y `audit_log`, manteniendo
-`modelo_catalogo = legacy` y sin activar ningún camino nuevo. Aplicar y probar primero en
-`fundamentos-backend-dev`, nunca en producción. No se ha hecho push, fusión ni despliegue.
+Empezar la tarea 10: trasladar los once accesos a la capa de datos, **uno por commit y sin
+cambiar comportamiento**, sacando cada archivo de `EXCEPCIONES_TRANSITORIAS` en
+`tests/datos-frontera-controlador.test.ts` a medida que deja de importar el controlador.
+La bandera sigue en `legacy` y el catálogo público no cambia de fuente. Toda comprobación
+real se hace en `fundamentos-backend-dev`, nunca en producción. No se ha hecho push,
+fusión ni despliegue.
 
 ## Restricciones globales
 
@@ -1676,7 +1709,7 @@ git commit -m "feat(datos): rol publico de solo lectura y su prueba de permisos"
 - Produce, en `app/lib/ajustes.server.ts`: `obtenerModeloDeCatalogo(): Promise<ModeloDeCatalogo>`,
   que es `leerModeloDeCatalogo` con la conexión real y caché breve.
 
-- [ ] **Paso 1: escribir las migraciones**
+- [x] **Paso 1: escribir las migraciones**
 
 `db/007_app_settings.sql`:
 
@@ -1726,7 +1759,7 @@ create index if not exists audit_log_ocurrido_en_idx on audit_log (ocurrido_en d
 create index if not exists audit_log_entidad_idx on audit_log (entidad, entidad_id);
 ```
 
-- [ ] **Paso 2: escribir la prueba que falla**
+- [x] **Paso 2: escribir la prueba que falla**
 
 ```ts
 import assert from "node:assert/strict";
@@ -1758,7 +1791,7 @@ test("lee el valor guardado", async () => {
 });
 ```
 
-- [ ] **Paso 3: ejecutar la prueba y comprobar que falla**
+- [x] **Paso 3: ejecutar la prueba y comprobar que falla**
 
 ```bash
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/ajustes.test.ts
@@ -1766,7 +1799,7 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/re
 
 Esperado: falla con «Cannot find module '../app/lib/ajustes'».
 
-- [ ] **Paso 4: escribir la implementación mínima**
+- [x] **Paso 4: escribir la implementación mínima**
 
 ```ts
 import type { Ejecutor } from "./datos/consulta";
@@ -1837,7 +1870,7 @@ export async function obtenerModeloDeCatalogo(): Promise<ModeloDeCatalogo> {
 }
 ```
 
-- [ ] **Paso 5: ejecutar la prueba y comprobar que pasa**
+- [x] **Paso 5: ejecutar la prueba y comprobar que pasa**
 
 ```bash
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/ajustes.test.ts
@@ -1845,7 +1878,7 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/re
 
 Esperado: 4 pruebas en verde.
 
-- [ ] **Paso 6: aplicar las migraciones y confirmar**
+- [x] **Paso 6: aplicar las migraciones y confirmar**
 
 ```bash
 npm run db:migrar

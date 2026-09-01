@@ -103,7 +103,7 @@ El trabajo activo ya no está solo en `main`. Continúa en:
 
 ### Qué está terminado
 
-Las tareas 1–8 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
+Las tareas 1–9 del subproyecto 1 están implementadas, revisadas e integradas. La tarea 7
 incluye la migración `005`, la proyección pública, el escritor por producto, la
 reproyección total, la conversión monetaria compartida y las pruebas de paridad y
 privacidad. No hay que rehacer ninguna de esas piezas.
@@ -137,21 +137,42 @@ La verificación fresca de este cierre dio `test:permisos` correcto, `test:datos
 repitieron `build` ni Playwright para esta tarea documental y de permisos; su último
 estado real sigue siendo el descrito en el párrafo anterior.
 
+La tarea 9 añade `007_app_settings.sql` y `008_audit_log.sql`, el módulo puro
+`app/lib/ajustes.ts`, su lectura con caché breve `app/lib/ajustes.server.ts` y seis pruebas
+en `tests/ajustes.test.ts`. La bandera `modelo_catalogo` **nació en `legacy` y ahí sigue**:
+no se activó `shadow` ni `relational_v2`, y ninguna página la consulta todavía.
+
+Se integró exclusivamente en `fundamentos-backend-dev`: las dos migraciones quedaron
+aplicadas, repetir el `insert` de la bandera dejó **una sola fila con el mismo valor**,
+`audit_log` quedó vacía con sus dos índices y su restricción rechazó un `actor_tipo`
+inventado (SQLSTATE 23514) dentro de una transacción deshecha. La lectura real devolvió
+`legacy`, igual que ante una tabla inexistente. **`npm run test:permisos` pasó de decir que
+`app_settings` y `audit_log` «todavía no existen» a denegarlas**, que era el cabo suelto de
+la tarea 8. Los 313 productos y los 25 precios siguen intactos.
+
+La verificación de este cierre dio `test:datos` **45/45**, `test:admin` **196/196**,
+`test:proveedores` **3/3**, `test:permisos` correcto, `typecheck` y `lint` limpios, `build`
+correcto y `catalogo:auditar` con 313 productos, 408 identificadores y 0 coincidencias.
+**Playwright no se ejecutó en esta tarea**, porque no toca ninguna ruta ni componente; su
+último estado real es el descrito más arriba.
+
 ### El siguiente paso exacto
 
-Empezar la **tarea 9**, sin adelantar ninguna de las posteriores:
+Empezar la **tarea 10**, sin adelantar ninguna de las posteriores:
 
-1. Crear `db/007_app_settings.sql` con `modelo_catalogo = legacy` y
-   `db/008_audit_log.sql`.
-2. Añadir la lectura tipada y conservadora de `app_settings`, con `legacy` ante cualquier
-   valor desconocido o fallo.
-3. Mantener la bandera en `legacy`: no activar `shadow` ni `relational_v2`.
-4. Aplicar y verificar primero en `fundamentos-backend-dev`. No usar producción.
+1. Trasladar a `app/lib/datos` los once archivos que hoy abren su propia conexión. Están
+   listados en `EXCEPCIONES_TRANSITORIAS`, dentro de
+   `tests/datos-frontera-controlador.test.ts`.
+2. **Un archivo por commit y sin cambiar comportamiento**, sacando su entrada de esa lista
+   en el mismo commit y pasando la batería completa entre uno y otro.
+3. El catálogo público **no cambia de fuente**: sigue leyendo `products`, y la bandera
+   sigue en `legacy`.
+4. Verificar en `fundamentos-backend-dev`. No usar producción.
 
 ### Estado de integración
 
 Solo se ha escrito en la rama aislada `fundamentos-backend-dev` para integrar las tareas
-7 y 8.
+7, 8 y 9.
 No se ha escrito en producción, fusionado la rama, hecho push ni desplegado. `main` sigue
 en `19d0106` y `origin/main` en `a4defad`; la implementación vive solo en el worktree.
 Los 25 precios existentes permanecen intactos por decisión del dueño.

@@ -54,7 +54,8 @@ autorización: ambas siguen necesitando el visto bueno expreso del dueño en su 
 
 El plan de fundamentos **ya está en ejecución** en el worktree
 `.worktrees/fundamentos-backend`, rama `feat/fundamentos-backend`. La base de código
-integrada y documentada antes de la comprobación en Neon es el commit `b14a931`:
+integrada y documentada antes de la comprobación en Neon fue el commit `b14a931`, y el
+trabajo ha seguido sobre él hasta cerrar la tarea 9:
 
 - **Tareas 1–6 terminadas:** errores tipados, registro estructurado, conexión y consultas
   con tiempo máximo, transacciones interactivas, frontera única de la capa de datos y
@@ -71,17 +72,31 @@ integrada y documentada antes de la comprobación en Neon es el commit `b14a931`
   excluido `updated_at`, fue idéntica antes y después. La tabla contiene 313 filas, los
   mismos 25 precios —con una huella idéntica a la conexión principal— y ninguna columna
   prohibida; se buscaron los 408 identificadores del proveedor y hubo **0 coincidencias**.
-- **Verificación fresca tras integrar:** `test:datos` 39/39, `test:admin` 196/196,
-  `test:proveedores` 3/3, `typecheck` y `lint` limpios, y `catalogo:auditar` con 313
-  productos, 408 identificadores y 0 coincidencias. La verificación completa previa del
-  mismo código mantiene `build` correcto; las 67 pruebas de Playwright terminaron sin
-  fallo de prueba, aunque en Windows el proceso quedó colgado al apagar su servidor y se
-  interrumpió después de la prueba 67. No se presenta ese cierre como salida limpia.
+- **Tarea 8 terminada y verificada:** migración `006`, el rol `econoluz_publico` sin
+  atributos elevados, `USAGE` sin `CREATE` sobre el esquema, `SELECT` únicamente sobre
+  `public_products`, la prueba real `npm run test:permisos` y la guía
+  `docs/OPERACION-ROL-PUBLICO.md`. Ninguna credencial entró en el repositorio.
+- **Tarea 9 terminada y verificada:** migraciones `007_app_settings.sql` y
+  `008_audit_log.sql`, el módulo puro `app/lib/ajustes.ts`, su lectura con caché breve
+  `app/lib/ajustes.server.ts` y seis pruebas. La bandera `modelo_catalogo` **nació en
+  `legacy` y ahí sigue**; ninguna página la consulta todavía. Repetir el `insert` dejó una
+  sola fila con el mismo valor, `audit_log` quedó vacía con sus dos índices y su
+  restricción rechazó un `actor_tipo` inventado, y `test:permisos` pasó de decir que las
+  dos tablas «todavía no existen» a **denegarlas**.
+- **Verificación fresca del último cierre:** `test:datos` 45/45, `test:admin` 196/196,
+  `test:proveedores` 3/3, `test:permisos` correcto, `typecheck` y `lint` limpios, `build`
+  correcto y `catalogo:auditar` con 313 productos, 408 identificadores y 0 coincidencias.
+  Playwright no se ha vuelto a ejecutar desde la tarea 7, porque las tareas 8 y 9 no tocan
+  ninguna ruta ni componente; en aquella ocasión sus 67 pruebas terminaron sin fallo de
+  prueba, pero en Windows el proceso quedó colgado al apagar su servidor y se interrumpió
+  después de la prueba 67. No se presenta ese cierre como salida limpia.
 
-**Lo siguiente es la tarea 8, todavía no empezada:** crear y verificar el rol
-`econoluz_publico`, concederle solo lectura de `public_products`, documentar la creación
-y rotación de su credencial y configurar `DATABASE_URL_PUBLIC`. Toda aplicación y prueba
-real se hace primero en `fundamentos-backend-dev`; no se toca producción.
+**Lo siguiente es la tarea 10, todavía no empezada:** trasladar a `app/lib/datos` los once
+archivos que hoy abren su propia conexión, **uno por commit y sin cambiar comportamiento**,
+sacando cada uno de la lista `EXCEPCIONES_TRANSITORIAS` de
+`tests/datos-frontera-controlador.test.ts` en el mismo commit. El catálogo público no
+cambia de fuente y la bandera sigue en `legacy`. Toda aplicación y prueba real se hace
+primero en `fundamentos-backend-dev`; no se toca producción.
 
 Solo se ha escrito en la rama aislada de Neon. No se ha fusionado, hecho push ni
 desplegado este trabajo, y producción permanece intacta.
@@ -432,10 +447,13 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
   cambiar el DNS es tarea del dueño del proyecto, no del código.
 - Base de datos: **Postgres 18 en Neon**, con `@neondatabase/serverless`, creada desde el
-  Marketplace de Vercel (región AWS US East 1). Ocho tablas: `leads`, `products`,
-  `admin_users`, `admin_sessions`, `admin_login_attempts`, `projects`, `project_images`
-  y `schema_migrations`. Las migraciones se aplican con `npm run db:migrar`, que es
-  repetible. `DATABASE_URL` está en `.env.local` (ignorado por git) y en Vercel.
+  Marketplace de Vercel (región AWS US East 1). **En producción hay ocho tablas**:
+  `leads`, `products`, `admin_users`, `admin_sessions`, `admin_login_attempts`,
+  `projects`, `project_images` y `schema_migrations`. La rama aislada de desarrollo
+  `fundamentos-backend-dev` tiene además `public_products`, `app_settings` y `audit_log`,
+  creadas por las migraciones 005 a 008 del subproyecto 1 (§0.4); a producción no han
+  llegado. Las migraciones se aplican con `npm run db:migrar`, que es repetible.
+  `DATABASE_URL` está en `.env.local` (ignorado por git) y en Vercel.
 - Pasarela de pago: `TODO — pendiente de decidir`
 - Certificador FEL: `TODO — pendiente de decidir`
 
@@ -500,6 +518,10 @@ frontend/
     002_products.sql              catálogo de productos, comentado campo por campo
     003_admin.sql                 usuarios, sesiones e intentos de acceso del panel
     004_projects.sql              galería de proyectos y sus fotografías
+    005_proyeccion_publica.sql    proyección pública derivada del catálogo
+    006_rol_publico.sql           el rol de solo lectura y sus permisos, sin contraseñas
+    007_app_settings.sql          configuración persistente; guarda `modelo_catalogo`
+    008_audit_log.sql             quién cambió qué, con el antes y el después
   scripts/                        utilidades de línea de comandos (ver "Comandos")
   docs/CONTINUAR-PANEL.md         hoja de traspaso: qué falta y cómo hacerlo
   tests/                          Playwright: catálogo, cotización y fronteras de datos
@@ -579,6 +601,10 @@ npm run proyectos:probar    # prueba cambios reales en Neon y los restaura siemp
 
 npm run test:admin         # las pruebas de unidad del panel (129)
 npm run admin:crear        # da de alta un administrador o le cambia la contraseña
+
+npm run test:datos         # las pruebas de la capa de datos y de los ajustes (45)
+npm run test:permisos      # comprueba contra Neon que el rol público solo lee la proyección
+npm run catalogo:reproyectar # reconstruye entera la proyección pública, de forma idempotente
 ```
 
 Los scripts de `scripts/` importan los datos `.ts` del proyecto sin compilar, gracias
