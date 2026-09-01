@@ -35,11 +35,20 @@ export function resolverMsMaximo(valor: number | undefined): number {
 }
 
 /**
- * Ejecuta una consulta dentro de un plazo máximo. El navegador deja de esperar tras
+ * Ejecuta una consulta dentro de un plazo máximo. Quien llama deja de esperar tras
  * agotar el tiempo, pero la petición HTTP subyacente puede seguir viva en el servidor
- * hasta que lo cierre. Es aceptable porque por aquí solo pasan lecturas idempotentes;
- * las escrituras van por `enTransaccion` con `statement_timeout`, que sí cancela en el
- * servidor.
+ * hasta que lo cierre: `enTransaccion` es el único camino que cancela de verdad, con
+ * `statement_timeout`.
+ *
+ * Desde el traslado de los once accesos (tarea 10) por aquí no pasan solo lecturas:
+ * también las escrituras de **una sola sentencia** —el `update` de la edición en
+ * línea, el alta de un producto, el `insert` de una solicitud de asesoría—, que ya
+ * iban sueltas por HTTP antes de existir esta capa. La consecuencia hay que tenerla
+ * presente: si una de ellas agota el plazo, quien llama recibe un error de
+ * indisponibilidad aunque la sentencia pueda completarse después en el servidor. Con
+ * diez segundos y sentencias de este tamaño no se ha visto ocurrir, y encerrarlas en
+ * `enTransaccion` cambiaría su atomicidad, que es una decisión del dueño y no del
+ * traslado.
  */
 export async function consultar<T>(
   ejecutor: Ejecutor,
