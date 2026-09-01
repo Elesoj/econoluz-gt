@@ -20,7 +20,6 @@ const PERMITIDO = "app/lib/datos";
  */
 const EXCEPCIONES_TRANSITORIAS = [
   "app/admin/auth/repository.server.ts",
-  "app/admin/panelStats.server.ts",
   "app/admin/productos/ficha.server.ts",
   "app/admin/productos/list.server.ts",
   "app/admin/productos/nuevo.server.ts",
