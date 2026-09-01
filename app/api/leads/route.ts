@@ -1,6 +1,6 @@
-import { neon } from "@neondatabase/serverless";
+import { leer } from "../../lib/datos";
 
-// El driver de Neon habla HTTP, pero el handler usa runtime de Node porque
+// La capa de datos habla HTTP, pero el handler usa runtime de Node porque
 // también llama a la API de Resend y no necesita las restricciones de edge.
 export const runtime = "nodejs";
 
@@ -85,28 +85,39 @@ const buildEmailBody = (lead: LeadRecord, userAgent: string) =>
     .join("\n");
 
 const saveToDatabase = async (lead: LeadRecord, userAgent: string) => {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
+  // Sin base de datos no se intenta guardar, y quien llama ya sabe distinguir
+  // «no se intentó» de «se intentó y falló». Igual que antes del traslado.
+  if (!process.env.DATABASE_URL) {
     return { attempted: false, ok: false };
   }
 
-  // El cliente se crea aquí y no a nivel de módulo para que la ausencia de
-  // DATABASE_URL en local no reviente la importación del handler.
-  const sql = neon(connectionString);
-
-  await sql`
-    insert into leads (
-      full_name, phone, email, project_type, estimated_area,
-      budget_range, lighting_type, message, products, led_summary,
-      source, user_agent
-    ) values (
-      ${lead.fullName}, ${lead.phone}, ${lead.email}, ${lead.projectType},
-      ${lead.estimatedArea}, ${lead.budgetRange}, ${lead.lightingType},
-      ${lead.message}, ${JSON.stringify(lead.products)}, ${lead.ledSummary},
-      ${lead.source}, ${userAgent}
-    )
-  `;
+  // La capa crea la conexión de forma perezosa, así que la ausencia de
+  // DATABASE_URL en local no revienta la importación del handler.
+  //
+  // Es una sola sentencia y va por `leer`: el camino y la atomicidad quedan
+  // como estaban. Los valores viajan como parámetros, igual que en la plantilla
+  // etiquetada que había antes; ninguno se interpola en el texto.
+  await leer(
+    `insert into leads (
+       full_name, phone, email, project_type, estimated_area,
+       budget_range, lighting_type, message, products, led_summary,
+       source, user_agent
+     ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+    [
+      lead.fullName,
+      lead.phone,
+      lead.email,
+      lead.projectType,
+      lead.estimatedArea,
+      lead.budgetRange,
+      lead.lightingType,
+      lead.message,
+      JSON.stringify(lead.products),
+      lead.ledSummary,
+      lead.source,
+      userAgent,
+    ],
+  );
 
   return { attempted: true, ok: true };
 };

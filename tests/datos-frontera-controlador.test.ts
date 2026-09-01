@@ -7,20 +7,18 @@ const RAIZ = join(import.meta.dirname, "..");
 const PERMITIDO = "app/lib/datos";
 
 /**
- * Lista de excepciones transitoria. Son los archivos de `app/**` que hoy
- * todavía abren su propia conexión con `@neondatabase/serverless` en lugar de
- * pasar por `app/lib/datos`. Migrarlos es la tarea 10, que los va sacando de
- * aquí uno a uno hasta dejar esta lista vacía; a partir de ahí la regla no
- * tendrá ninguna excepción.
+ * **La lista está vacía y así debe seguir.** Los once accesos que abrían su
+ * propia conexión con `@neondatabase/serverless` pasaron a `app/lib/datos` en
+ * la tarea 10, de modo que la regla ya no tiene ninguna excepción: dentro de
+ * `app/**`, solo `app/lib/datos` importa el controlador.
  *
- * Mientras tanto, la prueba falla en dos direcciones: si aparece un archivo
- * nuevo que importa el controlador y no está aquí, y si uno de estos deja de
- * importarlo y nadie borra su entrada, para que la lista nunca mienta sobre
- * el estado real de la migración.
+ * Se conserva la lista, y no una comprobación de lista vacía, para que añadir
+ * una excepción nueva tenga que escribirse aquí y se vea en el diff. La prueba
+ * falla en dos direcciones: si aparece un archivo que importa el controlador y
+ * no está en la lista, y si algo listado deja de importarlo y nadie borra su
+ * entrada, para que la lista nunca mienta sobre el estado real del código.
  */
-const EXCEPCIONES_TRANSITORIAS = [
-  "app/api/leads/route.ts",
-];
+const EXCEPCIONES_TRANSITORIAS: string[] = [];
 
 function archivosDe(carpeta: string): string[] {
   return readdirSync(carpeta, { withFileTypes: true }).flatMap((entrada) => {
@@ -35,7 +33,7 @@ function aRutaPosix(ruta: string): string {
   return ruta.split(sep).join("/");
 }
 
-test("solo app/lib/datos importa el controlador de Neon, salvo las excepciones transitorias", () => {
+test("dentro de app/**, solo app/lib/datos importa el controlador de Neon", () => {
   const encontrados = archivosDe(join(RAIZ, "app"))
     .filter((ruta) => readFileSync(ruta, "utf8").includes("@neondatabase/serverless"))
     .map((ruta) => aRutaPosix(relative(RAIZ, ruta)))
@@ -45,8 +43,8 @@ test("solo app/lib/datos importa el controlador de Neon, salvo las excepciones t
     [...encontrados].sort(),
     [...EXCEPCIONES_TRANSITORIAS].sort(),
     `La lista de excepciones ya no coincide con la realidad. Archivos que importan el ` +
-      `controlador fuera de ${PERMITIDO}:\n${encontrados.join("\n")}\n\n` +
-      `Excepciones documentadas:\n${EXCEPCIONES_TRANSITORIAS.join("\n")}`,
+      `controlador fuera de ${PERMITIDO}:\n${encontrados.join("\n") || "(ninguno)"}\n\n` +
+      `Excepciones documentadas:\n${EXCEPCIONES_TRANSITORIAS.join("\n") || "(ninguna)"}`,
   );
 });
 
