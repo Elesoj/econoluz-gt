@@ -1,6 +1,6 @@
 import "server-only";
 
-import { neon } from "@neondatabase/serverless";
+import { leer } from "../../lib/datos";
 import {
   createProject,
   moveProject,
@@ -16,12 +16,20 @@ import {
   type ProjectPublicationResult,
 } from "./model";
 
+/**
+ * Solo la conexión, ahora por la capa de datos. Cada operación de `model.ts`
+ * resuelve una sola sentencia —incluido el reordenamiento, que va con `with`—,
+ * salvo `setProjectPublished`, que lee antes de escribir sin transacción. Se
+ * deja como estaba: el traslado no cambia comportamiento, y esa atomicidad es
+ * una decisión aparte anotada en la documentación.
+ *
+ * La comprobación de `DATABASE_URL` se conserva para que el error siga saliendo
+ * aquí y no en la primera consulta.
+ */
 function connect() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("Falta DATABASE_URL.");
-  const sql = neon(connectionString);
+  if (!process.env.DATABASE_URL) throw new Error("Falta DATABASE_URL.");
   return (text: string, params: readonly (string | number | boolean | null)[]) =>
-    sql.query(text, [...params]) as Promise<Record<string, unknown>[]>;
+    leer<Record<string, unknown>>(text, params);
 }
 
 export function getAdminProjects(): Promise<AdminProjectSummary[]> {
