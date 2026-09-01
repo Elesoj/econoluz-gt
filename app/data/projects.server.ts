@@ -1,6 +1,6 @@
 import "server-only";
 
-import { neon } from "@neondatabase/serverless";
+import { leer } from "../lib/datos";
 import { unstable_cache } from "next/cache";
 import { projects, toPublicProject, type PublicProject } from "./projects";
 import { readPublicProjects, resolvePublicProjects } from "./projectsQuery";
@@ -8,15 +8,16 @@ import { readPublicProjects, resolvePublicProjects } from "./projectsQuery";
 export const PROJECTS_CACHE_TAG = "proyectos";
 const PROJECTS_REVALIDATE_SECONDS = 3600;
 
+// La lectura va por la capa de datos. La comprobación de `DATABASE_URL` se
+// queda aquí con su mensaje de siempre: lanzar es justamente lo que hace que
+// `resolvePublicProjects` caiga a la galería escrita en el código.
 async function readProjectsFromDatabase(): Promise<PublicProject[]> {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
+  if (!process.env.DATABASE_URL) {
     throw new Error("falta DATABASE_URL");
   }
 
-  const sql = neon(connectionString);
   return readPublicProjects((text, params) =>
-    sql.query(text, [...params]) as Promise<Record<string, unknown>[]>,
+    leer<Record<string, unknown>>(text, params),
   );
 }
 
