@@ -205,6 +205,32 @@ fallar con su mensaje antes de darlas por buenas.
 No se tocó Production, ni `DATABASE_URL`, ni se desplegó, ni se hizo push, ni se borró
 nada fuera de las roturas deliberadas, que se deshicieron.
 
+### Subproyecto 3: la Fase A, corregida (02/09/2026)
+
+Vive en la rama `feat/catalogo-relacional`. **La Fase B no ha empezado**: la migración no
+está aplicada en ninguna base, no se ha tocado Neon y `modelo_catalogo` sigue en `legacy`.
+
+Una primera versión de la Fase A se escribió **antes** de que se aprobara
+`docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md` y contradecía el
+diseño. Lo que estaba mal y ya está corregido:
+
+| Estaba mal | Ahora |
+|---|---|
+| Nueve tablas, con `category_attributes` | **Ocho**, y esa tabla no existe en ninguna forma |
+| El código del proveedor duplicado en tres columnas | Solo `supplier_code`, indexado para buscarlo y **sin `unique`** —hay registros con varios códigos separados por barras— |
+| Faltaban las dos etiquetas y la descripción del proveedor | Los **siete** campos del diseño, ni uno más |
+| Se podía cambiar el tipo de un atributo usado | Lo **rechaza la base**, con una clave foránea compuesta hacia `attributes (id, tipo)` |
+| Nada comprobaba que la opción fuera del atributo correcto | Otra clave foránea compuesta lo impide |
+| Se podían meter dos valores escalares del mismo atributo, o la misma opción dos veces | Índice único parcial y restricción única |
+| Solo se garantizaba **como mucho** una categoría principal | Además, una comprobación **diferible** exige que haya **exactamente una** cuando hay categorías |
+| `product_images` no impedía posiciones repetidas ni dos principales | Las dos restricciones puestas |
+| Atributos y opciones no se podían desactivar | Tienen `active`: lo no usado se borra, lo usado solo se desactiva |
+
+**Dos reglas del diseño no se pueden expresar en el esquema** y quedan para el contrato de
+escritura de la Fase B, porque dependen de estado que cambia con el tiempo: que la opción
+tenga que estar **activa** solo para asignaciones nuevas, y que un producto **publicado**
+tenga imagen principal visible.
+
 ### Revisión previa a la fusión (02/09/2026)
 
 Se revisó la rama entera contra `main`. **La superficie de regresión es prácticamente

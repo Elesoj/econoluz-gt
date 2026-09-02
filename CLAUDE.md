@@ -997,7 +997,20 @@ técnico: no tiene sentido registrar la aceptación de un texto que aún no exis
 
 La renovación de la sesión sí quedó conectada el 02/09/2026, junto con la revocación en
 Firebase al cerrar sesión y los mensajes de error del formulario de direcciones.
-El catálogo relacional corresponde al subproyecto 3 y no se adelanta.
+**El subproyecto 3, catálogo relacional, tiene su Fase A hecha y corregida** (02/09/2026),
+en la rama `feat/catalogo-relacional`. El diseño aprobado es
+`docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md` y el plan vigente
+`docs/superpowers/plans/2026-09-02-catalogo-relacional.md`.
+
+La Fase A son **el esquema escrito y la lógica pura**, y nada más:
+`db/010_catalogo_relacional.sql` con **ocho tablas** —`category_attributes` **no existe**,
+porque una categoría clasifica productos y no determina qué características puede tener
+uno— y tres módulos puros en `app/data/catalogo/`. **La migración no está aplicada en
+ninguna base**, `modelo_catalogo` sigue en `legacy` y el catálogo público no ha cambiado de
+fuente.
+
+Aplicarla es la Fase B y **necesita autorización expresa**; activar `relational_v2`, la
+Fase D, otra distinta.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar
