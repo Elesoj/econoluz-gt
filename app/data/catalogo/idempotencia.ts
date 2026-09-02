@@ -84,7 +84,9 @@ export function productoCoincideConEntrada(
     return false;
   }
 
-  const imagenesActuales = producto.imagenes.map(({ id: _id, ...imagen }) => imagen);
+  const imagenesActuales = producto.imagenes.map(
+    ({ url, alt, posicion, visible, principal }) => ({ url, alt, posicion, visible, principal }),
+  );
   if (!iguales(ordenar(imagenesActuales), ordenar(entrada.imagenes.map((imagen) => ({ ...imagen }))))) {
     return false;
   }

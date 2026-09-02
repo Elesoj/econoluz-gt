@@ -262,7 +262,9 @@ export async function verificarCatalogoRelacional(cliente, entorno = process.env
     const privado = privados.get(fila.id);
     agregarFallo(fallos, Boolean(privado), `${fila.id}: falta la fila privada`);
     if (privado) {
-      const { product_id: _productId, ...campos } = privado;
+      const campos = Object.fromEntries(
+        Object.entries(privado).filter(([clave]) => clave !== "product_id"),
+      );
       agregarFallo(fallos, iguales(campos, plan.privados), `${fila.id}: difieren los datos privados`);
     }
 
