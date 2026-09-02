@@ -1351,6 +1351,25 @@ guardando los cambios a un lado y ejecutándola sobre el código anterior: falla
 No tiene que ver con la base de datos ni con el catálogo. En la batería completa del
 25/08/2026, las otras **95** pasaron.
 
+### 10.2.bis Una inestabilidad de Playwright, pendiente de identificar (02/09/2026)
+
+**No es la anterior y no está resuelta.** El 02/09/2026, en la batería posterior al arreglo
+de la pimienta, una ejecución terminó con **1 fallo y 69 pasadas**, código de salida 1.
+
+Lo que se sabe, y lo que no:
+
+- **No se pudo identificar qué prueba falló.** Las ejecuciones limpias posteriores
+  sobrescribieron `test-results/` antes de ir a mirarlo. Es el error de método que hay que
+  no repetir: ante un fallo de Playwright, **leer el informe antes de volver a ejecutar**.
+- Ese mismo día hubo **tres ejecuciones que terminaron 70/70 con código 0**: una anterior al
+  cambio y **dos posteriores al fallo**. Tres limpias de cuatro.
+- Se trata como **inestabilidad**, no como regresión, porque la ejecución anterior a los
+  cambios también dio 70/70. Pero eso es un indicio, no una demostración: mientras no se
+  sepa qué prueba era, **queda abierto**.
+
+Si vuelve a ocurrir: ejecutar `npx playwright test --reporter=line`, **no repetir la
+ejecución**, y mirar `test-results/` y el nombre de la prueba antes de tocar nada.
+
 ### 10.3 Otras
 
 - `econoluzgt.com` sigue apuntando al WordPress viejo. Solo
