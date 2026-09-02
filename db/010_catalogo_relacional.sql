@@ -152,11 +152,12 @@ create index if not exists product_private_data_supplier_code_idx
 -- 4. Imágenes
 -- ---------------------------------------------------------------------------
 
--- Copia el patrón ya probado de `project_images`: orden explícito y retirada reversible con
--- `visible`, sin borrar el archivo.
+-- El panel retira imágenes de forma reversible con `visible` y no ofrece borrado permanente.
+-- `on delete restrict` evita que eliminar por accidente un producto borre las referencias
+-- de la base mientras los archivos locales o de Blob siguen existiendo fuera de ella.
 create table if not exists product_images (
   id         bigserial   primary key,
-  product_id text        not null references products(id) on delete cascade,
+  product_id text        not null references products(id) on delete restrict,
   url        text        not null,
   alt        text        not null default '',
   posicion   integer     not null default 0,

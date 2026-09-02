@@ -130,6 +130,18 @@ test("se pueden intercambiar dos posiciones de imagenes en un solo UPDATE", () =
   );
 });
 
+test("borrar un producto no borra en cascada sus referencias de imagen", () => {
+  const bloque = sql.slice(
+    sql.indexOf("create table if not exists product_images"),
+    sql.indexOf(");", sql.indexOf("create table if not exists product_images")),
+  );
+
+  assert.match(
+    bloque,
+    /product_id\s+text\s+not null references products\(id\) on delete restrict/i,
+  );
+});
+
 // ---------------------------------------------------------------------------
 // Atributos y sus opciones
 // ---------------------------------------------------------------------------
