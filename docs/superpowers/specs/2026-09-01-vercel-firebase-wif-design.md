@@ -680,16 +680,109 @@ biblioteca:
 
 ---
 
-## 16. Lo que queda sin comprobar
+## 16. Lo que quedaba sin comprobar — resuelto el 01/09/2026
 
-Se recoge aquí para que nadie lo dé por resuelto:
+Cuatro de los cinco puntos están cerrados **con una ejecución real**, no con un
+razonamiento. El único que sigue abierto está marcado como tal.
 
-1. Si `firebase-admin` necesita algún permiso de proyecto además de los cuatro de 6.1.
-2. Qué tipo de registro de auditoría recoge los canjes del STS, y si hace falta activarlo.
-3. La duración exacta del testigo de acceso de Google en nuestra configuración: **la mide la
-   prueba 10.4** en vez de afirmarse aquí.
-4. Si la organización admite `oidc.vercel.com` como emisor, y si el equipo de Vercel tiene
-   disponible la federación OIDC. Son las dos comprobaciones que abren o cierran todo lo
-   demás.
-5. Qué forma exacta del campo `audience` acepta el STS en el `ExternalAccountClient`, con o
-   sin `https://`. Los dos ejemplos oficiales de Vercel no coinciden; ver 8.1.
+1. **¿`firebase-admin` necesita algún permiso de proyecto además de los cuatro de 6.1?**
+   **No.** Con el rol personalizado de cuatro permisos y ningún otro, Firebase
+   Authentication aceptó la credencial y respondió a una llamada real de lectura. No hizo
+   falta añadir `firebase.projects.get` ni `resourcemanager.projects.get`.
+
+2. **¿Qué registro de auditoría recoge los canjes del STS?** **Sigue sin comprobar.** Se
+   mirará junto a la prueba en Preview.
+
+3. **¿Cuánto dura el testigo de acceso de Google?** **3.563 segundos** en la primera
+   medición, es decir la hora estándar menos el tiempo de ida y vuelta. Esa es la ventana
+   residual de revocación de la sección 12.2, ahora medida y no supuesta.
+
+4. **¿La organización admite `oidc.vercel.com`? ¿Vercel ofrece la federación?** **Sí a las
+   dos.** `constraints/iam.workloadIdentityPoolProviders` está en `allValues: ALLOW`, así
+   que no hubo que tocar ninguna política; y el equipo `joseangel-s-projects` tiene la
+   sección con el modo de emisor ya en *Team*.
+
+5. **¿Qué forma del campo `audience` acepta el STS?** **El nombre de recurso, sin
+   esquema.** La documentación de Vercel se contradice entre sus dos ejemplos y el STS
+   zanjó la duda rechazando el canje:
+
+   > `Error code invalid_request: Invalid value for "audience". This value should be the
+   > full resource name of the Identity Provider.`
+
+   Al **testigo** se le pide la audiencia con `https://`, que es la que publica el
+   proveedor y acaba en la afirmación `aud`. Al **STS** se le pasa
+   `//iam.googleapis.com/projects/…`. `app/identidad/credencial.ts` normaliza las dos
+   formas y lo cubren tres pruebas de unidad.
+
+---
+
+## 17. Evidencia de las pruebas — 01/09/2026
+
+### 17.1 Recursos creados en `econoluz-dev-d30ab`
+
+| Recurso | Valor real |
+|---|---|
+| Número del proyecto | `629521051305` |
+| Pool | `vercel`, `ACTIVE` |
+| Proveedor | `vercel`, `ACTIVE`, emisor `https://oidc.vercel.com/joseangel-s-projects`, **sin** `allowedAudiences` |
+| Rol | `econoluzIdentidadServidor`, cuatro permisos y ninguno más |
+| Cuenta | `econoluz-identidad-preview@econoluz-dev-d30ab.iam.gserviceaccount.com`, **un solo rol** |
+| Equipo de Vercel | `joseangel-s-projects` — `team_Dsl9K7DahJEa1bYTq3aQaoQ4` |
+| Proyecto de Vercel | `econoluz-gt` — `prj_RQAemyVYK4hWVhTOuFG32WvyYoG8` |
+
+Condición de atributos vigente:
+
+```
+assertion.owner_id == 'team_Dsl9K7DahJEa1bYTq3aQaoQ4' &&
+assertion.project_id == 'prj_RQAemyVYK4hWVhTOuFG32WvyYoG8' &&
+assertion.environment == 'preview'
+```
+
+Quien puede suplantar la cuenta, tras retirar el enlace temporal:
+
+```
+principal://iam.googleapis.com/projects/629521051305/locations/global/
+  workloadIdentityPools/vercel/subject/
+  owner:joseangel-s-projects:project:econoluz-gt:environment:preview
+```
+
+### 17.2 Prueba positiva (10.2)
+
+Con la condición ampliada temporalmente a `preview` y `development`:
+
+```
+  ok     hay testigo OIDC de Vercel (entorno: development)
+  ok     Google acepta la identidad federada (la credencial vale 3563 s)
+  ok     Firebase Authentication acepta la credencial temporal
+```
+
+### 17.3 Prueba negativa (10.3) — la que convierte esto en demostrado
+
+Se estrechó la condición a `preview` y **se repitió el mismo comando sin cambiar nada
+más**. El testigo seguía existiendo; el canje pasó a rechazarse:
+
+```
+  ok     hay testigo OIDC de Vercel (entorno: development)
+  FALLA  Google rechaza la identidad federada.
+  Motivo: Error code unauthorized_client: The given credential is rejected by
+          the attribute condition.
+```
+
+El mensaje atribuye el rechazo **a la condición de atributos**, no a otra cosa: eso es lo
+que prueba que la separación por entorno funciona de verdad.
+
+Después se retiró también el enlace `roles/iam.workloadIdentityUser` de
+`environment:development` y se repitió una tercera vez, con el mismo rechazo y los dos
+cierres puestos.
+
+### 17.4 Afirmaciones reales del testigo de Vercel
+
+Coinciden exactamente con el formato documentado, y confirman las duraciones de 3.1:
+
+| Afirmación | Valor |
+|---|---|
+| `iss` | `https://oidc.vercel.com/joseangel-s-projects` |
+| `aud` | `https://vercel.com/joseangel-s-projects` |
+| `sub` | `owner:joseangel-s-projects:project:econoluz-gt:environment:development` |
+| `environment` | `development` |
+| Vida | **12 horas**, la documentada para `development` |

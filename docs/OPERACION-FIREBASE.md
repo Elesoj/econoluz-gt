@@ -146,13 +146,37 @@ Creados en `econoluz-dev-d30ab`, todos sin ninguna clave:
 | Cuenta `econoluz-identidad-preview@econoluz-dev-d30ab.iam.gserviceaccount.com` | Creada. Tiene **un solo rol**, el personalizado. Ni Owner, ni Editor, ni `firebaseauth.admin` |
 | `roles/iam.workloadIdentityUser` sobre esa cuenta | Concedido a los principales de `environment:preview` y, **temporalmente**, `environment:development` |
 
-**Falta el proveedor OIDC del pool.** Su condición de atributos se escribe sobre
-`owner_id` y `project_id`, los identificadores estables de Vercel, y para leerlos hace
-falta que la CLI de Vercel esté autenticada. Es la única acción que queda del dueño.
+El **proveedor OIDC `vercel`** quedó creado y `ACTIVE`, con el emisor
+`https://oidc.vercel.com/joseangel-s-projects`, sin audiencias permitidas —usa la
+predeterminada del proveedor— y con esta condición de atributos:
 
-El enlace de `environment:development` es **temporal**: existe solo para poder hacer la
-prueba positiva desde la máquina de desarrollo, y se retira en cuanto se demuestre que un
-entorno no autorizado queda rechazado.
+```
+assertion.owner_id == 'team_Dsl9K7DahJEa1bYTq3aQaoQ4' &&
+assertion.project_id == 'prj_RQAemyVYK4hWVhTOuFG32WvyYoG8' &&
+assertion.environment == 'preview'
+```
+
+El enlace temporal de `environment:development` **ya se retiró**: solo la identidad de
+`preview` puede suplantar la cuenta.
+
+**La federación está demostrada, no supuesta.** La prueba positiva pasó los tres puntos y
+la negativa devolvió `unauthorized_client: The given credential is rejected by the
+attribute condition`. La evidencia completa está en la sección 17 del diseño.
+
+### 3.3 Dos trampas que costaron tiempo y conviene no repetir
+
+**`npx vercel link` escribe en `.env.local` por su cuenta.** Descarga un
+`VERCEL_OIDC_TOKEN` y lo añade al final con un comentario `# Created by Vercel CLI`, sin
+admitir otro nombre de archivo. No borró nada, pero dejó un testigo donde no debía. El
+procedimiento seguro es calcular la huella del archivo antes y después
+—`(Get-FileHash .env.local -Algorithm SHA256).Hash`— y restaurarlo hasta que vuelva a
+coincidir. Para descargar el entorno se usa **siempre** un nombre explícito:
+`npx vercel env pull .env.vercel.local`.
+
+**Las dos audiencias no se escriben igual.** Al testigo se le pide la URL con `https://`;
+al Security Token Service se le pasa el nombre de recurso, que empieza por `//`. Con la
+URL responde `Invalid value for "audience"`. Lo normaliza
+`app/identidad/credencial.ts` y lo cubren tres pruebas.
 
 ## 4. El proyecto de Firebase
 
