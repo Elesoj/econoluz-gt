@@ -136,3 +136,33 @@ Pruebas de paridad de los 313 productos y de privacidad del proveedor sobre el m
 **D.** `relational_v2`, con autorización expresa, paridad y privacidad en verde, y vuelta
 atrás inmediata cambiando la bandera —que por eso vive en `app_settings` y no en una
 variable de entorno—.
+
+---
+
+## Antes de ejecutar Playwright en este worktree
+
+**Este worktree no tiene `.env.local`**, y sin él cinco pruebas de Playwright fallan sin
+que haya ninguna regresión:
+
+```
+catalog-public-ui  › una selección de cotización vieja no rompe el catálogo
+tienda-carrito     › comprar un producto con precio y encontrarlo al volver
+tienda-carrito     › cambiar la cantidad recalcula el total
+tienda-carrito     › el catálogo ya no ofrece cotizar producto a producto
+tienda-carrito     › el inventario no viaja al navegador
+```
+
+El informe lo dice sin rodeos: *«ningún producto del catálogo tiene precio: ponle precio a
+alguno desde el panel»*. Sin `DATABASE_URL` el catálogo se sirve del respaldo estático de
+`app/data/products.ts`, donde no hay precios, así que no existe el botón «Agregar al
+carrito» que esas cinco buscan.
+
+**No es un fallo del subproyecto 3**, cuyo código es puro y no toca ninguna ruta: las
+mismas 70 pruebas pasan en el worktree principal, que sí tiene `.env.local`. Para
+ejecutarlas aquí hay que copiar ese archivo desde `frontend/`, y **eso lo decide el dueño**,
+porque es su archivo de credenciales y duplicarlo en disco es su decisión, no la de quien
+programa.
+
+Las pruebas de unidad —`test:datos`, `test:admin`, `test:proveedores`— y `typecheck`,
+`lint` y `build` **sí funcionan aquí sin `.env.local`**, y son las que cubren todo lo que
+añade la fase A.
