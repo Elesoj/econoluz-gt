@@ -7,6 +7,23 @@ const RAIZ = join(import.meta.dirname, "..");
 const RUTA = join(RAIZ, "db", "010_catalogo_relacional.sql");
 const sql = readFileSync(RUTA, "utf8");
 
+function bloqueDeTabla(nombre: string): string {
+  const inicio = sql.indexOf(`create table if not exists ${nombre}`);
+  return sql.slice(inicio, sql.indexOf(");", inicio));
+}
+
+function columnasDeTabla(nombre: string): string[] {
+  return [...bloqueDeTabla(nombre).matchAll(/^\s{2}([a-z_][a-z0-9_$]*)\s+[a-z]/gim)].map(
+    (coincidencia) => coincidencia[1],
+  );
+}
+
+/** `_` y `$` forman parte de un identificador SQL sin comillas y no son límites. */
+function contieneIdentificadorSql(texto: string, identificador: string): boolean {
+  const escapado = identificador.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?<![a-z0-9_$])${escapado}(?![a-z0-9_$])`, "i").test(texto);
+}
+
 /** Las ocho del diseño aprobado. `public_products` ya existe y no es de este subproyecto. */
 const TABLAS = [
   "categories",
@@ -39,12 +56,7 @@ test("category_attributes no existe en ninguna forma", () => {
 // ---------------------------------------------------------------------------
 
 test("product_private_data guarda los siete campos del diseno y ninguno mas", () => {
-  const bloque = sql.slice(
-    sql.indexOf("create table if not exists product_private_data"),
-    sql.indexOf(");", sql.indexOf("create table if not exists product_private_data")),
-  );
-
-  const columnas = [...bloque.matchAll(/^\s{2}(\w+)\s+\w/gm)].map((m) => m[1]);
+  const columnas = columnasDeTabla("product_private_data");
 
   assert.deepEqual([...columnas].sort(), [
     "product_id",
@@ -64,8 +76,14 @@ test("product_private_data guarda los siete campos del diseno y ninguno mas", ()
  * algún día discrepen.
  */
 test("no se duplica el codigo del proveedor en sku ni product_code", () => {
-  assert.equal(/\bsku\b/i.test(sql), false);
-  assert.equal(/product_code/i.test(sql), false);
+  const columnas = columnasDeTabla("product_private_data").join(" ");
+  assert.equal(contieneIdentificadorSql(columnas, "sku"), false);
+  assert.equal(contieneIdentificadorSql(columnas, "product_code"), false);
+});
+
+test("el guardian distingue supplier_sku de una columna sku real", () => {
+  assert.equal(contieneIdentificadorSql("supplier_sku sku_interno", "sku"), false);
+  assert.equal(contieneIdentificadorSql("supplier_code sku supplier_name", "sku"), true);
 });
 
 test("supplier_code es buscable y NO es unique", () => {
@@ -248,11 +266,22 @@ test("la migracion sigue sin aplicarse y lo dice en su cabecera", () => {
   assert.match(sql, /NO ESTÁ APLICADA/);
 });
 
-test("010 es la ultima migracion y no se salta ningun numero", () => {
-  const numeros = readdirSync(join(RAIZ, "db"))
-    .filter((archivo) => archivo.endsWith(".sql"))
-    .map((archivo) => Number(archivo.slice(0, 3)))
-    .sort((a, b) => a - b);
+test("las migraciones se descubren sin huecos e incluyen la 010", () => {
+  const archivosSql = readdirSync(join(RAIZ, "db")).filter((archivo) => archivo.endsWith(".sql"));
+  const migraciones = archivosSql.map((archivo) => archivo.match(/^(\d{3})_[a-z0-9_]+\.sql$/i));
 
-  assert.deepEqual(numeros, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  assert.equal(
+    migraciones.every((coincidencia) => coincidencia !== null),
+    true,
+    "Todos los archivos SQL deben llamarse NNN_descripcion.sql",
+  );
+
+  const numeros = migraciones
+    .map((coincidencia) => Number(coincidencia?.[1]))
+    .sort((a, b) => a - b);
+  const ultimo = numeros.at(-1) ?? 0;
+  const secuenciaEsperada = Array.from({ length: ultimo }, (_, indice) => indice + 1);
+
+  assert.equal(numeros.includes(10), true, "La migración 010 debe existir");
+  assert.deepEqual(numeros, secuenciaEsperada);
 });
