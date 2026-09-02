@@ -775,7 +775,43 @@ Después se retiró también el enlace `roles/iam.workloadIdentityUser` de
 `environment:development` y se repitió una tercera vez, con el mismo rechazo y los dos
 cierres puestos.
 
-### 17.4 Afirmaciones reales del testigo de Vercel
+### 17.4 La prueba en Preview no llegó a ejecutarse — y por un motivo ajeno
+
+El despliegue Preview se hizo con `npx vercel deploy` (sin push, sin `--prod`) y la ruta de
+diagnóstico devolvió **HTTP 500 con el cuerpo vacío**: la función reventó antes de llegar a
+su propio `try`. Los registros de Vercel dan la causa exacta:
+
+```
+Failed to load external module firebase-admin-…/auth:
+Error [ERR_REQUIRE_ESM]: require() of ES Module
+/var/task/node_modules/jwks-rsa/node_modules/jose/dist/webapi/index.js
+from /var/task/node_modules/jwks-rsa/src/utils.js not supported.
+    at Context.externalImport (.next/server/chunks/[turbopack]_runtime.js)
+```
+
+**Esto no tiene nada que ver con la identidad federada.** El código ni siquiera llegó a
+pedir un testigo: falló al cargar `firebase-admin/auth`. La cadena es
+`firebase-admin 14.3.0` → `jwks-rsa 4.1.0` → `jose 6.2.10`, que es **ESM puro**
+(`"type": "module"`), y `jwks-rsa` lo carga con `require()`.
+
+Lo comprobado sobre este fallo, para que nadie repita el camino:
+
+| Hipótesis | Resultado |
+|---|---|
+| Es la versión de Node de Vercel | **Descartada.** El proyecto está en **Node 24.x**, que soporta `require(esm)` |
+| Falla también en local | **No.** Con Node 24.15.0, `require('jose')` desde CJS funciona y `import('firebase-admin/auth')` carga sin error |
+| `jose` tiene `await` de nivel superior, que sí rompería `require(esm)` | **No**, no tiene |
+| Hay una versión más nueva que lo arregle | **No.** `firebase-admin` 14.3.0, `jwks-rsa` 4.1.0 y `jose` 6.2.10 son las últimas publicadas |
+
+Queda acotado a la carga del paquete **como módulo externo dentro del runtime de Turbopack
+en la función de Vercel**, que es donde aparece la traza. Es un bloqueo del subproyecto 2 en
+Vercel **sea cual sea el método de autenticación**, y por tanto un problema distinto del que
+resolvía este diseño.
+
+El despliegue Preview se borró inmediatamente después de leer los registros; era público
+porque el proyecto no tiene Deployment Protection activa.
+
+### 17.5 Afirmaciones reales del testigo de Vercel
 
 Coinciden exactamente con el formato documentado, y confirman las duraciones de 3.1:
 
