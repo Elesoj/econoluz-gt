@@ -86,11 +86,13 @@ export function hayCiclo(categorias: readonly Categoria[]): boolean {
 }
 
 /**
- * La ruta desde la raíz hasta la categoría pedida, para migas y URLs. Vacía si no existe.
+ * La ruta desde la raíz hasta la categoría pedida, para migas y URLs. Vacía si no existe
+ * o si los datos contienen un ciclo.
  *
- * **No se cuelga con datos cíclicos**: recorrer padres en un ciclo daría vueltas para
- * siempre, y prefiero una ruta corta a un servidor parado.
+ * Una cadena parcial causada por un ciclo no es una ruta válida: presentarla como miga o
+ * URL ocultaría que el árbol está roto.
  */
 export function rutaDeCategoria(categorias: readonly Categoria[], id: string): Categoria[] {
-  return ascendencia(categorias, id).cadena.reverse();
+  const { cadena, ciclo } = ascendencia(categorias, id);
+  return ciclo ? [] : cadena.reverse();
 }

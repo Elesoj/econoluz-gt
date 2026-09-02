@@ -108,16 +108,11 @@ test("una categoria que no existe no tiene ruta", () => {
   assert.deepEqual(rutaDeCategoria(arbol, "fantasma"), []);
 });
 
-/**
- * Si los datos llegaran con un ciclo, recorrer padres colgaría el servidor. Prefiero que
- * devuelva una ruta corta a que se quede dando vueltas.
- */
-test("la ruta no se cuelga si los datos traen un ciclo", () => {
+test("un ciclo no se presenta como una ruta parcial valida", () => {
   const roto: Categoria[] = [
     { id: "a", parentId: "b", nombre: "A" },
     { id: "b", parentId: "a", nombre: "B" },
   ];
 
-  const ruta = rutaDeCategoria(roto, "a");
-  assert.equal(ruta.length <= roto.length, true);
+  assert.deepEqual(rutaDeCategoria(roto, "a"), []);
 });
