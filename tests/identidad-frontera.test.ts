@@ -206,6 +206,22 @@ test("el comprobador de federacion no imprime ningun testigo", () => {
   assert.match(fuente, /expires_in|segundos/, "Sí debe informar de cuánto vive la credencial.");
 });
 
+/**
+ * Obtener un testigo prueba que hay identidad; no prueba que tenga permiso. La
+ * comprobación tiene que llegar hasta Firebase Authentication, igual que hace
+ * `scripts/comprobar-adc.mjs`, o dará por buena una configuración a la que le falta el rol.
+ */
+test("comprobarCredenciales no se conforma con obtener un testigo", () => {
+  const fuente = readFileSync(join(RAIZ, "app", "identidad", "firebase.server.ts"), "utf8");
+  const cuerpo = fuente.slice(fuente.indexOf("export async function comprobarCredenciales"));
+
+  assert.match(
+    cuerpo,
+    /listUsers/,
+    "Tener un testigo no es tener permiso: hay que ejercitar Firebase Authentication de verdad.",
+  );
+});
+
 test("las bibliotecas de federacion son dependencias directas, no transitivas", () => {
   const paquete = JSON.parse(readFileSync(join(RAIZ, "package.json"), "utf8"));
   assert.ok(

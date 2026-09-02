@@ -9,7 +9,7 @@ import {
 } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
-import { elegirModo } from "./credencial";
+import { elegirModo, type ModoDeCredencial } from "./credencial";
 import { credencialFederada } from "./credencialFederada.server";
 
 /**
@@ -95,20 +95,30 @@ function obtenerApp(): App {
 const auth = () => getAuth(obtenerApp());
 
 /**
- * Comprueba que las credenciales de verdad funcionan.
+ * Comprueba que las credenciales de verdad funcionan, en dos pasos distintos.
  *
- * `applicationDefault()` no falla al crearse: resuelve las credenciales
- * perezosamente, así que un entorno sin ADC parecería estar bien hasta la
- * primera operación real. Pedir un testigo de acceso es la única forma de
- * saberlo antes. **No devuelve el testigo**, solo cuánto le queda de vida.
+ * Las credenciales se resuelven perezosamente, así que un entorno mal
+ * configurado parecería estar bien hasta la primera operación real. Pedir un
+ * testigo lo descarta. Pero **tener testigo no es tener permiso**: hace falta
+ * además una llamada real a Firebase Authentication, que es donde se ve si el
+ * rol concedido alcanza. Es la misma distinción que hace
+ * `scripts/comprobar-adc.mjs`, y el fallo típico es justo el segundo punto.
+ *
+ * **No devuelve el testigo**, solo el modo con el que se obtuvo y cuánto le
+ * queda de vida.
  */
 export async function comprobarCredenciales(): Promise<{
   projectId: string;
+  modo: ModoDeCredencial;
   segundosDeVida: number;
 }> {
   const projectId = proyecto();
+  const modo = elegirModo(process.env);
   const testigo = await obtenerCredencial().getAccessToken();
-  return { projectId, segundosDeVida: testigo.expires_in };
+  // Listar cero usuarios es la operación más barata que ejercita permisos
+  // reales sin leer, crear ni tocar los datos de ningún cliente.
+  await auth().listUsers(1);
+  return { projectId, modo, segundosDeVida: testigo.expires_in };
 }
 
 /** El proveedor con el que se autenticó esta vez, o "desconocido". */
