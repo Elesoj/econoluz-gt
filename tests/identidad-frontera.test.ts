@@ -56,6 +56,9 @@ const SCRIPTS_QUE_PUEDEN = [
   // Comprueba que ADC funciona antes de dar por buena la configuración local.
   // No puede pasar por app/identidad/firebase.server.ts, que lleva "server-only".
   "scripts/comprobar-adc.mjs",
+  // Pregunta a Firebase qué identidades siguen existiendo y tampoco puede
+  // importar el módulo con "server-only".
+  "scripts/reconciliar-identidades.mjs",
 ];
 
 test("en scripts/, solo los declarados importan firebase-admin", () => {
@@ -68,6 +71,15 @@ test("en scripts/, solo los declarados importan firebase-admin", () => {
       `Importan firebase-admin:\n${encontrados.join("\n") || "(ninguno)"}\n\n` +
       `Declarados:\n${SCRIPTS_QUE_PUEDEN.join("\n") || "(ninguno)"}`,
   );
+});
+
+test("el barrido solo considera huérfano un usuario ausente en Firebase", () => {
+  const ruta = join(RAIZ, "scripts", "reconciliar-identidades.mjs");
+  assert.equal(existsSync(ruta), true, "Falta el script de reconciliación.");
+
+  const fuente = readFileSync(ruta, "utf8");
+  assert.match(fuente, /auth\/user-not-found/);
+  assert.match(fuente, /throw error/);
 });
 
 test("la identidad de clientes no importa nada del panel, ni al revés", () => {
