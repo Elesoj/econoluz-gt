@@ -514,9 +514,11 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   con una prueba positiva y una negativa. Desarrollo usa `econoluz-dev-d30ab`. La política
   corporativa prohíbe claves privadas de cuentas de servicio: no crear JSON ni variables
   con una clave privada, y no hay respaldo hacia ADC dentro de Vercel.
-  **Sigue bloqueado el despliegue, pero por otra causa**: `firebase-admin` no se carga
-  dentro de una función de Vercel porque su cadena `jwks-rsa` → `jose` es ESM puro y se
-  carga con `require()`. Ver `docs/OPERACION-FIREBASE.md` §3.
+  El fallo de carga en Vercel quedó resuelto el 01/09/2026 al incluir `firebase-admin`
+  en `transpilePackages`: Next dejó de externalizarlo y empaquetó también la cadena
+  `jwks-rsa` → `jose`. Un único Preview compiló y `/cuenta` respondió con la redirección
+  prevista a `/cuenta/entrar`, sin `ERR_REQUIRE_ESM`. No hizo falta fijar `jose` v5.
+  Ver `docs/OPERACION-FIREBASE.md` §3.
 - Pasarela de pago: `TODO — pendiente de decidir`
 - Certificador FEL: `TODO — pendiente de decidir`
 
@@ -964,8 +966,8 @@ de §0.2.
 se fusionó en `main`, se preparó Neon de producción y se publicó con autorización expresa
 el 01/09/2026. Vercel marcó el despliegue como `Ready` y `Current`, y las rutas críticas se
 comprobaron directamente. El **subproyecto 2, identidad de clientes**, está implementado
-y verificado en `feat/identidad-clientes`, pero aún no se ha fusionado, publicado ni
-desplegado.
+y verificado en `feat/identidad-clientes`, pero aún no se ha fusionado ni desplegado en
+Production. Solo se creó un Preview para verificar el empaquetado y `/cuenta`.
 
 **La identidad federada dejó de ser el bloqueo el 01/09/2026.** Está montada sobre
 `econoluz-dev-d30ab` y demostrada: la prueba positiva pasó los tres puntos y la negativa
@@ -974,9 +976,12 @@ condition` al estrechar la condición a `preview`. La cuenta de servicio tiene u
 personalizado de cuatro permisos y ninguno predefinido. Diseño y evidencia en
 `docs/superpowers/specs/2026-09-01-vercel-firebase-wif-design.md`.
 
-**Lo que bloquea ahora es otra cosa:** `firebase-admin` no se carga dentro de una función
-de Vercel (`ERR_REQUIRE_ESM` en la cadena `jwks-rsa` → `jose`). Es independiente del
-método de autenticación y hay que resolverlo antes de desplegar `/cuenta`.
+**El bloqueo de empaquetado también quedó resuelto el 01/09/2026.**
+`transpilePackages: ["firebase-admin"]` evita la excepción automática de Next 16.3.1,
+que trata `firebase-admin` como paquete externo. El build local dejó de trazar
+`firebase-admin`, `jwks-rsa` y `jose@6` como dependencias externas; el build remoto del
+único Preview terminó y `/cuenta` devolvió `307` a `/cuenta/entrar`, con una ejecución
+de nivel `info` y sin `ERR_REQUIRE_ESM`. `jose` v5 quedó como plan B y no se usó.
 El catálogo relacional corresponde al subproyecto 3 y no se adelanta.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el

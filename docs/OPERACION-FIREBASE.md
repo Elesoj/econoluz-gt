@@ -79,12 +79,12 @@ La cuenta corporativa con la que se inicia sesión necesita, sobre el proyecto
 Authentication Admin** basta—. Si `npm run identidad:adc` pasa el primer punto y falla el
 segundo, el problema es ese rol, no las credenciales.
 
-## 3. Producción — la federación está resuelta; queda otro bloqueo distinto
+## 3. Vercel — federación y empaquetado demostrados en Preview
 
 > **Estado al 01/09/2026.** La identidad federada **funciona y está demostrada** con una
 > prueba positiva y una negativa, las dos ejecutadas de verdad; ver §3.2 y la sección 17
-> del diseño. Lo que impide desplegar ahora es **otro problema, ajeno a la autenticación**:
-> `firebase-admin` no llega a cargarse dentro de una función de Vercel.
+> del diseño. El bloqueo posterior de empaquetado también está resuelto y comprobado en
+> un único Preview.
 >
 > ```
 > Failed to load external module firebase-admin/auth: ERR_REQUIRE_ESM:
@@ -92,13 +92,17 @@ segundo, el problema es ese rol, no las credenciales.
 > from .../jwks-rsa/src/utils.js not supported
 > ```
 >
-> La cadena es `firebase-admin 14.3.0` → `jwks-rsa 4.1.0` → `jose 6.2.10`, que es ESM puro.
-> **No es la versión de Node** —Vercel está en 24.x y en local carga sin error— y **no hay
-> versión más nueva** de ninguno de los tres paquetes. Está acotado a la carga del paquete
-> como módulo externo en el runtime de Turbopack.
+> La causa era que Next 16.3.1 incluye `firebase-admin` en su lista automática de paquetes
+> externos. La cadena `firebase-admin 14.3.0` → `jwks-rsa 4.1.0` → `jose 6.2.10` quedaba
+> para el runtime y acababa pasando por `require()`. Añadir
+> `transpilePackages: ["firebase-admin"]` a `next.config.ts` hizo que Turbopack empaquetara
+> la cadena completa.
 >
-> Mientras no se resuelva, `/cuenta` no puede funcionar en Vercel **con ningún método de
-> autenticación**, así que el texto que sigue describe el bloqueo anterior, ya superado.
+> La aserción de externalización falló antes del cambio y pasó después; el build local
+> trazó cero archivos externos de los tres paquetes. El build remoto del Preview
+> `dpl_HByQNb3hyHfX9kdnptp6TAkoBjBH` terminó correctamente y `/cuenta` respondió `307`
+> hacia `/cuenta/entrar`. Vercel registró `λ GET /cuenta` en nivel `info`, sin
+> `ERR_REQUIRE_ESM`. No se usó el plan B de fijar `jose` v5.
 
 **Vercel no es infraestructura de Google**, así que allí no hay credenciales
 predeterminadas de serie. Y como no se pueden generar claves de cuenta de servicio, la
@@ -109,11 +113,10 @@ El camino previsto es **Workload Identity Federation**: Vercel emite un testigo 
 despliegue, Google lo acepta como identidad federada y entrega credenciales de corta
 duración. Sin claves permanentes que robar ni rotar.
 
-**Todavía no está montado.** Mientras no lo esté:
-
-- Las pantallas de `/cuenta` **no pueden funcionar en producción**.
-- El desarrollo local sí funciona, con ADC.
-- No se añade ningún secreto a Vercel.
+La federación del entorno Preview ya está montada y restringida a ese entorno. El
+desarrollo local sigue usando ADC. La infraestructura separada de Production —proyecto
+Firebase, federación, migración y variables— aún no existe y solo se prepara con
+autorización expresa.
 
 Las tres decisiones que faltaban —qué identidad federada se crea, qué condición de la
 afirmación OIDC de Vercel se acepta y qué rol mínimo se concede— **ya están tomadas y

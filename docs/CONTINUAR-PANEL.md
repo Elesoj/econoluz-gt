@@ -149,7 +149,8 @@ petición creó el usuario sintético, la concurrente reutilizó la misma fila y
 confirmó que no quedó ese usuario. La autorización era necesaria porque su limpieza
 ejecuta `DELETE` fuera de la transacción.
 
-**No hay autorización para fusionar, hacer push ni desplegar.**
+**No hay autorización para fusionar, hacer push ni desplegar en Production.** El dueño
+autorizó únicamente el Preview de verificación descrito abajo.
 
 **La identidad federada ya no bloquea (01/09/2026).** Workload Identity Federation está
 montada sobre `econoluz-dev-d30ab` y **demostrada** con una prueba positiva y una negativa
@@ -157,17 +158,24 @@ ejecutadas de verdad; la cuenta de servicio tiene cuatro permisos y ninguno pred
 No se desactivó ninguna política corporativa ni se creó ningún JSON. Diseño y evidencia en
 `docs/superpowers/specs/2026-09-01-vercel-firebase-wif-design.md` §17.
 
-**El bloqueo ahora es otro, y es de empaquetado, no de autenticación.** Dentro de una
-función de Vercel, `firebase-admin/auth` no llega a cargarse:
+**El bloqueo de empaquetado quedó resuelto el 01/09/2026.** Next 16.3.1 incluye
+`firebase-admin` en su lista automática de paquetes externos; la función intentaba cargar
+por `require()` la cadena `firebase-admin 14.3.0` → `jwks-rsa 4.1.0` → `jose 6.2.10` y
+Vercel respondía con `ERR_REQUIRE_ESM`. Se añadió únicamente
+`transpilePackages: ["firebase-admin"]` a `next.config.ts`.
 
-```
-ERR_REQUIRE_ESM: require() of ES Module .../jwks-rsa/node_modules/jose/...
-```
+La misma aserción sobre los chunks falló antes del cambio y pasó después. El build local
+terminó correctamente y la traza de `/api/clientes/sesion` quedó con **0** archivos
+externos de `firebase-admin`, `jwks-rsa` y el `jose@6` anidado; los sourcemaps sí muestran
+los tres dentro del grafo compilado. Pasaron `test:datos` 146/146, `test:admin` 196/196,
+`test:proveedores` 3/3, `typecheck` y `lint`. Playwright ejecutó sus 70 pruebas como `ok`,
+pero volvió a quedarse colgado al apagar el servidor en Windows y se interrumpió después:
+no se presenta esa ejecución como salida limpia.
 
-`firebase-admin 14.3.0` → `jwks-rsa 4.1.0` → `jose 6.2.10`, que es ESM puro. **No** es la
-versión de Node (Vercel está en 24.x y en local carga bien) y **no** hay versión más nueva
-de ninguno de los tres. Hay que resolverlo antes de desplegar `/cuenta`, y afecta por igual
-a cualquier método de autenticación.
+Se creó **un único Preview**, sin push y sin `--prod`: el build remoto terminó y
+`/cuenta` respondió `307` hacia `/cuenta/entrar`. Los registros de esa petición muestran
+`λ GET /cuenta` en nivel `info`, sin `ERR_REQUIRE_ESM`. No se fijó `jose` v5: queda solo
+como plan B que no hizo falta usar.
 
 Antes de una futura salida a producción también faltan aplicar allí la migración `009`,
 crear el proyecto de Firebase de producción con su propia federación, configurar las

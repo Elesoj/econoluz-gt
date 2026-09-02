@@ -777,6 +777,11 @@ cierres puestos.
 
 ### 17.4 La prueba en Preview no llegó a ejecutarse — y por un motivo ajeno
 
+> **Seguimiento del 01/09/2026:** este fallo posterior quedó resuelto al añadir
+> `transpilePackages: ["firebase-admin"]` a `next.config.ts`. Un único Preview compiló y
+> `/cuenta` respondió con su redirección prevista, sin `ERR_REQUIRE_ESM`. Se conserva el
+> relato de abajo porque documenta la causa y la evidencia que condujeron a la corrección.
+
 El despliegue Preview se hizo con `npx vercel deploy` (sin push, sin `--prod`) y la ruta de
 diagnóstico devolvió **HTTP 500 con el cuerpo vacío**: la función reventó antes de llegar a
 su propio `try`. Los registros de Vercel dan la causa exacta:

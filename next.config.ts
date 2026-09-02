@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  transpilePackages: ["firebase-admin"],
   experimental: {
     serverActions: {
       // Las fotos del panel viajan dentro de la Server Action que guarda la
