@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  // Next 16 incluye `firebase-admin` en su lista automática de paquetes externos del
+  // servidor. Dejarlo ahí hace que la función de Vercel cargue por `require()` la cadena
+  // `firebase-admin` -> `jwks-rsa` -> `jose 6`, que es ESM puro, y `/cuenta` responde 500
+  // con `ERR_REQUIRE_ESM`. Esta línea obliga a Turbopack a empaquetar la cadena entera.
+  //
+  // **No quitar sin comprobarlo en un despliegue**: el fallo no se reproduce en local —el
+  // build pasa y las pruebas también— y solo aparece dentro de una función desplegada.
+  // `tests/identidad-frontera.test.ts` lo vigila; ver `docs/OPERACION-FIREBASE.md` §3.
   transpilePackages: ["firebase-admin"],
   experimental: {
     serverActions: {

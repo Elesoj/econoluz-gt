@@ -207,6 +207,42 @@ test("el comprobador de federacion no imprime ningun testigo", () => {
 });
 
 /**
+ * La ruta de diagnóstico fue temporal y ya cumplió: sirvió para comprobar en un Preview
+ * que el testigo OIDC llega por la cabecera. Expone el estado de las credenciales del
+ * servidor **sin ninguna autenticación**, y en aquel Preview fue aceptable solo porque era
+ * una comprobación acotada y el despliegue se borró enseguida. Esta prueba existe para que
+ * no vuelva por descuido.
+ */
+test("no queda ninguna ruta de diagnostico de identidad", () => {
+  const carpeta = join(RAIZ, "app", "api", "identidad");
+
+  assert.equal(
+    existsSync(carpeta),
+    false,
+    "app/api/identidad/ era temporal y tiene que seguir retirada.",
+  );
+});
+
+/**
+ * `transpilePackages: ["firebase-admin"]` no es una preferencia: sin esa línea, Next 16
+ * deja `firebase-admin` en su lista automática de paquetes externos, la función de Vercel
+ * intenta cargar por `require()` la cadena `firebase-admin` → `jwks-rsa` → `jose 6`, que es
+ * ESM puro, y `/cuenta` responde 500 con `ERR_REQUIRE_ESM`.
+ *
+ * Lo peligroso es que **eso no falla en local**: el build pasa, las pruebas pasan y el
+ * error solo aparece dentro de una función desplegada. Por eso hace falta una guarda aquí.
+ */
+test("firebase-admin se empaqueta, no se deja como modulo externo", async () => {
+  const { default: configuracion } = await import("../next.config");
+
+  assert.ok(
+    configuracion.transpilePackages?.includes("firebase-admin"),
+    "Sin transpilePackages: [\"firebase-admin\"], /cuenta responde 500 en Vercel con " +
+      "ERR_REQUIRE_ESM y el fallo no se reproduce en local. Ver docs/OPERACION-FIREBASE.md §3.",
+  );
+});
+
+/**
  * Obtener un testigo prueba que hay identidad; no prueba que tenga permiso. La
  * comprobación tiene que llegar hasta Firebase Authentication, igual que hace
  * `scripts/comprobar-adc.mjs`, o dará por buena una configuración a la que le falta el rol.
