@@ -260,6 +260,57 @@ estado `passed` y ningún caso fallido; no se repitió.
 `modelo_catalogo` continúa en `legacy`. No se activó `relational_v2`, no empezó la Fase C
 ni la D y no hubo push, merge ni despliegue. La siguiente fase necesita autorización nueva.
 
+### Correcciones post-revisión aplicadas el 02/09/2026
+
+La revisión técnica independiente encontró dos defectos confirmados en el rango
+`3cf911d..f33fb64`. Ambos se corrigieron en el commit `82ec89b` sobre la misma rama.
+
+**Defecto 1 resuelto — N+1 eliminado (`app/data/catalogo/lectura.ts`).**
+`leerCatalogoRelacional` ejecutaba `1 + 5N` consultas (1 566 para 313 productos) mediante
+`Promise.all(filas.map(leerSatelites))`. Se reemplazó por seis consultas globales en
+paralelo (productos, datos privados, categorías, imágenes, atributos y precios) y una
+función pura `armarProductoRelacional` que agrupa las filas en memoria por `product_id`.
+El número de consultas es ahora **constante = 6**, independientemente del tamaño del catálogo.
+`leerProductoRelacional` conserva sus cinco consultas individuales (filtradas por `id`).
+
+**Defecto 2 resuelto — Fuga de `supplier_code` eliminada (`scripts/verificar-catalogo-relacional.mjs`).**
+`busquedaPrivada` exponía `{ codigo: ejemploCodigo.supplier_code, ... }` en el JSON que
+imprime el verificador por consola. Ahora solo expone `{ coincidencias, encontrado }`.
+La lógica de validación interna permanece intacta.
+
+**Pruebas añadidas o ampliadas (`tests/catalogo-lectura.test.ts`):**
+
+| Test añadido | Verificación |
+|---|---|
+| 6 consultas globales para varios productos | `sentencias.length === 6` + sin cruces de relaciones entre productos |
+| 6 consultas globales para catálogo vacío | `sentencias.length === 6` + resultado `[]` |
+| 6 consultas globales para 313 productos | `sentencias.length === 6` (antes 1 566) |
+| `verificarCatalogoRelacional` sin `supplier_code` | Centinela secreto ausente en JSON serializado |
+
+**Batería completa tras las correcciones:**
+
+| Suite | Resultado | Pruebas |
+|---|---|---|
+| `test:datos` | ✓ Aprobado | 332 / 332 |
+| `test:admin` | ✓ Aprobado | 196 / 196 |
+| `test:proveedores` | ✓ Aprobado | 3 / 3 |
+| Pruebas de catálogo (`tests/catalogo-*.test.ts`) | ✓ Aprobado | 174 / 174 |
+| `typecheck` | ✓ Sin errores | — |
+| `lint` | ✓ Sin errores ni avisos | — |
+| `build` | ✓ 16 páginas generadas | — |
+| Playwright (una ejecución, sin DATABASE_URL) | 65 / 70 aprobados | 5 fallos preexistentes por falta de precios en modo sin BD |
+
+Los 5 fallos de Playwright son anteriores a esta corrección y ocurren únicamente porque
+el servidor arranca sin `DATABASE_URL`: el catálogo cae al respaldo estático, que no tiene
+precios asignados, y las pruebas que exigen botón «Agregar al carrito» lo documentan
+explícitamente con el mensaje *«ningún producto del catálogo tiene precio: ponle precio a
+alguno desde el panel»*. No guardan relación con los cambios de esta sesión.
+
+Neon no recibió ninguna escritura. Producción quedó intacta. La Fase C no comenzó.
+`modelo_catalogo` continúa en `legacy`. No hubo push, merge ni despliegue.
+
+**Veredicto: Fase B apta para solicitar la Fase C.**
+
 ### Revisión previa a la fusión (02/09/2026)
 
 Se revisó la rama entera contra `main`. **La superficie de regresión es prácticamente
