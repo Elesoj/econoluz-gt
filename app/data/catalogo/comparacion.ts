@@ -15,6 +15,8 @@
  * diferencia real en vez de quedar escondida.
  */
 
+import { createHash } from "node:crypto";
+
 import { fromProductRow, type ProductRow } from "../productRow";
 import { aFilaProyeccion, type FilaProyeccion } from "../proyeccionPublica";
 import { planificarProducto, type FilaDeCatalogo } from "./importacion";
@@ -177,4 +179,208 @@ export function catalogoCanonicoDesdeRelacional(
 ): CatalogoCanonico {
   const canonicos = productos.map((producto) => canonicoDesdeRelacional(producto, ahora));
   return { orden: ordenar(canonicos), productos: canonicos };
+}
+
+// --- El motor de diferencias -------------------------------------------------------
+
+export type TipoDeDiferencia =
+  | "producto_ausente"
+  | "producto_adicional"
+  | "campo_distinto"
+  | "coleccion_distinta"
+  | "orden_distinto";
+
+export type Diferencia = {
+  tipo: TipoDeDiferencia;
+  producto: string | null;
+  campo: string;
+  huellaLegacy: string | null;
+  huellaRelacional: string | null;
+};
+
+export type ResumenDeComparacion = {
+  productosLegacy: number;
+  productosRelacional: number;
+  comparados: number;
+  totalDiferencias: number;
+  porTipo: Record<string, number>;
+  porCampo: Record<string, number>;
+  diferencias: Diferencia[];
+  omitidas: number;
+};
+
+/**
+ * Cuántas diferencias se guardan como detalle. El resto se cuenta pero no se lista: 313
+ * productos por doce dimensiones pueden dar miles de líneas, y un registro que crece con
+ * el tamaño del catálogo es un registro que nadie lee y que además cuesta dinero.
+ */
+export const LIMITE_DE_DIFERENCIAS = 25;
+
+/** JSON con las claves ordenadas, para que dos objetos iguales den la misma huella. */
+function canonizar(valor: unknown): unknown {
+  if (Array.isArray(valor)) return valor.map(canonizar);
+  if (valor !== null && typeof valor === "object") {
+    return Object.fromEntries(
+      Object.entries(valor as Record<string, unknown>)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([clave, contenido]) => [clave, canonizar(contenido)]),
+    );
+  }
+  return valor;
+}
+
+/**
+ * Huella irreversible y corta de un valor.
+ *
+ * Se registra la huella y **nunca el valor**. Aunque el canónico solo contiene datos
+ * públicos, registrar huellas mantiene la regla simple —«de aquí no sale contenido»— y
+ * evita que un campo se cuele el día que alguien amplíe el canónico.
+ */
+export function huella(valor: unknown): string {
+  return createHash("sha256")
+    .update(JSON.stringify(canonizar(valor) ?? null))
+    .digest("hex")
+    .slice(0, 16);
+}
+
+const iguales = (a: unknown, b: unknown) =>
+  JSON.stringify(canonizar(a)) === JSON.stringify(canonizar(b));
+
+const CAMPOS_ESCALARES = [
+  "referencia",
+  "publicado",
+  "orden",
+  "categoriaPrincipal",
+  "precioNormalCentavos",
+  "precioPromocionCentavos",
+] as const;
+
+const CAMPOS_COLECCION = ["categorias", "imagenes", "atributos"] as const;
+
+function diferenciasDeProyeccion(
+  producto: string,
+  legacy: FilaProyeccion,
+  relacional: FilaProyeccion,
+): Diferencia[] {
+  const claves = [...new Set([...Object.keys(legacy), ...Object.keys(relacional)])].sort();
+  const salida: Diferencia[] = [];
+  for (const clave of claves) {
+    const a = (legacy as unknown as Record<string, unknown>)[clave];
+    const b = (relacional as unknown as Record<string, unknown>)[clave];
+    if (iguales(a, b)) continue;
+    salida.push({
+      tipo: "campo_distinto",
+      producto,
+      campo: `proyeccion.${clave}`,
+      huellaLegacy: huella(a),
+      huellaRelacional: huella(b),
+    });
+  }
+  return salida;
+}
+
+function diferenciasDeProducto(
+  legacy: ProductoCanonico,
+  relacional: ProductoCanonico,
+): Diferencia[] {
+  const salida: Diferencia[] = [];
+
+  for (const campo of CAMPOS_ESCALARES) {
+    if (iguales(legacy[campo], relacional[campo])) continue;
+    salida.push({
+      tipo: "campo_distinto",
+      producto: legacy.id,
+      campo,
+      huellaLegacy: huella(legacy[campo]),
+      huellaRelacional: huella(relacional[campo]),
+    });
+  }
+
+  for (const campo of CAMPOS_COLECCION) {
+    if (iguales(legacy[campo], relacional[campo])) continue;
+    salida.push({
+      tipo: "coleccion_distinta",
+      producto: legacy.id,
+      campo,
+      huellaLegacy: huella(legacy[campo]),
+      huellaRelacional: huella(relacional[campo]),
+    });
+  }
+
+  return [
+    ...salida,
+    ...diferenciasDeProyeccion(legacy.id, legacy.proyeccion, relacional.proyeccion),
+  ];
+}
+
+export function compararCatalogos(
+  legacy: CatalogoCanonico,
+  relacional: CatalogoCanonico,
+  limite: number = LIMITE_DE_DIFERENCIAS,
+): ResumenDeComparacion {
+  const porIdRelacional = new Map(relacional.productos.map((p) => [p.id, p]));
+  const porIdLegacy = new Map(legacy.productos.map((p) => [p.id, p]));
+
+  const diferencias: Diferencia[] = [];
+  const porTipo: Record<string, number> = {};
+  const porCampo: Record<string, number> = {};
+  let total = 0;
+  let comparados = 0;
+
+  const anotar = (diferencia: Diferencia) => {
+    total += 1;
+    porTipo[diferencia.tipo] = (porTipo[diferencia.tipo] ?? 0) + 1;
+    porCampo[diferencia.campo] = (porCampo[diferencia.campo] ?? 0) + 1;
+    if (diferencias.length < limite) diferencias.push(diferencia);
+  };
+
+  for (const producto of legacy.productos) {
+    const pareja = porIdRelacional.get(producto.id);
+    if (!pareja) {
+      anotar({
+        tipo: "producto_ausente",
+        producto: producto.id,
+        campo: "producto",
+        huellaLegacy: huella(producto.referencia),
+        huellaRelacional: null,
+      });
+      continue;
+    }
+    comparados += 1;
+    for (const diferencia of diferenciasDeProducto(producto, pareja)) anotar(diferencia);
+  }
+
+  for (const producto of relacional.productos) {
+    if (porIdLegacy.has(producto.id)) continue;
+    anotar({
+      tipo: "producto_adicional",
+      producto: producto.id,
+      campo: "producto",
+      huellaLegacy: null,
+      huellaRelacional: huella(producto.referencia),
+    });
+  }
+
+  // El orden del catálogo sí significa algo: es el que ve el visitante. Se compara como
+  // una secuencia, no como un conjunto.
+  if (!iguales(legacy.orden, relacional.orden)) {
+    anotar({
+      tipo: "orden_distinto",
+      producto: null,
+      campo: "orden",
+      huellaLegacy: huella(legacy.orden),
+      huellaRelacional: huella(relacional.orden),
+    });
+  }
+
+  return {
+    productosLegacy: legacy.productos.length,
+    productosRelacional: relacional.productos.length,
+    comparados,
+    totalDiferencias: total,
+    porTipo,
+    porCampo,
+    diferencias,
+    omitidas: Math.max(0, total - diferencias.length),
+  };
 }
