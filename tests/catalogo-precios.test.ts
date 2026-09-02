@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { haySolape, precioVigente, type Precio } from "../app/data/catalogo/precios";
+import {
+  haySolape,
+  precioVigente,
+  preciosVigentes,
+  type Precio,
+} from "../app/data/catalogo/precios";
 
 const AHORA = new Date("2026-09-02T12:00:00Z");
 const dias = (n: number) => new Date(AHORA.getTime() + n * 24 * 60 * 60 * 1000);
@@ -112,4 +117,49 @@ test("una promocion sin fin se solapa con cualquiera posterior", () => {
 
 test("una sola promocion nunca se solapa consigo misma", () => {
   assert.equal(haySolape([promo(1, dias(-5), dias(5), "a")]), false);
+});
+
+/**
+ * El diseño §3.9 no pide solo el precio resultante: pide **el normal vigente y, si existe,
+ * la única promoción vigente**, por separado. La ficha necesita los dos para poder enseñar
+ * el precio tachado junto al de promoción.
+ */
+test("se devuelven el normal y la promocion por separado", () => {
+  const vigentes = preciosVigentes([normal(125000), promo(99900, dias(-1), dias(5))], AHORA);
+
+  assert.equal(vigentes.normal?.centavos, 125000);
+  assert.equal(vigentes.promocion?.centavos, 99900);
+});
+
+test("sin promocion vigente, solo hay normal", () => {
+  const vigentes = preciosVigentes([normal(125000)], AHORA);
+
+  assert.equal(vigentes.normal?.centavos, 125000);
+  assert.equal(vigentes.promocion, null);
+});
+
+test("una promocion caducada no se devuelve, y el normal si", () => {
+  const vigentes = preciosVigentes([normal(125000), promo(99900, dias(-10), dias(-1))], AHORA);
+
+  assert.equal(vigentes.normal?.centavos, 125000);
+  assert.equal(vigentes.promocion, null);
+});
+
+/**
+ * Un producto puede tener promoción sin precio normal vigente. Enseñar «antes 0» seria peor
+ * que no enseñar nada.
+ */
+test("puede haber promocion sin normal vigente", () => {
+  const vigentes = preciosVigentes([promo(99900, dias(-1), dias(5))], AHORA);
+
+  assert.equal(vigentes.normal, null);
+  assert.equal(vigentes.promocion?.centavos, 99900);
+});
+
+test("sin ningun precio no hay ni normal ni promocion", () => {
+  assert.deepEqual(preciosVigentes([], AHORA), { normal: null, promocion: null });
+});
+
+test("un precio con decimales tampoco cuenta aqui", () => {
+  assert.equal(preciosVigentes([normal(1250.5)], AHORA).normal, null);
 });

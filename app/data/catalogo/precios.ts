@@ -65,6 +65,31 @@ export function precioVigente(precios: readonly Precio[], ahora: Date): PrecioRe
 }
 
 /**
+ * El precio normal vigente y, si existe, la única promoción vigente, **por separado**.
+ *
+ * `precioVigente` responde «cuánto se cobra»; esto responde «qué enseñar», que no es lo
+ * mismo: la ficha necesita los dos para poder tachar el normal junto al de promoción.
+ *
+ * Puede haber promoción sin normal vigente. En ese caso el normal es `null` y no cero:
+ * enseñar «antes Q0.00» sería peor que no enseñar nada.
+ *
+ * La restricción de exclusión de la base garantiza que no haya dos promociones vigentes a
+ * la vez; si aun así llegaran, se elige la que empezó después, igual que en `precioVigente`.
+ */
+export function preciosVigentes(
+  precios: readonly Precio[],
+  ahora: Date,
+): { normal: PrecioResuelto | null; promocion: PrecioResuelto | null } {
+  const de = (tipo: TipoDePrecio) =>
+    precioVigente(
+      precios.filter((precio) => precio.tipo === tipo),
+      ahora,
+    );
+
+  return { normal: de("normal"), promocion: de("promocion") };
+}
+
+/**
  * Si dos periodos cualesquiera se pisan. Se comparan todos contra todos porque la lista de
  * promociones de un producto es corta por naturaleza y la claridad vale más aquí que
  * ahorrarse un bucle.
