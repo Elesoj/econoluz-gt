@@ -1,176 +1,146 @@
-# Catálogo relacional v2 — plan de implementación (subproyecto 3)
+# Núcleo relacional de productos — plan de la Fase A (subproyecto 3)
 
-> **PLAN OBSOLETO DESDE EL 02/09/2026 — NO CONTINUAR NI EJECUTAR LA FASE B.**
-> El diseño aprobado elimina `category_attributes`, define atributos administrables por
-> producto y corrige el significado de `supplier_code`. La fase A existente y
-> `db/010_catalogo_relacional.sql` reflejan el diseño anterior de nueve tablas. Este plan se
-> reescribirá después de que el dueño revise
-> `docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md`. La migración no se
-> ha aplicado a ninguna base de datos.
+> **Reescrito el 02/09/2026.** La versión anterior quedó **obsoleta**: se escribió antes de
+> aprobarse `docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md` y
+> contradice el diseño en tres puntos —proponía nueve tablas, incluía `category_attributes`
+> y duplicaba el código del proveedor en tres columnas—. Este documento la sustituye entera.
 
-> **Para quien ejecute esto con agentes:** SUB-SKILL OBLIGATORIA: usa
-> `superpowers:subagent-driven-development` o `superpowers:executing-plans`.
+> **Para quien ejecute esto con agentes:** SUB-SKILL OBLIGATORIA:
+> `superpowers:executing-plans` o `superpowers:subagent-driven-development`, y
+> `superpowers:test-driven-development` en cada tarea.
 
-**Objetivo:** que el catálogo deje de vivir en 28 columnas y un JSON, y pase a nueve tablas
-relacionales que permitan filtrar por rango («entre 15 y 25 W»), tener varias categorías por
-producto, precios con vigencia y promociones que la base impide solapar.
+**Objetivo de la Fase A:** dejar el esquema y la lógica pura del núcleo relacional
+correctos y probados, **sin aplicar ninguna migración y sin tocar Neon**.
 
-**Arquitectura:** el modelo nuevo se construye **al lado** del viejo, sin sustituirlo. La
-bandera `modelo_catalogo` de `app_settings` decide qué se sirve, con tres valores:
-`legacy` (hoy), `shadow` (se lee de los dos y se comparan las diferencias sin cambiar lo
-que ve el visitante) y `relational_v2`. **`relational_v2` solo se activa con autorización
-expresa del dueño**, con paridad y privacidad en verde.
-
-**Stack:** el del proyecto. Postgres 18 en Neon, `app/lib/datos` como única puerta, pruebas
-con `node:test`.
-
-**Diseño:** `docs/superpowers/specs/2026-08-30-backend-relacional-v2-design.md`, §5.3 el
-modelo y §9.4 la transición.
+**Diseño:** `docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md`.
 
 ## Restricciones globales
 
 - **Rama `feat/catalogo-relacional`, worktree `.worktrees/catalogo-relacional`.**
-- **`modelo_catalogo` no se toca.** Sigue en `legacy` y cambiarla necesita autorización
-  expresa. Que las piezas estén probadas **no es autorización**.
-- **La fuente del catálogo público no cambia** hasta la fase C, y su activación hasta la D.
-- **Ninguna migración destructiva.** El modelo viejo se conserva entero; retirarlo es el
-  subproyecto 11.
-- **No se escribe en la Neon de producción**, ni se aplica ninguna migración allí.
-- **`stock` no reaparece bajo ninguna forma** (`CLAUDE.md` §0.2).
-- **El catálogo público no expone datos del proveedor.** Las siete columnas `supplier_*`
-  se mudan a `product_private_data`, que **nunca** sale al visitante, y
-  `test:proveedores` y la prueba de *chunks* siguen vigilándolo.
-- Español de España en comentarios, commits y resúmenes. Sin push, sin fusión, sin despliegue.
+- **La Fase B no empieza aquí.** No se aplica ninguna migración, no se conecta a Neon, no se
+  importa nada y `modelo_catalogo` no se toca: sigue en `legacy`.
+- **Sin push, sin fusión, sin despliegue.**
+- **No se borra ningún archivo** sin autorización. La corrección se hace reescribiendo.
+- **Ocho tablas nuevas, ni una más.** `public_products` ya existe y es una proyección
+  derivada, no una tabla de este subproyecto.
+- **No hay relación entre categorías y atributos.** Una categoría clasifica; una
+  característica describe al producto que la posee.
+- Español de España en comentarios y mensajes de commit.
 
 ---
 
-## Fases, y qué autorización necesita cada una
+## Qué estaba mal en la Fase A ya implementada
 
-| Fase | Qué hace | ¿Ejecutable sin pedir permiso? |
+| # | Defecto | Dónde |
 |---|---|---|
-| **A. Esquema y piezas puras** | El archivo de migración y toda la lógica que no toca la base: tipado de atributos, resolución del precio vigente, árbol de categorías, traducción producto ↔ filas | **Sí.** Escribir el `.sql` no es aplicarlo |
-| **B. Escritura y lectura del modelo nuevo** | Aplicar la migración en una rama de Neon de desarrollo, importar los 313 productos, leer del modelo nuevo | **No.** Aplicar migraciones necesita autorización |
-| **C. Sombra y paridad** | Leer de los dos modelos, comparar y registrar diferencias sin cambiar lo que ve el visitante | **No.** Necesita B, y cambiar la bandera a `shadow` |
-| **D. Activación** | `modelo_catalogo = relational_v2` | **No.** Autorización expresa, con paridad y privacidad en verde |
-
-Este plan detalla la **fase A** paso a paso. Las fases B a D quedan listadas al final con
-su alcance, para redactarlas cuando la anterior esté aprobada.
-
----
-
-## Estructura de archivos de la fase A
-
-| Archivo | Responsabilidad |
-|---|---|
-| `db/010_catalogo_relacional.sql` — **nuevo, sin aplicar** | Las nueve tablas, sus restricciones e índices |
-| `app/data/catalogo/atributos.ts` — **nuevo** | Los cinco tipos de atributo y qué columna corresponde a cada uno; validación |
-| `app/data/catalogo/precios.ts` — **nuevo** | Resolución del precio vigente y detección de promociones solapadas |
-| `app/data/catalogo/categorias.ts` — **nuevo** | Árbol de categorías: rutas, principal única, ciclos |
-| `tests/catalogo-atributos.test.ts` · `catalogo-precios.test.ts` · `catalogo-categorias.test.ts` | Sus pruebas |
-
-Todo puro: sin red, sin base de datos y sin `server-only`, para poder probarlo entero.
+| 1 | Existía `category_attributes`, que el diseño prohíbe expresamente | `db/010` |
+| 2 | Nueve tablas en vez de ocho | `db/010` |
+| 3 | `product_private_data` duplicaba el código del proveedor en `sku`, `product_code` y `supplier_code`, y le faltaban las dos etiquetas y la descripción | `db/010` |
+| 4 | `supplier_code` no era buscable: sin índice | `db/010` |
+| 5 | Solo se garantizaba **como mucho** una categoría principal, no **exactamente una** cuando hay categorías | `db/010` |
+| 6 | `product_images` no impedía dos posiciones iguales ni declaraba imagen principal | `db/010` |
+| 7 | Nada impedía cambiar el tipo de un atributo ya usado | `db/010` y lógica |
+| 8 | Nada comprobaba que la opción elegida perteneciera al atributo | `db/010` y lógica |
+| 9 | Nada impedía dos valores escalares del mismo atributo, ni la misma opción dos veces | `db/010` y lógica |
+| 10 | `attributes` y `attribute_options` no tenían `active`, así que no se podía desactivar lo usado | `db/010` |
+| 11 | La lógica pura no sabía borrar solo lo no usado ni desactivar lo usado | `atributos.ts` |
+| 12 | No existía la lógica de categorías | — |
 
 ---
 
-## Tarea A1: El tipado de atributos
+## Tarea 1: Las reglas de atributos y opciones, en lógica pura
 
-Es la pieza que da sentido al subproyecto: `product_attribute_values` guarda cuatro
-columnas —`value_number`, `value_text`, `value_bool`, `option_id`— y **exactamente una**
-debe estar llena según el tipo declarado del atributo. Sin esa regla, «20 W» vuelve a ser
-una cadena y el filtro por rango es imposible.
+**Archivos:** modificar `app/data/catalogo/atributos.ts` y `tests/catalogo-atributos.test.ts`.
 
-**Archivos:** crear `app/data/catalogo/atributos.ts` y `tests/catalogo-atributos.test.ts`.
+Se conserva lo que ya existe —`TIPOS_DE_ATRIBUTO`, `COLUMNA_DE_TIPO`, `validarValor`,
+`columnasLlenas`— y se añade:
 
-**Produce:**
-- `type TipoDeAtributo = "numero" | "texto" | "booleano" | "opcion" | "opcion_multiple"`
-- `COLUMNA_DE_TIPO: Record<TipoDeAtributo, string>`
-- `validarValor(tipo, valor): { ok: true; columnas } | { ok: false; motivo }`
+- `decidirRetirada(usos)`: `"borrar"` si nunca se usó, `"desactivar"` en cuanto hay un uso.
+  Vale igual para un atributo y para una opción.
+- `puedeCambiarseElTipo(usos)`: falso en cuanto hay un uso, para no reinterpretar datos
+  existentes.
+- `validarAsignaciones(atributo, asignaciones)`: los escalares admiten **como mucho una**;
+  `opcion_multiple` admite varias pero **nunca la misma opción dos veces**; la opción tiene
+  que **pertenecer al atributo**; y una opción **inactiva** no admite asignaciones nuevas,
+  aunque las históricas se conserven.
 
-Los pasos son los del ciclo de siempre: prueba que falla, mínima implementación, prueba que
-pasa, rotura deliberada para ver fallar la prueba, commit.
+Ciclo por cada regla: prueba que falla, mínimo para pasarla, rotura deliberada.
 
-## Tarea A2: El precio vigente
+## Tarea 2: Las reglas de categorías, en lógica pura
 
-`product_prices` guarda centavos enteros, tipo (`normal`, `promocion`) y periodo de validez.
-Resolver **qué precio se cobra hoy** es puro y es donde más fácil es equivocarse: una
-promoción caducada no puede ganar, y dos promociones solapadas son un error de datos que la
-base rechaza pero que la aplicación tiene que saber detectar antes de intentar escribirlo.
+**Archivos:** crear `app/data/catalogo/categorias.ts` y `tests/catalogo-categorias.test.ts`.
 
-**Produce:**
-- `precioVigente(precios, ahora): PrecioResuelto | null`
-- `haySolape(promociones): boolean`
+- `validarPertenencias(pertenencias)`: **exactamente una principal cuando hay al menos una
+  categoría**. Sin categorías es válido; ni cero principales ni dos.
+- `hayCiclo(categorias)`: una categoría no puede colgar de sí misma, ni directa ni
+  indirectamente.
+- `rutaDeCategoria(categorias, id)`: la ruta desde la raíz, para migas y URLs.
 
-**Reglas que fijan las pruebas:** el dinero se compara en **centavos enteros**; una
-promoción vigente gana al precio normal; una caducada o futura no cuenta; sin ningún precio
-vigente el producto **no se vende** —«tener precio es estar a la venta», `CLAUDE.md` §2—.
+## Tarea 3: La lectura de precios que pide el diseño
 
-## Tarea A3: El árbol de categorías
+**Archivos:** modificar `app/data/catalogo/precios.ts` y sus pruebas.
 
-`categories` tiene `parent_id` hacia sí misma y `product_categories` permite pertenencia
-múltiple con **una principal**. Lo puro que hay aquí: construir la ruta de una categoría,
-detectar ciclos y comprobar que hay exactamente una principal.
+El diseño §3.9 pide obtener **el precio normal vigente y, si existe, la única promoción
+vigente**, no solo el resultante. `precioVigente` se conserva y se añade
+`preciosVigentes(precios, ahora)`, que devuelve los dos por separado.
 
-**Produce:** `rutaDeCategoria`, `hayCiclo`, `validarPertenencias`.
+## Tarea 4: Reescribir la migración `010`
 
-## Tarea A4: La migración `010`, escrita y sin aplicar
+**Archivos:** reescribir `db/010_catalogo_relacional.sql` y `tests/catalogo-migracion.test.ts`.
 
-Las nueve tablas del diseño §5.3, con:
-- índice único parcial que garantiza **una sola categoría principal** por producto;
-- restricción que obliga a llenar la columna que corresponde al tipo del atributo;
-- **restricción de exclusión** que impide dos promociones solapadas del mismo producto
-  (necesita `btree_gist`);
-- índices por `(attribute_id, value_number)` y `(attribute_id, option_id)`.
+**Ocho tablas.** `category_attributes` desaparece.
 
-**No se aplica.** La tarea termina con el archivo escrito, revisado y una prueba que
-comprueba su forma, igual que hace `tests/datos-migrador.test.ts` con las anteriores.
+Lo que se resuelve **de forma declarativa**, para que no dependa de que la aplicación se
+acuerde:
 
-## Tarea A5: Cerrar la fase
+- `attributes` gana `unique (id, tipo)`, y `product_attribute_values` lleva una columna
+  `attribute_type` con clave foránea compuesta `(attribute_id, attribute_type)` hacia
+  `attributes (id, tipo)` **`on update restrict`**. Eso hace que **cambiar el tipo de un
+  atributo usado lo rechace la base**, no un `if` que alguien pueda olvidar.
+- `attribute_options` gana `unique (id, attribute_id)`, y los valores llevan clave foránea
+  compuesta `(option_id, attribute_id)`: **la opción tiene que ser de ese atributo**.
+- Índice único parcial `(product_id, attribute_id)` sobre las filas que no son
+  `opcion_multiple`: **un solo valor escalar** por producto y atributo.
+- `unique (product_id, attribute_id, option_id)`: **nunca la misma opción dos veces**.
+- `product_categories` conserva el índice parcial de «como mucho una principal» y añade un
+  **`constraint trigger` diferible** que exige **exactamente una** al cerrar la transacción,
+  de modo que se puedan reemplazar las categorías de un producto sin estados intermedios
+  inválidos.
+- `product_images` gana `unique (product_id, posicion)` y un índice parcial que impide dos
+  principales.
+- `product_private_data` queda con **los siete campos del diseño y ni uno más**, con
+  `supplier_code` **indexado para poder buscarlo** y **sin `unique`**, porque hay registros
+  con varios códigos separados por barras.
 
-Batería completa y documentación al día. **La fase B no empieza sin autorización.**
+Lo que **no** se puede expresar de forma declarativa y queda para el contrato de escritura
+de la Fase B: que la opción tenga que estar **activa** solo para asignaciones nuevas, y que
+un producto **publicado** tenga imagen principal visible. Las dos dependen de estado que
+cambia con el tiempo.
+
+**La migración sigue sin aplicarse.**
+
+## Tarea 5: Documentación y batería
+
+`CLAUDE.md` y `docs/CONTINUAR-PANEL.md` al día, y la batería completa. **La Fase B no
+empieza sin autorización expresa.**
 
 ---
 
-## Fases B, C y D — alcance, para redactarlas cuando toque
+## Fases B, C y D
 
-**B.** Aplicar `010` en una rama de Neon de desarrollo; importador idempotente de los 313
-productos al modelo nuevo, sembrando las 12 características normalizadas y `ambiente`;
-lectura del modelo nuevo con su contrato público; ampliar `test:permisos` con las nueve
-tablas.
-
-**C.** Lectura en paralelo con `modelo_catalogo = shadow`: se sirve el modelo viejo y se
-compara con el nuevo, registrando diferencias **sin cambiar lo que ve el visitante**.
-Pruebas de paridad de los 313 productos y de privacidad del proveedor sobre el modelo nuevo.
-
-**D.** `relational_v2`, con autorización expresa, paridad y privacidad en verde, y vuelta
-atrás inmediata cambiando la bandera —que por eso vive en `app_settings` y no en una
-variable de entorno—.
+Sin cambios respecto al diseño §5: aplicar en una rama de Neon de desarrollo e importar de
+forma idempotente (B), `shadow` hasta lograr paridad (C), y `relational_v2` con autorización
+expresa y reversión inmediata a `legacy` (D). Cada una necesita su propia autorización.
 
 ---
 
 ## Antes de ejecutar Playwright en este worktree
 
-**Este worktree no tiene `.env.local`**, y sin él cinco pruebas de Playwright fallan sin
-que haya ninguna regresión:
+**Este worktree no tiene `.env.local`**, y sin él cinco pruebas fallan sin que haya ninguna
+regresión: el informe dice «ningún producto del catálogo tiene precio», porque sin
+`DATABASE_URL` el catálogo se sirve del respaldo estático, que no tiene precios, y el botón
+«Agregar al carrito» no existe. Las mismas 70 pasan en el worktree principal. Copiar ese
+archivo es decisión del dueño.
 
-```
-catalog-public-ui  › una selección de cotización vieja no rompe el catálogo
-tienda-carrito     › comprar un producto con precio y encontrarlo al volver
-tienda-carrito     › cambiar la cantidad recalcula el total
-tienda-carrito     › el catálogo ya no ofrece cotizar producto a producto
-tienda-carrito     › el inventario no viaja al navegador
-```
-
-El informe lo dice sin rodeos: *«ningún producto del catálogo tiene precio: ponle precio a
-alguno desde el panel»*. Sin `DATABASE_URL` el catálogo se sirve del respaldo estático de
-`app/data/products.ts`, donde no hay precios, así que no existe el botón «Agregar al
-carrito» que esas cinco buscan.
-
-**No es un fallo del subproyecto 3**, cuyo código es puro y no toca ninguna ruta: las
-mismas 70 pruebas pasan en el worktree principal, que sí tiene `.env.local`. Para
-ejecutarlas aquí hay que copiar ese archivo desde `frontend/`, y **eso lo decide el dueño**,
-porque es su archivo de credenciales y duplicarlo en disco es su decisión, no la de quien
-programa.
-
-Las pruebas de unidad —`test:datos`, `test:admin`, `test:proveedores`— y `typecheck`,
-`lint` y `build` **sí funcionan aquí sin `.env.local`**, y son las que cubren todo lo que
-añade la fase A.
+Las pruebas de unidad, `typecheck`, `lint` y `build` **sí funcionan aquí sin `.env.local`**,
+y son las que cubren todo lo que añade la Fase A.
