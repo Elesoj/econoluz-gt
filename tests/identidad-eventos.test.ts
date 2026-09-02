@@ -6,6 +6,7 @@ import {
   SQL_REGISTRAR_EVENTO,
   hayDemasiadosFallos,
   parametrosDeEvento,
+  politicaDeLimite,
 } from "../app/identidad/eventos";
 
 const BASE = {
@@ -67,4 +68,79 @@ test("alcanzado el límite, sí", () => {
 
 test("sin datos no se bloquea: no saber no autoriza a frenar", () => {
   assert.equal(hayDemasiadosFallos([]), false);
+});
+
+/**
+ * El límite de intentos se apagaba solo, y en silencio, cuando faltaba
+ * `AUTH_EVENT_IP_PEPPER`: sin pimienta no hay huella, sin huella no hay nada que contar, y
+ * la función devolvía «adelante». Una variable de entorno sin poner dejaba el acceso de
+ * clientes sin ninguna protección contra fuerza bruta y nadie se enteraba.
+ *
+ * La regla ahora es la misma que ya aplica el proyecto con `ADMIN_SESSION_SECRET` —«sin
+ * esta variable el panel no arranca, a propósito»— y con `origenPublico`: **en producción
+ * se falla cerrado y ruidoso**; en local se permite, con aviso, para no dejar el
+ * desarrollo inservible.
+ */
+test("en produccion, sin pimienta, se bloquea en vez de dejar pasar", () => {
+  const politica = politicaDeLimite({ hayPimienta: false, hayIp: true, produccion: true });
+
+  assert.equal(politica.accion, "bloquear");
+  assert.match(politica.suceso, /pimienta/);
+});
+
+test("en produccion, sin pimienta, NUNCA se permite", () => {
+  for (const hayIp of [true, false]) {
+    const politica = politicaDeLimite({ hayPimienta: false, hayIp, produccion: true });
+    assert.notEqual(
+      politica.accion,
+      "permitir",
+      "Sin pimienta en producción no puede permitirse el intento bajo ninguna circunstancia.",
+    );
+  }
+});
+
+test("en desarrollo, sin pimienta, se permite pero queda dicho", () => {
+  const politica = politicaDeLimite({ hayPimienta: false, hayIp: true, produccion: false });
+
+  assert.equal(politica.accion, "permitir");
+  assert.equal(politica.nivel, "info");
+  assert.match(politica.suceso, /pimienta/);
+});
+
+test("con pimienta y con IP se comprueba el limite de verdad", () => {
+  assert.deepEqual(politicaDeLimite({ hayPimienta: true, hayIp: true, produccion: true }), {
+    accion: "comprobar",
+  });
+});
+
+/**
+ * Sin IP tampoco se puede contar por huella. No se bloquea —dejaría fuera a quien entra de
+ * buena fe si un día faltara la cabecera—, pero en producción tiene que quedar registrado
+ * como error, que es lo que distingue «no protege» de «no protege y nadie lo sabe».
+ */
+test("con pimienta pero sin IP se permite, y en produccion se registra como error", () => {
+  const enProduccion = politicaDeLimite({ hayPimienta: true, hayIp: false, produccion: true });
+  assert.equal(enProduccion.accion, "permitir");
+  assert.equal(enProduccion.nivel, "error");
+
+  const enLocal = politicaDeLimite({ hayPimienta: true, hayIp: false, produccion: false });
+  assert.equal(enLocal.accion, "permitir");
+  assert.equal(enLocal.nivel, "info");
+});
+
+test("ninguna decision se toma en silencio: todas llevan suceso que registrar", () => {
+  const combinaciones = [true, false].flatMap((hayPimienta) =>
+    [true, false].flatMap((hayIp) =>
+      [true, false].map((produccion) => ({ hayPimienta, hayIp, produccion })),
+    ),
+  );
+
+  for (const entrada of combinaciones) {
+    const politica = politicaDeLimite(entrada);
+    if (politica.accion === "comprobar") continue;
+    assert.ok(
+      politica.suceso.length > 0,
+      `Sin suceso que registrar, el fallo de configuración sería invisible: ${JSON.stringify(entrada)}`,
+    );
+  }
 });

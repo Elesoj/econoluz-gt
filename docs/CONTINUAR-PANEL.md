@@ -205,6 +205,37 @@ fallar con su mensaje antes de darlas por buenas.
 No se tocó Production, ni `DATABASE_URL`, ni se desplegó, ni se hizo push, ni se borró
 nada fuera de las roturas deliberadas, que se deshicieron.
 
+### Revisión previa a la fusión (02/09/2026)
+
+Se revisó la rama entera contra `main`. **La superficie de regresión es prácticamente
+nula:** no hay ni un archivo preexistente de `app/` modificado o borrado; de los diez
+archivos modificados solo cuatro son código, y tres de ellos con cambios de una o dos
+líneas. No hay IDOR: todo el SQL de identidad va acotado por `user_id = $1`, ninguna
+consulta acepta el id de una dirección desde el cliente y el `userId` sale siempre de
+`leerClienteActual()`, nunca de un formulario. `test:permisos` confirma que las cuatro
+tablas nuevas están **denegadas** al rol público. No hay secretos en el diff.
+
+**Un defecto de seguridad se corrigió en el acto:** el límite de intentos se apagaba solo
+y en silencio si faltaba `AUTH_EVENT_IP_PEPPER`. Ahora, en producción, esa ausencia
+**rechaza el intento y registra un error**; en desarrollo se permite con aviso. La regla
+vive en `politicaDeLimite`, en `app/identidad/eventos.ts`, con seis pruebas propias que se
+vieron fallar reintroduciendo la regresión.
+
+**Dos piezas quedan construidas y probadas pero sin consumidor**, y no deben darse por
+activas:
+
+- **Consentimientos.** `user_consents` y `app/identidad/consentimientos*.ts` existen y
+  están probados, pero ninguna pantalla ni ruta los llama: **hoy no se registra ni un
+  consentimiento**. Importa porque hay textos legales pendientes de aprobar.
+- **Renovación de la sesión.** `debeRenovarse` está escrita, probada y descrita en el
+  comentario de `sesion.ts`, pero no la llama nadie: la sesión caduca en seco a los cinco
+  días.
+
+**Cuatro hallazgos menores quedan sin arreglar, por decisión del dueño de hacerlo después:**
+cerrar sesión no revoca la sesión en Firebase —solo borra la cookie, y `revokeRefreshTokens`
+ya está a mano—, y el formulario de direcciones descarta lo inválido sin mostrar ningún
+mensaje.
+
 Se creó **un único Preview**, sin push y sin `--prod`: el build remoto terminó y
 `/cuenta` respondió `307` hacia `/cuenta/entrar`. Los registros de esa petición muestran
 `λ GET /cuenta` en nivel `info`, sin `ERR_REQUIRE_ESM`. No se fijó `jose` v5: queda solo

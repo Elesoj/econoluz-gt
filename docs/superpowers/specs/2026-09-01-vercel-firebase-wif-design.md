@@ -1,7 +1,12 @@
 # Credenciales federadas de Vercel a Firebase Admin — diseño
 
 **Fecha:** 01/09/2026 · **Subproyecto:** 2, identidad de clientes · **Rama:** `feat/identidad-clientes`
-**Estado:** diseño aprobado por el dueño, pendiente de plan de implementación.
+**Estado (02/09/2026):** aprobado, **implementado y verificado**. El plan está en
+`docs/superpowers/plans/2026-09-01-vercel-firebase-wif.md` y se ejecutó entero: los
+recursos existen en `econoluz-dev-d30ab`, la prueba positiva y la negativa se ejecutaron
+de verdad —evidencia en la sección 17— y el bloqueo de empaquetado que apareció después
+también quedó resuelto. Lo único que no se ha hecho es la infraestructura de Production,
+que es tarea aparte y necesita autorización expresa.
 
 Este documento resuelve el **último bloqueo del subproyecto 2**: cómo se autentica
 `firebase-admin` desde Vercel sin que exista, en ninguna parte, una clave privada de

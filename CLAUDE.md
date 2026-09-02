@@ -689,15 +689,19 @@ npm run proyectos:probar    # prueba cambios reales en Neon y los restaura siemp
 npm run test:admin         # las pruebas de unidad del panel (196)
 npm run admin:crear        # da de alta un administrador o le cambia la contraseña
 
-npm run test:datos         # capa de datos, ajustes e identidad (121)
+npm run test:datos         # capa de datos, ajustes e identidad (154)
 npm run test:permisos      # comprueba contra Neon que el rol público solo lee la proyección
 npm run catalogo:reproyectar # reconstruye entera la proyección pública, de forma idempotente
 
 npm run identidad:adc       # valida ADC contra el proyecto Firebase configurado
+npm run identidad:federacion # valida la identidad federada de Vercel de extremo a extremo
 npm run identidad:verificar # invariantes reales en Neon dentro de una transacción reversible
 npm run identidad:probar    # prueba aprovisionamiento concurrente; crea y limpia datos sintéticos
 npm run identidad:reconciliar # solo informa; añadir -- --aplicar para reparar huérfanos
 ```
+
+`identidad:federacion` necesita el entorno de Vercel descargado **a un archivo aparte**:
+`npx vercel env pull .env.vercel.local`. Nunca sobre `.env.local`, que se sobrescribiría.
 
 Los scripts de `scripts/` importan los datos `.ts` del proyecto sin compilar, gracias
 al gancho `register-ts.mjs`. Cualquier script nuevo que haga lo mismo necesita
@@ -982,6 +986,20 @@ que trata `firebase-admin` como paquete externo. El build local dejó de trazar
 `firebase-admin`, `jwks-rsa` y `jose@6` como dependencias externas; el build remoto del
 único Preview terminó y `/cuenta` devolvió `307` a `/cuenta/entrar`, con una ejecución
 de nivel `info` y sin `ERR_REQUIRE_ESM`. `jose` v5 quedó como plan B y no se usó.
+
+**Dos piezas están construidas y probadas pero sin consumidor** (02/09/2026), y no deben
+darse por activas, igual que ocurrió con tres del subproyecto 1:
+
+- **Los consentimientos.** La tabla `user_consents`, la migración y
+  `app/identidad/consentimientos*.ts` existen y están probados, pero **ninguna pantalla ni
+  ruta los llama**: hoy no se registra ni un consentimiento. Con textos legales de por
+  medio conviene no confundir «implementado» con «capturándose».
+- **La renovación de la sesión.** `debeRenovarse` está escrita, probada y descrita en el
+  comentario de `app/identidad/sesion.ts`, pero **no la llama nadie**: la sesión del
+  cliente caduca en seco a los cinco días y no se renueva con el uso, al contrario de lo
+  que ese comentario da a entender.
+
+Engancharlas es trabajo pendiente y la decisión de cuándo es del dueño.
 El catálogo relacional corresponde al subproyecto 3 y no se adelanta.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el

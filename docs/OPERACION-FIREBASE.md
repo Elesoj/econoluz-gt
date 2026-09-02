@@ -155,15 +155,16 @@ Los valores que salieron de ahí, ninguno secreto:
 | Proyecto de Vercel | `econoluz-gt` |
 | Emisor OIDC | `https://oidc.vercel.com/joseangel-s-projects` |
 
-**Faltan tres API por activar** en `econoluz-dev-d30ab`, y sin ellas la federación no
-puede montarse: `iam.googleapis.com` (crear el pool y el proveedor),
+**Faltaban tres API por activar** en `econoluz-dev-d30ab`, y ya se activaron el
+01/09/2026; sin ellas la federación no puede montarse: `iam.googleapis.com` (crear el pool
+y el proveedor),
 `sts.googleapis.com` (el canje del testigo) y `iamcredentials.googleapis.com` (suplantar
 la cuenta de servicio). `identitytoolkit.googleapis.com` sí está activa.
 
 La CLI de Vercel no está instalada en la máquina y el proyecto no está enlazado. No hace
 falta instalarla: se usa `npx vercel`.
 
-### 3.2 Recursos creados — 01/09/2026, en curso
+### 3.2 Recursos creados — 01/09/2026
 
 Creados en `econoluz-dev-d30ab`, todos sin ninguna clave:
 

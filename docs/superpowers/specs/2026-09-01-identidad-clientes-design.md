@@ -2,7 +2,12 @@
 
 > **Estado:** aprobado por el dueño el 01/09/2026. Es la especificación del subproyecto 2
 > del rediseño aprobado en `docs/superpowers/specs/2026-08-30-backend-relacional-v2-design.md`.
-> El plan de implementación se redacta aparte y **no se ha escrito código todavía**.
+> **Al 02/09/2026 el subproyecto está implementado y verificado** en la rama
+> `feat/identidad-clientes`; el plan ejecutado es
+> `docs/superpowers/plans/2026-09-01-identidad-clientes.md`. No está fusionado ni
+> desplegado en Production. **Dos piezas de esta especificación quedaron construidas y
+> probadas pero sin consumidor:** los consentimientos, que no los registra ninguna
+> pantalla, y la renovación de la sesión, que no la llama nadie. Ver `CLAUDE.md` §11.
 
 **Objetivo:** que un cliente pueda crear su cuenta, entrar, guardar sus direcciones y sus
 datos fiscales, y borrarse de verdad; todo ello **sin tocar el acceso del panel
