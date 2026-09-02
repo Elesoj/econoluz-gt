@@ -209,7 +209,13 @@ export async function verificarCatalogoRelacional(cliente, entorno = process.env
       (select valor from app_settings where clave = 'rama_neon') as rama
   `);
   agregarFallo(fallos, Number(migracion_010) === 1, "010 no está registrada exactamente una vez");
-  agregarFallo(fallos, modelo === "legacy", `modelo_catalogo vale ${String(modelo)}`);
+  // Desde la Fase C la bandera puede estar en `shadow` en la rama de desarrollo. Lo que
+  // sigue prohibido, y por eso se comprueba, es `relational_v2`: eso es la Fase D.
+  agregarFallo(
+    fallos,
+    modelo === "legacy" || modelo === "shadow",
+    `modelo_catalogo vale ${String(modelo)}`,
+  );
   agregarFallo(fallos, rama === entorno.NEON_RAMA_ESPERADA, `marcador de rama inesperado: ${String(rama)}`);
 
   const permisos = await ejecutar(
