@@ -13,6 +13,7 @@
     "identidad:verificar": "node --env-file-if-exists=.env.local ./scripts/verificar-identidad.mjs",
     "identidad:probar": "node --env-file-if-exists=.env.local ./scripts/probar-aprovisionamiento.mjs",
     "identidad:reconciliar": "node --env-file-if-exists=.env.local ./scripts/reconciliar-identidades.mjs",
+    "identidad:federacion": "node --env-file-if-exists=.env.vercel.local --env-file-if-exists=.env.local ./scripts/comprobar-federacion.mjs",
     "test:permisos": "node --env-file-if-exists=.env.local ./scripts/verificar-permisos.mjs",
     "catalogo:importar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/import-products.mjs",
     "catalogo:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs ./scripts/verify-product-rows.mjs",

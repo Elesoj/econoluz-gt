@@ -59,6 +59,9 @@ const SCRIPTS_QUE_PUEDEN = [
   // Pregunta a Firebase qué identidades siguen existiendo y tampoco puede
   // importar el módulo con "server-only".
   "scripts/reconciliar-identidades.mjs",
+  // Comprueba el camino entero de la identidad federada, desde el testigo de
+  // Vercel hasta una llamada real a Firebase Authentication.
+  "scripts/comprobar-federacion.mjs",
 ];
 
 test("en scripts/, solo los declarados importan firebase-admin", () => {
@@ -179,6 +182,28 @@ test("firebase.server.ts no tiene salida hacia ADC cuando esta en Vercel", () =>
     false,
     "En Vercel no puede haber ninguna caída hacia applicationDefault().",
   );
+});
+
+/**
+ * El comprobador toca los tres testigos del camino federado. Ninguno puede acabar en la
+ * consola: un testigo impreso es un testigo que se pega en un chat o queda en el historial
+ * de la terminal.
+ */
+test("el comprobador de federacion no imprime ningun testigo", () => {
+  const ruta = join(RAIZ, "scripts", "comprobar-federacion.mjs");
+  assert.equal(existsSync(ruta), true, "Falta el script de comprobación de la federación.");
+
+  const fuente = readFileSync(ruta, "utf8");
+
+  for (const prohibido of [
+    /console\.log\([^)]*\btoken\b/i,
+    /console\.log\([^)]*access_token/i,
+    /console\.log\([^)]*getSubjectToken/i,
+  ]) {
+    assert.equal(prohibido.test(fuente), false, `El script no puede imprimir testigos: ${prohibido}`);
+  }
+
+  assert.match(fuente, /expires_in|segundos/, "Sí debe informar de cuánto vive la credencial.");
 });
 
 test("las bibliotecas de federacion son dependencias directas, no transitivas", () => {
