@@ -15,6 +15,7 @@ export default defineConfig({
     "catalog-precio.spec.ts",
     "ui-botones.spec.ts",
     "tienda-carrito.spec.ts",
+    "cuenta.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,
