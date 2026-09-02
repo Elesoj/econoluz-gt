@@ -222,14 +222,26 @@ diseño. Lo que estaba mal y ya está corregido:
 | Se podía cambiar el tipo de un atributo usado | Lo **rechaza la base**, con una clave foránea compuesta hacia `attributes (id, tipo)` |
 | Nada comprobaba que la opción fuera del atributo correcto | Otra clave foránea compuesta lo impide |
 | Se podían meter dos valores escalares del mismo atributo, o la misma opción dos veces | Índice único parcial y restricción única |
-| Solo se garantizaba **como mucho** una categoría principal | Además, una comprobación **diferible** exige que haya **exactamente una** cuando hay categorías |
-| `product_images` no impedía posiciones repetidas ni dos principales | Las dos restricciones puestas |
+| Solo se garantizaba **como mucho** una categoría principal | Un índice de búsqueda no único y una comprobación **diferible** exigen **exactamente una** al confirmar |
+| `product_images` no impedía posiciones repetidas ni dos principales | Orden único diferible, principal única y FK `ON DELETE RESTRICT` |
 | Atributos y opciones no se podían desactivar | Tienen `active`: lo no usado se borra, lo usado solo se desactiva |
 
 **Dos reglas del diseño no se pueden expresar en el esquema** y quedan para el contrato de
 escritura de la Fase B, porque dependen de estado que cambia con el tiempo: que la opción
 tenga que estar **activa** solo para asignaciones nuevas, y que un producto **publicado**
 tenga imagen principal visible.
+
+La lógica pura distingue `asignacion_nueva` de `valor_existente`: una opción desactivada no
+se puede asignar de nuevo, pero el producto que ya la tenía puede conservarla al guardarse.
+El contrato de escritura de la Fase B debe además cerrar la vigencia del precio normal
+anterior dentro de la misma transacción que inserta el nuevo.
+
+**Limitación verificada de esta Fase A:** las pruebas actuales inspeccionan la estructura
+del SQL, no lo ejecutan. En este entorno no hay PostgreSQL ni `psql`, y Docker está instalado
+pero su motor no está activo; no se arrancó ni instaló ningún servicio. Antes de aplicar
+`010` en la Fase B hay que ejecutar la migración completa dos veces en una base desechable y
+confirmar que el rol migrador puede crear `btree_gist` —extensión confiable que requiere
+`CREATE` sobre la base— si todavía no existe.
 
 ### Revisión previa a la fusión (02/09/2026)
 

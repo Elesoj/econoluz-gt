@@ -37,13 +37,13 @@ y los nueve hallazgos de revisión recibidos el 02/09/2026.
 **Interfaz:** la restricción `product_images_posicion_unica` debe ser
 `UNIQUE (product_id, posicion) DEFERRABLE INITIALLY DEFERRED`.
 
-- [ ] Añadir una prueba que extraiga la restricción y exija las dos cláusulas de
+- [x] Añadir una prueba que extraiga la restricción y exija las dos cláusulas de
   diferibilidad.
-- [ ] Ejecutar `node --test --import ./scripts/register-ts.mjs tests/catalogo-migracion.test.ts`
+- [x] Ejecutar `node --test --import ./scripts/register-ts.mjs tests/catalogo-migracion.test.ts`
   y observar que falla por la restricción inmediata actual.
-- [ ] Nombrar la restricción y declararla diferible e inicialmente diferida.
-- [ ] Repetir la prueba y confirmar que pasa.
-- [ ] Crear el commit `fix(catalogo): diferir el orden unico de las imagenes`.
+- [x] Nombrar la restricción y declararla diferible e inicialmente diferida.
+- [x] Repetir la prueba y confirmar que pasa.
+- [x] Crear el commit `fix(catalogo): diferir el orden unico de las imagenes`.
 
 ### Tarea 2: Categoría principal comprobada al confirmar
 
@@ -54,14 +54,14 @@ y los nueve hallazgos de revisión recibidos el 02/09/2026.
 búsqueda; el `constraint trigger` inicialmente diferido es la única garantía de
 exactamente una principal cuando existen pertenencias.
 
-- [ ] Añadir pruebas estructurales que rechacen el índice único inmediato, exijan el
+- [x] Añadir pruebas estructurales que rechacen el índice único inmediato, exijan el
   índice no único y unan los casos puros de cero, una y más de una principal con el
   trigger diferido.
-- [ ] Ejecutar la prueba enfocada y observar el fallo por `create unique index`.
-- [ ] Sustituir el índice y ajustar comentarios y trigger para comprobar todos los
+- [x] Ejecutar la prueba enfocada y observar el fallo por `create unique index`.
+- [x] Sustituir el índice y ajustar comentarios y trigger para comprobar todos los
   productos afectados por una actualización.
-- [ ] Repetir la prueba enfocada y confirmar que pasa.
-- [ ] Crear el commit `fix(catalogo): diferir la categoria principal`.
+- [x] Repetir la prueba enfocada y confirmar que pasa.
+- [x] Crear el commit `fix(catalogo): diferir la categoria principal`.
 
 ### Tarea 3: Borrado protegido de imágenes
 
@@ -72,11 +72,11 @@ exactamente una principal cuando existen pertenencias.
 retirada es reversible, no existe borrado permanente desde el panel y una cascada
 borraría la referencia de la base sin borrar el archivo externo.
 
-- [ ] Añadir una prueba que exija `ON DELETE RESTRICT` en esa FK.
-- [ ] Ejecutarla y observar el fallo por el `CASCADE` actual.
-- [ ] Cambiar FK y comentario para que expresen el mismo comportamiento.
-- [ ] Repetir la prueba y confirmar que pasa.
-- [ ] Crear el commit `fix(catalogo): proteger las imagenes al borrar productos`.
+- [x] Añadir una prueba que exija `ON DELETE RESTRICT` en esa FK.
+- [x] Ejecutarla y observar el fallo por el `CASCADE` actual.
+- [x] Cambiar FK y comentario para que expresen el mismo comportamiento.
+- [x] Repetir la prueba y confirmar que pasa.
+- [x] Crear el commit `fix(catalogo): proteger las imagenes al borrar productos`.
 
 ### Tarea 4: Opciones desactivadas nuevas e históricas
 
@@ -87,12 +87,12 @@ borraría la referencia de la base sin borrar el archivo externo.
 `modo = "asignacion_nueva" | "valor_existente"`; el valor por defecto es el modo seguro
 `"asignacion_nueva"`.
 
-- [ ] Añadir una prueba que conserve una opción desactivada en modo `valor_existente`,
+- [x] Añadir una prueba que conserve una opción desactivada en modo `valor_existente`,
   manteniendo la prueba que la rechaza como asignación nueva.
-- [ ] Ejecutar la prueba enfocada y observar que el caso histórico falla.
-- [ ] Introducir el tipo de modo y condicionar únicamente la comprobación de `active`.
-- [ ] Repetir la prueba y confirmar que ambos casos pasan.
-- [ ] Crear el commit `fix(catalogo): conservar opciones desactivadas existentes`.
+- [x] Ejecutar la prueba enfocada y observar que el caso histórico falla.
+- [x] Introducir el tipo de modo y condicionar únicamente la comprobación de `active`.
+- [x] Repetir la prueba y confirmar que ambos casos pasan.
+- [x] Crear el commit `fix(catalogo): conservar opciones desactivadas existentes`.
 
 ### Tarea 5: Guardianes de migraciones y `sku`
 
@@ -103,12 +103,12 @@ no tiene huecos e incluye 010; añadir 011 no modifica ninguna lista esperada. E
 de `sku` usa límites de identificador SQL y no confunde `supplier_sku` con una columna
 `sku`.
 
-- [ ] Reescribir la prueba de secuencia con un límite superior descubierto en disco y
+- [x] Reescribir la prueba de secuencia con un límite superior descubierto en disco y
   una aserción explícita de que incluye 010.
-- [ ] Añadir casos sintéticos que acepten `supplier_sku` y rechacen una declaración real
+- [x] Añadir casos sintéticos que acepten `supplier_sku` y rechacen una declaración real
   de columna `sku`.
-- [ ] Ejecutar la prueba enfocada y confirmar todos los casos.
-- [ ] Crear el commit `test(catalogo): endurecer los guardianes de la migracion`.
+- [x] Ejecutar la prueba enfocada y confirmar todos los casos.
+- [x] Crear el commit `test(catalogo): endurecer los guardianes de la migracion`.
 
 ### Tarea 6: Rutas de categorías con ciclos
 
@@ -118,11 +118,11 @@ de `sku` usa límites de identificador SQL y no confunde `supplier_sku` con una 
 **Interfaz:** `rutaDeCategoria(categorias, id)` devuelve `[]` si la ascendencia contiene
 un ciclo; una ruta parcial nunca se considera válida.
 
-- [ ] Cambiar la prueba negativa para exigir `[]`.
-- [ ] Ejecutarla y observar que falla con la ruta parcial actual.
-- [ ] Descartar la cadena cuando `ascendencia` indique ciclo y actualizar el contrato.
-- [ ] Repetir la prueba y confirmar que pasa.
-- [ ] Crear el commit `fix(catalogo): descartar rutas de categorias ciclicas`.
+- [x] Cambiar la prueba negativa para exigir `[]`.
+- [x] Ejecutarla y observar que falla con la ruta parcial actual.
+- [x] Descartar la cadena cuando `ascendencia` indique ciclo y actualizar el contrato.
+- [x] Repetir la prueba y confirmar que pasa.
+- [x] Crear el commit `fix(catalogo): descartar rutas de categorias ciclicas`.
 
 ### Tarea 7: Contratos pendientes y límite de ejecución SQL
 
@@ -131,13 +131,13 @@ un ciclo; una ruta parcial nunca se considera válida.
 `docs/superpowers/plans/2026-09-02-catalogo-relacional.md`, `CLAUDE.md` y
 `docs/CONTINUAR-PANEL.md`.
 
-- [ ] Documentar que crear un precio normal cierra la vigencia del normal anterior en
+- [x] Documentar que crear un precio normal cierra la vigencia del normal anterior en
   la misma transacción antes de insertar el nuevo.
-- [ ] Documentar que `btree_gist` es una extensión confiable de PostgreSQL, pero que la
+- [x] Documentar que `btree_gist` es una extensión confiable de PostgreSQL, pero que la
   Fase B debe verificar su disponibilidad y el privilegio `CREATE` del rol migrador.
-- [ ] Dejar explícito que no hubo ejecución real del SQL: no hay `psql`, PostgreSQL ni
+- [x] Dejar explícito que no hubo ejecución real del SQL: no hay `psql`, PostgreSQL ni
   motor Docker activo en el entorno y no se arrancaron ni instalaron servicios.
-- [ ] Crear el commit `docs(catalogo): precisar los requisitos previos de la fase B`.
+- [x] Crear el commit `docs(catalogo): precisar los requisitos previos de la fase B`.
 
 ### Tarea 8: Verificación final
 

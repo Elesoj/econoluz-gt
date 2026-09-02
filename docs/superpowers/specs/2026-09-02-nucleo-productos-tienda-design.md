@@ -66,10 +66,12 @@ productos. No determina qué atributos puede tener un producto.
 ### 3.3 `product_categories`
 
 Resuelve la relación muchos-a-muchos entre productos y categorías e identifica una
-categoría principal. La pareja `(product_id, category_id)` es única. Un índice único parcial
-impide más de una principal y una comprobación diferible al final de la transacción exige
-una principal cuando el producto tenga al menos una categoría. Así se pueden reemplazar
-asignaciones dentro de una sola transacción sin estados intermedios inválidos.
+categoría principal. La pareja `(product_id, category_id)` es única. Un índice parcial no
+único acelera la búsqueda y un *constraint trigger* inicialmente diferido exige exactamente
+una principal cuando el producto tenga al menos una categoría. El trigger serializa por
+producto antes de contar, para que dos escrituras concurrentes no validen cada una una
+principal distinta. Así se pueden reemplazar asignaciones dentro de una sola transacción
+sin rechazar estados intermedios.
 
 ### 3.4 `product_private_data`
 
@@ -88,9 +90,12 @@ decidirá al diseñar el ERP.
 ### 3.5 `product_images`
 
 Guarda varias imágenes por producto, con URL o ruta, texto alternativo, posición,
-visibilidad y marca de principal. La pareja `(product_id, position)` es única y un índice
-parcial impide dos imágenes principales. La operación de publicación valida que un producto
-publicado tenga una imagen principal visible.
+visibilidad y marca de principal. La pareja `(product_id, position)` es única mediante una
+restricción inicialmente diferida, para poder intercambiar dos posiciones en un solo
+`UPDATE`, y un índice parcial impide dos imágenes principales. La FK usa `ON DELETE
+RESTRICT`: la retirada desde el panel es reversible y borrar la referencia no eliminaría el
+archivo local o de Blob. La operación de publicación valida que un producto publicado tenga
+una imagen principal visible.
 
 ### 3.6 `attributes`
 
@@ -137,7 +142,10 @@ el valor real es `20`, no el texto `"20 W"`.
 Guarda importes en centavos enteros, tipo `normal` o `promocion` y periodo de vigencia con
 `tstzrange`. Una restricción de exclusión impide promociones solapadas para el mismo
 producto. La lectura obtiene el precio normal vigente y, si existe, la única promoción
-vigente. El inventario no forma parte de esta tabla ni de este subproyecto.
+vigente. Al crear un precio normal nuevo, el contrato de escritura de la Fase B cierra el
+límite superior de la vigencia del normal anterior e inserta el nuevo dentro de la misma
+transacción: nunca quedan dos normales vigentes por un guardado parcial. El inventario no
+forma parte de esta tabla ni de este subproyecto.
 
 ### 3.10 `public_products`
 
@@ -152,7 +160,9 @@ Guardar un producto abre una transacción y, en este orden lógico:
 
 1. valida el cuerpo completo, los tipos y las autorizaciones;
 2. inserta o actualiza el núcleo de `products`;
-3. sincroniza datos privados, categorías, imágenes, valores de atributos y precios;
+3. sincroniza datos privados, categorías, imágenes, valores de atributos y precios; si se
+   crea un precio normal, cierra antes la vigencia del normal anterior dentro de esta misma
+   transacción;
 4. comprueba principal de categoría e imagen, tipos, opciones y periodos de precios;
 5. reconstruye la fila saneada de `public_products`;
 6. registra la auditoría;
@@ -176,7 +186,9 @@ La secuencia de migración es aditiva:
 
 1. **Fase A:** corregir esquema y lógica pura, sin aplicar migraciones.
 2. **Fase B:** con autorización, aplicar en una rama de Neon de desarrollo e importar todos
-   los productos de forma idempotente.
+   los productos de forma idempotente. Antes de aplicar `010`, comprobar que `btree_gist`
+   está disponible y que el rol migrador tiene `CREATE` sobre la base para instalar esta
+   extensión confiable si aún no existe.
 3. **Fase C:** con autorización, ejecutar `shadow` hasta lograr paridad de datos, precios,
    atributos, categorías, imágenes y privacidad.
 4. **Fase D:** con autorización expresa, activar `relational_v2` con reversión inmediata a
@@ -189,6 +201,8 @@ solo ocurre después de que todo haya superado las pruebas y el dueño la aprueb
 ## 6. Verificación exigida
 
 - Migración repetible y transaccional en una base vacía y en una rama de desarrollo.
+- Confirmación previa de que `btree_gist` está disponible o se puede crear con el rol
+  migrador de la rama aislada.
 - Pruebas de cada restricción positiva y negativa: principal única y obligatoria, opciones
   del atributo correcto, tipos, valores escalares, opciones múltiples y promociones.
 - Pruebas de creación, edición, borrado de no usados y desactivación de usados desde el
@@ -204,4 +218,3 @@ solo ocurre después de que todo haya superado las pruebas y el dueño la aprueb
 Quedan fuera los pedidos, pagos, envíos, FEL, inventario, variantes de ERP, textos legales,
 consentimientos y la destrucción del modelo antiguo. Este diseño prepara el producto de una
 tienda, pero no adelanta decisiones de esos subproyectos.
-

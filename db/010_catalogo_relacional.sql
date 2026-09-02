@@ -24,7 +24,9 @@
 -- docs/superpowers/plans/2026-09-02-catalogo-relacional.md, fase B.
 
 -- La restricción de exclusión de `product_prices` compara un texto con un rango de fechas
--- en el mismo índice, y eso solo lo hace GiST.
+-- en el mismo índice, y eso solo lo hace GiST. `btree_gist` es una extensión confiable,
+-- pero el rol migrador necesita `CREATE` sobre la base: la Fase B debe verificarlo primero
+-- en su rama aislada.
 create extension if not exists btree_gist;
 
 -- ---------------------------------------------------------------------------

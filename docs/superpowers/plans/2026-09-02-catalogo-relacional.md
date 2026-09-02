@@ -102,12 +102,12 @@ acuerde:
 - Índice único parcial `(product_id, attribute_id)` sobre las filas que no son
   `opcion_multiple`: **un solo valor escalar** por producto y atributo.
 - `unique (product_id, attribute_id, option_id)`: **nunca la misma opción dos veces**.
-- `product_categories` conserva el índice parcial de «como mucho una principal» y añade un
-  **`constraint trigger` diferible** que exige **exactamente una** al cerrar la transacción,
-  de modo que se puedan reemplazar las categorías de un producto sin estados intermedios
-  inválidos.
-- `product_images` gana `unique (product_id, posicion)` y un índice parcial que impide dos
-  principales.
+- `product_categories` usa un índice parcial de búsqueda **no único** y un
+  **`constraint trigger` diferible** que exige **exactamente una** al cerrar la transacción.
+  El trigger serializa por producto para cubrir también escrituras concurrentes.
+- `product_images` gana una restricción `unique (product_id, posicion)` inicialmente
+  diferida, un índice parcial que impide dos principales y `ON DELETE RESTRICT`, porque
+  borrar la referencia no elimina el archivo externo.
 - `product_private_data` queda con **los siete campos del diseño y ni uno más**, con
   `supplier_code` **indexado para poder buscarlo** y **sin `unique`**, porque hay registros
   con varios códigos separados por barras.
@@ -116,6 +116,9 @@ Lo que **no** se puede expresar de forma declarativa y queda para el contrato de
 de la Fase B: que la opción tenga que estar **activa** solo para asignaciones nuevas, y que
 un producto **publicado** tenga imagen principal visible. Las dos dependen de estado que
 cambia con el tiempo.
+
+El mismo contrato de escritura cierra la vigencia del precio normal anterior y crea el
+nuevo precio normal **dentro de una única transacción**.
 
 **La migración sigue sin aplicarse.**
 
@@ -132,6 +135,11 @@ Sin cambios respecto al diseño §5: aplicar en una rama de Neon de desarrollo e
 forma idempotente (B), `shadow` hasta lograr paridad (C), y `relational_v2` con autorización
 expresa y reversión inmediata a `legacy` (D). Cada una necesita su propia autorización.
 
+Requisito previo de la Fase B: verificar en la rama aislada que `btree_gist` está disponible
+y que el rol migrador tiene `CREATE` sobre la base para ejecutar `create extension if not
+exists btree_gist`. PostgreSQL la marca como extensión confiable, pero la Fase A no ha
+comprobado los privilegios reales del entorno de Neon.
+
 ---
 
 ## Antes de ejecutar Playwright en este worktree
@@ -144,3 +152,9 @@ archivo es decisión del dueño.
 
 Las pruebas de unidad, `typecheck`, `lint` y `build` **sí funcionan aquí sin `.env.local`**,
 y son las que cubren todo lo que añade la Fase A.
+
+La revisión de la Fase A tampoco pudo ejecutar la migración en una base local: no hay
+`psql` ni PostgreSQL instalado y Docker está presente pero su motor no está activo. No se
+arrancó ni instaló ningún servicio. Por tanto, las pruebas de `catalogo-migracion` vigilan
+la estructura y las invariantes declaradas, pero **no demuestran que el SQL completo sea
+ejecutable**; esa ejecución efímera y repetible es una puerta obligatoria de la Fase B.

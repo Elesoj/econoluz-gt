@@ -1009,6 +1009,17 @@ uno— y tres módulos puros en `app/data/catalogo/`. **La migración no está a
 ninguna base**, `modelo_catalogo` sigue en `legacy` y el catálogo público no ha cambiado de
 fuente.
 
+La revisión posterior hizo diferible el orden único de `product_images`, trasladó la
+unicidad de la categoría principal al trigger diferido, protegió las imágenes con `ON
+DELETE RESTRICT`, distinguió asignaciones nuevas de valores históricos desactivados y
+rechaza rutas parciales cuando el árbol tiene un ciclo. El contrato de la Fase B debe cerrar
+la vigencia del precio normal anterior en la misma transacción que crea el nuevo.
+
+La migración completa **aún no se ha ejecutado localmente**: este entorno no tiene
+PostgreSQL ni `psql`, y el motor Docker no está activo. Antes de la Fase B hay que probarla
+en una base desechable y confirmar que el rol migrador puede instalar `btree_gist` —extensión
+confiable que exige `CREATE` sobre la base— si todavía no existe.
+
 Aplicarla es la Fase B y **necesita autorización expresa**; activar `relational_v2`, la
 Fase D, otra distinta.
 
