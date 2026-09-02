@@ -28,6 +28,14 @@ const PROHIBIDAS = [
   "user_addresses",
   "user_consents",
   "auth_events",
+  "categories",
+  "product_categories",
+  "product_private_data",
+  "product_images",
+  "attributes",
+  "attribute_options",
+  "product_attribute_values",
+  "product_prices",
 ];
 
 const identificador = (nombre) => {

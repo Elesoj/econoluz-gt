@@ -22,6 +22,7 @@
     "catalogo:relacional:sellar": "node ./scripts/guarda-neon.mjs --sellar catalogo-relacional-fase-b",
     "catalogo:relacional:simular": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/importar-catalogo-relacional.mjs --simular",
     "catalogo:relacional:importar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/importar-catalogo-relacional.mjs --importar",
+    "catalogo:relacional:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/verificar-catalogo-relacional.mjs",
     "test:proveedores": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/catalog-supplier-privacy.test.ts",
     "proyectos:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs ./scripts/verify-project-rows.mjs",
     "proyectos:importar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/import-projects.mjs",
