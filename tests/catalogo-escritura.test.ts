@@ -376,7 +376,13 @@ test("un producto despublicado se retira de la proyección en vez de actualizars
     ...ENTRADA,
     nucleo: { ...ENTRADA.nucleo, published: false },
   });
-  assert.ok(sentencias.some((s) => /delete from public_products/i.test(s.texto)));
+  const retirada = sentencias.find((s) => /delete from public_products/i.test(s.texto));
+  assert.ok(retirada);
+  assert.deepEqual(
+    retirada.parametros,
+    [ENTRADA.nucleo.econoluz_reference.toLowerCase()],
+    "public_products se identifica por la referencia pública, no por products.id",
+  );
   assert.ok(!sentencias.some((s) => /insert into public_products/i.test(s.texto)));
 });
 

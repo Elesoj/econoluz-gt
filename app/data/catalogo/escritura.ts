@@ -521,7 +521,9 @@ async function reconstruirProyeccion(
   precioCentavos: number | null,
 ) {
   if (!entrada.nucleo.published) {
-    await ejecutar("delete from public_products where id = $1", [entrada.id]);
+    await ejecutar("delete from public_products where id = $1", [
+      entrada.nucleo.econoluz_reference.toLowerCase(),
+    ]);
     return;
   }
 
