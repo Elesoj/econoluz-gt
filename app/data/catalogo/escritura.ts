@@ -5,6 +5,8 @@ import { fromProductRow, type ProductRow } from "../productRow";
 import { aFilaProyeccion } from "../proyeccionPublica";
 import { construirUpsertProyeccion } from "../proyeccionPublicaSql";
 import {
+  decidirRetirada,
+  TIPOS_DE_ATRIBUTO,
   validarAsignaciones,
   validarValor,
   type Asignacion,
@@ -570,6 +572,142 @@ export async function aplicarProducto(
       }),
     ],
   );
+}
+
+export type EntradaDeAtributo = {
+  clave: string;
+  nombre: string;
+  tipo: TipoDeAtributo;
+  unidad: string | null;
+};
+
+export type EdicionDeAtributo = {
+  nombre: string;
+  unidad: string | null;
+  filterable: boolean;
+  comparable: boolean;
+};
+
+export type EntradaDeOpcion = { clave: string; etiqueta: string; posicion: number };
+
+function textoObligatorio(valor: string, campo: string): string {
+  const limpio = valor.trim();
+  if (!limpio) throw conflicto(`${campo} no puede quedar vacío.`);
+  return limpio;
+}
+
+export async function crearAtributo(
+  ejecutar: Ejecutor,
+  entrada: EntradaDeAtributo,
+): Promise<string> {
+  const clave = textoObligatorio(entrada.clave, "La clave").toLowerCase();
+  const nombre = textoObligatorio(entrada.nombre, "El nombre");
+  if (!TIPOS_DE_ATRIBUTO.includes(entrada.tipo)) {
+    throw conflicto(`Tipo de atributo desconocido: ${String(entrada.tipo)}.`);
+  }
+  const filas = await ejecutar(
+    `insert into attributes (clave, nombre, tipo, unidad)
+     values ($1, $2, $3, $4)
+     returning id::text`,
+    [clave, nombre, entrada.tipo, entrada.unidad?.trim() || null],
+  );
+  if (!filas[0]?.id) throw new ErrorDeDatos("indisponible");
+  return String(filas[0].id);
+}
+
+export async function editarAtributo(
+  ejecutar: Ejecutor,
+  id: string,
+  entrada: EdicionDeAtributo,
+): Promise<void> {
+  await ejecutar(
+    `update attributes
+        set nombre = $2, unidad = $3, filterable = $4, comparable = $5,
+            actualizado_en = now()
+      where id = $1`,
+    [
+      id,
+      textoObligatorio(entrada.nombre, "El nombre"),
+      entrada.unidad?.trim() || null,
+      entrada.filterable,
+      entrada.comparable,
+    ],
+  );
+}
+
+async function bloquearDefinicion(
+  ejecutar: Ejecutor,
+  tabla: "attributes" | "attribute_options",
+  id: string,
+): Promise<void> {
+  const filas = await ejecutar(`select id::text from ${tabla} where id = $1 for update`, [id]);
+  if (!filas[0]) throw new ErrorDeDatos("no-encontrado");
+}
+
+export async function retirarAtributo(
+  ejecutar: Ejecutor,
+  id: string,
+): Promise<"borrado" | "desactivado"> {
+  await bloquearDefinicion(ejecutar, "attributes", id);
+  const filas = await ejecutar(
+    `select count(*)::int as usos
+       from product_attribute_values
+      where attribute_id = $1`,
+    [id],
+  );
+  const decision = decidirRetirada(Number(filas[0]?.usos ?? 0));
+  if (decision === "borrar") {
+    await ejecutar("delete from attributes where id = $1", [id]);
+    return "borrado";
+  }
+  await ejecutar("update attributes set active = false, actualizado_en = now() where id = $1", [id]);
+  return "desactivado";
+}
+
+export async function crearOpcion(
+  ejecutar: Ejecutor,
+  atributoId: string,
+  entrada: EntradaDeOpcion,
+): Promise<string> {
+  if (!Number.isInteger(entrada.posicion)) {
+    throw conflicto("La posición de la opción debe ser un entero.");
+  }
+  const filas = await ejecutar(
+    `insert into attribute_options (attribute_id, clave, etiqueta, posicion)
+     values ($1, $2, $3, $4)
+     returning id::text`,
+    [
+      atributoId,
+      textoObligatorio(entrada.clave, "La clave").toLowerCase(),
+      textoObligatorio(entrada.etiqueta, "La etiqueta"),
+      entrada.posicion,
+    ],
+  );
+  if (!filas[0]?.id) throw new ErrorDeDatos("indisponible");
+  return String(filas[0].id);
+}
+
+export async function retirarOpcion(
+  ejecutar: Ejecutor,
+  id: string,
+): Promise<"borrado" | "desactivado"> {
+  await bloquearDefinicion(ejecutar, "attribute_options", id);
+  const filas = await ejecutar(
+    `select count(*)::int as usos
+       from product_attribute_values
+      where option_id = $1`,
+    [id],
+  );
+  const decision = decidirRetirada(Number(filas[0]?.usos ?? 0));
+  if (decision === "borrar") {
+    await ejecutar("delete from attribute_options where id = $1", [id]);
+    return "borrado";
+  }
+  await ejecutar(
+    "update attribute_options set active = false, actualizado_en = now() where id = $1",
+    [id],
+  );
+  return "desactivado";
 }
 
 export type EscrituraTransaccional = (

@@ -5,7 +5,12 @@ import { ErrorDeDatos } from "../app/lib/datos/errores";
 import type { Ejecutor } from "../app/lib/datos/consulta";
 import {
   aplicarProducto,
+  crearAtributo,
+  crearOpcion,
+  editarAtributo,
   guardarProductoCon,
+  retirarAtributo,
+  retirarOpcion,
   type EntradaDeProducto,
 } from "../app/data/catalogo/escritura";
 
@@ -450,4 +455,92 @@ test("un valor de atributo que ya está igual no se reescribe", async () => {
   ]);
   await aplicarProducto(ejecutar, ENTRADA);
   assert.equal(indiceDe(sentencias, /insert into product_attribute_values/i), -1);
+});
+
+// ---------------------------------------------------------------------------
+// Definiciones de atributos y opciones
+// ---------------------------------------------------------------------------
+
+test("un atributo sin usar se bloquea, se cuenta y se borra", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso([
+    { patron: /from attributes[\s\S]*for update/i, filas: [{ id: "1" }] },
+    { patron: /count[\s\S]*product_attribute_values/i, filas: [{ usos: 0 }] },
+  ]);
+
+  assert.equal(await retirarAtributo(ejecutar, "1"), "borrado");
+  assert.ok(indiceDe(sentencias, /for update/i) < indiceDe(sentencias, /count/i));
+  assert.ok(indiceDe(sentencias, /count/i) < indiceDe(sentencias, /delete from attributes/i));
+});
+
+test("un atributo usado solo se desactiva y conserva su clave", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso([
+    { patron: /from attributes[\s\S]*for update/i, filas: [{ id: "1" }] },
+    { patron: /count[\s\S]*product_attribute_values/i, filas: [{ usos: 7 }] },
+  ]);
+
+  assert.equal(await retirarAtributo(ejecutar, "1"), "desactivado");
+  assert.equal(indiceDe(sentencias, /delete from attributes/i), -1);
+  assert.ok(indiceDe(sentencias, /update attributes set active = false/i) >= 0);
+});
+
+test("editar un atributo no acepta ni escribe el tipo", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso();
+  await editarAtributo(ejecutar, "1", {
+    nombre: "Potencia nominal",
+    unidad: "W",
+    filterable: true,
+    comparable: true,
+  });
+
+  assert.doesNotMatch(sentencias[0].texto, /\btipo\b/i);
+  assert.deepEqual(sentencias[0].parametros, ["1", "Potencia nominal", "W", true, true]);
+});
+
+test("crear un atributo devuelve el identificador asignado", async () => {
+  const { ejecutar } = ejecutorFalso([
+    { patron: /insert into attributes/i, filas: [{ id: "12" }] },
+  ]);
+  assert.equal(
+    await crearAtributo(ejecutar, {
+      clave: "potencia_nominal",
+      nombre: "Potencia nominal",
+      tipo: "numero",
+      unidad: "W",
+    }),
+    "12",
+  );
+});
+
+test("una opción usada se desactiva en vez de borrarse", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso([
+    { patron: /from attribute_options[\s\S]*for update/i, filas: [{ id: "10" }] },
+    { patron: /count[\s\S]*product_attribute_values/i, filas: [{ usos: 3 }] },
+  ]);
+
+  assert.equal(await retirarOpcion(ejecutar, "10"), "desactivado");
+  assert.equal(indiceDe(sentencias, /delete from attribute_options/i), -1);
+  assert.ok(indiceDe(sentencias, /update attribute_options set active = false/i) >= 0);
+});
+
+test("crear una opción la vincula a su atributo", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso([
+    { patron: /insert into attribute_options/i, filas: [{ id: "20" }] },
+  ]);
+  assert.equal(
+    await crearOpcion(ejecutar, "1", { clave: "calida", etiqueta: "Cálida", posicion: 10 }),
+    "20",
+  );
+  assert.deepEqual(sentencias[0].parametros, ["1", "calida", "Cálida", 10]);
+});
+
+test("retirar una definición inexistente devuelve un error tipado", async () => {
+  const { ejecutar } = ejecutorFalso();
+  await assert.rejects(
+    retirarAtributo(ejecutar, "999"),
+    (error: unknown) => error instanceof ErrorDeDatos && error.causa === "no-encontrado",
+  );
+  await assert.rejects(
+    retirarOpcion(ejecutar, "999"),
+    (error: unknown) => error instanceof ErrorDeDatos && error.causa === "no-encontrado",
+  );
 });
