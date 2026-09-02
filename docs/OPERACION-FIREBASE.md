@@ -103,6 +103,13 @@ segundo, el problema es ese rol, no las credenciales.
 > `dpl_HByQNb3hyHfX9kdnptp6TAkoBjBH` terminó correctamente y `/cuenta` respondió `307`
 > hacia `/cuenta/entrar`. Vercel registró `λ GET /cuenta` en nivel `info`, sin
 > `ERR_REQUIRE_ESM`. No se usó el plan B de fijar `jose` v5.
+>
+> **Desde el 02/09/2026 hay una prueba que lo protege.** `transpilePackages` es una línea
+> cuya desaparición no se nota en local —el build pasa y las pruebas también— y solo rompe
+> dentro de una función desplegada, así que `tests/identidad-frontera.test.ts` comprueba
+> que `firebase-admin` sigue declarado ahí, y `next.config.ts` lleva el comentario que
+> explica por qué y advierte de no quitarla sin comprobarlo en un despliegue. La prueba se
+> rompió a propósito, borrando la línea, para verla fallar antes de darla por buena.
 
 **Vercel no es infraestructura de Google**, así que allí no hay credenciales
 predeterminadas de serie. Y como no se pueden generar claves de cuenta de servicio, la

@@ -172,6 +172,39 @@ los tres dentro del grafo compilado. Pasaron `test:datos` 146/146, `test:admin` 
 pero volvió a quedarse colgado al apagar el servidor en Windows y se interrumpió después:
 no se presenta esa ejecución como salida limpia.
 
+### Las dos guardas que faltaban, puestas el 02/09/2026
+
+Los dos arreglos del 01/09/2026 quedaron **sin ninguna prueba que los protegiera**, y son
+justo los que se rompen en silencio:
+
+1. **`transpilePackages: ["firebase-admin"]`** entró como una línea suelta y sin comentario
+   en `next.config.ts`. Quien la quitara rompería `/cuenta` en Vercel con
+   `ERR_REQUIRE_ESM`, y **eso no falla en local**: el build pasa, las pruebas pasan y el
+   error solo aparece dentro de una función desplegada. Ahora hay una prueba que lee la
+   configuración y comprueba que el paquete sigue declarado, más el comentario que explica
+   por qué existe la línea y que advierte de no quitarla sin comprobarlo en un despliegue.
+2. **La ruta temporal `app/api/identidad/diagnostico`** se retiró, pero nada impedía que
+   volviera. El diseño pedía esa prueba guardiana en el mismo commit de la retirada y se
+   había quedado sin poner.
+
+Las dos se rompieron a propósito —recreando la ruta y borrando la línea— para verlas
+fallar con su mensaje antes de darlas por buenas.
+
+**Verificación completa del 02/09/2026, esta vez con Playwright limpio:**
+
+| Comprobación | Resultado |
+|---|---|
+| `test:datos` | **148/148** (146 + las dos guardas nuevas) |
+| `test:admin` | 196/196 |
+| `test:proveedores` | 3/3 |
+| `typecheck` y `lint` | limpios |
+| `build` | correcto |
+| Playwright | **70/70, salida limpia y código de salida 0**; no se colgó |
+| `identidad:adc` | credencial válida y Firebase Authentication la acepta |
+
+No se tocó Production, ni `DATABASE_URL`, ni se desplegó, ni se hizo push, ni se borró
+nada fuera de las roturas deliberadas, que se deshicieron.
+
 Se creó **un único Preview**, sin push y sin `--prod`: el build remoto terminó y
 `/cuenta` respondió `307` hacia `/cuenta/entrar`. Los registros de esa petición muestran
 `λ GET /cuenta` en nivel `info`, sin `ERR_REQUIRE_ESM`. No se fijó `jose` v5: queda solo
