@@ -2,6 +2,9 @@ import "server-only";
 
 import { leer } from "../lib/datos";
 import { unstable_cache } from "next/cache";
+import { obtenerModeloDeCatalogo } from "../lib/ajustes.server";
+import { compararCatalogoEnSombra } from "./catalogo/comparacion.server";
+import { servirSegunModelo } from "./catalogo/seleccion";
 import { products } from "./products";
 import { CATALOG_COLUMNS, fromProductRow, type CatalogRow } from "./productRow";
 import { toPublicProduct, type PublicProduct } from "./publicProduct";
@@ -73,7 +76,19 @@ export const getPublicCatalog = async (): Promise<PublicProduct[]> => {
   }
 
   try {
-    return await getCachedCatalog();
+    // El modelo decide qué camino se sirve. En `legacy` y en `shadow` el visitante recibe
+    // exactamente `getCachedCatalog()`, la lectura de siempre. `shadow` solo añade, cuando
+    // la respuesta ya está decidida, una lectura del modelo nuevo y su comparación, que no
+    // puede alterar ni romper lo que se devuelve.
+    return await servirSegunModelo(await obtenerModeloDeCatalogo(), {
+      legacy: getCachedCatalog,
+      // El camino relacional pertenece a la Fase D y hoy es inalcanzable: la llave
+      // `FASE_D_AUTORIZADA` está cerrada y `relational_v2` degrada a `shadow`.
+      relacional: async () => {
+        throw new Error("la Fase D no está autorizada");
+      },
+      comparar: compararCatalogoEnSombra,
+    });
   } catch (error) {
     // Antes el catálogo era un archivo fijo y no podía fallar; ahora depende
     // de que Neon conteste. Si no contesta, es mejor enseñar un catálogo algo

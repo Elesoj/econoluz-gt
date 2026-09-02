@@ -7,11 +7,13 @@ import {
   catalogoCanonicoDesdeLegacy,
   catalogoCanonicoDesdeRelacional,
   compararCatalogos,
+  ejecutarComparacion,
   huella,
   LIMITE_DE_DIFERENCIAS,
 } from "../app/data/catalogo/comparacion";
 import type { FilaDeCatalogo } from "../app/data/catalogo/importacion";
 import type { ProductoRelacional } from "../app/data/catalogo/lectura";
+import type { Ejecutor } from "../app/lib/datos/consulta";
 
 const FILA: FilaDeCatalogo = {
   id: "apl-001",
@@ -361,4 +363,192 @@ test("la huella no deja recuperar el valor y distingue valores distintos", () =>
   assert.equal(huella("a"), huella("a"));
   assert.notEqual(huella("a"), huella("b"));
   assert.equal(huella(null), huella(null));
+});
+
+// --- La comparación contra un ejecutor -----------------------------------------------
+
+function ejecutorFalso(respuestas: { patron: RegExp; filas: Record<string, unknown>[] }[]) {
+  const sentencias: string[] = [];
+  const ejecutar: Ejecutor = async (texto) => {
+    sentencias.push(texto);
+    return respuestas.find((r) => r.patron.test(texto))?.filas ?? [];
+  };
+  return { ejecutar, sentencias };
+}
+
+function registroEspia() {
+  const lineas: { nivel: string; suceso: string; datos: Record<string, unknown> }[] = [];
+  const registro = (nivel: "info" | "error", suceso: string, datos = {}) => {
+    lineas.push({ nivel, suceso, datos });
+  };
+  return { lineas, registro };
+}
+
+const PATRON_LEGACY = /supplier_description, price_gtq, published/;
+
+/**
+ * El núcleo del lector relacional pide las mismas columnas públicas y **ninguna** del
+ * proveedor. Como la consulta legacy también termina en `published from products`, este
+ * patrón va después del suyo: `find` devuelve la primera coincidencia.
+ */
+const PATRON_NUCLEO_RELACIONAL = /published\s+from products/;
+
+const RESPUESTAS_IGUALES = [
+  { patron: PATRON_LEGACY, filas: [{ ...FILA }] as unknown as Record<string, unknown>[] },
+  {
+    patron: PATRON_NUCLEO_RELACIONAL,
+    filas: [{ id: "apl-001", ...RELACIONAL.nucleo }] as unknown as Record<string, unknown>[],
+  },
+  {
+    patron: /from product_private_data/,
+    filas: [{ product_id: "apl-001", ...RELACIONAL.privados }],
+  },
+  {
+    patron: /from product_categories/,
+    filas: [
+      {
+        product_id: "apl-001",
+        category_id: "7",
+        parent_id: "1",
+        slug: "placas-accesorios-placas-apagadores",
+        nombre: "Placas y apagadores",
+        principal: true,
+      },
+    ],
+  },
+  {
+    patron: /from product_images/,
+    filas: [
+      {
+        product_id: "apl-001",
+        id: "1",
+        url: "/catalogos/electrico/apl-001.png",
+        alt: "Módulo eléctrico apagador",
+        posicion: 0,
+        visible: true,
+        principal: true,
+      },
+      {
+        product_id: "apl-001",
+        id: "2",
+        url: "/catalogos/electrico/apl-001-b.png",
+        alt: "Módulo eléctrico apagador",
+        posicion: 10,
+        visible: true,
+        principal: false,
+      },
+    ],
+  },
+  {
+    patron: /from product_attribute_values/,
+    filas: [
+      {
+        product_id: "apl-001",
+        id: "9",
+        attribute_id: "3",
+        clave: "amperage",
+        nombre: "Amperaje",
+        tipo: "numero",
+        unidad: "A",
+        filterable: true,
+        comparable: true,
+        active: true,
+        value_number: 15,
+        value_text: null,
+        value_bool: null,
+        option_id: null,
+        option_clave: null,
+        option_etiqueta: null,
+      },
+    ],
+  },
+  {
+    patron: /from product_prices/,
+    filas: [
+      {
+        product_id: "apl-001",
+        id: "5",
+        centavos: "12500",
+        tipo: "normal",
+        desde: null,
+        hasta: null,
+      },
+    ],
+  },
+];
+
+test("la comparación emite una lectura legacy y exactamente seis relacionales", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso(RESPUESTAS_IGUALES);
+  const { registro } = registroEspia();
+  await ejecutarComparacion(ejecutar, registro, AHORA);
+  assert.equal(sentencias.length, 7, `emitió ${sentencias.length} consultas`);
+});
+
+test("la lectura relacional sigue siendo de seis consultas con 313 productos", async () => {
+  const muchos = Array.from({ length: 313 }, (_, i) => ({
+    ...FILA,
+    id: `p-${i}`,
+    econoluz_reference: `ECO-ELE-${String(i).padStart(4, "0")}`,
+    position: i,
+  })) as unknown as Record<string, unknown>[];
+  const { ejecutar, sentencias } = ejecutorFalso([
+    { patron: PATRON_LEGACY, filas: muchos },
+  ]);
+  const { registro } = registroEspia();
+  await ejecutarComparacion(ejecutar, registro, AHORA);
+  assert.equal(sentencias.length, 7, `emitió ${sentencias.length} consultas para 313 productos`);
+});
+
+test("la comparación no escribe nunca en la base", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso(RESPUESTAS_IGUALES);
+  const { registro } = registroEspia();
+  await ejecutarComparacion(ejecutar, registro, AHORA);
+  assert.equal(sentencias.length > 0, true);
+  for (const sentencia of sentencias) {
+    assert.match(sentencia.trim().toLowerCase(), /^select\b/, `no es una lectura: ${sentencia}`);
+  }
+});
+
+test("catálogos equivalentes registran cero diferencias, duración y correlación", async () => {
+  const { ejecutar } = ejecutorFalso(RESPUESTAS_IGUALES);
+  const { lineas, registro } = registroEspia();
+  const resumen = await ejecutarComparacion(ejecutar, registro, AHORA);
+  assert.equal(resumen?.totalDiferencias, 0);
+  const cierre = lineas.find((l) => l.suceso === "catalogo-shadow-resumen");
+  assert.ok(cierre, "falta el resumen");
+  assert.equal(cierre?.datos.diferencias, 0);
+  assert.equal(typeof cierre?.datos.duracionMs, "number");
+  assert.equal(typeof cierre?.datos.correlacion, "string");
+  assert.equal(cierre?.datos.consultasRelacionales, 6);
+});
+
+test("un fallo de la lectura relacional se registra saneado y devuelve null", async () => {
+  const ejecutar: Ejecutor = async (texto) => {
+    if (PATRON_LEGACY.test(texto)) return [{ ...FILA }] as unknown as Record<string, unknown>[];
+    throw new Error("connection to ep-secreto.neon.tech failed: password=supersecreto");
+  };
+  const { lineas, registro } = registroEspia();
+  const resumen = await ejecutarComparacion(ejecutar, registro, AHORA);
+  assert.equal(resumen, null);
+  const fallo = lineas.find((l) => l.suceso === "catalogo-shadow-error");
+  assert.ok(fallo, "falta el registro del fallo");
+  assert.equal(fallo?.nivel, "error");
+  const serializado = JSON.stringify(lineas);
+  assert.equal(serializado.includes("supersecreto"), false);
+  assert.equal(serializado.includes("ep-secreto"), false);
+});
+
+test("los eventos de diferencia están limitados por comparación", async () => {
+  const muchas = Array.from({ length: 200 }, (_, i) => ({
+    ...FILA,
+    id: `p-${i}`,
+    econoluz_reference: `ECO-ELE-${String(i).padStart(4, "0")}`,
+    position: i,
+  })) as unknown as Record<string, unknown>[];
+  const { ejecutar } = ejecutorFalso([{ patron: PATRON_LEGACY, filas: muchas }]);
+  const { lineas, registro } = registroEspia();
+  const resumen = await ejecutarComparacion(ejecutar, registro, AHORA);
+  const eventos = lineas.filter((l) => l.suceso === "catalogo-shadow-diferencia");
+  assert.equal(eventos.length <= LIMITE_DE_DIFERENCIAS, true, `registró ${eventos.length}`);
+  assert.equal((resumen?.omitidas ?? 0) > 0, true);
 });

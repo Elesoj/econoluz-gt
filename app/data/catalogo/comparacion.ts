@@ -15,12 +15,17 @@
  * diferencia real en vez de quedar escondida.
  */
 
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 
+import type { Ejecutor } from "../../lib/datos/consulta";
 import { fromProductRow, type ProductRow } from "../productRow";
 import { aFilaProyeccion, type FilaProyeccion } from "../proyeccionPublica";
 import { planificarProducto, type FilaDeCatalogo } from "./importacion";
-import { proyeccionDesdeRelacional, type ProductoRelacional } from "./lectura";
+import {
+  leerCatalogoRelacional,
+  proyeccionDesdeRelacional,
+  type ProductoRelacional,
+} from "./lectura";
 import { preciosVigentes } from "./precios";
 
 export type ImagenCanonica = {
@@ -383,4 +388,121 @@ export function compararCatalogos(
     diferencias,
     omitidas: Math.max(0, total - diferencias.length),
   };
+}
+
+// --- La comparación contra la base ---------------------------------------------------
+
+/**
+ * La lectura del catálogo antiguo **para comparar**, que no es la que sirve al visitante.
+ *
+ * Son dos consultas distintas a propósito: la del visitante (`app/data/catalog.server.ts`)
+ * no se toca ni un carácter, porque el compromiso de esta fase es que reciba exactamente
+ * lo de siempre. Esta otra pide además `published` y `price_gtq` de **todos** los
+ * productos, publicados o no, porque el estado de publicación es una de las dimensiones
+ * que hay que comparar.
+ */
+export const CONSULTA_LEGACY_COMPLETA =
+  "select id, econoluz_reference, position, public_name, public_description, image, " +
+  "images, technical_specs, product_type, product_type_label, application, " +
+  "application_label, finish, finish_label, family_label, supplier_brand, " +
+  "supplier_brand_label, supplier_series, supplier_series_label, supplier_code, " +
+  "supplier_name, supplier_description, price_gtq, published " +
+  "from products order by position, id";
+
+export type Registro = (
+  nivel: "info" | "error",
+  suceso: string,
+  datos?: Record<string, string | number | boolean>,
+) => void;
+
+/** Las seis consultas globales de `leerCatalogoRelacional`; no puede volver el N+1. */
+const CONSULTAS_RELACIONALES_ESPERADAS = 6;
+
+/** Las filas llegan de Postgres con `numeric` en texto y `jsonb` ya expandido. */
+export function normalizarFilaLegacy(fila: Record<string, unknown>): FilaDeCatalogo {
+  return {
+    id: String(fila.id),
+    econoluz_reference: String(fila.econoluz_reference),
+    position: Number(fila.position),
+    public_name: String(fila.public_name),
+    public_description: String(fila.public_description),
+    image: String(fila.image),
+    images: Array.isArray(fila.images) ? fila.images.map(String) : null,
+    technical_specs: (fila.technical_specs ?? null) as FilaDeCatalogo["technical_specs"],
+    product_type: String(fila.product_type),
+    product_type_label: String(fila.product_type_label),
+    application: String(fila.application),
+    application_label: String(fila.application_label),
+    finish: String(fila.finish),
+    finish_label: String(fila.finish_label),
+    family_label: String(fila.family_label),
+    supplier_brand: String(fila.supplier_brand ?? ""),
+    supplier_brand_label: String(fila.supplier_brand_label ?? ""),
+    supplier_series: String(fila.supplier_series ?? ""),
+    supplier_series_label: String(fila.supplier_series_label ?? ""),
+    supplier_code: String(fila.supplier_code ?? ""),
+    supplier_name: String(fila.supplier_name ?? ""),
+    supplier_description: String(fila.supplier_description ?? ""),
+    price_gtq:
+      fila.price_gtq === null || fila.price_gtq === undefined ? null : Number(fila.price_gtq),
+    published: Boolean(fila.published),
+  };
+}
+
+/**
+ * Lee los dos catálogos, los compara y registra el resultado.
+ *
+ * **Nunca lanza.** Devuelve `null` si algo falló, y quien llama sigue sirviendo `legacy`.
+ * Del error solo se registra su clase: el texto de Postgres puede llevar el host, el rol o
+ * la contraseña, y esos no entran en un registro.
+ */
+export async function ejecutarComparacion(
+  ejecutar: Ejecutor,
+  registro: Registro,
+  ahora: Date = new Date(),
+): Promise<ResumenDeComparacion | null> {
+  const correlacion = randomBytes(6).toString("hex");
+  const arranque = Date.now();
+
+  try {
+    const filas = (await ejecutar(CONSULTA_LEGACY_COMPLETA, [])) as Record<string, unknown>[];
+    const legacy = catalogoCanonicoDesdeLegacy(filas.map(normalizarFilaLegacy));
+    const relacional = catalogoCanonicoDesdeRelacional(
+      await leerCatalogoRelacional(ejecutar),
+      ahora,
+    );
+
+    const resumen = compararCatalogos(legacy, relacional);
+
+    for (const diferencia of resumen.diferencias) {
+      registro("info", "catalogo-shadow-diferencia", {
+        correlacion,
+        tipo: diferencia.tipo,
+        producto: diferencia.producto ?? "",
+        campo: diferencia.campo,
+        huellaLegacy: diferencia.huellaLegacy ?? "",
+        huellaRelacional: diferencia.huellaRelacional ?? "",
+      });
+    }
+
+    registro(resumen.totalDiferencias === 0 ? "info" : "error", "catalogo-shadow-resumen", {
+      correlacion,
+      productosLegacy: resumen.productosLegacy,
+      productosRelacional: resumen.productosRelacional,
+      comparados: resumen.comparados,
+      diferencias: resumen.totalDiferencias,
+      omitidas: resumen.omitidas,
+      consultasRelacionales: CONSULTAS_RELACIONALES_ESPERADAS,
+      duracionMs: Date.now() - arranque,
+    });
+
+    return resumen;
+  } catch (error) {
+    registro("error", "catalogo-shadow-error", {
+      correlacion,
+      causa: error instanceof Error ? error.constructor.name : "desconocida",
+      duracionMs: Date.now() - arranque,
+    });
+    return null;
+  }
 }
