@@ -1,14 +1,21 @@
 import { cookies } from "next/headers";
 import { aprovisionarCliente } from "@/app/identidad/aprovisionamiento.server";
 import { demasiadosFallosRecientes, registrarEvento } from "@/app/identidad/eventos.server";
-import { crearCookieDeSesion, verificarIdToken } from "@/app/identidad/firebase.server";
+import {
+  crearCookieDeSesion,
+  revocarSesiones,
+  verificarIdToken,
+} from "@/app/identidad/firebase.server";
 import { esMismoOrigen } from "@/app/identidad/origen";
 import {
   COOKIE_SESION_CLIENTE,
   MS_DE_SESION,
   caducidadDesde,
+  cerrarSesion,
   opcionesDeCookie,
 } from "@/app/identidad/sesion";
+import { leerClienteActual } from "@/app/identidad/sesion.server";
+import { registrar } from "@/app/lib/datos";
 
 // `firebase-admin` necesita runtime de Node: no funciona en edge.
 export const runtime = "nodejs";
@@ -77,7 +84,24 @@ export async function DELETE(request: Request) {
     return Response.json({ ok: false, error: "origen-no-valido" }, { status: 403 });
   }
 
-  const almacen = await cookies();
-  almacen.delete(COOKIE_SESION_CLIENTE);
+  const cliente = await leerClienteActual();
+
+  // La orquestación —y qué pasa si Firebase no contesta— vive en `cerrarSesion`,
+  // que está probada. Aquí solo se le dan las piezas de verdad.
+  const { revocada } = await cerrarSesion({
+    uid: cliente?.uid ?? null,
+    revocar: revocarSesiones,
+    borrarCookie: async () => {
+      const almacen = await cookies();
+      almacen.delete(COOKIE_SESION_CLIENTE);
+    },
+  });
+
+  if (cliente && !revocada) {
+    registrar("error", "identidad-sesion-no-revocada", {
+      efecto: "la cookie se borro, pero la sesion sigue viva en Firebase hasta caducar",
+    });
+  }
+
   return Response.json({ ok: true });
 }

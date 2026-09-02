@@ -153,6 +153,20 @@ export async function verificarCookieDeSesion(cookie: string): Promise<Identidad
 }
 
 /**
+ * Invalida las sesiones abiertas de una cuenta sin borrarla.
+ *
+ * Es lo que hace que cerrar sesión signifique algo: la cookie de sesión sigue
+ * siendo criptográficamente válida hasta caducar, y solo la revocación —que
+ * `verificarCookieDeSesion` comprueba— la deja sin efecto.
+ *
+ * **Firebase revoca por cuenta, no por sesión**: esto cierra la sesión del
+ * cliente en todos sus dispositivos, no solo en el que la cierra.
+ */
+export async function revocarSesiones(uid: string): Promise<void> {
+  await auth().revokeRefreshTokens(uid);
+}
+
+/**
  * Revoca las sesiones y borra la identidad. En este orden: si se borrara
  * primero, una sesión viva podría seguir usándose durante su último minuto.
  */

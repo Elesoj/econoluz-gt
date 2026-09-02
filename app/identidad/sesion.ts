@@ -56,6 +56,41 @@ export function debeRenovarse(expira: Date, ahora: Date): boolean {
   return restante > 0 && restante < MS_DE_SESION / 2;
 }
 
+/**
+ * Cerrar sesión, en el orden que importa.
+ *
+ * Borrar la cookie del navegador no invalida nada: la cookie de sesión de Firebase sigue
+ * siendo buena hasta caducar, así que quien la hubiera capturado seguiría dentro. Como
+ * `verificarCookieDeSesion` comprueba la revocación, revocar al salir la invalida de
+ * verdad.
+ *
+ * **Consecuencia que hay que conocer:** Firebase revoca *por cuenta*, no por sesión. Cerrar
+ * sesión en un dispositivo cierra la sesión del cliente **en todos**. Es el precio de que
+ * cerrar sesión signifique algo, y no hay revocación individual que ofrecer en su lugar.
+ *
+ * La cookie se borra pase lo que pase: si Firebase no contesta, dejar dentro al visitante
+ * sería peor que no haber revocado.
+ */
+export async function cerrarSesion(deps: {
+  uid: string | null;
+  revocar: (uid: string) => Promise<void>;
+  borrarCookie: () => Promise<void>;
+}): Promise<{ revocada: boolean }> {
+  let revocada = false;
+
+  if (deps.uid) {
+    try {
+      await deps.revocar(deps.uid);
+      revocada = true;
+    } catch {
+      revocada = false;
+    }
+  }
+
+  await deps.borrarCookie();
+  return { revocada };
+}
+
 export type EstadoDeSesion =
   | { estado: "sin-sesion" }
   | { estado: "invalida" }
