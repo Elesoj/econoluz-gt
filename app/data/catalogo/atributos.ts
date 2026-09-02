@@ -89,6 +89,7 @@ export type Asignacion =
   | { clase: "opcion"; opcion: Opcion };
 
 export type ResultadoDeAsignaciones = { ok: true } | { ok: false; motivo: string };
+export type ModoDeValidacionDeAsignaciones = "asignacion_nueva" | "valor_existente";
 
 const ADMITE_VARIAS = (tipo: TipoDeAtributo) => tipo === "opcion_multiple";
 const ESPERA_OPCION = (tipo: TipoDeAtributo) => tipo === "opcion" || tipo === "opcion_multiple";
@@ -105,6 +106,7 @@ const ESPERA_OPCION = (tipo: TipoDeAtributo) => tipo === "opcion" || tipo === "o
 export function validarAsignaciones(
   atributo: Atributo,
   asignaciones: readonly Asignacion[],
+  modo: ModoDeValidacionDeAsignaciones = "asignacion_nueva",
 ): ResultadoDeAsignaciones {
   if (asignaciones.length === 0) {
     return { ok: true };
@@ -139,7 +141,7 @@ export function validarAsignaciones(
       return { ok: false, motivo: `La opción ${opcion.id} no pertenece a este atributo.` };
     }
 
-    if (!opcion.activa) {
+    if (!opcion.activa && modo === "asignacion_nueva") {
       return {
         ok: false,
         motivo: `La opción ${opcion.id} está desactivada y no admite asignaciones nuevas.`,

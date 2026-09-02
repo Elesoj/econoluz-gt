@@ -187,11 +187,21 @@ test("una opcion de otro atributo se rechaza", () => {
 test("una opcion desactivada no admite asignaciones nuevas", () => {
   const resultado = validarAsignaciones(ATRIBUTO_MULTIPLE, [
     { clase: "opcion", opcion: opcion("op-retirada", "at-ambiente", false) },
-  ]);
+  ], "asignacion_nueva");
 
   assert.equal(resultado.ok, false);
   if (resultado.ok) return;
   assert.match(resultado.motivo, /desactivad/i);
+});
+
+test("una opcion desactivada ya existente puede conservarse al guardar", () => {
+  const resultado = validarAsignaciones(
+    ATRIBUTO_MULTIPLE,
+    [{ clase: "opcion", opcion: opcion("op-retirada", "at-ambiente", false) }],
+    "valor_existente",
+  );
+
+  assert.equal(resultado.ok, true);
 });
 
 test("a un atributo de opcion no se le puede meter un escalar", () => {
