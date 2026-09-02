@@ -689,7 +689,7 @@ npm run proyectos:probar    # prueba cambios reales en Neon y los restaura siemp
 npm run test:admin         # las pruebas de unidad del panel (196)
 npm run admin:crear        # da de alta un administrador o le cambia la contraseña
 
-npm run test:datos         # capa de datos, ajustes e identidad (154)
+npm run test:datos         # capa de datos, ajustes e identidad (167)
 npm run test:permisos      # comprueba contra Neon que el rol público solo lee la proyección
 npm run catalogo:reproyectar # reconstruye entera la proyección pública, de forma idempotente
 
@@ -969,9 +969,10 @@ de §0.2.
 `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`. Se cerraron sus doce tareas,
 se fusionó en `main`, se preparó Neon de producción y se publicó con autorización expresa
 el 01/09/2026. Vercel marcó el despliegue como `Ready` y `Current`, y las rutas críticas se
-comprobaron directamente. El **subproyecto 2, identidad de clientes**, está implementado
-y verificado en `feat/identidad-clientes`, pero aún no se ha fusionado ni desplegado en
-Production. Solo se creó un Preview para verificar el empaquetado y `/cuenta`.
+comprobaron directamente. El **subproyecto 2, identidad de clientes**, está implementado, verificado y
+**fusionado en `main` por avance rápido el 02/09/2026**. No se ha publicado ni desplegado
+en Production: `main` va por delante de `origin/main` y empujarlo dispararía el despliegue.
+Solo se creó un Preview para verificar el empaquetado y `/cuenta`.
 
 **La identidad federada dejó de ser el bloqueo el 01/09/2026.** Está montada sobre
 `econoluz-dev-d30ab` y demostrada: la prueba positiva pasó los tres puntos y la negativa
@@ -987,19 +988,15 @@ que trata `firebase-admin` como paquete externo. El build local dejó de trazar
 único Preview terminó y `/cuenta` devolvió `307` a `/cuenta/entrar`, con una ejecución
 de nivel `info` y sin `ERR_REQUIRE_ESM`. `jose` v5 quedó como plan B y no se usó.
 
-**Dos piezas están construidas y probadas pero sin consumidor** (02/09/2026), y no deben
-darse por activas, igual que ocurrió con tres del subproyecto 1:
+**Una pieza sigue construida y probada pero sin consumidor** (02/09/2026), y no debe darse
+por activa: **los consentimientos**. La tabla `user_consents`, la migración y
+`app/identidad/consentimientos*.ts` existen y están probados, pero **ninguna pantalla ni
+ruta los llama**: hoy no se registra ni un consentimiento. **Engancharlos está bloqueado
+por una decisión de negocio** —aprobar los textos legales y sus versiones—, no por trabajo
+técnico: no tiene sentido registrar la aceptación de un texto que aún no existe.
 
-- **Los consentimientos.** La tabla `user_consents`, la migración y
-  `app/identidad/consentimientos*.ts` existen y están probados, pero **ninguna pantalla ni
-  ruta los llama**: hoy no se registra ni un consentimiento. Con textos legales de por
-  medio conviene no confundir «implementado» con «capturándose».
-- **La renovación de la sesión.** `debeRenovarse` está escrita, probada y descrita en el
-  comentario de `app/identidad/sesion.ts`, pero **no la llama nadie**: la sesión del
-  cliente caduca en seco a los cinco días y no se renueva con el uso, al contrario de lo
-  que ese comentario da a entender.
-
-Engancharlas es trabajo pendiente y la decisión de cuándo es del dueño.
+La renovación de la sesión sí quedó conectada el 02/09/2026, junto con la revocación en
+Firebase al cerrar sesión y los mensajes de error del formulario de direcciones.
 El catálogo relacional corresponde al subproyecto 3 y no se adelanta.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el

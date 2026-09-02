@@ -221,20 +221,29 @@ y en silencio si faltaba `AUTH_EVENT_IP_PEPPER`. Ahora, en producción, esa ause
 vive en `politicaDeLimite`, en `app/identidad/eventos.ts`, con seis pruebas propias que se
 vieron fallar reintroduciendo la regresión.
 
-**Dos piezas quedan construidas y probadas pero sin consumidor**, y no deben darse por
-activas:
+**Una pieza queda construida y probada pero sin consumidor**, y no debe darse por activa:
+**los consentimientos**. `user_consents` y `app/identidad/consentimientos*.ts` existen y
+están probados, pero ninguna pantalla ni ruta los llama: **hoy no se registra ni un
+consentimiento**. Está **bloqueado por una decisión de negocio** —aprobar los textos
+legales y sus versiones—, no por trabajo técnico.
 
-- **Consentimientos.** `user_consents` y `app/identidad/consentimientos*.ts` existen y
-  están probados, pero ninguna pantalla ni ruta los llama: **hoy no se registra ni un
-  consentimiento**. Importa porque hay textos legales pendientes de aprobar.
-- **Renovación de la sesión.** `debeRenovarse` está escrita, probada y descrita en el
-  comentario de `sesion.ts`, pero no la llama nadie: la sesión caduca en seco a los cinco
-  días.
+### La rama se fusionó, y después se cerraron los hallazgos pendientes (02/09/2026)
 
-**Cuatro hallazgos menores quedan sin arreglar, por decisión del dueño de hacerlo después:**
-cerrar sesión no revoca la sesión en Firebase —solo borra la cookie, y `revokeRefreshTokens`
-ya está a mano—, y el formulario de direcciones descarta lo inválido sin mostrar ningún
-mensaje.
+`feat/identidad-clientes` se fusionó en `main` **por avance rápido**, sin commit de fusión;
+la rama y el worktree se conservan. **No se ha publicado**: `main` va por delante de
+`origin/main` y empujarlo dispararía el despliegue.
+
+Después, y ya sobre `main`, se cerraron los tres hallazgos que quedaban:
+
+- **Cerrar sesión revoca en Firebase.** Antes solo borraba la cookie, que seguía siendo
+  válida hasta caducar. El orden está probado —revocar y después borrar— y la cookie se
+  borra aunque Firebase no conteste. **Consecuencia:** Firebase revoca por cuenta, así que
+  cerrar sesión en un dispositivo la cierra en todos.
+- **La renovación de la sesión está conectada.** El servidor decide si toca y el navegador
+  aporta el testigo, porque una cookie de sesión de Firebase no se puede alargar desde el
+  servidor. Cinco pruebas cubren los casos que no pueden dispararla.
+- **El formulario de direcciones dice qué falla.** Antes descartaba lo inválido en
+  silencio.
 
 Se creó **un único Preview**, sin push y sin `--prod`: el build remoto terminó y
 `/cuenta` respondió `307` hacia `/cuenta/entrar`. Los registros de esa petición muestran
