@@ -25,6 +25,41 @@ const LARGO_MAXIMO = 300;
 
 const texto = (valor: unknown) => (typeof valor === "string" ? valor.trim() : "");
 
+/**
+ * Lo que ve el cliente en la pantalla, no el nombre del campo en el formulario. Decirle
+ * «destinatario» cuando la etiqueta dice «Quién recibe» le obliga a adivinar.
+ */
+const ETIQUETAS: Record<string, string> = {
+  destinatario: "quién recibe",
+  telefono: "teléfono",
+  departamento: "departamento",
+  municipio: "municipio",
+  direccion: "dirección",
+  referencias: "referencias",
+};
+
+/**
+ * El mensaje que sustituye al silencio: antes la acción hacía `return` y el cliente se
+ * quedaba mirando el formulario sin saber qué había pasado.
+ *
+ * No dice que los campos no puedan quedar vacíos, porque `referencias` sí puede y solo
+ * falla por larga. Dice qué revisar y cuál es el límite, que es lo único cierto de los dos
+ * casos a la vez.
+ */
+export function mensajeDeFaltan(faltan: readonly string[]): string {
+  if (faltan.length === 0) return "";
+
+  const etiquetas = faltan.map((campo) => ETIQUETAS[campo] ?? "algún dato");
+  const unicos = [...new Set(etiquetas)];
+
+  const cabecera =
+    unicos.length === 1
+      ? `Revisa el campo «${unicos[0]}».`
+      : `Revisa estos campos: ${unicos.map((e) => `«${e}»`).join(", ")}.`;
+
+  return `${cabecera} Los obligatorios no pueden quedar vacíos, y ninguno puede pasar de ${LARGO_MAXIMO} caracteres.`;
+}
+
 export function validarDireccion(entrada: unknown): ResultadoDeValidacion {
   if (typeof entrada !== "object" || entrada === null) {
     return { ok: false, faltan: [...OBLIGATORIOS] };

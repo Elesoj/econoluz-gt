@@ -1,12 +1,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { validarDireccion } from "@/app/identidad/direcciones";
+import { mensajeDeFaltan, validarDireccion } from "@/app/identidad/direcciones";
 import { guardarDireccion, listarDirecciones } from "@/app/identidad/direcciones.server";
 import { leerClienteActual } from "@/app/identidad/sesion.server";
+import FormularioDireccion, { type EstadoDelFormulario } from "./FormularioDireccion";
 
 export const metadata = { title: "Mis direcciones · ECONOLUZ" };
 
-async function guardar(datos: FormData) {
+async function guardar(
+  _previo: EstadoDelFormulario,
+  datos: FormData,
+): Promise<EstadoDelFormulario> {
   "use server";
 
   const cliente = await leerClienteActual();
@@ -24,10 +28,14 @@ async function guardar(datos: FormData) {
     predeterminada: datos.get("predeterminada") === "on",
   });
 
-  if (!resultado.ok) return;
+  // Antes esto era un `return` a secas: la dirección se perdía sin decir nada.
+  if (!resultado.ok) {
+    return { mensaje: mensajeDeFaltan(resultado.faltan), guardada: false };
+  }
 
   await guardarDireccion(cliente.id, resultado.direccion);
   revalidatePath("/cuenta/direcciones");
+  return { mensaje: "", guardada: true };
 }
 
 export default async function DireccionesPage() {
@@ -63,42 +71,7 @@ export default async function DireccionesPage() {
         ) : null}
       </ul>
 
-      <form action={guardar} className="mt-10 space-y-3">
-        <h2 className="text-lg font-medium text-[#001B59]">Agregar una dirección</h2>
-        {[
-          ["destinatario", "Quién recibe", "text"],
-          ["telefono", "Teléfono", "tel"],
-          ["departamento", "Departamento", "text"],
-          ["municipio", "Municipio", "text"],
-          ["direccion", "Dirección", "text"],
-        ].map(([nombre, etiqueta, tipo]) => (
-          <label key={nombre} className="block text-sm text-neutral-700">
-            {etiqueta}
-            <input
-              type={tipo}
-              name={nombre}
-              required
-              placeholder={nombre === "telefono" ? "4042 8790" : undefined}
-              className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
-            />
-          </label>
-        ))}
-        <label className="block text-sm text-neutral-700">
-          Referencias para encontrarla
-          <input
-            name="referencias"
-            placeholder="Portón negro frente a la tienda"
-            className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
-          />
-        </label>
-        <label className="flex items-center gap-2 text-sm text-neutral-700">
-          <input type="checkbox" name="predeterminada" />
-          Usar como predeterminada
-        </label>
-        <button type="submit" className="rounded bg-[#E11133] px-4 py-3 font-medium text-white">
-          Guardar dirección
-        </button>
-      </form>
+      <FormularioDireccion accion={guardar} />
     </main>
   );
 }
