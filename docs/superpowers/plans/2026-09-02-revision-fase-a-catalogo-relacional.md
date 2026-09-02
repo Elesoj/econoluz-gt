@@ -143,12 +143,12 @@ un ciclo; una ruta parcial nunca se considera válida.
 
 **Archivos:** ninguno adicional salvo correcciones justificadas por las pruebas.
 
-- [ ] Ejecutar las pruebas enfocadas del catálogo y después `npm run test:datos`,
+- [x] Ejecutar las pruebas enfocadas del catálogo y después `npm run test:datos`,
   `npm run test:admin`, `npm run test:proveedores`, `npm run typecheck`, `npm run lint` y
   `npm run build`.
-- [ ] Ejecutar `npx playwright test --reporter=line`; si falla, inspeccionar
+- [x] Ejecutar `npx playwright test --reporter=line`; si falla, inspeccionar
   `test-results/` antes de cualquier repetición. Informar aparte los cinco fallos por la
   ausencia conocida de `.env.local`/`DATABASE_URL`.
-- [ ] Revisar `git diff 7b40e0e`, `git log 7b40e0e..HEAD` y `git status --short --branch`.
-- [ ] Confirmar que no se conectó a Neon, no se importó nada, `modelo_catalogo` no cambió
+- [x] Revisar `git diff 7b40e0e`, `git log 7b40e0e..HEAD` y `git status --short --branch`.
+- [x] Confirmar que no se conectó a Neon, no se importó nada, `modelo_catalogo` no cambió
   y no hubo push, merge ni despliegue.

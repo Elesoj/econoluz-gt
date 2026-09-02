@@ -243,6 +243,17 @@ pero su motor no está activo; no se arrancó ni instaló ningún servicio. Ante
 confirmar que el rol migrador puede crear `btree_gist` —extensión confiable que requiere
 `CREATE` sobre la base— si todavía no existe.
 
+**Verificación de la revisión de la Fase A:** las pruebas enfocadas del catálogo pasaron
+83/83; `test:datos`, 250/250; `test:admin`, 196/196; `test:proveedores`, 3/3;
+`typecheck` y `lint`, limpios; y `build`, correcto con 16 páginas generadas.
+`test:permisos` no se ejecutó porque necesita una conexión y esta revisión tenía prohibido
+conectarse a Neon. Playwright ejecutó sus 70 casos una sola vez: dejó cinco fallos conocidos
+porque faltan `.env.local` y `DATABASE_URL`, de modo que los 313 productos aparecen como
+«Precio a consultar» y no existe ningún botón «Agregar al carrito»; los otros 65 casos no
+fallaron. Se inspeccionaron los cinco `error-context.md` antes de decidir no repetirlo. El
+proceso se quedó colgado al apagar el servidor de desarrollo en Windows y se interrumpió
+después de ejecutar el caso 70, así que no se presenta como una salida limpia.
+
 ### Revisión previa a la fusión (02/09/2026)
 
 Se revisó la rama entera contra `main`. **La superficie de regresión es prácticamente

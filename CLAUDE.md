@@ -1020,6 +1020,13 @@ PostgreSQL ni `psql`, y el motor Docker no está activo. Antes de la Fase B hay 
 en una base desechable y confirmar que el rol migrador puede instalar `btree_gist` —extensión
 confiable que exige `CREATE` sobre la base— si todavía no existe.
 
+La verificación de esta revisión dio `test:datos` 250/250, `test:admin` 196/196,
+`test:proveedores` 3/3, `typecheck` y `lint` limpios y `build` correcto. Playwright ejecutó
+70 casos: cinco fallaron por la ausencia conocida de `.env.local`/`DATABASE_URL` y sus
+informes se inspeccionaron antes de no repetir la batería; los otros 65 no fallaron. El
+proceso se interrumpió después por el bloqueo conocido al apagar el servidor en Windows.
+`test:permisos` no se ejecutó porque habría requerido conectar a Neon.
+
 Aplicarla es la Fase B y **necesita autorización expresa**; activar `relational_v2`, la
 Fase D, otra distinta.
 
