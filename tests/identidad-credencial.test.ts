@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { VARIABLES_DE_FEDERACION, elegirModo } from "../app/identidad/credencial";
+import {
+  VARIABLES_DE_FEDERACION,
+  adaptarCredencial,
+  configuracionFederada,
+  elegirModo,
+} from "../app/identidad/credencial";
 
 const COMPLETO = {
   VERCEL: "1",
@@ -49,4 +54,87 @@ test("el mensaje de error nombra todas las variables que faltan, no solo la prim
     () => elegirModo({ VERCEL: "1" }),
     (error: Error) => VARIABLES_DE_FEDERACION.every((v) => error.message.includes(v)),
   );
+});
+
+test("la configuracion apunta al proveedor y a la cuenta de servicio esperados", () => {
+  const config = configuracionFederada(COMPLETO);
+
+  assert.equal(config.type, "external_account");
+  assert.equal(config.subject_token_type, "urn:ietf:params:oauth:token-type:jwt");
+  assert.equal(config.token_url, "https://sts.googleapis.com/v1/token");
+  assert.equal(config.audience, COMPLETO.GCP_AUDIENCE);
+  assert.equal(
+    config.service_account_impersonation_url,
+    "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/" +
+      `${COMPLETO.GCP_SERVICE_ACCOUNT_EMAIL}:generateAccessToken`,
+  );
+});
+
+test("la configuracion no lleva ninguna clave privada", () => {
+  const texto = JSON.stringify(configuracionFederada(COMPLETO));
+  assert.equal(texto.includes("private_key"), false);
+  assert.equal(texto.includes("BEGIN PRIVATE KEY"), false);
+});
+
+test("la credencial devuelve el testigo de acceso y su vida en segundos", async () => {
+  const ahora = 1_000_000_000_000;
+  const credencial = adaptarCredencial(
+    () => ({
+      getAccessToken: async () => ({ token: "testigo-de-acceso" }),
+      credentials: { expiry_date: ahora + 3_600_000 },
+    }),
+    () => ahora,
+  );
+
+  assert.deepEqual(await credencial.getAccessToken(), {
+    access_token: "testigo-de-acceso",
+    expires_in: 3600,
+  });
+});
+
+test("el cliente se construye una sola vez aunque se pida el testigo varias veces", async () => {
+  let construcciones = 0;
+  const credencial = adaptarCredencial(() => {
+    construcciones += 1;
+    return {
+      getAccessToken: async () => ({ token: "testigo" }),
+      credentials: { expiry_date: Date.now() + 60_000 },
+    };
+  });
+
+  await credencial.getAccessToken();
+  await credencial.getAccessToken();
+  assert.equal(construcciones, 1);
+});
+
+test("un canje sin testigo falla en vez de devolver una credencial vacia", async () => {
+  const credencial = adaptarCredencial(() => ({
+    getAccessToken: async () => ({ token: null }),
+    credentials: { expiry_date: Date.now() + 60_000 },
+  }));
+
+  await assert.rejects(() => credencial.getAccessToken(), /no devolvi/i);
+});
+
+test("un testigo sin caducidad falla en vez de inventarse una vida", async () => {
+  const credencial = adaptarCredencial(() => ({
+    getAccessToken: async () => ({ token: "testigo" }),
+    credentials: {},
+  }));
+
+  await assert.rejects(() => credencial.getAccessToken(), /caducidad/i);
+});
+
+test("una caducidad ya pasada da cero, nunca un numero negativo", async () => {
+  const ahora = 1_000_000_000_000;
+  const credencial = adaptarCredencial(
+    () => ({
+      getAccessToken: async () => ({ token: "testigo" }),
+      credentials: { expiry_date: ahora - 5_000 },
+    }),
+    () => ahora,
+  );
+
+  const { expires_in } = await credencial.getAccessToken();
+  assert.equal(expires_in, 0);
 });

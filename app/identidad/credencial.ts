@@ -44,3 +44,88 @@ export function elegirModo(env: Record<string, string | undefined>): ModoDeCrede
 
   return "federada";
 }
+
+export type ConfiguracionFederada = {
+  type: "external_account";
+  audience: string;
+  subject_token_type: "urn:ietf:params:oauth:token-type:jwt";
+  token_url: "https://sts.googleapis.com/v1/token";
+  service_account_impersonation_url: string;
+};
+
+/**
+ * Lo que se le pasa a `ExternalAccountClient.fromJSON`, sin el proveedor del testigo,
+ * que es lo único impuro y vive en `credencialFederada.server.ts`.
+ *
+ * `audience` sale tal cual de la variable de entorno, con `https://`, porque es la
+ * audiencia predeterminada del proveedor y tiene que coincidir con la que se le pide a
+ * Vercel. Ver la trampa documentada en el diseño, sección 8.1: los dos ejemplos oficiales
+ * de Vercel no escriben igual este campo.
+ */
+export function configuracionFederada(
+  env: Record<string, string | undefined>,
+): ConfiguracionFederada {
+  if (elegirModo(env) !== "federada") {
+    throw new Error("configuracionFederada solo se usa cuando el modo es federada.");
+  }
+
+  return {
+    type: "external_account",
+    audience: env.GCP_AUDIENCE as string,
+    subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
+    token_url: "https://sts.googleapis.com/v1/token",
+    service_account_impersonation_url:
+      "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/" +
+      `${env.GCP_SERVICE_ACCOUNT_EMAIL}:generateAccessToken`,
+  };
+}
+
+export type ClienteFederado = {
+  getAccessToken(): Promise<{ token?: string | null }>;
+  credentials: { expiry_date?: number | null };
+};
+
+/**
+ * La forma que `initializeApp` espera de una credencial. **No se importa de
+ * `firebase-admin` a propósito**, ni siquiera como tipo: la frontera del proyecto reserva
+ * ese import para `firebase.server.ts`, y esto es todo lo que el SDK necesita.
+ */
+export type CredencialDeFirebase = {
+  getAccessToken(): Promise<{ access_token: string; expires_in: number }>;
+};
+
+/**
+ * Convierte cualquier cliente de cuenta externa en la credencial que espera
+ * `firebase-admin`. El cliente se recibe como función para poder construirlo tarde —y
+ * una sola vez—, y para poder inyectar uno falso en las pruebas.
+ */
+export function adaptarCredencial(
+  crearCliente: () => ClienteFederado,
+  ahora: () => number = Date.now,
+): CredencialDeFirebase {
+  let cliente: ClienteFederado | null = null;
+
+  return {
+    async getAccessToken() {
+      cliente ??= crearCliente();
+
+      const { token } = await cliente.getAccessToken();
+      if (!token) {
+        throw new Error("El intercambio federado no devolvió ningún testigo de acceso.");
+      }
+
+      const caducidad = cliente.credentials.expiry_date;
+      if (typeof caducidad !== "number") {
+        throw new Error(
+          "El intercambio federado no devolvió caducidad del testigo de acceso; sin ella no " +
+            "se puede saber cuánto vale.",
+        );
+      }
+
+      return {
+        access_token: token,
+        expires_in: Math.max(0, Math.floor((caducidad - ahora()) / 1000)),
+      };
+    },
+  };
+}
