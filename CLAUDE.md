@@ -478,8 +478,8 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
 ## 4. Stack técnico
 
 - Framework: Next.js `16.3.1` — **App Router**. Todo el código vive en `app/`;
-  no existe `pages/`, ni `src/`, ni `middleware.ts`. La única ruta de API es
-  `app/api/leads/route.ts`.
+  no existe `pages/`, ni `src/`, ni `middleware.ts`. Hay rutas de API para leads y para
+  crear o borrar la sesión del cliente.
   La versión importa: `16.2.6` duplicaba el ancla de la URL al navegar entre secciones
   (`/#inicio#inicio`) y se subió a `16.3.1` para corregirlo. No bajar de ahí.
 - Lenguaje: **TypeScript** `5.9.3` en modo `strict`, sobre React `19.2.4`.
@@ -502,9 +502,17 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   `projects`, `project_images`, `schema_migrations`, `public_products`, `app_settings` y
   `audit_log`. Las migraciones `005` a `008` llegaron a producción el 01/09/2026; la
   proyección quedó poblada con 313 filas y el rol `econoluz_publico` solo puede leerla.
+  La rama de desarrollo `identidad-clientes-dev` añade `users`, `user_addresses`,
+  `user_consents` y `auth_events` mediante la migración `009`; esas cuatro tablas aún no
+  existen en producción.
   Las migraciones se aplican con `npm run db:migrar`, que es repetible. `DATABASE_URL`
   está en `.env.local` (ignorado por git) y en Vercel; `DATABASE_URL_PUBLIC` está en
   Vercel como secreto exclusivo de Production.
+- Identidad de clientes: **Firebase Authentication**. El navegador usa el SDK web y el
+  servidor `firebase-admin` con credenciales predeterminadas de la aplicación (ADC).
+  Desarrollo usa `econoluz-dev-d30ab`; producción está bloqueada hasta diseñar Workload
+  Identity Federation para Vercel. La política corporativa prohíbe claves privadas de
+  cuentas de servicio: no crear JSON ni variables con una clave privada.
 - Pasarela de pago: `TODO — pendiente de decidir`
 - Certificador FEL: `TODO — pendiente de decidir`
 
@@ -527,7 +535,10 @@ frontend/
       catalogState.ts  useCatalogNavigation.ts  quoteSelection.ts
       useQuoteSelection.ts  quotePersistence.ts  floatingQuoteStore.ts
       publicQuoteMessage.ts       texto de la cotización que sale por WhatsApp
-    api/leads/route.ts            única ruta de API: guarda el lead en Neon
+    api/leads/route.ts            guarda el lead en Neon
+    api/clientes/                 canje de sesión y borrado/anonimización de la cuenta
+    cuenta/                       acceso, resumen y direcciones del cliente
+    identidad/                    Firebase Admin, sesión, perfiles y políticas de identidad
     components/                   UI compartida (12 componentes + ui/)
                                   AnimatedStat, ContactCTA, FloatingWhatsApp,
                                   LedSavingsCalculator, ProductCard,
@@ -589,9 +600,11 @@ frontend/
     006_rol_publico.sql           el rol de solo lectura y sus permisos, sin contraseñas
     007_app_settings.sql          configuración persistente; guarda `modelo_catalogo`
     008_audit_log.sql             quién cambió qué, con el antes y el después
+    009_identidad_clientes.sql    clientes, direcciones, consentimientos y eventos de acceso
   scripts/                        utilidades de línea de comandos (ver "Comandos")
   docs/CONTINUAR-PANEL.md         hoja de traspaso: qué falta y cómo hacerlo
   docs/OPERACION-ROL-PUBLICO.md   crear, rotar y verificar la credencial del rol público
+  docs/OPERACION-FIREBASE.md      ADC local y futura identidad federada de producción
   tests/                          Playwright: catálogo, cotización y fronteras de datos
   public/
     logo_econoluz.png
@@ -667,12 +680,17 @@ npm run proyectos:verificar # ensayo reversible de los 12 proyectos y 104 fotos
 npm run proyectos:importar  # importa a Neon de forma idempotente y relee el resultado
 npm run proyectos:probar    # prueba cambios reales en Neon y los restaura siempre
 
-npm run test:admin         # las pruebas de unidad del panel (129)
+npm run test:admin         # las pruebas de unidad del panel (196)
 npm run admin:crear        # da de alta un administrador o le cambia la contraseña
 
-npm run test:datos         # las pruebas de la capa de datos y de los ajustes (45)
+npm run test:datos         # capa de datos, ajustes e identidad (121)
 npm run test:permisos      # comprueba contra Neon que el rol público solo lee la proyección
 npm run catalogo:reproyectar # reconstruye entera la proyección pública, de forma idempotente
+
+npm run identidad:adc       # valida ADC contra el proyecto Firebase configurado
+npm run identidad:verificar # invariantes reales en Neon dentro de una transacción reversible
+npm run identidad:probar    # prueba aprovisionamiento concurrente; crea y limpia datos sintéticos
+npm run identidad:reconciliar # solo informa; añadir -- --aplicar para reparar huérfanos
 ```
 
 Los scripts de `scripts/` importan los datos `.ts` del proyecto sin compilar, gracias
@@ -725,6 +743,10 @@ entrenamiento. Antes de escribir código, consulta la guía correspondiente en
 - **La conexión privilegiada nunca sustituye al rol público en producción.** Si falta
   `DATABASE_URL_PUBLIC`, se sirve el respaldo estático y se registra el error; ver
   `app/data/origenPublico.ts`.
+- **La identidad de clientes y la identidad del panel nunca se mezclan.** Ninguna de las
+  dos capas importa la otra. Dentro de `app/**`, solo
+  `app/identidad/firebase.server.ts` puede importar `firebase-admin`; las excepciones de
+  `scripts/**` están declaradas y vigiladas por `tests/identidad-frontera.test.ts`.
 - Accesibilidad: contraste suficiente, textos alternativos en imágenes,
   navegación por teclado funcional.
 - Rendimiento: las imágenes **ya están optimizadas** (430 archivos, 24 MB en total,
@@ -937,9 +959,10 @@ de §0.2.
 `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`. Se cerraron sus doce tareas,
 se fusionó en `main`, se preparó Neon de producción y se publicó con autorización expresa
 el 01/09/2026. Vercel marcó el despliegue como `Ready` y `Current`, y las rutas críticas se
-comprobaron directamente. El siguiente desarrollo es el **subproyecto 2, identidad de
-clientes**; debe empezar con su propio diseño y punto de aprobación. El catálogo
-relacional corresponde al subproyecto 3 y no se adelanta.
+comprobaron directamente. El **subproyecto 2, identidad de clientes**, está implementado
+y verificado en `feat/identidad-clientes`, pero aún no se ha fusionado, publicado ni
+desplegado. Su producción sigue bloqueada por la identidad federada pendiente de Vercel.
+El catálogo relacional corresponde al subproyecto 3 y no se adelanta.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar

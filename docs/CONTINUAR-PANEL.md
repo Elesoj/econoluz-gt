@@ -100,7 +100,67 @@ El subproyecto 1 ya no está pendiente de integración:
   rápido, y la documentación del despliegue publicada desde `7d882f6`
 - **Worktree conservado:** `.worktrees/fundamentos-backend`, limpio y en el mismo commit
 - **Plan terminado:** `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`
-- **Siguiente desarrollo:** subproyecto 2, identidad de clientes; todavía no iniciado
+- **Desarrollo en curso:** subproyecto 2, identidad de clientes, implementado y verificado
+  en `feat/identidad-clientes`; todavía no se ha fusionado, publicado ni desplegado
+
+### El subproyecto 2 está implementado en su rama (01/09/2026)
+
+Las catorce tareas de `docs/superpowers/plans/2026-09-01-identidad-clientes.md` están
+implementadas en el worktree `.worktrees/identidad-clientes`. Incluyen la migración
+`009_identidad_clientes.sql`, sesiones Firebase en cookie segura, aprovisionamiento
+perezoso e idempotente, eventos de autenticación sin IP en claro, direcciones,
+consentimientos versionados, anonimización, reconciliación y las pantallas de `/cuenta`.
+El alta admite correo y contraseña; Google y el enlace de cuentas con el mismo correo
+también están preparados.
+
+La infraestructura usada para comprobarlo está completamente aislada de producción:
+
+- Firebase de desarrollo es `econoluz-dev-d30ab`. Firebase Admin usa ADC con la cuenta
+  corporativa; no existen claves privadas de cuentas de servicio. Correo/contraseña y
+  Google están habilitados, y la app web de desarrollo es `econoluz-web-dev`.
+- Neon usa la rama `identidad-clientes-dev`. Tanto `DATABASE_URL` como
+  `DATABASE_URL_PUBLIC` apuntan a su host directo; la segunda entra como
+  `econoluz_publico`. Los hosts se compararon con producción y son distintos.
+- La migración `009` solo está aplicada en esa rama. El rol público puede leer
+  `public_products` y tiene denegadas las catorce tablas protegidas, incluidas las cuatro
+  de identidad. No se escribió en producción.
+- `ADMIN_SESSION_SECRET` y `AUTH_EVENT_IP_PEPPER` están presentes solo en el entorno
+  local ignorado. La pimienta produce una HMAC truncada; la IP nunca se persiste.
+
+Verificación fresca del cierre:
+
+| Comprobación | Resultado |
+|---|---|
+| `test:datos` | 121/121 |
+| `test:admin` | 196/196 |
+| `test:proveedores` | 3/3 |
+| `test:permisos` | correcto: solo `public_products`, 14 tablas protegidas denegadas |
+| `typecheck` y `lint` | limpios |
+| `build` | correcto; 16 páginas generadas y las rutas de cuenta detectadas |
+| Playwright | 70/70 con salida limpia |
+| `identidad:adc` | credencial válida, testigo obtenido y Firebase Authentication la acepta |
+| `identidad:verificar` | 11 invariantes correctos y `ROLLBACK`; incluye HMAC real sin IP en claro |
+| `identidad:reconciliar` | modo simulación correcto, sin huérfanos en desarrollo |
+| `catalogo:auditar` | 313 productos, 408 identificadores, 0 coincidencias |
+| Neon de desarrollo | `modelo_catalogo = legacy`, 313 productos y 25 precios |
+
+`npm run identidad:probar` pasó también en el cierre con autorización expresa: una
+petición creó el usuario sintético, la concurrente reutilizó la misma fila y la limpieza
+confirmó que no quedó ese usuario. La autorización era necesaria porque su limpieza
+ejecuta `DELETE` fuera de la transacción.
+
+**No hay autorización para fusionar, hacer push ni desplegar.** Firebase de producción
+permanece bloqueado hasta diseñar Workload Identity Federation para Vercel; no se debe
+desactivar la política corporativa ni crear archivos JSON. Antes de una futura salida a
+producción también faltan aplicar allí la migración `009`, configurar las variables
+públicas de la app web, guardar la pimienta y aprobar los textos legales.
+
+Preguntas abiertas del diseño, que no se deben resolver por suposición:
+
+1. Validar con un asesor de Guatemala la retención fiscal exacta tras anonimizar.
+2. Aprobar los textos legales y sus primeras versiones persistidas.
+3. Decidir cuándo se incorpora Facebook como proveedor de acceso.
+4. Definir qué ocurre si se solicita el borrado con un pedido activo.
 
 ### El subproyecto 1 está terminado y desplegado (01/09/2026)
 
