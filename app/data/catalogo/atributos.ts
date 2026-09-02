@@ -60,6 +60,101 @@ export function columnasLlenas(columnas: ValorDeAtributo): ColumnaDeValor[] {
 const esTexto = (valor: unknown): valor is string =>
   typeof valor === "string" && valor.trim().length > 0;
 
+/**
+ * Qué se puede hacer con una definición que ya está en uso.
+ *
+ * Borrar un atributo o una opción que ya describe productos perdería esos datos sin avisar,
+ * así que desde el primer uso solo cabe desactivar. Desactivar impide asignaciones nuevas y
+ * conserva las históricas, y la clave sigue reservada para que nadie la reutilice con otro
+ * significado. Vale igual para un atributo y para una opción.
+ */
+export function decidirRetirada(usos: number): "borrar" | "desactivar" {
+  return usos === 0 ? "borrar" : "desactivar";
+}
+
+/**
+ * El tipo de un atributo usado es inmutable: cambiarlo reinterpretaría los valores ya
+ * guardados —los `20` de `value_number` pasarían a leerse como otra cosa— sin tocarlos.
+ * La base lo impide además con una clave foránea compuesta hacia `attributes (id, tipo)`.
+ */
+export function puedeCambiarseElTipo(usos: number): boolean {
+  return usos === 0;
+}
+
+export type Atributo = { id: string; tipo: TipoDeAtributo };
+export type Opcion = { id: string; atributoId: string; activa: boolean };
+
+export type Asignacion =
+  | { clase: "escalar"; valor: unknown }
+  | { clase: "opcion"; opcion: Opcion };
+
+export type ResultadoDeAsignaciones = { ok: true } | { ok: false; motivo: string };
+
+const ADMITE_VARIAS = (tipo: TipoDeAtributo) => tipo === "opcion_multiple";
+const ESPERA_OPCION = (tipo: TipoDeAtributo) => tipo === "opcion" || tipo === "opcion_multiple";
+
+/**
+ * Las cuatro reglas de las asignaciones de un producto, en un solo sitio.
+ *
+ * Tres de ellas las impide además el esquema —un solo valor escalar, la opción del atributo
+ * correcto y nunca la misma opción dos veces—, y aquí existen para poder dar un mensaje
+ * entendible en vez de un error de Postgres. La cuarta, que la opción esté **activa**, solo
+ * puede vivir aquí: el esquema no distingue una fila nueva de una histórica, y desactivar
+ * tiene que impedir lo primero sin borrar lo segundo.
+ */
+export function validarAsignaciones(
+  atributo: Atributo,
+  asignaciones: readonly Asignacion[],
+): ResultadoDeAsignaciones {
+  if (asignaciones.length === 0) {
+    return { ok: true };
+  }
+
+  if (!ADMITE_VARIAS(atributo.tipo) && asignaciones.length > 1) {
+    return {
+      ok: false,
+      motivo: `El atributo admite un solo valor por producto, y llegaron ${asignaciones.length}.`,
+    };
+  }
+
+  const vistas = new Set<string>();
+
+  for (const asignacion of asignaciones) {
+    if (ESPERA_OPCION(atributo.tipo) !== (asignacion.clase === "opcion")) {
+      return {
+        ok: false,
+        motivo: `Un atributo de tipo ${atributo.tipo} no admite un valor de clase ${asignacion.clase}.`,
+      };
+    }
+
+    if (asignacion.clase === "escalar") {
+      const valor = validarValor(atributo.tipo, asignacion.valor);
+      if (!valor.ok) return { ok: false, motivo: valor.motivo };
+      continue;
+    }
+
+    const { opcion } = asignacion;
+
+    if (opcion.atributoId !== atributo.id) {
+      return { ok: false, motivo: `La opción ${opcion.id} no pertenece a este atributo.` };
+    }
+
+    if (!opcion.activa) {
+      return {
+        ok: false,
+        motivo: `La opción ${opcion.id} está desactivada y no admite asignaciones nuevas.`,
+      };
+    }
+
+    if (vistas.has(opcion.id)) {
+      return { ok: false, motivo: `La opción ${opcion.id} está repetida: no puede elegirse dos veces.` };
+    }
+    vistas.add(opcion.id);
+  }
+
+  return { ok: true };
+}
+
 export function validarValor(tipo: TipoDeAtributo, valor: unknown): ResultadoDeValor {
   switch (tipo) {
     case "numero":
