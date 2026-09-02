@@ -90,17 +90,49 @@ El camino previsto es **Workload Identity Federation**: Vercel emite un testigo 
 despliegue, Google lo acepta como identidad federada y entrega credenciales de corta
 duración. Sin claves permanentes que robar ni rotar.
 
-**Eso no está montado y no se monta todavía.** Es trabajo aparte, con su propia
-verificación, y hay que hacerlo **antes de desplegar** cualquier cosa que dependa de
-Firebase. Mientras tanto:
+**Todavía no está montado.** Mientras no lo esté:
 
 - Las pantallas de `/cuenta` **no pueden funcionar en producción**.
 - El desarrollo local sí funciona, con ADC.
 - No se añade ningún secreto a Vercel.
 
-Cuando llegue el momento habrá que decidir, y dejarlo escrito aquí: qué identidad federada
-se crea, qué condición de la afirmación OIDC de Vercel se acepta —el proyecto y el
-entorno, no cualquier despliegue de cualquiera—, y qué rol mínimo se le concede.
+Las tres decisiones que faltaban —qué identidad federada se crea, qué condición de la
+afirmación OIDC de Vercel se acepta y qué rol mínimo se concede— **ya están tomadas y
+escritas**, con su fuente oficial, en
+`docs/superpowers/specs/2026-09-01-vercel-firebase-wif-design.md`. El plan para
+ejecutarlas está en `docs/superpowers/plans/2026-09-01-vercel-firebase-wif.md`.
+
+### 3.1 Comprobaciones previas — 01/09/2026
+
+Antes de crear nada se comprobaron las tres condiciones que podían tumbar el diseño. Las
+tres salieron favorables, y conviene repetirlas si alguna vez deja de funcionar.
+
+| Qué | Resultado |
+|---|---|
+| `constraints/iam.workloadIdentityPoolProviders`, efectiva sobre `econoluz-dev-d30ab` | `allValues: ALLOW`. La organización **no restringe** los emisores OIDC, así que `oidc.vercel.com` es admisible **sin tocar ninguna política** |
+| Permisos de `administrador@econoluz.net` sobre el proyecto | `roles/owner`: puede crear el pool, el proveedor, el rol personalizado y la cuenta de servicio |
+| Vercel, *Settings → Security → Secure Backend Access with OIDC Federation* | Disponible, con el modo de emisor ya en **Team** |
+
+Se confirmó además que `constraints/iam.disableServiceAccountKeyCreation` está en
+`enforced: true`. La política que prohíbe las claves privadas **existe, está activa y no
+se toca**.
+
+Los valores que salieron de ahí, ninguno secreto:
+
+| Dato | Valor |
+|---|---|
+| Número del proyecto de Google | `629521051305` |
+| Equipo de Vercel (slug) | `joseangel-s-projects` |
+| Proyecto de Vercel | `econoluz-gt` |
+| Emisor OIDC | `https://oidc.vercel.com/joseangel-s-projects` |
+
+**Faltan tres API por activar** en `econoluz-dev-d30ab`, y sin ellas la federación no
+puede montarse: `iam.googleapis.com` (crear el pool y el proveedor),
+`sts.googleapis.com` (el canje del testigo) y `iamcredentials.googleapis.com` (suplantar
+la cuenta de servicio). `identitytoolkit.googleapis.com` sí está activa.
+
+La CLI de Vercel no está instalada en la máquina y el proyecto no está enlazado. No hace
+falta instalarla: se usa `npx vercel`.
 
 ## 4. El proyecto de Firebase
 
