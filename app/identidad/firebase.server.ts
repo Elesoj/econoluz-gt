@@ -9,6 +9,9 @@ import {
 } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
+import { elegirModo } from "./credencial";
+import { credencialFederada } from "./credencialFederada.server";
+
 /**
  * La única puerta a `firebase-admin` en todo el proyecto.
  *
@@ -24,16 +27,20 @@ import { getAuth } from "firebase-admin/auth";
  * es correcta: una clave descargada es un secreto permanente que se copia, se
  * pega en un chat y sobrevive a quien la creó.
  *
- * En su lugar se usan las **credenciales predeterminadas de la aplicación**
- * (ADC), que `applicationDefault()` resuelve sola:
+ * Hay dos caminos, y cuál se usa lo decide `elegirModo` en `credencial.ts`:
  *
- * - **En desarrollo local**, las que deja `gcloud auth application-default
- *   login`. Viven en el perfil del usuario, **nunca dentro del repositorio**.
- * - **En producción, todavía no está resuelto.** Vercel no es infraestructura
- *   de Google, así que ahí no hay ADC de serie. Antes de desplegar hay que
- *   montar una integración **sin claves permanentes** —Workload Identity
- *   Federation con los testigos OIDC de Vercel es el camino previsto—, y eso
- *   es trabajo aparte que no se hace aquí. Ver `docs/OPERACION-FIREBASE.md`.
+ * - **En desarrollo local**, las **credenciales predeterminadas de la
+ *   aplicación** (ADC) que deja `gcloud auth application-default login`. Viven
+ *   en el perfil del usuario, **nunca dentro del repositorio**.
+ * - **En Vercel**, una **identidad federada**: Vercel firma un testigo OIDC por
+ *   despliegue, Google lo canjea por credenciales temporales mediante Workload
+ *   Identity Federation y con ellas se suplanta una cuenta de servicio con
+ *   cuatro permisos sobre Firebase Authentication. Ver
+ *   `docs/superpowers/specs/2026-09-01-vercel-firebase-wif-design.md`.
+ *
+ * **En Vercel no hay respaldo hacia ADC.** Si falta configuración se lanza un
+ * error: caer hacia el camino más privilegiado justo cuando algo está mal
+ * configurado es precisamente lo que no puede pasar.
  *
  * La inicialización es perezosa: sin credenciales, el sitio tiene que arrancar
  * igual, como ya hacen el catálogo y `/api/leads`. Y falla de forma segura: si
@@ -70,7 +77,10 @@ let app: App | null = null;
 
 function obtenerCredencial(): Credential {
   if (!credencial) {
-    credencial = applicationDefault();
+    credencial =
+      elegirModo(process.env) === "federada"
+        ? (credencialFederada() as Credential)
+        : applicationDefault();
   }
   return credencial;
 }

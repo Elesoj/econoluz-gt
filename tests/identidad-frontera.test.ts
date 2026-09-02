@@ -134,3 +134,61 @@ test("no se usan claves privadas de cuenta de servicio", () => {
       `predeterminadas (ADC). Archivos que las piden:\n${sospechosos.join("\n")}`,
   );
 });
+
+/**
+ * Las bibliotecas de la federación entran por un solo archivo, igual que
+ * `firebase-admin` entra por `firebase.server.ts` y el controlador de Neon por
+ * `app/lib/datos`. Cuando la dependencia tiene una sola puerta, cambiarla o simularla es
+ * un trabajo acotado.
+ */
+test("dentro de app/, solo credencialFederada.server.ts importa las bibliotecas de federacion", () => {
+  const infractores = archivosDe(join(RAIZ, "app"))
+    .filter((ruta) => {
+      const fuente = readFileSync(ruta, "utf8");
+      return /from "google-auth-library|from "@vercel\/oidc/.test(fuente);
+    })
+    .map(aPosix)
+    .filter((ruta) => ruta !== "app/identidad/credencialFederada.server.ts");
+
+  assert.deepEqual(
+    infractores,
+    [],
+    `Solo app/identidad/credencialFederada.server.ts puede importarlas. Además lo hacen:\n${infractores.join("\n")}`,
+  );
+});
+
+/**
+ * Se mira el import, no la mención: el módulo explica en un comentario por qué NO importa
+ * `firebase-admin`, y esa explicación tiene que poder escribirse.
+ */
+test("el modulo puro de la credencial no importa firebase-admin", () => {
+  const ruta = join(RAIZ, "app", "identidad", "credencial.ts");
+  assert.equal(existsSync(ruta), true, "Falta el módulo puro de la credencial.");
+  assert.equal(
+    usaFirebaseAdmin(ruta),
+    false,
+    "credencial.ts declara la forma de Credential por su cuenta; importarla rompería la frontera.",
+  );
+});
+
+test("firebase.server.ts no tiene salida hacia ADC cuando esta en Vercel", () => {
+  const fuente = readFileSync(join(RAIZ, "app", "identidad", "firebase.server.ts"), "utf8");
+  assert.match(fuente, /elegirModo/, "La elección tiene que venir del módulo puro y probado.");
+  assert.equal(
+    /VERCEL[\s\S]{0,200}applicationDefault/.test(fuente),
+    false,
+    "En Vercel no puede haber ninguna caída hacia applicationDefault().",
+  );
+});
+
+test("las bibliotecas de federacion son dependencias directas, no transitivas", () => {
+  const paquete = JSON.parse(readFileSync(join(RAIZ, "package.json"), "utf8"));
+  assert.ok(
+    paquete.dependencies["google-auth-library"],
+    "google-auth-library se importa explícitamente: no puede depender de que la traiga firebase-admin.",
+  );
+  assert.ok(
+    paquete.dependencies["@vercel/oidc"],
+    "@vercel/oidc se importa explícitamente: no puede depender de que la traiga @vercel/blob.",
+  );
+});
