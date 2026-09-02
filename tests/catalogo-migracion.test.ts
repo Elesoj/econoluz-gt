@@ -262,8 +262,9 @@ test("la migracion no borra nada", () => {
   }
 });
 
-test("la migracion sigue sin aplicarse y lo dice en su cabecera", () => {
-  assert.match(sql, /NO ESTÁ APLICADA/);
+test("la cabecera distingue la rama de desarrollo de Producción", () => {
+  assert.match(sql, /APLICADA SOLO EN LA RAMA DE DESARROLLO/);
+  assert.match(sql, /NO ESTÁ APLICADA EN PRODUCCIÓN/);
 });
 
 test("las migraciones se descubren sin huecos e incluyen la 010", () => {

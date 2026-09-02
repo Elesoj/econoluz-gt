@@ -20,8 +20,9 @@
 -- 'construlita-cuasar'—, no un entero. Todas las claves foráneas hacia productos son por
 -- tanto `text`. Escribirlas como `bigint` hace que la migración entera falle al aplicarse.
 --
--- ESTA MIGRACIÓN NO ESTÁ APLICADA EN NINGUNA BASE. Ver
--- docs/superpowers/plans/2026-09-02-catalogo-relacional.md, fase B.
+-- ESTA MIGRACIÓN ESTÁ APLICADA SOLO EN LA RAMA DE DESARROLLO
+-- `catalogo-relacional-fase-b`; NO ESTÁ APLICADA EN PRODUCCIÓN. Ver
+-- docs/superpowers/plans/2026-09-02-catalogo-relacional-fase-b.md.
 
 -- La restricción de exclusión de `product_prices` compara un texto con un rango de fechas
 -- en el mismo índice, y eso solo lo hace GiST. `btree_gist` es una extensión confiable,
