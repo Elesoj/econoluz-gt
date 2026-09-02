@@ -57,6 +57,30 @@ export function debeRenovarse(expira: Date, ahora: Date): boolean {
 }
 
 /**
+ * La decisión completa de renovar, con los casos que **no** pueden dispararla.
+ *
+ * Una cookie de sesión de Firebase no se puede alargar desde el servidor: hace falta un
+ * testigo de identidad nuevo, y eso solo lo produce el navegador. Por eso esto no renueva
+ * nada: dice si hay que pedírselo al cliente, que es quien puede.
+ *
+ * - Una sesión **inválida** no se renueva: sería alargar indefinidamente algo que ya
+ *   debería haber terminado. Se rehace entrando.
+ * - Una **ya caducada** tampoco, por lo mismo.
+ * - **Sin caducidad conocida** no se renueva, en vez de adivinarla.
+ */
+export function debeRenovarSesion(entrada: {
+  valida: boolean;
+  expiraEnSegundos: number | null;
+  ahora: Date;
+}): boolean {
+  if (!entrada.valida || entrada.expiraEnSegundos === null) {
+    return false;
+  }
+
+  return debeRenovarse(new Date(entrada.expiraEnSegundos * 1000), entrada.ahora);
+}
+
+/**
  * Cerrar sesión, en el orden que importa.
  *
  * Borrar la cookie del navegador no invalida nada: la cookie de sesión de Firebase sigue

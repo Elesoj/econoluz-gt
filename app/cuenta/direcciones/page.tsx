@@ -2,7 +2,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { mensajeDeFaltan, validarDireccion } from "@/app/identidad/direcciones";
 import { guardarDireccion, listarDirecciones } from "@/app/identidad/direcciones.server";
-import { leerClienteActual } from "@/app/identidad/sesion.server";
+import { debeRenovarLaSesion, leerClienteActual } from "@/app/identidad/sesion.server";
+import RenovarSesion from "../RenovarSesion";
 import FormularioDireccion, { type EstadoDelFormulario } from "./FormularioDireccion";
 
 export const metadata = { title: "Mis direcciones · ECONOLUZ" };
@@ -44,10 +45,12 @@ export default async function DireccionesPage() {
     redirect("/cuenta/entrar");
   }
 
+  const debeRenovar = await debeRenovarLaSesion();
   const direcciones = await listarDirecciones(cliente.id);
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-16">
+      <RenovarSesion debeRenovar={debeRenovar} />
       <h1 className="text-2xl font-semibold text-[#001B59]">Mis direcciones de entrega</h1>
 
       <ul className="mt-6 space-y-4">

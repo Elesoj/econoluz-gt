@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { leerClienteActual } from "@/app/identidad/sesion.server";
+import { debeRenovarLaSesion, leerClienteActual } from "@/app/identidad/sesion.server";
+import RenovarSesion from "./RenovarSesion";
 
 export const metadata = { title: "Mi cuenta · ECONOLUZ" };
 
@@ -10,8 +11,11 @@ export default async function CuentaPage() {
     redirect("/cuenta/entrar");
   }
 
+  const debeRenovar = await debeRenovarLaSesion();
+
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-16">
+      <RenovarSesion debeRenovar={debeRenovar} />
       <h1 className="text-2xl font-semibold text-[#001B59]">Mi cuenta</h1>
 
       <dl className="mt-6 space-y-2 text-sm">

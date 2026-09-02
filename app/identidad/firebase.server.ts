@@ -54,6 +54,12 @@ export type IdentidadVerificada = {
   emailVerificado: boolean;
   nombre: string;
   proveedor: string;
+  /**
+   * Cuándo caduca la credencial que se acaba de verificar, en segundos epoch, o `null` si
+   * no lo dice. Para la cookie de sesión es lo que decide si toca renovarla; para un
+   * testigo de identidad es su propia hora corta y no se usa.
+   */
+  expiraEnSegundos: number | null;
 };
 
 /**
@@ -129,6 +135,7 @@ function proveedorDe(claims: Record<string, unknown>): string {
 
 function aIdentidad(claims: Record<string, unknown>): IdentidadVerificada {
   return {
+    expiraEnSegundos: typeof claims.exp === "number" ? claims.exp : null,
     uid: String(claims.uid ?? claims.sub ?? ""),
     email: String(claims.email ?? ""),
     emailVerificado: claims.email_verified === true,

@@ -5,6 +5,7 @@ import {
   MS_DE_SESION,
   caducidadDesde,
   cerrarSesion,
+  debeRenovarSesion,
   debeRenovarse,
   normalizarCorreo,
   opcionesDeCookie,
@@ -113,4 +114,60 @@ test("sin sesion que cerrar, no se llama a Firebase pero la cookie se borra", as
   assert.equal(seRevoco, false, "Sin uid no hay a quién revocar.");
   assert.equal(cookieBorrada, true);
   assert.equal(resultado.revocada, false);
+});
+
+/**
+ * `debeRenovarse` estaba escrita y probada pero no la llamaba nadie: la sesión caducaba en
+ * seco a los cinco días, al contrario de lo que decía su propio comentario. Esto es la
+ * decisión completa, con los casos que no pueden dispararla.
+ */
+const AHORA = new Date("2026-09-02T12:00:00Z");
+const enSegundos = (fecha: Date) => Math.floor(fecha.getTime() / 1000);
+
+test("pasada la mitad de la vida, la sesion valida se renueva", () => {
+  const quedaUnDia = new Date(AHORA.getTime() + 24 * 60 * 60 * 1000);
+
+  assert.equal(
+    debeRenovarSesion({ valida: true, expiraEnSegundos: enSegundos(quedaUnDia), ahora: AHORA }),
+    true,
+  );
+});
+
+test("recien abierta no se renueva: renovar en cada carga no es renovar", () => {
+  const quedanCuatroDias = new Date(AHORA.getTime() + 4 * 24 * 60 * 60 * 1000);
+
+  assert.equal(
+    debeRenovarSesion({
+      valida: true,
+      expiraEnSegundos: enSegundos(quedanCuatroDias),
+      ahora: AHORA,
+    }),
+    false,
+  );
+});
+
+/**
+ * Renovar una sesión que no es válida sería alargar indefinidamente algo que ya debería
+ * haber terminado. Se rehace entrando, no se prolonga.
+ */
+test("una sesion invalida no se renueva nunca", () => {
+  const quedaUnDia = new Date(AHORA.getTime() + 24 * 60 * 60 * 1000);
+
+  assert.equal(
+    debeRenovarSesion({ valida: false, expiraEnSegundos: enSegundos(quedaUnDia), ahora: AHORA }),
+    false,
+  );
+});
+
+test("una sesion ya caducada no se renueva", () => {
+  const caduco = new Date(AHORA.getTime() - 1000);
+
+  assert.equal(
+    debeRenovarSesion({ valida: true, expiraEnSegundos: enSegundos(caduco), ahora: AHORA }),
+    false,
+  );
+});
+
+test("sin caducidad conocida no se renueva, en vez de adivinarla", () => {
+  assert.equal(debeRenovarSesion({ valida: true, expiraEnSegundos: null, ahora: AHORA }), false);
 });

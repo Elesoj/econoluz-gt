@@ -13,6 +13,8 @@ const IDENTIDAD = {
   emailVerificado: true,
   nombre: "Quien Compra",
   proveedor: "google.com",
+  // El aprovisionamiento no mira la caducidad: la usa la renovación de la sesión.
+  expiraEnSegundos: null,
 };
 
 test("el correo llega normalizado a la base, o la restricción lo rechazaría", () => {

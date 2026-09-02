@@ -2,33 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getApps, initializeApp, type FirebaseError } from "firebase/app";
+import { type FirebaseError } from "firebase/app";
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   fetchSignInMethodsForEmail,
-  getAuth,
   linkWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
   type AuthCredential,
   type UserCredential,
 } from "firebase/auth";
+import { auth } from "./firebaseCliente";
 
-const configuracion = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-};
-
-function auth() {
-  if (!configuracion.apiKey || !configuracion.authDomain || !configuracion.projectId) {
-    throw new Error("Falta la configuración pública de Firebase.");
-  }
-
-  const app = getApps()[0] ?? initializeApp(configuracion);
-  return getAuth(app);
-}
 
 export default function ClienteFirebase() {
   const router = useRouter();

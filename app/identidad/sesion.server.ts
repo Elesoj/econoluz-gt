@@ -7,6 +7,7 @@ import { verificarCookieDeSesion } from "./firebase.server";
 import {
   COOKIE_SESION_CLIENTE,
   clasificarFalloDeSesion,
+  debeRenovarSesion,
   interpretarSesion,
   type EstadoDeSesion,
 } from "./sesion";
@@ -22,6 +23,12 @@ export type ClienteActual = {
 export type SesionDeCliente = {
   estado: EstadoDeSesion;
   cliente: ClienteActual | null;
+  /**
+   * La cookie de sesión de Firebase no se puede alargar desde aquí: hace falta un testigo
+   * de identidad nuevo y eso solo lo produce el navegador. Esto es la señal de que hay que
+   * pedírselo, y la consume `app/cuenta/RenovarSesion.tsx`.
+   */
+  debeRenovar: boolean;
 };
 
 /**
@@ -36,6 +43,7 @@ export const leerSesionDeCliente = cache(async (): Promise<SesionDeCliente> => {
     return {
       estado: interpretarSesion({ hayCookie: false, verificada: false, fallo: null }),
       cliente: null,
+      debeRenovar: false,
     };
   }
 
@@ -56,11 +64,17 @@ export const leerSesionDeCliente = cache(async (): Promise<SesionDeCliente> => {
       return {
         estado: interpretarSesion({ hayCookie: true, verificada: false, fallo: "invalida" }),
         cliente: null,
+        debeRenovar: false,
       };
     }
 
     return {
       estado: interpretarSesion({ hayCookie: true, verificada: true, fallo: null }),
+      debeRenovar: debeRenovarSesion({
+        valida: true,
+        expiraEnSegundos: identidad.expiraEnSegundos,
+        ahora: new Date(),
+      }),
       cliente: {
         id: String(fila.id),
         uid: identidad.uid,
@@ -77,6 +91,7 @@ export const leerSesionDeCliente = cache(async (): Promise<SesionDeCliente> => {
         fallo: clasificarFalloDeSesion(fallo),
       }),
       cliente: null,
+      debeRenovar: false,
     };
   }
 });
@@ -84,4 +99,9 @@ export const leerSesionDeCliente = cache(async (): Promise<SesionDeCliente> => {
 /** La identidad del visitante que usan las pantallas públicas. */
 export async function leerClienteActual(): Promise<ClienteActual | null> {
   return (await leerSesionDeCliente()).cliente;
+}
+
+/** Si toca pedirle al navegador un testigo nuevo para alargar la sesión. */
+export async function debeRenovarLaSesion(): Promise<boolean> {
+  return (await leerSesionDeCliente()).debeRenovar;
 }
