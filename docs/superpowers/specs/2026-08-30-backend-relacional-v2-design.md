@@ -160,7 +160,7 @@ verificado en el servidor.
 | 5 | Solo envío por mensajería a todo el país; sin recogida ni reparto propio | 30/08/2026 | Alta: la recogida sería un método de envío más |
 | 6 | NIT y nombre fiscal, con consumidor final como opción | 30/08/2026 | Alta |
 | 7 | Árbol de categorías padre/hijo con pertenencia múltiple; el ambiente es característica filtrable, no categoría | 30/08/2026 | Media: reclasificar cuesta trabajo manual |
-| 8 | Se normalizan 12 características más el ambiente; el resto sigue en JSON | 30/08/2026 | Alta: añadir una más es una fila en `attributes` |
+| 8 | Se normalizan 12 características más el ambiente; el resto sigue en JSON. Las características pertenecen al producto, nunca a la categoría; el panel permite crear y retirar de uso atributos | 02/09/2026 | Alta: añadir una más es una fila en `attributes` |
 | 9 | Dos roles de panel: administrador y empleado | 30/08/2026 | Alta: un tercer rol es una línea de migración |
 | 10 | Borrado real de cuenta con anonimización; pedidos y facturas se conservan | 30/08/2026 | Baja: es requisito de Apple y Google |
 | 11 | Precio vigente más promoción opcional con fechas, en centavos enteros | 30/08/2026 | Alta |
@@ -223,12 +223,12 @@ de iOS. Eso es lo que impide que la web y las apps acaben comportándose distint
 
 ## 5. Modelo de datos
 
-**33 tablas nuevas en total**, más las 8 existentes. El desglose importa porque las tres
+**32 tablas nuevas en total**, más las 8 existentes. El desglose importa porque las tres
 categorías tienen naturalezas distintas:
 
 | Categoría | Cuántas | Cuáles |
 |---|---|---|
-| Negocio y contenido | 31 | Las de los ocho dominios de esta sección |
+| Negocio y contenido | 30 | Las de los ocho dominios de esta sección |
 | Configuración | 1 | `app_settings` (sección 9.4), que no pertenece a ningún dominio y nace en el subproyecto 1 |
 | Proyección derivada | 1 | `public_products` (sección 7.2): **no es fuente de verdad**. Es una *tabla de proyección pública derivada y sincronizada* que contiene el catálogo ya saneado |
 
@@ -270,30 +270,48 @@ Ningún subproyecto crea más de nueve tablas: cada uno trae solo las suyas.
    el pedido guarda su copia.
 3. **`auth_events` no guarda IP en claro.**
 
-### 5.3 Catálogo — 9 tablas
+### 5.3 Núcleo de productos y catálogo de la tienda — 8 tablas
 
 `categories` · `product_categories` · `product_private_data` · `product_images` ·
-`attributes` · `attribute_options` · `category_attributes` · `product_attribute_values` ·
-`product_prices`
+`attributes` · `attribute_options` · `product_attribute_values` · `product_prices`
 
 - `categories` tiene `parent_id` hacia sí misma, `slug` único, posición y publicación.
 - `product_categories` permite pertenencia múltiple con **una categoría marcada como
-  principal** (índice único parcial).
+  principal**. El índice único parcial impide que haya dos; una comprobación diferible al
+  final de la transacción exige que exista exactamente una cuando el producto tenga
+  categorías.
 - **`products` adelgaza de 28 columnas a unas 10.** Las imágenes salen a
   `product_images` copiando el patrón probado de `project_images`; las siete columnas
   `supplier_*` salen a `product_private_data`; el precio sale a `product_prices`.
+- **`supplier_code` es el código que ECONOLUZ usa internamente para vender.** Se conserva
+  exactamente en `product_private_data`, privado, editable y buscable desde el panel, sin
+  restricción `UNIQUE` porque hoy algunas filas contienen varios códigos. `sku` y
+  `productCode` son alias actuales de ese mismo dato y no se convierten en columnas
+  duplicadas. Cuando existan pedidos, cada línea guardará una copia inmutable del código
+  usado en la venta. Normalizar variantes o códigos individuales queda para un futuro ERP,
+  cuando el negocio defina qué significa cada código separado por `/`.
 - `attributes` declara el tipo de dato (`numero`, `texto`, `booleano`, `opcion`,
-  `opcion_multiple`), la unidad, y si sirve para filtrar o comparar.
+  `opcion_multiple`), la unidad, si sirve para filtrar o comparar y si sigue activo.
+  **No existe relación categoría–atributo:** las características pertenecen a cada
+  producto. En su ficha el administrador añade únicamente las que ese producto necesite.
+- El panel permite crear atributos y sus opciones. Un atributo u opción sin uso se puede
+  borrar; si ya tiene valores se conserva y se desactiva. Un atributo utilizado no puede
+  cambiar de tipo. Las claves permanecen estables y únicas aunque cambie la etiqueta.
 - `product_attribute_values` guarda `value_number`, `value_text`, `value_bool` y
-  `option_id`, **con una restricción que obliga a llenar exactamente la columna que
-  corresponde al tipo declarado**. Eso es lo que permite filtrar «entre 15 y 25 W» en
-  lugar de buscar la cadena «20 W». Índices por `(attribute_id, value_number)` y
-  `(attribute_id, option_id)`.
+  `option_id`. Una restricción local exige exactamente una columna llena y una
+  comprobación transaccional valida que coincida con el tipo declarado, que la opción
+  pertenezca al mismo atributo y que no haya duplicados. Los tipos escalares y `opcion`
+  admiten un valor por producto; `opcion_multiple`, varias opciones distintas. Eso es lo
+  que permite filtrar «entre 15 y 25 W» en lugar de buscar la cadena «20 W». Índices por
+  `(attribute_id, value_number)` y `(attribute_id, option_id)`.
 - `product_prices` guarda centavos enteros, tipo (`normal`, `promocion`) y periodo de
   validez, con **restricción de exclusión que impide dos promociones solapadas** para el
   mismo producto. La base rechaza el error; no depende de que la aplicación se acuerde.
 - La ficha descriptiva —las 46 claves restantes, `specialFeatures` incluida— sigue en
   `products.technical_specs` como JSON.
+
+La especificación detallada de estas relaciones, las reglas del panel y la transición está
+en `docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md`.
 
 **Las 12 características que se normalizan**, con el número de productos que ya la tienen:
 `protection` (IP, 217), `voltage` (210), `power` (190), `colorTemperature` (174),
@@ -319,9 +337,10 @@ cantidades, con el tope de 999 por línea ya vigente.
 - `orders` guarda número público, estado, importes en centavos, datos fiscales copiados
   (NIT, nombre fiscal, consumidor final), plazo estimado y fecha de confirmación con el
   proveedor.
-- **`order_items` guarda su propia instantánea** de referencia, nombre, precio unitario,
-  cantidad e impuesto. La clave hacia `products` es opcional, para que retirar un
-  producto no rompa un pedido histórico.
+- **`order_items` guarda su propia instantánea** de referencia, nombre, `supplier_code`
+  interno usado por ECONOLUZ, precio unitario, cantidad e impuesto. La clave hacia
+  `products` es opcional, para que retirar o editar un producto no cambie un pedido
+  histórico.
 - `order_addresses` guarda copia completa de la dirección de envío y la de facturación.
 - `idempotency_keys` impide que un doble clic o un reintento cree dos pedidos.
 
@@ -380,7 +399,6 @@ erDiagram
     products ||--o{ product_attribute_values : "describe"
     attributes ||--o{ product_attribute_values : "define"
     attributes ||--o{ attribute_options : "ofrece"
-    categories ||--o{ category_attributes : "aplica"
     cart_items }o--|| products : "referencia"
     order_items }o--o| products : "referencia (opcional)"
 ```
@@ -980,7 +998,7 @@ flowchart TD
 |---|---|---|---|
 | 1 | Fundamentos y capa de datos | Capa única de acceso, transacciones, errores tipados, registro, verificación del migrador, proyección pública y rol público, `app_settings`, `audit_log` | Listo para empezar |
 | 2 | Identidad de clientes | Firebase Auth, `users`, direcciones, consentimientos, eventos, borrado y anonimización | Tras 1 |
-| 3 | Catálogo relacional v2 | Categorías jerárquicas, características normalizadas, imágenes, precios con vigencia | Tras 1 |
+| 3 | Núcleo relacional de productos y catálogo de la tienda | Categorías jerárquicas, características propias de cada producto y administrables desde el panel, datos internos, imágenes y precios con vigencia | Tras 1 |
 | 5 | Carrito persistente | `carts`, `cart_items`, fusión al iniciar sesión | Tras 2 |
 | 9 | Envíos | Zonas, tarifas, envíos y seguimiento | Tras 3 |
 | 6 | Checkout y pedidos | Pedidos, líneas con instantánea, direcciones, historial, idempotencia, datos fiscales | Tras 2, 3, 5 y 9 |
@@ -1058,3 +1076,4 @@ paridad total, y esa invisibilidad es precisamente lo que lo hace seguro.
 | 30/08/2026 (contenido) | Retirado el antiguo anexo 12, que recogía una tarea de contenido ya ejecutada en su propia rama, y renumerado el historial a §12. La sección 0 pasa a tiempo pasado: `CLAUDE.md` y `docs/CONTINUAR-PANEL.md` ya están actualizados |
 | 30/08/2026 (cierre) | Las cuatro decisiones pendientes, aprobadas e incorporadas: la proyección pública entra en el subproyecto 1 pero como proyección derivada **de prueba**, sin sustituir al catálogo del visitante y con la frontera actual intacta; la bandera queda en `legacy` al terminar el subproyecto 1, `shadow` solo compara, y `relational_v2` únicamente en el subproyecto 3 con autorización expresa; la actualización de `CLAUDE.md` y `CONTINUAR-PANEL.md` es tarea documental separada, aprobada, posterior a estos documentos y anterior a implementar, y no autoriza a retirar nada de código; y el recuento de 33 tablas físicas, con `public_products` descrita como «tabla de proyección pública derivada y sincronizada» para no confundirla con una `MATERIALIZED VIEW` |
 | 30/08/2026 (revisión del dueño) | Ocho correcciones tras su lectura completa: recuento exacto de tablas (33, desglosado en 31 de negocio, `app_settings` y la proyección derivada); auditoría corregida porque **el migrador ya es transaccional**; la factura FEL se solicita solo tras la confirmación del proveedor, no al confirmarse el pago; precisión de qué es atómico en la creación del pedido y qué no (el cobro externo nunca lo es); **la proyección pública pasa de vista a tabla materializada** porque la limpieza de privacidad usa los datos del proveedor como contexto; la regla de importación del controlador se limita a `app/**` y excluye `scripts/**`; se explicita que este diseño sustituye reglas vigentes de `CLAUDE.md` y `CONTINUAR-PANEL.md`, que se actualizarán aparte |
+| 02/09/2026 (núcleo de tienda) | El dueño aclara y aprueba que las características pertenecen únicamente a los productos: se elimina `category_attributes`, el catálogo pasa de nueve a ocho tablas nuevas y el total global de 33 a 32. Los atributos y opciones se administran desde el panel con borrado solo mientras estén sin uso y desactivación posterior. `supplier_code` queda como código privado de venta de ECONOLUZ, sin duplicarlo como `sku` o `product_code`, y se copiará a las líneas de pedido futuras. El subproyecto 3 se describe como núcleo relacional de productos y catálogo de la tienda, no como un catálogo aislado. |

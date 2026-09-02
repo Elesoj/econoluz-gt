@@ -1,5 +1,13 @@
 # Catálogo relacional v2 — plan de implementación (subproyecto 3)
 
+> **PLAN OBSOLETO DESDE EL 02/09/2026 — NO CONTINUAR NI EJECUTAR LA FASE B.**
+> El diseño aprobado elimina `category_attributes`, define atributos administrables por
+> producto y corrige el significado de `supplier_code`. La fase A existente y
+> `db/010_catalogo_relacional.sql` reflejan el diseño anterior de nueve tablas. Este plan se
+> reescribirá después de que el dueño revise
+> `docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md`. La migración no se
+> ha aplicado a ninguna base de datos.
+
 > **Para quien ejecute esto con agentes:** SUB-SKILL OBLIGATORIA: usa
 > `superpowers:subagent-driven-development` o `superpowers:executing-plans`.
 
