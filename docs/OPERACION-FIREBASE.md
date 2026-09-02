@@ -79,7 +79,26 @@ La cuenta corporativa con la que se inicia sesión necesita, sobre el proyecto
 Authentication Admin** basta—. Si `npm run identidad:adc` pasa el primer punto y falla el
 segundo, el problema es ese rol, no las credenciales.
 
-## 3. Producción — sin resolver, y bloquea el despliegue
+## 3. Producción — la federación está resuelta; queda otro bloqueo distinto
+
+> **Estado al 01/09/2026.** La identidad federada **funciona y está demostrada** con una
+> prueba positiva y una negativa, las dos ejecutadas de verdad; ver §3.2 y la sección 17
+> del diseño. Lo que impide desplegar ahora es **otro problema, ajeno a la autenticación**:
+> `firebase-admin` no llega a cargarse dentro de una función de Vercel.
+>
+> ```
+> Failed to load external module firebase-admin/auth: ERR_REQUIRE_ESM:
+> require() of ES Module .../jwks-rsa/node_modules/jose/dist/webapi/index.js
+> from .../jwks-rsa/src/utils.js not supported
+> ```
+>
+> La cadena es `firebase-admin 14.3.0` → `jwks-rsa 4.1.0` → `jose 6.2.10`, que es ESM puro.
+> **No es la versión de Node** —Vercel está en 24.x y en local carga sin error— y **no hay
+> versión más nueva** de ninguno de los tres paquetes. Está acotado a la carga del paquete
+> como módulo externo en el runtime de Turbopack.
+>
+> Mientras no se resuelva, `/cuenta` no puede funcionar en Vercel **con ningún método de
+> autenticación**, así que el texto que sigue describe el bloqueo anterior, ya superado.
 
 **Vercel no es infraestructura de Google**, así que allí no hay credenciales
 predeterminadas de serie. Y como no se pueden generar claves de cuenta de servicio, la

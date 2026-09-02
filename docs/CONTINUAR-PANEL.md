@@ -149,11 +149,29 @@ petición creó el usuario sintético, la concurrente reutilizó la misma fila y
 confirmó que no quedó ese usuario. La autorización era necesaria porque su limpieza
 ejecuta `DELETE` fuera de la transacción.
 
-**No hay autorización para fusionar, hacer push ni desplegar.** Firebase de producción
-permanece bloqueado hasta diseñar Workload Identity Federation para Vercel; no se debe
-desactivar la política corporativa ni crear archivos JSON. Antes de una futura salida a
-producción también faltan aplicar allí la migración `009`, configurar las variables
-públicas de la app web, guardar la pimienta y aprobar los textos legales.
+**No hay autorización para fusionar, hacer push ni desplegar.**
+
+**La identidad federada ya no bloquea (01/09/2026).** Workload Identity Federation está
+montada sobre `econoluz-dev-d30ab` y **demostrada** con una prueba positiva y una negativa
+ejecutadas de verdad; la cuenta de servicio tiene cuatro permisos y ninguno predefinido.
+No se desactivó ninguna política corporativa ni se creó ningún JSON. Diseño y evidencia en
+`docs/superpowers/specs/2026-09-01-vercel-firebase-wif-design.md` §17.
+
+**El bloqueo ahora es otro, y es de empaquetado, no de autenticación.** Dentro de una
+función de Vercel, `firebase-admin/auth` no llega a cargarse:
+
+```
+ERR_REQUIRE_ESM: require() of ES Module .../jwks-rsa/node_modules/jose/...
+```
+
+`firebase-admin 14.3.0` → `jwks-rsa 4.1.0` → `jose 6.2.10`, que es ESM puro. **No** es la
+versión de Node (Vercel está en 24.x y en local carga bien) y **no** hay versión más nueva
+de ninguno de los tres. Hay que resolverlo antes de desplegar `/cuenta`, y afecta por igual
+a cualquier método de autenticación.
+
+Antes de una futura salida a producción también faltan aplicar allí la migración `009`,
+crear el proyecto de Firebase de producción con su propia federación, configurar las
+variables públicas de la app web, guardar la pimienta y aprobar los textos legales.
 
 Preguntas abiertas del diseño, que no se deben resolver por suposición:
 

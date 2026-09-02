@@ -509,10 +509,14 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   está en `.env.local` (ignorado por git) y en Vercel; `DATABASE_URL_PUBLIC` está en
   Vercel como secreto exclusivo de Production.
 - Identidad de clientes: **Firebase Authentication**. El navegador usa el SDK web y el
-  servidor `firebase-admin` con credenciales predeterminadas de la aplicación (ADC).
-  Desarrollo usa `econoluz-dev-d30ab`; producción está bloqueada hasta diseñar Workload
-  Identity Federation para Vercel. La política corporativa prohíbe claves privadas de
-  cuentas de servicio: no crear JSON ni variables con una clave privada.
+  servidor `firebase-admin`. En local se autentica con credenciales predeterminadas (ADC);
+  en Vercel, con **Workload Identity Federation**, ya montada y demostrada el 01/09/2026
+  con una prueba positiva y una negativa. Desarrollo usa `econoluz-dev-d30ab`. La política
+  corporativa prohíbe claves privadas de cuentas de servicio: no crear JSON ni variables
+  con una clave privada, y no hay respaldo hacia ADC dentro de Vercel.
+  **Sigue bloqueado el despliegue, pero por otra causa**: `firebase-admin` no se carga
+  dentro de una función de Vercel porque su cadena `jwks-rsa` → `jose` es ESM puro y se
+  carga con `require()`. Ver `docs/OPERACION-FIREBASE.md` §3.
 - Pasarela de pago: `TODO — pendiente de decidir`
 - Certificador FEL: `TODO — pendiente de decidir`
 
@@ -961,7 +965,18 @@ se fusionó en `main`, se preparó Neon de producción y se publicó con autoriz
 el 01/09/2026. Vercel marcó el despliegue como `Ready` y `Current`, y las rutas críticas se
 comprobaron directamente. El **subproyecto 2, identidad de clientes**, está implementado
 y verificado en `feat/identidad-clientes`, pero aún no se ha fusionado, publicado ni
-desplegado. Su producción sigue bloqueada por la identidad federada pendiente de Vercel.
+desplegado.
+
+**La identidad federada dejó de ser el bloqueo el 01/09/2026.** Está montada sobre
+`econoluz-dev-d30ab` y demostrada: la prueba positiva pasó los tres puntos y la negativa
+devolvió `unauthorized_client: The given credential is rejected by the attribute
+condition` al estrechar la condición a `preview`. La cuenta de servicio tiene un rol
+personalizado de cuatro permisos y ninguno predefinido. Diseño y evidencia en
+`docs/superpowers/specs/2026-09-01-vercel-firebase-wif-design.md`.
+
+**Lo que bloquea ahora es otra cosa:** `firebase-admin` no se carga dentro de una función
+de Vercel (`ERR_REQUIRE_ESM` en la cadena `jwks-rsa` → `jose`). Es independiente del
+método de autenticación y hay que resolverlo antes de desplegar `/cuenta`.
 El catálogo relacional corresponde al subproyecto 3 y no se adelanta.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
