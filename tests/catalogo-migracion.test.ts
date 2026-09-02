@@ -103,6 +103,23 @@ test("no puede haber dos imagenes en la misma posicion ni dos principales", () =
   assert.match(sql, /create unique index if not exists product_images_una_principal/);
 });
 
+/**
+ * Una restricción inmediata comprueba cada fila mientras avanza el `UPDATE`: al intercambiar
+ * las posiciones 10 y 20, la primera fila choca con la segunda antes de que esta se mueva.
+ * La unicidad tiene que comprobarse sobre el estado final de la transacción.
+ */
+test("se pueden intercambiar dos posiciones de imagenes en un solo UPDATE", () => {
+  const bloque = sql.slice(
+    sql.indexOf("create table if not exists product_images"),
+    sql.indexOf(");", sql.indexOf("create table if not exists product_images")),
+  );
+
+  assert.match(
+    bloque,
+    /constraint product_images_posicion_unica\s+unique \(product_id, posicion\)\s+deferrable initially deferred/i,
+  );
+});
+
 // ---------------------------------------------------------------------------
 // Atributos y sus opciones
 // ---------------------------------------------------------------------------

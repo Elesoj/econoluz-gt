@@ -152,7 +152,10 @@ create table if not exists product_images (
   principal  boolean     not null default false,
   creado_en  timestamptz not null default now(),
 
-  unique (product_id, posicion)
+  -- Diferida para poder intercambiar dos posiciones en un único UPDATE. El estado final
+  -- sigue siendo único; lo que se permite es el choque transitorio mientras se mueven.
+  constraint product_images_posicion_unica
+    unique (product_id, posicion) deferrable initially deferred
 );
 
 create unique index if not exists product_images_una_principal
