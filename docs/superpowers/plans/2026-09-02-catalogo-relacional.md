@@ -122,6 +122,30 @@ nuevo precio normal **dentro de una única transacción**.
 
 **La migración sigue sin aplicarse.**
 
+## Tarea 4.bis: Comprobar la migración contra PostgreSQL de verdad
+
+Las pruebas de `tests/catalogo-migracion.test.ts` leen el **texto** del `.sql`: impiden que
+alguien borre una restricción sin enterarse, pero no demuestran que PostgreSQL acepte el
+archivo ni que las restricciones se comporten como dicen. Eso lo hace
+`scripts/verificar-migracion-postgres.sh`:
+
+```bash
+bash scripts/verificar-migracion-postgres.sh
+```
+
+Levanta un clúster **efímero** propio —sin Docker, sin `sudo` y **sin red**: solo un socket
+dentro de su carpeta temporal—, aplica `001` a `010` con un rol **no superusuario**
+equivalente al de Neon, repite la `010` para demostrar idempotencia, ejercita cada
+restricción y lo borra todo al terminar, incluso si algo falla.
+
+**Solo corre en Linux o WSL**, porque necesita los binarios de PostgreSQL; por eso no está
+en `package.json`, donde sería un comando roto en la consola del dueño. No lleva
+contraseñas ni cadenas de conexión.
+
+Cada comprobación negativa exige **qué restricción** debe saltar, no solo que falle: sin
+eso, una errata en el SQL de la prueba también daría error y la comprobación se daría por
+buena sin haber ejercitado nada.
+
 ## Tarea 5: Documentación y batería
 
 `CLAUDE.md` y `docs/CONTINUAR-PANEL.md` al día, y la batería completa. **La Fase B no
