@@ -5,6 +5,7 @@ import { ExternalAccountClient } from "google-auth-library";
 
 import {
   adaptarCredencial,
+  audienciaDelTestigo,
   configuracionFederada,
   type ClienteFederado,
   type CredencialDeFirebase,
@@ -40,7 +41,9 @@ import {
  */
 function crearCliente(): ClienteFederado {
   const configuracion = configuracionFederada(process.env);
-  const audiencia = configuracion.audience;
+  // Ojo: la audiencia que se le pide al testigo NO es la que lleva la configuración del
+  // STS. Ver `credencial.ts`, que explica por qué y con qué error se descubrió.
+  const audiencia = audienciaDelTestigo(process.env);
 
   const cliente = ExternalAccountClient.fromJSON({
     ...configuracion,

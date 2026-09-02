@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   VARIABLES_DE_FEDERACION,
   adaptarCredencial,
+  audienciaDelTestigo,
   configuracionFederada,
   elegirModo,
 } from "../app/identidad/credencial";
@@ -62,12 +63,44 @@ test("la configuracion apunta al proveedor y a la cuenta de servicio esperados",
   assert.equal(config.type, "external_account");
   assert.equal(config.subject_token_type, "urn:ietf:params:oauth:token-type:jwt");
   assert.equal(config.token_url, "https://sts.googleapis.com/v1/token");
-  assert.equal(config.audience, COMPLETO.GCP_AUDIENCE);
+  // La audiencia del STS tiene su propia prueba justo debajo: no es GCP_AUDIENCE tal cual.
   assert.equal(
     config.service_account_impersonation_url,
     "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/" +
       `${COMPLETO.GCP_SERVICE_ACCOUNT_EMAIL}:generateAccessToken`,
   );
+});
+
+/**
+ * Las dos audiencias NO se escriben igual, y confundirlas cuesta una tarde. Comprobado
+ * contra el STS el 01/09/2026: con `https://` responde
+ * «Invalid value for "audience". This value should be the full resource name of the
+ * Identity Provider».
+ *
+ * - Al **testigo** se le pide la audiencia tal y como la publica el proveedor, con
+ *   `https://`: es lo que va en la afirmación `aud` que Google valida.
+ * - Al **STS** se le pasa el nombre de recurso, que empieza por `//`.
+ */
+test("la audiencia del STS es el nombre de recurso, sin esquema", () => {
+  assert.equal(
+    configuracionFederada(COMPLETO).audience,
+    "//iam.googleapis.com/projects/629521051305/locations/global/workloadIdentityPools/vercel/providers/vercel",
+  );
+});
+
+test("al testigo se le pide la audiencia con https, que es la que publica el proveedor", () => {
+  assert.equal(audienciaDelTestigo(COMPLETO), COMPLETO.GCP_AUDIENCE);
+});
+
+test("si GCP_AUDIENCE ya viene como recurso, las dos formas siguen saliendo bien", () => {
+  const comoRecurso = {
+    ...COMPLETO,
+    GCP_AUDIENCE:
+      "//iam.googleapis.com/projects/629521051305/locations/global/workloadIdentityPools/vercel/providers/vercel",
+  };
+
+  assert.equal(configuracionFederada(comoRecurso).audience, comoRecurso.GCP_AUDIENCE);
+  assert.equal(audienciaDelTestigo(comoRecurso), COMPLETO.GCP_AUDIENCE);
 });
 
 test("la configuracion no lleva ninguna clave privada", () => {

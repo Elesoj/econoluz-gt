@@ -39,8 +39,14 @@ if (faltan.length > 0) {
 }
 
 const projectId = process.env.FIREBASE_PROJECT_ID;
-const audiencia = process.env.GCP_AUDIENCE;
 const cuenta = process.env.GCP_SERVICE_ACCOUNT_EMAIL;
+
+// Las dos audiencias NO se escriben igual, y confundirlas es el fallo mas facil de
+// cometer aqui. Al testigo se le pide la URL con https, que es la que publica el
+// proveedor y acaba en la afirmacion aud. Al STS se le pasa el nombre de recurso, que
+// empieza por //; con https responde "Invalid value for audience". Ver credencial.ts.
+const recurso = process.env.GCP_AUDIENCE.replace(/^https:/, "");
+const audiencia = `https:${recurso}`;
 
 console.log(`Proyecto:       ${projectId}`);
 console.log(`Cuenta:         ${cuenta}`);
@@ -73,7 +79,7 @@ try {
 // 2. Google lo acepta y entrega una credencial temporal?
 const cliente = ExternalAccountClient.fromJSON({
   type: "external_account",
-  audience: audiencia,
+  audience: recurso,
   subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
   token_url: "https://sts.googleapis.com/v1/token",
   service_account_impersonation_url:

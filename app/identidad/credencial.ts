@@ -54,13 +54,33 @@ export type ConfiguracionFederada = {
 };
 
 /**
- * Lo que se le pasa a `ExternalAccountClient.fromJSON`, sin el proveedor del testigo,
- * que es lo único impuro y vive en `credencialFederada.server.ts`.
+ * Las dos audiencias del camino federado, que **no se escriben igual**.
  *
- * `audience` sale tal cual de la variable de entorno, con `https://`, porque es la
- * audiencia predeterminada del proveedor y tiene que coincidir con la que se le pide a
- * Vercel. Ver la trampa documentada en el diseño, sección 8.1: los dos ejemplos oficiales
- * de Vercel no escriben igual este campo.
+ * Google publica la audiencia predeterminada del proveedor como una URL con `https://`, y
+ * esa es la que hay que pedirle a Vercel: acaba en la afirmación `aud` del testigo. Pero
+ * el Security Token Service exige en su propio campo `audience` el **nombre de recurso**,
+ * que empieza por `//`. Pasarle la URL responde:
+ *
+ * > Invalid value for "audience". This value should be the full resource name of the
+ * > Identity Provider.
+ *
+ * Comprobado contra el STS el 01/09/2026. Los dos ejemplos de la documentación de Vercel
+ * escriben este campo de forma distinta, y por eso `GCP_AUDIENCE` se admite en cualquiera
+ * de las dos formas y aquí se normaliza a la que toca en cada sitio.
+ */
+function recursoDelProveedor(env: Record<string, string | undefined>): string {
+  return (env.GCP_AUDIENCE as string).replace(/^https:/, "");
+}
+
+/** La que se le pide a Vercel, con `https://`. */
+export function audienciaDelTestigo(env: Record<string, string | undefined>): string {
+  const recurso = recursoDelProveedor(env);
+  return `https:${recurso}`;
+}
+
+/**
+ * Lo que se le pasa a `ExternalAccountClient.fromJSON`, sin el proveedor del testigo, que
+ * es lo único impuro y vive en `credencialFederada.server.ts`.
  */
 export function configuracionFederada(
   env: Record<string, string | undefined>,
@@ -71,7 +91,7 @@ export function configuracionFederada(
 
   return {
     type: "external_account",
-    audience: env.GCP_AUDIENCE as string,
+    audience: recursoDelProveedor(env),
     subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
     token_url: "https://sts.googleapis.com/v1/token",
     service_account_impersonation_url:
