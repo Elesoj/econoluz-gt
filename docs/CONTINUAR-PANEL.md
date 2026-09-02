@@ -251,6 +251,12 @@ lectura busca `supplier_code` solo en la superficie privada; la comparación cam
 de los 313 productos demuestra que la proyección pública está saneada. El rol público tiene
 denegada la lectura de las ocho tablas nuevas y puede leer `public_products`.
 
+La verificación final dio `test:datos` 329/329, `test:admin` 196/196,
+`test:proveedores` 3/3, `test:permisos` correcto —22 tablas protegidas denegadas y
+`public_products` legible—, `typecheck` y `lint` sin errores ni avisos, y `build` correcto
+con 16 páginas generadas. Playwright se ejecutó una vez contra la rama aislada: 70/70,
+estado `passed` y ningún caso fallido; no se repitió.
+
 `modelo_catalogo` continúa en `legacy`. No se activó `relational_v2`, no empezó la Fase C
 ni la D y no hubo push, merge ni despliegue. La siguiente fase necesita autorización nueva.
 
