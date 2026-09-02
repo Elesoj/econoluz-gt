@@ -134,6 +134,26 @@ la cuenta de servicio). `identitytoolkit.googleapis.com` sí está activa.
 La CLI de Vercel no está instalada en la máquina y el proyecto no está enlazado. No hace
 falta instalarla: se usa `npx vercel`.
 
+### 3.2 Recursos creados — 01/09/2026, en curso
+
+Creados en `econoluz-dev-d30ab`, todos sin ninguna clave:
+
+| Recurso | Estado |
+|---|---|
+| API `iam`, `sts` e `iamcredentials` | Activadas |
+| Pool `vercel` (global) | `ACTIVE` |
+| Rol `econoluzIdentidadServidor` | Creado con **cuatro permisos**: `firebaseauth.users.get`, `users.createSession`, `users.update`, `users.delete` |
+| Cuenta `econoluz-identidad-preview@econoluz-dev-d30ab.iam.gserviceaccount.com` | Creada. Tiene **un solo rol**, el personalizado. Ni Owner, ni Editor, ni `firebaseauth.admin` |
+| `roles/iam.workloadIdentityUser` sobre esa cuenta | Concedido a los principales de `environment:preview` y, **temporalmente**, `environment:development` |
+
+**Falta el proveedor OIDC del pool.** Su condición de atributos se escribe sobre
+`owner_id` y `project_id`, los identificadores estables de Vercel, y para leerlos hace
+falta que la CLI de Vercel esté autenticada. Es la única acción que queda del dueño.
+
+El enlace de `environment:development` es **temporal**: existe solo para poder hacer la
+prueba positiva desde la máquina de desarrollo, y se retira en cuanto se demuestre que un
+entorno no autorizado queda rechazado.
+
 ## 4. El proyecto de Firebase
 
 | | Desarrollo | Producción |
