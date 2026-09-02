@@ -997,38 +997,34 @@ técnico: no tiene sentido registrar la aceptación de un texto que aún no exis
 
 La renovación de la sesión sí quedó conectada el 02/09/2026, junto con la revocación en
 Firebase al cerrar sesión y los mensajes de error del formulario de direcciones.
-**El subproyecto 3, catálogo relacional, tiene su Fase A hecha y corregida** (02/09/2026),
-en la rama `feat/catalogo-relacional`. El diseño aprobado es
-`docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md` y el plan vigente
-`docs/superpowers/plans/2026-09-02-catalogo-relacional.md`.
+**El subproyecto 3, catálogo relacional, tiene terminada la Fase B** (02/09/2026) en la
+rama `feat/catalogo-relacional`. El diseño aprobado es
+`docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md` y el plan ejecutado,
+`docs/superpowers/plans/2026-09-02-catalogo-relacional-fase-b.md`.
 
-La Fase A son **el esquema escrito y la lógica pura**, y nada más:
-`db/010_catalogo_relacional.sql` con **ocho tablas** —`category_attributes` **no existe**,
-porque una categoría clasifica productos y no determina qué características puede tener
-uno— y tres módulos puros en `app/data/catalogo/`. **La migración no está aplicada en
-ninguna base**, `modelo_catalogo` sigue en `legacy` y el catálogo público no ha cambiado de
-fuente.
+La migración `010` crea **ocho tablas** —`category_attributes` no existe— y fue validada
+dos veces en PostgreSQL 16.11 desechable, con 30 comprobaciones reales y creación de
+`btree_gist` por un rol no superusuario con permiso `CREATE`. En Neon se aplicaron `009` y
+`010` únicamente a la rama de desarrollo `catalogo-relacional-fase-b`
+(`br-quiet-hat-avozt905`, endpoint `ep-green-union-avi3x99e`), hija de Production `main`
+(`br-flat-dew-avc2njed`, endpoint `ep-misty-sun-avmcbgly`). Production no se tocó.
 
-La revisión posterior hizo diferible el orden único de `product_images`, trasladó la
-unicidad de la categoría principal al trigger diferido, protegió las imágenes con `ON
-DELETE RESTRICT`, distinguió asignaciones nuevas de valores históricos desactivados y
-rechaza rutas parciales cuando el árbol tiene un ciclo. El contrato de la Fase B debe cerrar
-la vigencia del precio normal anterior en la misma transacción que crea el nuevo.
+La importación conserva los campos originales en `technical_specs` y normaliza solo las
+siete claves autorizadas. La simulación aceptó los 313 productos, sin rechazos; la primera
+ejecución escribió 313 productos privados, 36 categorías, 313 relaciones de categoría,
+327 imágenes, 7 atributos, 0 opciones, 45 valores y 25 precios. La segunda modificó 0 y
+omitió los 313: el hash de contenido permaneció en
+`a21ad178a5fb7ad2aea072a2fe1adbe9`.
 
-La migración completa **aún no se ha ejecutado localmente**: este entorno no tiene
-PostgreSQL ni `psql`, y el motor Docker no está activo. Antes de la Fase B hay que probarla
-en una base desechable y confirmar que el rol migrador puede instalar `btree_gist` —extensión
-confiable que exige `CREATE` sobre la base— si todavía no existe.
+El contrato de escritura es atómico, cierra el precio normal anterior antes de insertar el
+nuevo, conserva opciones desactivadas ya existentes pero rechaza asignaciones nuevas y
+mantiene la proyección pública saneada. `supplier_code` se puede buscar desde el contrato
+privado y la verificación campo a campo confirma que nunca aparece en `public_products`.
+El rol público no puede leer ninguna de las ocho tablas nuevas y sí puede leer la
+proyección.
 
-La verificación de esta revisión dio `test:datos` 250/250, `test:admin` 196/196,
-`test:proveedores` 3/3, `typecheck` y `lint` limpios y `build` correcto. Playwright ejecutó
-70 casos: cinco fallaron por la ausencia conocida de `.env.local`/`DATABASE_URL` y sus
-informes se inspeccionaron antes de no repetir la batería; los otros 65 no fallaron. El
-proceso se interrumpió después por el bloqueo conocido al apagar el servidor en Windows.
-`test:permisos` no se ejecutó porque habría requerido conectar a Neon.
-
-Aplicarla es la Fase B y **necesita autorización expresa**; activar `relational_v2`, la
-Fase D, otra distinta.
+`modelo_catalogo` sigue en `legacy`: no se activó `relational_v2`, no cambió la fuente del
+catálogo público y no empezaron las fases C ni D. Tampoco hubo push, merge ni despliegue.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar

@@ -205,54 +205,54 @@ fallar con su mensaje antes de darlas por buenas.
 No se tocó Production, ni `DATABASE_URL`, ni se desplegó, ni se hizo push, ni se borró
 nada fuera de las roturas deliberadas, que se deshicieron.
 
-### Subproyecto 3: la Fase A, corregida (02/09/2026)
+### Subproyecto 3: Fase B terminada en rama aislada (02/09/2026)
 
-Vive en la rama `feat/catalogo-relacional`. **La Fase B no ha empezado**: la migración no
-está aplicada en ninguna base, no se ha tocado Neon y `modelo_catalogo` sigue en `legacy`.
+Vive en `feat/catalogo-relacional` y sigue el diseño
+`docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md` y el plan
+`docs/superpowers/plans/2026-09-02-catalogo-relacional-fase-b.md`.
 
-Una primera versión de la Fase A se escribió **antes** de que se aprobara
-`docs/superpowers/specs/2026-09-02-nucleo-productos-tienda-design.md` y contradecía el
-diseño. Lo que estaba mal y ya está corregido:
+La rama Neon usada fue `catalogo-relacional-fase-b` (`br-quiet-hat-avozt905`, endpoint
+`ep-green-union-avi3x99e`), hija de Production `main` (`br-flat-dew-avc2njed`, endpoint
+`ep-misty-sun-avmcbgly`). Se comprobó que no era primaria ni predeterminada y que su host
+era distinto del de Production. La rama partía de las migraciones `001`–`008`, por lo que
+el migrador aplicó `009` y `010`; `btree_gist` se instaló correctamente. Production no se
+tocó.
 
-| Estaba mal | Ahora |
-|---|---|
-| Nueve tablas, con `category_attributes` | **Ocho**, y esa tabla no existe en ninguna forma |
-| El código del proveedor duplicado en tres columnas | Solo `supplier_code`, indexado para buscarlo y **sin `unique`** —hay registros con varios códigos separados por barras— |
-| Faltaban las dos etiquetas y la descripción del proveedor | Los **siete** campos del diseño, ni uno más |
-| Se podía cambiar el tipo de un atributo usado | Lo **rechaza la base**, con una clave foránea compuesta hacia `attributes (id, tipo)` |
-| Nada comprobaba que la opción fuera del atributo correcto | Otra clave foránea compuesta lo impide |
-| Se podían meter dos valores escalares del mismo atributo, o la misma opción dos veces | Índice único parcial y restricción única |
-| Solo se garantizaba **como mucho** una categoría principal | Un índice de búsqueda no único y una comprobación **diferible** exigen **exactamente una** al confirmar |
-| `product_images` no impedía posiciones repetidas ni dos principales | Orden único diferible, principal única y FK `ON DELETE RESTRICT` |
-| Atributos y opciones no se podían desactivar | Tienen `active`: lo no usado se borra, lo usado solo se desactiva |
+Antes de Neon, la migración completa se ejecutó dos veces en PostgreSQL 16.11 efímero: 30
+comprobaciones reales, 0 fallos, incluida la creación de `btree_gist` por un rol no
+superusuario con `CREATE` sobre la base. Las pruebas de expresiones regulares ya no son la
+única evidencia de que el SQL es ejecutable.
 
-**Dos reglas del diseño no se pueden expresar en el esquema** y quedan para el contrato de
-escritura de la Fase B, porque dependen de estado que cambia con el tiempo: que la opción
-tenga que estar **activa** solo para asignaciones nuevas, y que un producto **publicado**
-tenga imagen principal visible.
+La importación preserva `technical_specs` y solo normaliza las siete claves autorizadas:
+`amperage` (`A`), `savings` (`%`), `panelLifetime` (`años`), `disconnectSpeed`
+(`segundos`), `shortCircuitCurrent` (`kA`), `weight` (`g`) y `cutout` (`mm`). No normaliza
+`specialFeatures`, `power`, `luminousFlux`, `colorTemperature` ni claves ambiguas.
 
-La lógica pura distingue `asignacion_nueva` de `valor_existente`: una opción desactivada no
-se puede asignar de nuevo, pero el producto que ya la tenía puede conservarla al guardarse.
-El contrato de escritura de la Fase B debe además cerrar la vigencia del precio normal
-anterior dentro de la misma transacción que inserta el nuevo.
+| Resultado | Simulación | Primera importación | Segunda importación |
+|---|---:|---:|---:|
+| Productos de origen / aceptados / rechazados | 313 / 313 / 0 | 313 / 313 / 0 | 313 / 313 / 0 |
+| Modificados / omitidos | 313 / 0 | 313 / 0 | 0 / 313 |
+| Categorías | 36 | 36 | 36 |
+| Relaciones producto-categoría | 313 | 313 | 313 |
+| Datos privados | 313 | 313 | 313 |
+| Imágenes | 327 | 327 | 327 |
+| Atributos / opciones / valores | 7 / 0 / 45 | 7 / 0 / 45 | 7 / 0 / 45 |
+| Precios | 25 | 25 | 25 |
+| Proyección pública | 313 | 313 | 313 |
 
-**Limitación verificada de esta Fase A:** las pruebas actuales inspeccionan la estructura
-del SQL, no lo ejecutan. En este entorno no hay PostgreSQL ni `psql`, y Docker está instalado
-pero su motor no está activo; no se arrancó ni instaló ningún servicio. Antes de aplicar
-`010` en la Fase B hay que ejecutar la migración completa dos veces en una base desechable y
-confirmar que el rol migrador puede crear `btree_gist` —extensión confiable que requiere
-`CREATE` sobre la base— si todavía no existe.
+La simulación se revirtió y dejó las ocho tablas nuevas a cero. Tras la primera importación
+el hash de contenido fue `a21ad178a5fb7ad2aea072a2fe1adbe9`; la segunda conservó
+exactamente el mismo hash y no creó auditorías ni escrituras de producto nuevas.
 
-**Verificación de la revisión de la Fase A:** las pruebas enfocadas del catálogo pasaron
-83/83; `test:datos`, 250/250; `test:admin`, 196/196; `test:proveedores`, 3/3;
-`typecheck` y `lint`, limpios; y `build`, correcto con 16 páginas generadas.
-`test:permisos` no se ejecutó porque necesita una conexión y esta revisión tenía prohibido
-conectarse a Neon. Playwright ejecutó sus 70 casos una sola vez: dejó cinco fallos conocidos
-porque faltan `.env.local` y `DATABASE_URL`, de modo que los 313 productos aparecen como
-«Precio a consultar» y no existe ningún botón «Agregar al carrito»; los otros 65 casos no
-fallaron. Se inspeccionaron los cinco `error-context.md` antes de decidir no repetirlo. El
-proceso se quedó colgado al apagar el servidor de desarrollo en Windows y se interrumpió
-después de ejecutar el caso 70, así que no se presenta como una salida limpia.
+El contrato de escritura cierra el precio normal anterior en la misma transacción antes de
+crear el nuevo. Rechaza opciones desactivadas en asignaciones nuevas, permite conservarlas
+si ya estaban asignadas y exige una imagen principal visible al publicar. El contrato de
+lectura busca `supplier_code` solo en la superficie privada; la comparación campo a campo
+de los 313 productos demuestra que la proyección pública está saneada. El rol público tiene
+denegada la lectura de las ocho tablas nuevas y puede leer `public_products`.
+
+`modelo_catalogo` continúa en `legacy`. No se activó `relational_v2`, no empezó la Fase C
+ni la D y no hubo push, merge ni despliegue. La siguiente fase necesita autorización nueva.
 
 ### Revisión previa a la fusión (02/09/2026)
 
