@@ -334,10 +334,11 @@ export async function verificarCatalogoRelacional(cliente, entorno = process.env
   let busquedaPrivada = null;
   if (ejemploCodigo) {
     const resultados = await buscarPorCodigoDeProveedor(ejecutar, ejemploCodigo.supplier_code);
-    busquedaPrivada = { codigo: ejemploCodigo.supplier_code, coincidencias: resultados.length };
+    const encontrado = resultados.some((resultado) => resultado.id === ejemploCodigo.id);
+    busquedaPrivada = { coincidencias: resultados.length, encontrado };
     agregarFallo(
       fallos,
-      resultados.some((resultado) => resultado.id === ejemploCodigo.id),
+      encontrado,
       "supplier_code no se puede buscar desde la conexión administrativa",
     );
   }

@@ -80,68 +80,39 @@ const fechaONull = (valor: unknown): Date | null => {
   return valor instanceof Date ? valor : new Date(String(valor));
 };
 
-async function leerSatelites(
-  ejecutar: Ejecutor,
+function armarProductoRelacional(
   fila: FilaNucleo,
-): Promise<ProductoRelacional> {
+  privadosRaw: Record<string, unknown> | undefined,
+  categoriasRaw: Record<string, unknown>[],
+  imagenesRaw: Record<string, unknown>[],
+  atributosRaw: Record<string, unknown>[],
+  preciosRaw: Record<string, unknown>[],
+): ProductoRelacional {
   const productoId = String(fila.id);
-  const [privados, categorias, imagenes, atributos, precios] = await Promise.all([
-    ejecutar(
-      `select supplier_brand, supplier_brand_label, supplier_series, supplier_series_label,
-              supplier_code, supplier_name, supplier_description
-         from product_private_data
-        where product_id = $1`,
-      [productoId],
-    ),
-    ejecutar(
-      `select c.id::text as category_id, c.parent_id::text, c.slug, c.nombre, pc.principal
-         from product_categories pc
-         join categories c on c.id = pc.category_id
-        where pc.product_id = $1
-        order by pc.principal desc, c.posicion, c.id`,
-      [productoId],
-    ),
-    ejecutar(
-      `select id::text, url, alt, posicion, visible, principal
-         from product_images
-        where product_id = $1
-        order by posicion, id`,
-      [productoId],
-    ),
-    ejecutar(
-      `select pav.id::text, pav.attribute_id::text, a.clave, a.nombre, a.tipo, a.unidad,
-              a.filterable, a.comparable, a.active, pav.value_number, pav.value_text,
-              pav.value_bool, pav.option_id::text, ao.clave as option_clave,
-              ao.etiqueta as option_etiqueta
-         from product_attribute_values pav
-         join attributes a on a.id = pav.attribute_id
-         left join attribute_options ao on ao.id = pav.option_id
-        where pav.product_id = $1
-        order by a.clave, ao.posicion, pav.id`,
-      [productoId],
-    ),
-    ejecutar(
-      `select id::text, centavos::text, tipo, lower(vigencia) as desde,
-              upper(vigencia) as hasta
-         from product_prices
-        where product_id = $1
-        order by lower(vigencia), id`,
-      [productoId],
-    ),
-  ]);
+  const privados = privadosRaw
+    ? {
+        supplier_brand: String(privadosRaw.supplier_brand ?? ""),
+        supplier_brand_label: String(privadosRaw.supplier_brand_label ?? ""),
+        supplier_series: String(privadosRaw.supplier_series ?? ""),
+        supplier_series_label: String(privadosRaw.supplier_series_label ?? ""),
+        supplier_code: String(privadosRaw.supplier_code ?? ""),
+        supplier_name: String(privadosRaw.supplier_name ?? ""),
+        supplier_description: String(privadosRaw.supplier_description ?? ""),
+      }
+    : null;
 
   return {
     id: productoId,
     nucleo: nucleoDesdeFila(fila),
-    privados: (privados[0] as DatosPrivadosDeProducto | undefined) ?? null,
-    categorias: categorias.map((categoria) => ({
+    privados,
+    categorias: categoriasRaw.map((categoria) => ({
       id: String(categoria.category_id),
       parentId: categoria.parent_id === null ? null : String(categoria.parent_id),
       slug: String(categoria.slug),
       nombre: String(categoria.nombre),
       principal: Boolean(categoria.principal),
     })),
-    imagenes: imagenes.map((imagen) => ({
+    imagenes: imagenesRaw.map((imagen) => ({
       id: String(imagen.id),
       url: String(imagen.url),
       alt: String(imagen.alt),
@@ -149,7 +120,7 @@ async function leerSatelites(
       visible: Boolean(imagen.visible),
       principal: Boolean(imagen.principal),
     })),
-    atributos: atributos.map((atributo) => ({
+    atributos: atributosRaw.map((atributo) => ({
       id: String(atributo.id),
       atributoId: String(atributo.attribute_id),
       clave: String(atributo.clave),
@@ -167,7 +138,7 @@ async function leerSatelites(
       optionEtiqueta:
         atributo.option_etiqueta === null ? null : String(atributo.option_etiqueta),
     })),
-    precios: precios.map((precio) => ({
+    precios: preciosRaw.map((precio) => ({
       id: String(precio.id),
       centavos: Number(precio.centavos),
       tipo: precio.tipo as TipoDePrecio,
@@ -175,6 +146,20 @@ async function leerSatelites(
       hasta: fechaONull(precio.hasta),
     })),
   };
+}
+
+function agruparPorProducto<T extends Record<string, unknown>>(filas: T[]): Map<string, T[]> {
+  const mapa = new Map<string, T[]>();
+  for (const fila of filas) {
+    const id = String(fila.product_id);
+    const lista = mapa.get(id);
+    if (lista) {
+      lista.push(fila);
+    } else {
+      mapa.set(id, [fila]);
+    }
+  }
+  return mapa;
 }
 
 export async function leerProductoRelacional(
@@ -187,18 +172,134 @@ export async function leerProductoRelacional(
       where id = $1`,
     [id],
   )) as FilaNucleo[];
-  return filas[0] ? leerSatelites(ejecutar, filas[0]) : null;
+  if (!filas[0]) return null;
+
+  const [privados, categorias, imagenes, atributos, precios] = await Promise.all([
+    ejecutar(
+      `select supplier_brand, supplier_brand_label, supplier_series, supplier_series_label,
+              supplier_code, supplier_name, supplier_description
+         from product_private_data
+        where product_id = $1`,
+      [id],
+    ),
+    ejecutar(
+      `select c.id::text as category_id, c.parent_id::text, c.slug, c.nombre, pc.principal
+         from product_categories pc
+         join categories c on c.id = pc.category_id
+        where pc.product_id = $1
+        order by pc.principal desc, c.posicion, c.id`,
+      [id],
+    ),
+    ejecutar(
+      `select id::text, url, alt, posicion, visible, principal
+         from product_images
+        where product_id = $1
+        order by posicion, id`,
+      [id],
+    ),
+    ejecutar(
+      `select pav.id::text, pav.attribute_id::text, a.clave, a.nombre, a.tipo, a.unidad,
+              a.filterable, a.comparable, a.active, pav.value_number, pav.value_text,
+              pav.value_bool, pav.option_id::text, ao.clave as option_clave,
+              ao.etiqueta as option_etiqueta
+         from product_attribute_values pav
+         join attributes a on a.id = pav.attribute_id
+         left join attribute_options ao on ao.id = pav.option_id
+        where pav.product_id = $1
+        order by a.clave, ao.posicion, pav.id`,
+      [id],
+    ),
+    ejecutar(
+      `select id::text, centavos::text, tipo, lower(vigencia) as desde,
+              upper(vigencia) as hasta
+         from product_prices
+        where product_id = $1
+        order by lower(vigencia), id`,
+      [id],
+    ),
+  ]);
+
+  return armarProductoRelacional(
+    filas[0],
+    privados[0] as Record<string, unknown> | undefined,
+    categorias as Record<string, unknown>[],
+    imagenes as Record<string, unknown>[],
+    atributos as Record<string, unknown>[],
+    precios as Record<string, unknown>[],
+  );
 }
 
 export async function leerCatalogoRelacional(
   ejecutar: Ejecutor,
 ): Promise<ProductoRelacional[]> {
-  const filas = (await ejecutar(
-    `select ${COLUMNAS_NUCLEO.join(", ")}
-       from products
-      order by position, id`,
-  )) as FilaNucleo[];
-  return Promise.all(filas.map((fila) => leerSatelites(ejecutar, fila)));
+  const [
+    filasNucleo,
+    filasPrivadas,
+    filasCategorias,
+    filasImagenes,
+    filasAtributos,
+    filasPrecios,
+  ] = await Promise.all([
+    ejecutar(
+      `select ${COLUMNAS_NUCLEO.join(", ")}
+         from products
+        order by position, id`,
+    ),
+    ejecutar(
+      `select product_id, supplier_brand, supplier_brand_label, supplier_series,
+              supplier_series_label, supplier_code, supplier_name, supplier_description
+         from product_private_data`,
+    ),
+    ejecutar(
+      `select pc.product_id, c.id::text as category_id, c.parent_id::text, c.slug, c.nombre, pc.principal
+         from product_categories pc
+         join categories c on c.id = pc.category_id
+        order by pc.principal desc, c.posicion, c.id`,
+    ),
+    ejecutar(
+      `select product_id, id::text, url, alt, posicion, visible, principal
+         from product_images
+        order by posicion, id`,
+    ),
+    ejecutar(
+      `select pav.product_id, pav.id::text, pav.attribute_id::text, a.clave, a.nombre, a.tipo, a.unidad,
+              a.filterable, a.comparable, a.active, pav.value_number, pav.value_text,
+              pav.value_bool, pav.option_id::text, ao.clave as option_clave,
+              ao.etiqueta as option_etiqueta
+         from product_attribute_values pav
+         join attributes a on a.id = pav.attribute_id
+         left join attribute_options ao on ao.id = pav.option_id
+        order by a.clave, ao.posicion, pav.id`,
+    ),
+    ejecutar(
+      `select product_id, id::text, centavos::text, tipo, lower(vigencia) as desde,
+              upper(vigencia) as hasta
+         from product_prices
+        order by lower(vigencia), id`,
+    ),
+  ]);
+
+  const privadosPorProducto = new Map<string, Record<string, unknown>>();
+  for (const fila of filasPrivadas as Record<string, unknown>[]) {
+    privadosPorProducto.set(String(fila.product_id), fila);
+  }
+
+  const categoriasPorProducto = agruparPorProducto(filasCategorias as Record<string, unknown>[]);
+  const imagenesPorProducto = agruparPorProducto(filasImagenes as Record<string, unknown>[]);
+  const atributosPorProducto = agruparPorProducto(filasAtributos as Record<string, unknown>[]);
+  const preciosPorProducto = agruparPorProducto(filasPrecios as Record<string, unknown>[]);
+
+  return (filasNucleo as FilaNucleo[]).map((fila) => {
+    const productoId = String(fila.id);
+    return armarProductoRelacional(
+      fila,
+      privadosPorProducto.get(productoId),
+      categoriasPorProducto.get(productoId) ?? [],
+      imagenesPorProducto.get(productoId) ?? [],
+      atributosPorProducto.get(productoId) ?? [],
+      preciosPorProducto.get(productoId) ?? [],
+    );
+  });
 }
 
 const PRIVADOS_VACIOS: DatosPrivadosDeProducto = {
