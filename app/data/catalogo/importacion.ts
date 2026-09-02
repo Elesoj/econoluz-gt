@@ -123,6 +123,17 @@ export const NOMBRES_DE_ATRIBUTO: Record<(typeof CLAVES_NUMERICAS)[number], stri
   cutout: "Medida de corte",
 };
 
+/** Unidades canónicas aprobadas; el texto original permanece en `technical_specs`. */
+export const UNIDADES_NUMERICAS: Record<(typeof CLAVES_NUMERICAS)[number], string> = {
+  amperage: "A",
+  savings: "%",
+  panelLifetime: "años",
+  disconnectSpeed: "segundos",
+  shortCircuitCurrent: "kA",
+  weight: "g",
+  cutout: "mm",
+};
+
 /** `attributes.clave` tiene que ir en minúsculas: lo exige `attributes_clave_minusculas`. */
 export function claveDeAtributo(clave: string): string {
   return clave.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
@@ -259,7 +270,7 @@ export function planificarProducto(fila: FilaDeCatalogo): PlanDeProducto {
     atributos.push({
       clave: claveDeAtributo(clave),
       nombre: NOMBRES_DE_ATRIBUTO[clave],
-      unidad: medida.unidad,
+      unidad: UNIDADES_NUMERICAS[clave],
       numero: medida.numero,
     });
   }

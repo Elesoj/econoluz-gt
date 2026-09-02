@@ -218,6 +218,37 @@ test("solo se normalizan las claves aprobadas, y el resto se queda en el JSON", 
   );
 });
 
+test("las siete claves usan exactamente las unidades canónicas aprobadas", () => {
+  const technicalSpecs = {
+    amperage: "15A",
+    savings: "75%",
+    panelLifetime: "25 anos",
+    disconnectSpeed: "0.025 seg.",
+    shortCircuitCurrent: "10 kA",
+    weight: "87 g",
+    cutout: "75 mm",
+    power: "75 W / 100 W",
+  };
+
+  const plan = planificarProducto({ ...FILA, technical_specs: technicalSpecs });
+
+  assert.deepEqual(
+    plan.atributos.map(({ clave, unidad }) => [clave, unidad]),
+    [
+      ["amperage", "A"],
+      ["savings", "%"],
+      ["panel_lifetime", "años"],
+      ["disconnect_speed", "segundos"],
+      ["short_circuit_current", "kA"],
+      ["weight", "g"],
+      ["cutout", "mm"],
+    ],
+  );
+  assert.equal(technicalSpecs.panelLifetime, "25 anos", "el valor original se conserva");
+  assert.equal(technicalSpecs.disconnectSpeed, "0.025 seg.", "el valor original se conserva");
+  assert.equal(technicalSpecs.power, "75 W / 100 W", "lo ambiguo no se transforma");
+});
+
 test("una clave aprobada con un valor que no es número no se importa", () => {
   // La lista aprobada dice qué claves mirar; el test numérico dice si el valor sirve. Si
   // alguien edita `amperage` en el panel y escribe «15-20A», eso no entra como número.
