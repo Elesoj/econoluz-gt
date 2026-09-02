@@ -63,42 +63,54 @@ create table if not exists product_categories (
   primary key (product_id, category_id)
 );
 
--- Impide que haya DOS principales.
-create unique index if not exists product_categories_una_principal
+-- Solo acelera la búsqueda de la principal. NO es único: la comprobación se difiere hasta
+-- confirmar la transacción, para admitir el reemplazo de la principal sin estados
+-- intermedios artificialmente inválidos.
+create index if not exists product_categories_principal_idx
   on product_categories (product_id)
   where principal;
 
 create index if not exists product_categories_categoria_idx
   on product_categories (category_id);
 
--- El índice de arriba no puede exigir que haya UNA: sobre cero filas marcadas no hay nada
--- que comparar. Esto sí, y es DIFERIBLE a propósito: así se pueden reemplazar todas las
--- categorías de un producto dentro de una transacción sin pasar por estados intermedios
--- inválidos —borrar la principal vieja antes de insertar la nueva—.
+-- El índice de arriba solo busca. Esto garantiza exactamente UNA principal al confirmar y
+-- admite estados intermedios con cero o varias mientras se reemplaza el conjunto completo.
+-- La fila padre se bloquea antes de contar para serializar dos escrituras concurrentes del
+-- mismo producto: sin ese bloqueo, cada transacción podría ver solo su propia principal.
 create or replace function product_categories_exige_principal() returns trigger
 language plpgsql as $$
 declare
   producto     text;
+  productos    text[] := array[]::text[];
   total        integer;
   principales  integer;
 begin
-  if tg_op = 'DELETE' then
-    producto := old.product_id;
-  else
-    producto := new.product_id;
+  if tg_op in ('DELETE', 'UPDATE') then
+    productos := array_append(productos, old.product_id);
   end if;
 
-  select count(*), count(*) filter (where principal)
-    into total, principales
-    from product_categories
-   where product_id = producto;
-
-  if total > 0 and principales <> 1 then
-    raise exception
-      'El producto % tiene % categoria(s) y % principal(es): hace falta exactamente una',
-      producto, total, principales
-      using errcode = 'check_violation';
+  if tg_op in ('INSERT', 'UPDATE') then
+    productos := array_append(productos, new.product_id);
   end if;
+
+  foreach producto in array productos loop
+    perform 1
+      from products
+     where id = producto
+       for update;
+
+    select count(*), count(*) filter (where principal)
+      into total, principales
+      from product_categories
+     where product_id = producto;
+
+    if total > 0 and principales <> 1 then
+      raise exception
+        'El producto % tiene % categoria(s) y % principal(es): hace falta exactamente una',
+        producto, total, principales
+        using errcode = 'check_violation';
+    end if;
+  end loop;
 
   return null;
 end;

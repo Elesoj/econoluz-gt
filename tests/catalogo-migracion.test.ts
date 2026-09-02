@@ -78,8 +78,12 @@ test("supplier_code es buscable y NO es unique", () => {
 // Categorías
 // ---------------------------------------------------------------------------
 
-test("un producto no puede tener dos categorias principales", () => {
-  assert.match(sql, /create unique index if not exists product_categories_una_principal/);
+test("la categoria principal se busca con un indice no unico", () => {
+  assert.doesNotMatch(
+    sql,
+    /create unique index if not exists product_categories_[\w]*principal/i,
+  );
+  assert.match(sql, /create index if not exists product_categories_principal_idx/);
   assert.match(sql, /on product_categories \(product_id\)\s*\n\s*where principal;/);
 });
 
@@ -89,9 +93,15 @@ test("un producto no puede tener dos categorias principales", () => {
  * para poder reemplazar las categorías de un producto dentro de una transacción sin pasar
  * por estados intermedios inválidos.
  */
-test("una comprobacion diferible exige que haya principal cuando hay categorias", () => {
+test("cero, una y mas de una principal se comprueban al confirmar", () => {
   assert.match(sql, /create constraint trigger/i);
   assert.match(sql, /deferrable initially deferred/i);
+  assert.match(sql, /if total > 0 and principales <> 1 then/i);
+  assert.match(
+    sql,
+    /from products\s+where id = producto\s+for update/i,
+    "La comprobación debe serializar las escrituras concurrentes del mismo producto",
+  );
 });
 
 // ---------------------------------------------------------------------------
