@@ -935,8 +935,33 @@ git commit -m "feat(identidad): comprobador de la federacion que no imprime test
 **Punto de revisión con el dueño antes de empezar.** Aquí se crean recursos externos
 por primera vez. Cada paso se le da suelto y se espera a que confirme.
 
-Requiere los tres valores anotados en la tarea 0: slug del equipo, nombre del proyecto
-en Vercel y confirmación de la sección de OIDC.
+Valores confirmados en la tarea 0, ya no son incógnitas:
+
+| Dato | Valor |
+|---|---|
+| `[NUM]` — número del proyecto de Google | `629521051305` |
+| `[EQUIPO]` — slug del equipo de Vercel | `joseangel-s-projects` |
+| `[PROYECTO]` — nombre del proyecto de Vercel | `econoluz-gt` |
+| Emisor | `https://oidc.vercel.com/joseangel-s-projects` |
+| `[TEAM_ID]`, `[PROJECT_ID]` | se leen en el paso 2 |
+
+La CLI de Vercel **no está instalada**, así que todos los comandos `vercel …` de este plan
+se ejecutan como `npx vercel …`.
+
+- [ ] **Paso 0: Activar las tres API que faltan**
+
+La tarea 0 comprobó que `identitytoolkit.googleapis.com` está activa pero estas tres no, y
+sin ellas la federación no se puede ni crear ni usar:
+
+```powershell
+gcloud services enable iam.googleapis.com sts.googleapis.com iamcredentials.googleapis.com --project=econoluz-dev-d30ab
+```
+
+`gcloud` no está en el `PATH`; la ruta completa es
+`C:\Users\PC\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd`.
+
+Activar una API no crea ningún recurso ni tiene coste por sí misma, pero **modifica el
+proyecto de Google Cloud**, así que va dentro de esta tarea y no antes.
 
 - [ ] **Paso 1: Fijar el modo de emisor en Vercel**
 
@@ -952,11 +977,11 @@ forma más simple de leerlos es descargar un testigo de desarrollo y mirar sus
 afirmaciones —**sin imprimir el testigo**—:
 
 ```powershell
-vercel link
+npx vercel link
 ```
 
 ```powershell
-vercel env pull .env.vercel.local
+npx vercel env pull .env.vercel.local
 ```
 
 ```powershell
@@ -1052,7 +1077,7 @@ git commit -m "docs(identidad): documentar los recursos de la identidad federada
 - [ ] **Paso 1: Refrescar el entorno de Vercel**
 
 ```powershell
-vercel env pull .env.vercel.local
+npx vercel env pull .env.vercel.local
 ```
 
 - [ ] **Paso 2: Añadir las variables de GCP al archivo local de prueba**
@@ -1249,7 +1274,7 @@ git commit -m "test(identidad): ruta temporal para comprobar la federacion en Pr
 - [ ] **Paso 7: Desplegar a Preview desde la CLI, sin push**
 
 ```powershell
-vercel deploy
+npx vercel deploy
 ```
 
 Sin `--prod`. Esto **no** hace push, **no** toca GitHub y **no** toca `main`. Anotar la
