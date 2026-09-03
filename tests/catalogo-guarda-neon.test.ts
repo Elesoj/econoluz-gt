@@ -14,6 +14,10 @@ import {
   interpretarBandera,
 } from "../scripts/guarda-neon.mjs";
 import { ponerModelo, valorDeModeloAceptado } from "../scripts/modelo-catalogo.mjs";
+import {
+  marcadorEsperado,
+  modeloAceptable,
+} from "../scripts/verificar-catalogo-relacional.mjs";
 
 const DESARROLLO = "ep-catalogo-fase-b.c-11.us-east-1.aws.neon.tech";
 const PRODUCCION = "ep-produccion.c-11.us-east-1.aws.neon.tech";
@@ -470,4 +474,36 @@ test("los scripts de la Fase D conservan su autorización de Producción", () =>
       `${ruta} solo lee: no debe pedir autorización de escritura`,
     );
   }
+});
+
+// --- Lo que el verificador debe esperar en cada destino --------------------------------
+//
+// Dos comprobaciones del verificador solo tenían sentido en la rama de desarrollo: exigir
+// el marcador de rama —que Producción no tiene ni debe tener— y prohibir `relational_v2`,
+// que en la Fase D es precisamente el estado bueno. Ninguna de las dos se elimina: se
+// vuelven dependientes del destino, para que sigan mordiendo donde tenían sentido.
+
+test("en desarrollo se sigue exigiendo el marcador de la rama aislada", () => {
+  assert.equal(marcadorEsperado("desarrollo", "catalogo-relacional-fase-b"), "catalogo-relacional-fase-b");
+});
+
+test("en Producción el marcador correcto es no tener ninguno", () => {
+  assert.equal(marcadorEsperado("produccion", "catalogo-relacional-fase-b"), null);
+});
+
+test("en desarrollo, `relational_v2` sigue prohibido", () => {
+  assert.equal(modeloAceptable("legacy", "desarrollo"), true);
+  assert.equal(modeloAceptable("shadow", "desarrollo"), true);
+  assert.equal(modeloAceptable("relational_v2", "desarrollo"), false);
+});
+
+test("en Producción, `relational_v2` es un estado válido desde la Fase D", () => {
+  assert.equal(modeloAceptable("legacy", "produccion"), true);
+  assert.equal(modeloAceptable("shadow", "produccion"), true);
+  assert.equal(modeloAceptable("relational_v2", "produccion"), true);
+});
+
+test("ningún destino acepta un valor inventado", () => {
+  assert.equal(modeloAceptable("relacional", "produccion"), false);
+  assert.equal(modeloAceptable(null, "desarrollo"), false);
 });

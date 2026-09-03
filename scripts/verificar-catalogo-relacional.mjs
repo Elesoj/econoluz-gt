@@ -90,6 +90,27 @@ function agregarFallo(fallos, condicion, mensaje) {
   if (!condicion) fallos.push(mensaje);
 }
 
+/**
+ * El marcador de rama existe para que las herramientas de la Fase B no escriban fuera de
+ * su rama aislada. **Producción no lo tiene, y no debe tenerlo**: ponérselo la haría
+ * pasar por una rama de desarrollo ante todos los guardianes. Así que allí el valor
+ * correcto es la ausencia.
+ */
+export function marcadorEsperado(destino, ramaEsperada) {
+  return destino === "produccion" ? null : (ramaEsperada ?? null);
+}
+
+/**
+ * `relational_v2` sigue prohibido en la rama de desarrollo —allí sería la Fase D
+ * empezando por su cuenta— y es un estado legítimo en Producción desde que la Fase D se
+ * autorizó. Un valor que no esté en la lista no se acepta en ningún destino.
+ */
+export function modeloAceptable(modelo, destino) {
+  const permitidos =
+    destino === "produccion" ? ["legacy", "shadow", "relational_v2"] : ["legacy", "shadow"];
+  return permitidos.includes(modelo);
+}
+
 export async function verificarCatalogoRelacional(
   cliente,
   entorno = process.env,
@@ -213,14 +234,16 @@ export async function verificarCatalogoRelacional(
       (select valor from app_settings where clave = 'rama_neon') as rama
   `);
   agregarFallo(fallos, Number(migracion_010) === 1, "010 no está registrada exactamente una vez");
-  // Desde la Fase C la bandera puede estar en `shadow` en la rama de desarrollo. Lo que
-  // sigue prohibido, y por eso se comprueba, es `relational_v2`: eso es la Fase D.
   agregarFallo(
     fallos,
-    modelo === "legacy" || modelo === "shadow",
-    `modelo_catalogo vale ${String(modelo)}`,
+    modeloAceptable(modelo, destino),
+    `modelo_catalogo vale ${String(modelo)} en ${destino}`,
   );
-  agregarFallo(fallos, rama === entorno.NEON_RAMA_ESPERADA, `marcador de rama inesperado: ${String(rama)}`);
+  agregarFallo(
+    fallos,
+    (rama ?? null) === marcadorEsperado(destino, entorno.NEON_RAMA_ESPERADA),
+    `marcador de rama inesperado: ${String(rama)}`,
+  );
 
   const permisos = await ejecutar(
     `select tabla,
