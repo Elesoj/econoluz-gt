@@ -36,6 +36,8 @@ const PROHIBIDAS = [
   "attribute_options",
   "product_attribute_values",
   "product_prices",
+  "carts",
+  "cart_items",
 ];
 
 const identificador = (nombre) => {

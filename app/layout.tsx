@@ -2,6 +2,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import CarritoContador from "./tienda/CarritoContador";
+import SincronizarCarrito from "./tienda/SincronizarCarrito";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -59,6 +60,7 @@ export default function RootLayout({
         {children}
         <FloatingWhatsApp />
         <CarritoContador />
+        <SincronizarCarrito />
       </body>
     </html>
   );

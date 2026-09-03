@@ -1,5 +1,7 @@
 import { reducirCarrito, type AccionCarrito, type LineaCarrito } from "./carrito";
 import { guardarCarrito, leerCarrito } from "./carritoPersistencia";
+import { aplicarConReversion, limpiarCarritoPrivado } from "./carritoSincronizacion";
+import { sincronizadorRemoto } from "./carritoRemoto";
 
 /**
  * El carrito, vivo, compartido por toda la aplicación.
@@ -56,7 +58,9 @@ const persistir = () => {
  * rompería la hidratación de React.
  */
 export const hidratar = () => {
-  if (hidratado) {
+  // En modo remoto manda el servidor: leer aquí lo guardado en el navegador pondría el
+  // carrito de este dispositivo por encima del de la cuenta.
+  if (hidratado || modo === "remoto") {
     return;
   }
 
@@ -85,10 +89,75 @@ export const hidratar = () => {
   avisar();
 };
 
+/**
+ * De dónde manda el carrito.
+ *
+ * `local` es el de siempre: `localStorage` y nada más, para el visitante anónimo.
+ * `remoto` es el del cliente con sesión, que vive en Neon; en ese modo **no se persiste
+ * en el navegador**, porque el carrito ya no es de este dispositivo sino de la cuenta, y
+ * dejarlo escrito aquí es justo lo que no debe pasar en un ordenador compartido.
+ */
+let modo: "local" | "remoto" = "local";
+
+/**
+ * Pasa al carrito del cliente con sesión, con lo que ha devuelto el servidor.
+ *
+ * Se llama después de fusionar, que es cuando el servidor ya tiene la verdad.
+ */
+export const activarModoRemoto = (delServidor: readonly LineaCarrito[]) => {
+  modo = "remoto";
+  hidratado = true;
+  lineas = delServidor.length === 0 ? VACIO : [...delServidor];
+  avisar();
+};
+
+/**
+ * Vuelve al carrito anónimo al cerrar sesión, **sin dejar rastro del privado**.
+ *
+ * No basta con vaciar la memoria: el carrito del cliente pudo escribirse en el navegador
+ * antes de iniciar sesión, y quien entre después en el mismo dispositivo no puede
+ * encontrarse su compra.
+ */
+export const activarModoLocal = () => {
+  const eraRemoto = modo === "remoto";
+  modo = "local";
+
+  if (!eraRemoto) return;
+
+  try {
+    limpiarCarritoPrivado(window.localStorage);
+  } catch {
+    // Sin acceso al almacén no hay nada que limpiar ni nada que hacer.
+  }
+
+  lineas = VACIO;
+  avisar();
+};
+
+export const obtenerModo = () => modo;
+
+const pintar = (siguientes: readonly LineaCarrito[]) => {
+  lineas = siguientes;
+  avisar();
+};
+
 export const despachar = (accion: AccionCarrito) => {
   const siguientes = reducirCarrito(lineas, accion);
 
   if (siguientes === lineas) {
+    return;
+  }
+
+  if (modo === "remoto") {
+    // Se pinta ya y se revierte si el servidor dice que no. La política vive en
+    // `carritoSincronizacion`, que está probada sin red.
+    void aplicarConReversion(lineas, accion, sincronizadorRemoto, pintar).then(
+      (resultado) => {
+        // La sesión se acabó mientras el cliente compraba: se vuelve al carrito anónimo y
+        // no queda nada suyo en este navegador.
+        if (resultado.sinSesion) activarModoLocal();
+      },
+    );
     return;
   }
 
