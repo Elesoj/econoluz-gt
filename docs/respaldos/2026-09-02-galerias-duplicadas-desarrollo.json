@@ -1,0 +1,618 @@
+{
+  "generado": "2026-09-03T00:15:18.120Z",
+  "rama": "catalogo-relacional-fase-b",
+  "motivo": "Fase C: quitar de products.images la repeticion exacta de products.image",
+  "afectados": 64,
+  "productos": [
+    {
+      "id": "construlita-cuasar",
+      "referencia": "ECO-IND-0042",
+      "imagen": "/catalogos/construlita/alto_montaje/eco-industrial-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/alto_montaje/eco-industrial-001.webp",
+        "/catalogos/construlita/alto_montaje/eco-industrial-002.webp"
+      ],
+      "imagesNuevo": [
+        "/catalogos/construlita/alto_montaje/eco-industrial-002.webp"
+      ]
+    },
+    {
+      "id": "construlita-highlens",
+      "referencia": "ECO-IND-0045",
+      "imagen": "/catalogos/construlita/alto_montaje/eco-industrial-005.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/alto_montaje/eco-industrial-005.webp",
+        "/catalogos/construlita/alto_montaje/eco-industrial-006.webp"
+      ],
+      "imagesNuevo": [
+        "/catalogos/construlita/alto_montaje/eco-industrial-006.webp"
+      ]
+    },
+    {
+      "id": "construlita-bronce-ou2001c00k",
+      "referencia": "ECO-CAT-0059",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-002.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-002.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ou6026c00k",
+      "referencia": "ECO-CAT-0060",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-005.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-005.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ou3022c00k",
+      "referencia": "ECO-CAT-0061",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-003.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-003.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ou3023c00k",
+      "referencia": "ECO-CAT-0062",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-004.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-004.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ou7012c00k",
+      "referencia": "ECO-CAT-0063",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-006.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-006.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ou7014c00k",
+      "referencia": "ECO-CAT-0064",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-007.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-007.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-re8200c00k",
+      "referencia": "ECO-CAT-0065",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-011.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-011.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-re8201c00k",
+      "referencia": "ECO-CAT-0066",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-012.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-012.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ou9010c00k",
+      "referencia": "ECO-CAT-0067",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-008.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-008.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ou9011cbcf",
+      "referencia": "ECO-CAT-0068",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-009.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-009.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ou9012c00k",
+      "referencia": "ECO-CAT-0069",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-010.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-010.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bronce-ac7600c",
+      "referencia": "ECO-CAT-0070",
+      "imagen": "/catalogos/construlita/bronce/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/bronce/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-sombra",
+      "referencia": "ECO-CAT-0071",
+      "imagen": "/catalogos/construlita/arbotantes/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/arbotantes/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-landscape",
+      "referencia": "ECO-CAT-0072",
+      "imagen": "/catalogos/construlita/proyector/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-corvus-luminario-para-poste",
+      "referencia": "ECO-CAT-0073",
+      "imagen": "/catalogos/construlita/luminarios_para_poste/eco-exterior-002.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/luminarios_para_poste/eco-exterior-002.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bright",
+      "referencia": "ECO-CAT-0074",
+      "imagen": "/catalogos/construlita/luminarios_para_poste/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/luminarios_para_poste/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-urban-city-ou9086-ou9087-ou9100",
+      "referencia": "ECO-CAT-0075",
+      "imagen": "/catalogos/construlita/luminarios_para_poste/eco-exterior-006.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/luminarios_para_poste/eco-exterior-006.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-urban-city-ou9021fbna",
+      "referencia": "ECO-CAT-0076",
+      "imagen": "/catalogos/construlita/luminarios_para_poste/eco-exterior-005.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/luminarios_para_poste/eco-exterior-005.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-faroled-colonial-ou9035-ou9036",
+      "referencia": "ECO-CAT-0077",
+      "imagen": "/catalogos/construlita/luminarios_para_poste/eco-exterior-003.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/luminarios_para_poste/eco-exterior-003.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-faroled-colonial-ou9906nbca",
+      "referencia": "ECO-CAT-0078",
+      "imagen": "/catalogos/construlita/luminarios_para_poste/eco-exterior-004.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/luminarios_para_poste/eco-exterior-004.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-poste-cubic",
+      "referencia": "ECO-CAT-0079",
+      "imagen": "/catalogos/construlita/poste/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/poste/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-cubic-bolardo",
+      "referencia": "ECO-CAT-0080",
+      "imagen": "/catalogos/construlita/minipostes/eco-exterior-006.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/minipostes/eco-exterior-006.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-softglow",
+      "referencia": "ECO-CAT-0081",
+      "imagen": "/catalogos/construlita/minipostes/eco-exterior-007.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/minipostes/eco-exterior-007.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-corvus-miniposte-ou9093cbca",
+      "referencia": "ECO-CAT-0082",
+      "imagen": "/catalogos/construlita/minipostes/eco-exterior-005.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/minipostes/eco-exterior-005.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-corvus-miniposte-ou9092cbca",
+      "referencia": "ECO-CAT-0083",
+      "imagen": "/catalogos/construlita/minipostes/eco-exterior-004.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/minipostes/eco-exterior-004.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-corvus-miniposte-ou9089sbcb",
+      "referencia": "ECO-CAT-0084",
+      "imagen": "/catalogos/construlita/minipostes/eco-exterior-003.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/minipostes/eco-exterior-003.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bollard-ou9090fbnb",
+      "referencia": "ECO-CAT-0085",
+      "imagen": "/catalogos/construlita/minipostes/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/minipostes/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-bollard-ou9091fbnb",
+      "referencia": "ECO-CAT-0086",
+      "imagen": "/catalogos/construlita/minipostes/eco-exterior-002.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/minipostes/eco-exterior-002.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-evolight",
+      "referencia": "ECO-CAT-0087",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-nanovia-v0040un2m50",
+      "referencia": "ECO-CAT-0088",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-003.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-003.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-nanovia-v0052un2m50",
+      "referencia": "ECO-CAT-0089",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-004.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-004.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-nanovia-v0100un2m",
+      "referencia": "ECO-CAT-0090",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-005.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-005.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-nanovia-ul-u0040un2m",
+      "referencia": "ECO-CAT-0091",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-002.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-002.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-vialed-v1050un2m",
+      "referencia": "ECO-CAT-0092",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-009.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-009.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-vialed-v1070un2m",
+      "referencia": "ECO-CAT-0093",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-010.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-010.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-vialed-v2100un2m",
+      "referencia": "ECO-CAT-0094",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-011.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-011.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-vialed-v2130un2m",
+      "referencia": "ECO-CAT-0095",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-012.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-012.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-vialed-v3160un2m",
+      "referencia": "ECO-CAT-0096",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-013.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-013.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-vialed-ul-u1050un2m",
+      "referencia": "ECO-CAT-0097",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-006.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-006.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-vialed-ul-u1070un2m",
+      "referencia": "ECO-CAT-0098",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-007.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-007.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-vialed-ul-u1090un2m",
+      "referencia": "ECO-CAT-0099",
+      "imagen": "/catalogos/construlita/vialidades/eco-exterior-008.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/vialidades/eco-exterior-008.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-module-configurable",
+      "referencia": "ECO-CAT-0100",
+      "imagen": "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-007.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-007.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-module-45w",
+      "referencia": "ECO-CAT-0101",
+      "imagen": "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-007.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-007.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-module-90w",
+      "referencia": "ECO-CAT-0102",
+      "imagen": "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-006.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-006.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-module-135w",
+      "referencia": "ECO-CAT-0103",
+      "imagen": "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-module-180w",
+      "referencia": "ECO-CAT-0104",
+      "imagen": "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-002.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-002.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-module-270w",
+      "referencia": "ECO-CAT-0105",
+      "imagen": "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-003.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-003.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-module-360w",
+      "referencia": "ECO-CAT-0106",
+      "imagen": "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-004.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-004.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-module-540w",
+      "referencia": "ECO-CAT-0107",
+      "imagen": "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-005.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-005.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-sumergible-ou7056sbcg",
+      "referencia": "ECO-CAT-0108",
+      "imagen": "/catalogos/construlita/sumergibles/eco-exterior-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/sumergibles/eco-exterior-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-sumergible-ou7057sbcg",
+      "referencia": "ECO-CAT-0109",
+      "imagen": "/catalogos/construlita/sumergibles/eco-exterior-002.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/sumergibles/eco-exterior-002.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-sumergible-ou7058sbcg",
+      "referencia": "ECO-CAT-0110",
+      "imagen": "/catalogos/construlita/sumergibles/eco-exterior-003.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/sumergibles/eco-exterior-003.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-sumergible-ou7059sbcg",
+      "referencia": "ECO-CAT-0111",
+      "imagen": "/catalogos/construlita/sumergibles/eco-exterior-004.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/sumergibles/eco-exterior-004.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-uplights-dirigibles",
+      "referencia": "ECO-CAT-0112",
+      "imagen": "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-005.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-005.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-006.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-007.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-008.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-009.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-010.webp"
+      ],
+      "imagesNuevo": [
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-006.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-007.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-008.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-009.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-010.webp"
+      ]
+    },
+    {
+      "id": "construlita-fragata-pro",
+      "referencia": "ECO-CAT-0113",
+      "imagen": "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-001.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-goleta-pro",
+      "referencia": "ECO-CAT-0114",
+      "imagen": "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-002.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-002.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-roadlight",
+      "referencia": "ECO-CAT-0115",
+      "imagen": "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-004.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-004.webp",
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-003.webp"
+      ],
+      "imagesNuevo": [
+        "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-003.webp"
+      ]
+    },
+    {
+      "id": "construlita-walklights",
+      "referencia": "ECO-CAT-0116",
+      "imagen": "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-001.webp",
+        "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-002.webp",
+        "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-003.webp",
+        "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-004.webp"
+      ],
+      "imagesNuevo": [
+        "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-002.webp",
+        "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-003.webp",
+        "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-004.webp"
+      ]
+    },
+    {
+      "id": "construlita-barra-pro",
+      "referencia": "ECO-CAT-0117",
+      "imagen": "/catalogos/construlita/barras/eco-lineal-001.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/barras/eco-lineal-001.webp",
+        "/catalogos/construlita/barras/eco-lineal-002.webp",
+        "/catalogos/construlita/barras/eco-lineal-003.webp",
+        "/catalogos/construlita/barras/eco-lineal-004.webp"
+      ],
+      "imagesNuevo": [
+        "/catalogos/construlita/barras/eco-lineal-002.webp",
+        "/catalogos/construlita/barras/eco-lineal-003.webp",
+        "/catalogos/construlita/barras/eco-lineal-004.webp"
+      ]
+    },
+    {
+      "id": "construlita-uplight-lineal",
+      "referencia": "ECO-CAT-0118",
+      "imagen": "/catalogos/construlita/barras/eco-lineal-007.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/barras/eco-lineal-007.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-uplight-lineal-dirigible",
+      "referencia": "ECO-CAT-0119",
+      "imagen": "/catalogos/construlita/barras/eco-lineal-006.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/barras/eco-lineal-006.webp"
+      ],
+      "imagesNuevo": null
+    },
+    {
+      "id": "construlita-metroled",
+      "referencia": "ECO-CAT-0120",
+      "imagen": "/catalogos/construlita/barras/eco-lineal-005.webp",
+      "imagesOriginal": [
+        "/catalogos/construlita/barras/eco-lineal-005.webp"
+      ],
+      "imagesNuevo": null
+    }
+  ]
+}
