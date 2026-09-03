@@ -312,8 +312,14 @@ administración, importación y `shadow`; la búsqueda por `supplier_code` sigue
 código. Esta preparación no cambia `modelo_catalogo`, no escribe en Neon y no comienza la
 Fase D.
 
-**Verificación local de esta preparación:** las 16 suites del catálogo pasan **276/276**;
-`test:datos`, **425/425**; `test:admin`, **196/196**; `test:proveedores`, **3/3**;
+La revisión independiente pidió blindar el cableado real, no solo el lector puro. La
+frontera vive ahora en `lecturaPublica.server.ts`, módulo que importa `leerPublico` y no
+puede importar `leer` ni nombrar `DATABASE_URL`; una mutación temporal hacia el lector
+privilegiado hizo fallar la prueba. También quedaron fijadas por prueba la clave
+`catalogo-publico-relacional`, la etiqueta `catalogo` y la caducidad de 3600 segundos.
+
+**Verificación local de esta preparación:** las 16 suites del catálogo pasan **277/277**;
+`test:datos`, **426/426**; `test:admin`, **196/196**; `test:proveedores`, **3/3**;
 `typecheck`, `lint` y `build`, correctos. No se ejecutó Playwright porque no cambió ningún
 comportamiento renderizado. `test:permisos` no pudo completarse de nuevo: este worktree y
 el entorno del proceso no tienen `DATABASE_URL_PUBLIC`, y la credencial heredada del
