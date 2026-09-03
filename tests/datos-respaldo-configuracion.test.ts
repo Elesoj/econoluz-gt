@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   decidirOrigenPublico,
@@ -153,6 +153,34 @@ test("un fallo del rol público no abre la puerta a la privilegiada", async () =
 // que mirar.
 
 const CAPA = join(import.meta.dirname, "..", "app", "lib", "datos");
+const LECTOR_PUBLICO = join(
+  import.meta.dirname,
+  "..",
+  "app",
+  "data",
+  "catalogo",
+  "lecturaPublica.server.ts",
+);
+
+test("el lector relacional público vive en una frontera sin acceso privilegiado", () => {
+  assert.equal(
+    existsSync(LECTOR_PUBLICO),
+    true,
+    "La lectura pública debe vivir separada del adaptador relacional privado.",
+  );
+  const fuente = readFileSync(LECTOR_PUBLICO, "utf8");
+  assert.match(fuente, /import \{ leerPublico, type Ejecutor \} from "\.\.\/\.\.\/lib\/datos"/);
+  assert.doesNotMatch(
+    fuente,
+    /import \{[^}]*\bleer\b[^}]*\} from "\.\.\/\.\.\/lib\/datos"/,
+    "La frontera pública no puede importar el lector privilegiado.",
+  );
+  assert.doesNotMatch(
+    fuente,
+    /DATABASE_URL(?!_PUBLIC)/,
+    "La frontera pública no puede consultar la cadena privilegiada.",
+  );
+});
 
 /**
  * Devuelve el cuerpo de una función exportada.

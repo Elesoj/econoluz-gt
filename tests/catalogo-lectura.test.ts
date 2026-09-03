@@ -31,12 +31,16 @@ function ejecutorFalso(respuestas: readonly Respuesta[]) {
 function cacheFalsa() {
   let valor: PublicProduct[] | undefined;
   let tags: string[] = [];
+  let claves: string[] = [];
+  let revalidate = 0;
   const cachear = (
     leer: () => Promise<PublicProduct[]>,
     _claves: string[],
     opciones: { tags: string[]; revalidate: number },
   ) => {
     tags = opciones.tags;
+    claves = _claves;
+    revalidate = opciones.revalidate;
     return async () => {
       if (valor !== undefined) return structuredClone(valor);
       const resultado = await leer();
@@ -48,6 +52,9 @@ function cacheFalsa() {
     cachear,
     invalidar(tag: string) {
       if (tags.includes(tag)) valor = undefined;
+    },
+    configuracion() {
+      return { claves, tags, revalidate };
     },
   };
 }
@@ -453,6 +460,17 @@ test("un error de lectura pública no se conserva en la caché", async () => {
   await assert.rejects(() => leer(), /fallo transitorio/);
   assert.deepEqual(await leer(), [PRODUCTO_PUBLICO]);
   assert.equal(lecturas, 2);
+});
+
+test("la caché pública conserva la clave, etiqueta y caducidad aprobadas", () => {
+  const cache = cacheFalsa();
+  crearLectorCatalogoPublicoCacheado(async () => [PRODUCTO_PUBLICO], cache.cachear);
+
+  assert.deepEqual(cache.configuracion(), {
+    claves: ["catalogo-publico-relacional"],
+    tags: ["catalogo"],
+    revalidate: 3600,
+  });
 });
 
 test("la búsqueda interna encuentra un código dentro de una lista", async () => {
