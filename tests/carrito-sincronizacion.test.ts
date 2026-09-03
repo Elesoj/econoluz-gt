@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { CARRITO_STORAGE_KEY, guardarCarrito } from "../app/tienda/carritoPersistencia";
 import {
   aplicarConReversion,
+  comprobarSesionYSincronizar,
   limpiarCarritoPrivado,
   sincronizarAlEntrar,
   type Sincronizador,
@@ -315,4 +316,100 @@ test("un fallo normal no se confunde con el final de la sesion", async () => {
   );
 
   assert.notEqual(resultado.sinSesion, true);
+});
+
+// --- Cuándo se comprueba la sesión --------------------------------------------------------
+
+/**
+ * La comprobación es **una por pestaña** para no molestar al visitante anónimo con una
+ * petición por navegación. Pero iniciar sesión no remonta el layout —Next conserva el árbol
+ * en una navegación de cliente—, así que sin un disparo explícito la fusión no ocurriría
+ * hasta la siguiente recarga. Eso deja al cliente recién entrado viendo su carrito local
+ * como si no hubiera pasado nada.
+ */
+test("sin haber comprobado antes, se comprueba", async () => {
+  let comprobado = false;
+  const resultado = await comprobarSesionYSincronizar({
+    forzar: false,
+    yaComprobado: () => false,
+    anotarComprobado: () => {
+      comprobado = true;
+    },
+    haySesion: async () => false,
+    entrar: async () => ({ ok: false }),
+  });
+
+  assert.equal(resultado, "anonimo");
+  assert.equal(comprobado, true);
+});
+
+test("ya comprobada la pestana, no se vuelve a preguntar", async () => {
+  let preguntas = 0;
+  const resultado = await comprobarSesionYSincronizar({
+    forzar: false,
+    yaComprobado: () => true,
+    anotarComprobado: () => {},
+    haySesion: async () => {
+      preguntas += 1;
+      return true;
+    },
+    entrar: async () => ({ ok: true, lineas: [], descartes: [] }),
+  });
+
+  assert.equal(resultado, "omitido");
+  assert.equal(preguntas, 0);
+});
+
+test("iniciar sesion fuerza la comprobacion aunque la pestana ya la hubiera hecho", async () => {
+  const resultado = await comprobarSesionYSincronizar({
+    forzar: true,
+    yaComprobado: () => true,
+    anotarComprobado: () => {},
+    haySesion: async () => true,
+    entrar: async () => ({
+      ok: true,
+      lineas: [{ econoluzReference: "ECO-ELE-0001", cantidad: 2 }],
+      descartes: [],
+    }),
+  });
+
+  assert.equal(resultado, "fusionado");
+});
+
+/**
+ * Si la fusión falla, la pestaña no puede quedarse marcada como comprobada: el carrito
+ * local sigue entero y hay que volver a intentarlo.
+ */
+test("si la fusion falla, la pestana no queda marcada como comprobada", async () => {
+  let comprobado = false;
+  const resultado = await comprobarSesionYSincronizar({
+    forzar: false,
+    yaComprobado: () => false,
+    anotarComprobado: () => {
+      comprobado = true;
+    },
+    haySesion: async () => true,
+    entrar: async () => ({ ok: false }),
+  });
+
+  assert.equal(resultado, "fallo");
+  assert.equal(comprobado, false, "un fallo no puede impedir el reintento");
+});
+
+test("un fallo al preguntar por la sesion no se toma por «no hay sesion»", async () => {
+  let comprobado = false;
+  const resultado = await comprobarSesionYSincronizar({
+    forzar: false,
+    yaComprobado: () => false,
+    anotarComprobado: () => {
+      comprobado = true;
+    },
+    haySesion: async () => {
+      throw new TypeError("Failed to fetch");
+    },
+    entrar: async () => ({ ok: true, lineas: [], descartes: [] }),
+  });
+
+  assert.equal(resultado, "fallo");
+  assert.equal(comprobado, false);
 });

@@ -162,3 +162,51 @@ export function limpiarCarritoPrivado(almacen: AlmacenCarrito): void {
     // `localStorage` puede lanzar solo con tocarlo. No hay nada mejor que hacer aquí.
   }
 }
+
+export type ResultadoDeComprobacion = "omitido" | "anonimo" | "fusionado" | "fallo";
+
+/**
+ * Decide si toca preguntar por la sesión y, si la hay, fusiona.
+ *
+ * La comprobación es **una por pestaña** para no cobrarle al visitante anónimo una
+ * petición por navegación. Pero iniciar sesión **no remonta el layout** —Next conserva el
+ * árbol en una navegación de cliente—, así que la pantalla de acceso tiene que pedir la
+ * comprobación explícitamente con `forzar`. Sin eso, quien acaba de entrar seguiría viendo
+ * su carrito local hasta la siguiente recarga.
+ *
+ * La pestaña se marca como comprobada **solo cuando la respuesta es concluyente**: un
+ * fallo de red no puede dejarla marcada, porque entonces el reintento no llegaría nunca.
+ */
+export async function comprobarSesionYSincronizar({
+  forzar,
+  yaComprobado,
+  anotarComprobado,
+  haySesion,
+  entrar,
+}: {
+  forzar: boolean;
+  yaComprobado: () => boolean;
+  anotarComprobado: () => void;
+  haySesion: () => Promise<boolean>;
+  entrar: () => Promise<ResultadoDeFusionLocal>;
+}): Promise<ResultadoDeComprobacion> {
+  if (!forzar && yaComprobado()) return "omitido";
+
+  let sesion: boolean;
+  try {
+    sesion = await haySesion();
+  } catch {
+    return "fallo";
+  }
+
+  if (!sesion) {
+    anotarComprobado();
+    return "anonimo";
+  }
+
+  const resultado = await entrar();
+  if (!resultado.ok) return "fallo";
+
+  anotarComprobado();
+  return "fusionado";
+}

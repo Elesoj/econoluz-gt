@@ -14,6 +14,7 @@ import {
   type UserCredential,
 } from "firebase/auth";
 import { auth } from "./firebaseCliente";
+import { engancharCarritoConLaSesion } from "../tienda/carritoSesion";
 
 
 export default function ClienteFirebase() {
@@ -42,6 +43,13 @@ export default function ClienteFirebase() {
       );
       return;
     }
+
+    // La sesión ya está abierta: hay que fusionar el carrito anónimo **ahora**. Esta
+    // navegación no remonta el layout, así que el sincronizador que vive allí no se
+    // enteraría hasta la siguiente recarga y el cliente vería su carrito local intacto.
+    // Si la fusión falla no se bloquea la entrada: el carrito local se conserva entero y
+    // se reintenta con el mismo token.
+    await engancharCarritoConLaSesion(true);
 
     router.replace("/cuenta");
     router.refresh();
