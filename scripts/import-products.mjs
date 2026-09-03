@@ -11,8 +11,18 @@
 // insert no diera error: la da por buena porque lo que quedó guardado
 // reconstruye el catálogo idéntico.
 //
+// **Simula por defecto.** Hasta el 02/09/2026 escribía por el mero hecho de ejecutarlo,
+// sin transacción y sin ningún guardián: importaba sobre lo que hubiera al otro lado de
+// `DATABASE_URL`, Producción incluida. Y como `images` está en `CATALOG_COLUMNS`, una
+// ejecución distraída deshace correcciones hechas a mano sobre la galería.
+//
 // Uso:
-//   npm run catalogo:importar
+//   npm run catalogo:importar                        simula y no escribe nada
+//   npm run catalogo:importar -- --aplicar           escribe en la rama de desarrollo
+//   npm run catalogo:importar -- --aplicar-produccion  escribe en Producción
+//
+// El último exige las tres llaves a la vez: endpoint de Producción verificado,
+// PERMITIR_ESCRITURA_PRODUCCION=true y CONFIRMAR_PRODUCCION con la palabra literal.
 
 import { Client, neonConfig } from "@neondatabase/serverless";
 import { products } from "../app/data/products.ts";
@@ -24,6 +34,10 @@ import {
   toProductRow,
 } from "../app/data/productRow.ts";
 import { compareCatalogs, reportProblems } from "./compare-catalog.mjs";
+import { autorizarEscritura, comprobarConteo, decidirModo } from "./guarda-neon.mjs";
+
+/** La palabra literal que exige este comando para tocar Producción. */
+export const CONFIRMACION_PRODUCCION = "importar-en-produccion";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -55,6 +69,18 @@ console.log("");
 await client.connect();
 
 try {
+  const modo = decidirModo(process.argv.slice(2));
+  const { escribe, destino } = await autorizarEscritura(client, {
+    modo,
+    confirmacionEsperada: CONFIRMACION_PRODUCCION,
+  });
+  console.log(`Modo:           ${modo} (${destino})`);
+  console.log("");
+
+  // Todo el trabajo va dentro de una transacción. En simulación se hace igual y se tira:
+  // así el ensayo comprueba de verdad que las filas entran, en vez de suponerlo.
+  await client.query("begin");
+
   const antes = await client.query("select count(*)::int as n from products");
   console.log(`Ya había en la tabla: ${antes.rows[0].n}`);
 
@@ -117,11 +143,38 @@ try {
   console.log(`Publicados:         ${leidos.rows.filter((row) => row.published).length}`);
   console.log("");
 
-  reportProblems(
-    problemas,
-    `OK: los ${products.length} productos están en la base de datos y reconstruyen el\n` +
-      "    catálogo exactamente igual que el código, campo por campo.",
-  );
+  // Ni una fila de menos ni una de más: si el conteo no cuadra, no se confirma nada.
+  const conteo = comprobarConteo({
+    esperado: rows.length,
+    obtenido: leidos.rows.length,
+    etiqueta: "productos en la tabla",
+  });
+
+  if (!conteo.ok || problemas.length > 0) {
+    await client.query("rollback");
+    if (!conteo.ok) console.error(conteo.motivo);
+    reportProblems(problemas, "");
+    console.error("\nNo se confirmó nada: la transacción se revirtió.");
+    process.exitCode = 1;
+  } else if (escribe) {
+    await client.query("commit");
+    reportProblems(
+      problemas,
+      `OK: los ${products.length} productos están en la base de datos y reconstruyen el\n` +
+        "    catálogo exactamente igual que el código, campo por campo.",
+    );
+  } else {
+    // En simulación se hace el trabajo entero y se tira, para que el ensayo compruebe de
+    // verdad que las filas entran en lugar de suponerlo.
+    await client.query("rollback");
+    console.log(
+      `OK en simulación: los ${products.length} productos entran y reconstruyen el\n` +
+        "    catálogo campo por campo. No se escribió nada; añade -- --aplicar para hacerlo.",
+    );
+  }
+} catch (error) {
+  await client.query("rollback").catch(() => undefined);
+  throw error;
 } finally {
   await client.end();
 }

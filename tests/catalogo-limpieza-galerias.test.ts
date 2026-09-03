@@ -71,68 +71,55 @@ test("el orden de las fotografías conservadas no cambia", () => {
 const PROD = "ep-misty-sun-avmcbgly.c-11.us-east-1.aws.neon.tech";
 const DEV = "ep-green-union-avi3x99e.c-11.us-east-1.aws.neon.tech";
 
+// Desde el endurecimiento previo a la Fase D, escribir en Produccion exige tambien la
+// bandera explicita, no solo el endpoint y la confirmacion.
+const BASE = {
+  host: PROD,
+  hostProduccion: PROD,
+  confirmacion: CONFIRMACION_PRODUCCION,
+  bandera: true,
+};
+
 test("sin confirmación explícita no se escribe en Producción", () => {
-  const decision = decidirEscrituraEnProduccion({
-    host: PROD,
-    hostProduccion: PROD,
-    confirmacion: undefined,
-  });
+  const decision = decidirEscrituraEnProduccion({ ...BASE, confirmacion: undefined });
   assert.equal(decision.ok, false);
   assert.match(String(decision.motivo), /confirmaci/i);
 });
 
 test("una confirmación equivocada tampoco vale", () => {
   for (const confirmacion of ["si", "SI", "produccion", CONFIRMACION_PRODUCCION.toUpperCase()]) {
-    const decision = decidirEscrituraEnProduccion({
-      host: PROD,
-      hostProduccion: PROD,
-      confirmacion,
-    });
+    const decision = decidirEscrituraEnProduccion({ ...BASE, confirmacion });
     assert.equal(decision.ok, false, `${confirmacion} no debería valer`);
   }
 });
 
 test("este camino no puede tocar la rama de desarrollo por equivocación", () => {
-  const decision = decidirEscrituraEnProduccion({
-    host: DEV,
-    hostProduccion: PROD,
-    confirmacion: CONFIRMACION_PRODUCCION,
-  });
+  const decision = decidirEscrituraEnProduccion({ ...BASE, host: DEV });
   assert.equal(decision.ok, false);
   assert.match(String(decision.motivo), /no es el de Producci/i);
 });
 
 test("sin saber cuál es el endpoint de Producción, no se escribe", () => {
-  const decision = decidirEscrituraEnProduccion({
-    host: PROD,
-    hostProduccion: "",
-    confirmacion: CONFIRMACION_PRODUCCION,
-  });
+  const decision = decidirEscrituraEnProduccion({ ...BASE, hostProduccion: "" });
   assert.equal(decision.ok, false);
   assert.match(String(decision.motivo), /NEON_ENDPOINT_PRODUCCION/);
 });
 
 test("con el endpoint de Producción y la confirmación exacta, se permite", () => {
-  assert.deepEqual(
-    decidirEscrituraEnProduccion({
-      host: PROD,
-      hostProduccion: PROD,
-      confirmacion: CONFIRMACION_PRODUCCION,
-    }),
-    { ok: true },
-  );
+  assert.deepEqual(decidirEscrituraEnProduccion(BASE), { ok: true });
+});
+
+test("sin la bandera explícita tampoco se escribe en Producción", () => {
+  for (const bandera of [undefined, false, "true", 1, {}]) {
+    const decision = decidirEscrituraEnProduccion({ ...BASE, bandera });
+    assert.equal(decision.ok, false, `${JSON.stringify(bandera)} no debería valer`);
+    assert.match(String(decision.motivo), /bandera/i);
+  }
 });
 
 test("el sufijo -pooler no confunde a la comprobación", () => {
   const conPooler = PROD.replace(".c-11", "-pooler.c-11");
-  assert.equal(
-    decidirEscrituraEnProduccion({
-      host: conPooler,
-      hostProduccion: PROD,
-      confirmacion: CONFIRMACION_PRODUCCION,
-    }).ok,
-    true,
-  );
+  assert.equal(decidirEscrituraEnProduccion({ ...BASE, host: conPooler }).ok, true);
 });
 
 test("el resumen cuenta productos afectados y fotografías conservadas", () => {

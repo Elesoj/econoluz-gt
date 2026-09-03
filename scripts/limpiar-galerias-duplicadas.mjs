@@ -22,38 +22,27 @@ import { fileURLToPath } from "node:url";
 
 import { Client, neonConfig } from "@neondatabase/serverless";
 
-import { endpointCanonico, exigirRamaDeDesarrollo } from "./guarda-neon.mjs";
+import {
+  decidirEscrituraEnProduccion as decidirEnProduccion,
+  exigirRamaDeDesarrollo,
+  interpretarBandera,
+} from "./guarda-neon.mjs";
 
-/**
- * La palabra exacta que hay que escribir para poder tocar Producción.
- *
- * El guardián de rama rechaza Producción por diseño, y eso no se toca: este es un camino
- * **aparte**, que no relaja aquel. Para escribir en Producción hacen falta dos cosas a la
- * vez —estar conectado justo a su endpoint y escribir esta palabra— porque cada una sola
- * puede darse por descuido, y las dos juntas no.
- */
+/** La palabra exacta que hay que escribir para poder tocar Producción con este comando. */
 export const CONFIRMACION_PRODUCCION = "limpiar-galerias-produccion";
 
-export function decidirEscrituraEnProduccion({ host, hostProduccion, confirmacion }) {
-  if (!hostProduccion) {
-    return { ok: false, motivo: "Falta NEON_ENDPOINT_PRODUCCION: no se sabe cuál es." };
-  }
-  if (confirmacion !== CONFIRMACION_PRODUCCION) {
-    return {
-      ok: false,
-      motivo: `Falta la confirmación explícita «${CONFIRMACION_PRODUCCION}».`,
-    };
-  }
-
-  const conectado = endpointCanonico(host);
-  if (!conectado || conectado !== endpointCanonico(hostProduccion)) {
-    return {
-      ok: false,
-      motivo: `El endpoint conectado no es el de Producción: ${host || "vacío"}.`,
-    };
-  }
-
-  return { ok: true };
+/**
+ * La decisión vive en `guarda-neon.mjs`, compartida con los demás comandos que pueden
+ * escribir: una sola implementación que endurecer, y no tres que se van separando.
+ */
+export function decidirEscrituraEnProduccion({ host, hostProduccion, confirmacion, bandera }) {
+  return decidirEnProduccion({
+    host,
+    hostProduccion,
+    confirmacion,
+    esperada: CONFIRMACION_PRODUCCION,
+    bandera,
+  });
 }
 
 /** Cuántos productos deben quedar afectados. Si no son exactamente estos, se revierte. */
@@ -131,6 +120,7 @@ export async function aplicar(cliente, entorno = process.env, rutaRespaldo, dest
       host: new URL(entorno.DATABASE_URL).host,
       hostProduccion: entorno.NEON_ENDPOINT_PRODUCCION,
       confirmacion: entorno.CONFIRMAR_PRODUCCION,
+      bandera: interpretarBandera(entorno.PERMITIR_ESCRITURA_PRODUCCION),
     });
     if (!decision.ok) throw new Error(decision.motivo);
   } else {
@@ -196,6 +186,7 @@ export async function restaurar(cliente, rutaRespaldo, entorno = process.env) {
       host: new URL(entorno.DATABASE_URL).host,
       hostProduccion: entorno.NEON_ENDPOINT_PRODUCCION,
       confirmacion: entorno.CONFIRMAR_PRODUCCION,
+      bandera: interpretarBandera(entorno.PERMITIR_ESCRITURA_PRODUCCION),
     });
     if (!decision.ok) throw new Error(decision.motivo);
   } else {

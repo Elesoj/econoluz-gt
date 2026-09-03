@@ -42,6 +42,100 @@ function decidirEndpointSeguro({ host, hostEsperado, hostProduccion, ramaEsperad
   return { ok: true };
 }
 
+/**
+ * Los tres modos de cualquier script que pueda escribir. **`simular` es el de por
+ * defecto**: un script que escribe por el mero hecho de ejecutarlo acaba escribiendo por
+ * accidente, y estos tocan el catálogo entero.
+ */
+export function decidirModo(argumentos = []) {
+  const lista = [...argumentos];
+  if (lista.includes("--aplicar-produccion")) return "aplicar-produccion";
+  if (lista.includes("--aplicar")) return "aplicar";
+  return "simular";
+}
+
+/**
+ * Una bandera de entorno, sin trucos de veracidad: solo la cadena exacta `"true"`.
+ * `"1"`, `"si"` o `"False"` son verdaderos en JavaScript y no deben abrir nada.
+ */
+export function interpretarBandera(valor) {
+  return valor === "true";
+}
+
+/**
+ * Escribir en Producción exige **tres cosas a la vez**, y ninguna sola basta: estar
+ * conectado justo a su endpoint, haber levantado la bandera explícita, y escribir la
+ * confirmación literal de esa operación concreta. Cada una por separado puede darse por
+ * descuido —una variable heredada, un comando copiado—; las tres juntas, no.
+ *
+ * Esto **no relaja** `exigirRamaDeDesarrollo`: es un camino aparte, que el guardián de
+ * rama sigue rechazando.
+ */
+export function decidirEscrituraEnProduccion({
+  host,
+  hostProduccion,
+  confirmacion,
+  esperada,
+  bandera,
+}) {
+  if (!hostProduccion) {
+    return { ok: false, motivo: "Falta NEON_ENDPOINT_PRODUCCION: no se sabe cuál es." };
+  }
+  if (bandera !== true) {
+    return { ok: false, motivo: "Falta la bandera explícita de escritura en Producción." };
+  }
+  if (!esperada || confirmacion !== esperada) {
+    return { ok: false, motivo: `Falta la confirmación literal «${esperada}».` };
+  }
+
+  const conectado = endpointCanonico(host);
+  if (!conectado || conectado !== endpointCanonico(hostProduccion)) {
+    return {
+      ok: false,
+      motivo: `El endpoint conectado no es el de Producción: ${host || "vacío"}.`,
+    };
+  }
+
+  return { ok: true };
+}
+
+/** Un conteo solo vale si es un entero y es exactamente el que se esperaba. */
+export function comprobarConteo({ esperado, obtenido, etiqueta = "filas" }) {
+  if (!Number.isInteger(obtenido)) {
+    return { ok: false, motivo: `El conteo de ${etiqueta} no es un entero: ${String(obtenido)}.` };
+  }
+  if (obtenido !== esperado) {
+    return {
+      ok: false,
+      motivo: `Se esperaban ${esperado} ${etiqueta} y salieron ${obtenido}.`,
+    };
+  }
+  return { ok: true };
+}
+
+/**
+ * Decide y aplica el guardián que toque según el modo. Devuelve si hay que escribir.
+ * Lanza —y por tanto corta el script— cuando la escritura no está autorizada.
+ */
+export async function autorizarEscritura(cliente, { modo, entorno = process.env, confirmacionEsperada }) {
+  if (modo === "simular") return { escribe: false, destino: "simulacion" };
+
+  if (modo === "aplicar-produccion") {
+    const decision = decidirEscrituraEnProduccion({
+      host: new URL(entorno.DATABASE_URL).host,
+      hostProduccion: entorno.NEON_ENDPOINT_PRODUCCION,
+      confirmacion: entorno.CONFIRMAR_PRODUCCION,
+      esperada: confirmacionEsperada,
+      bandera: interpretarBandera(entorno.PERMITIR_ESCRITURA_PRODUCCION),
+    });
+    if (!decision.ok) throw new Error(decision.motivo);
+    return { escribe: true, destino: "produccion" };
+  }
+
+  await exigirRamaDeDesarrollo(cliente, entorno);
+  return { escribe: true, destino: "desarrollo" };
+}
+
 export function decidirSiPuedeEscribir({
   host,
   hostEsperado,
