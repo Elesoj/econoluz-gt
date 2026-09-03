@@ -173,28 +173,34 @@ cuya huella figura arriba**:
 - **340 códigos municipales únicos**, que coinciden exactamente con el universo declarado
   por el DINESE. Descartados los códigos de país que la misma boleta incluye (`3030` Cuba,
   `4007` Bélgica, `5008` China…), todos ≥ 3000.
-- **339 de los 340 nombres** quedaron emparejados con su código. El emparejado se hizo por
+- **339 de los 340 nombres** quedaron emparejados automáticamente. El emparejado se hizo por
   coordenadas y **se comprobó que ampliar la tolerancia no alteró ningún emparejamiento
   previo**: cero cambios, once huecos rellenados.
-- **Falta el nombre del municipio `923`** (Quetzaltenango). En el PDF, la celda contigua a
-  ese código **está vacía**: sus vecinos `920` Coatepeque, `921` Génova y `922` Flores Costa
-  Cuca sí lo tienen. **No se rellena de memoria.** Se resuelve mirando el documento —o la
-  fuente que aporte el dueño— y se documenta como cualquier otra corrección.
+- **El municipio `0923` es La Esperanza, Quetzaltenango**, y está **confirmado por el dueño
+  contra la página 7**, entre `0922 Flores Costa Cuca` y `0924 Palestina de los Altos`.
 
-**Erratas del documento detectadas, que no se corrigen en silencio:**
+**Corrección de un error de informe, para que no se repita.** Una versión anterior de esta
+sección afirmaba que la celda de `0923` **estaba vacía en el PDF**. Es falso: el nombre está
+en el documento y **lo que falló fue la extracción por coordenadas**. Son dos cosas
+distintas —que la fuente no traiga un dato, y que la herramienta no lo saque— y confundirlas
+lleva a conclusiones equivocadas sobre la calidad de la fuente.
 
-| Código | Como aparece en el PDF | Corrección propuesta |
-|---|---|---|
-| `1330` | `Santiago Chimaltenanango` | `Santiago Chimaltenango` |
+**Erratas y correcciones puntuales, que no se aplican en silencio:**
+
+| Código | Como aparece en el PDF | Como se almacena | Motivo |
+|---|---|---|---|
+| `1330` | `Santiago Chimaltenanango` | `Santiago Chimaltenango` | Errata tipográfica del documento |
+| `0923` | `La Esperanza` (legible en la página 7) | `La Esperanza` | El texto es correcto; falló la extracción automática, no la fuente |
 
 Cada corrección adicional que aparezca al completar la extracción **se añade a esta tabla**,
-con su código, el texto original y el corregido. Ninguna se aplica sin quedar escrita aquí.
+con su código, el texto original, el almacenado y el motivo. Ninguna se aplica sin quedar
+escrita aquí y sin respaldo en la página 7.
 
-**Por qué la segunda huella todavía no está.** Firmar el SHA-256 de una instantánea a la que
-le falta un nombre sería firmar un valor que va a cambiar en cuanto se complete, y dejaría
-en el documento una huella que no corresponde a lo que acabe migrando. Se registra en la
-tabla de §4.2.1 **al cerrar el municipio `923` y revisar la tabla de erratas**, antes de que
-`012_geografia_gt.sql` exista. El criterio de aceptación 14 lo exige.
+**Por qué la segunda huella todavía no está.** El catálogo ya está completo conceptualmente,
+pero la instantánea **se genera al ejecutar la tarea 1 del plan**, y su SHA-256 solo puede
+calcularse sobre el archivo real. Se registra en la tabla de §4.2.1 **antes de que
+`012_geografia_gt.sql` exista**; el criterio de aceptación 14 lo exige y ninguna migración
+puede escribirse antes.
 
 **La completitud se verifica contra este conjunto exacto versionado** —22 departamentos y
 340 municipios—, nunca comprobando que los códigos formen una secuencia numérica continua:

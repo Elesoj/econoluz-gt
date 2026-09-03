@@ -120,23 +120,34 @@ Esperado exactamente:
 **Si la huella no coincide, detente y avisa al dueño.** El INE ha republicado el documento y
 la especificación necesita actualizarse antes de seguir.
 
-- [ ] **Paso 2: Resolver el municipio `923` y las erratas**
+- [ ] **Paso 2: Registrar las correcciones conocidas**
 
-De la extracción del 03/09/2026 salieron **340 códigos únicos y 339 nombres**. Falta el
-nombre de `923` (Quetzaltenango), cuya celda aparece vacía en el PDF, y está documentada una
-errata en `1330` (`Santiago Chimaltenanango`).
-
-Abre el PDF en la página 7 y **lee** el nombre de `923`. Anótalo junto a cualquier otra
-errata en `db/datos/geografia-gt.FUENTE.md` con esta tabla:
+De la extracción del 03/09/2026 salieron **340 códigos únicos y 339 nombres emparejados
+automáticamente**. Las dos correcciones conocidas van a `db/datos/geografia-gt.FUENTE.md`
+antes de generar nada:
 
 ```markdown
+# Procedencia del catálogo geográfico
+
+Fuente primaria: Instituto Nacional de Estadística de Guatemala (INE),
+ENEIC 2024-2025, boleta larga, tabla «Lista de códigos de los municipios de la
+República de Guatemala», página 7.
+SHA-256 del PDF: 1eb2a2e3a718c7132c944a26a83a1d2a317c42e7fc4f3ab4862026950da7ca0e
+
+## Correcciones aplicadas
+
 | Código | Como aparece en el PDF | Como se almacena | Motivo |
 |---|---|---|---|
 | 1330 | Santiago Chimaltenanango | Santiago Chimaltenango | Errata tipográfica del documento |
+| 0923 | La Esperanza | La Esperanza | El texto es correcto y legible en la página 7; falló la extracción automática, no la fuente |
 ```
 
-**No rellenes `923` de memoria.** Si el PDF no lo trae legible, pregunta al dueño antes de
-continuar. Un municipio inventado gobernaría tarifas reales.
+**`0923` es La Esperanza, Quetzaltenango**, entre `0922 Flores Costa Cuca` y
+`0924 Palestina de los Altos`. Está confirmado contra la página 7 por el dueño: **no es un
+dato inferido ni una celda vacía**, sino un fallo de la extracción por coordenadas.
+
+Si aparece cualquier otra discrepancia, se añade a esa tabla con su respaldo en la página 7.
+**Nada se corrige de memoria ni en silencio.**
 
 - [ ] **Paso 3: Escribir la prueba de la instantánea**
 
@@ -182,6 +193,29 @@ test("no se comprueba continuidad: los saltos de código son legítimos", () => 
   // versionado y no contra una secuencia.
   const numeros = catalogo.municipios.map((m) => Number(m.codigo)).sort((a, b) => a - b);
   assert.ok(numeros.length === 340);
+});
+
+// Las tres filas que la extracción automática no resolvió sola. Se prueban por
+// su nombre exacto porque son justo las que un refactor del extractor puede
+// volver a romper sin que nadie se entere.
+const busca = (codigo) => catalogo.municipios.find((m) => m.codigo === codigo);
+
+test("0923 es La Esperanza, y su vecino 0924 sigue siendo Palestina de los Altos", () => {
+  assert.deepEqual(busca("0923"), { codigo: "0923", departamento: "09", nombre: "La Esperanza" });
+  assert.deepEqual(busca("0924"), { codigo: "0924", departamento: "09", nombre: "Palestina de los Altos" });
+});
+
+test("la errata de 1330 está corregida y no reintroducida", () => {
+  assert.equal(busca("1330").nombre, "Santiago Chimaltenango");
+  assert.equal(catalogo.municipios.some((m) => m.nombre.includes("Chimaltenanango")), false);
+});
+
+test("toda corrección aplicada está documentada en el archivo de procedencia", () => {
+  const fuente = readFileSync("db/datos/geografia-gt.FUENTE.md", "utf8");
+  for (const codigo of ["0923", "1330"]) {
+    assert.ok(fuente.includes(codigo), `sin documentar: ${codigo}`);
+  }
+  assert.match(fuente, /1eb2a2e3a718c7132c944a26a83a1d2a317c42e7fc4f3ab4862026950da7ca0e/);
 });
 ```
 
@@ -237,14 +271,50 @@ if (huella !== HUELLA_PDF) {
 5. **Completar con cero inicial** los códigos de tres cifras y derivar el departamento de
    los dos primeros dígitos.
 
+**El objetivo es que el extractor saque `0923 → La Esperanza` por sí solo.** Si con las
+tolerancias de arriba sigue sin resolverlo, aplica una **corrección puntual declarada**, que
+es preferible a relajar las tolerancias globales y arriesgarse a mover otros 339
+emparejamientos:
+
+```js
+// Correcciones puntuales respaldadas por la página 7 del PDF y documentadas en
+// db/datos/geografia-gt.FUENTE.md. Se aplican DESPUÉS del emparejado automático
+// y el script avisa de cada una, para que ninguna pase inadvertida.
+const CORRECCIONES = {
+  "0923": "La Esperanza",           // legible en la página 7; falla la extracción por coordenadas
+  "1330": "Santiago Chimaltenango", // errata tipográfica del documento
+};
+
+for (const [codigo, nombre] of Object.entries(CORRECCIONES)) {
+  const fila = municipios.find((m) => m.codigo === codigo);
+  if (!fila) {
+    console.error(`La corrección de ${codigo} no encuentra su fila. Revisa la extracción.`);
+    process.exit(1);
+  }
+  if (fila.nombre !== nombre) {
+    console.warn(`Corrección aplicada en ${codigo}: ${JSON.stringify(fila.nombre)} -> ${nombre}`);
+    fila.nombre = nombre;
+  }
+}
+```
+
 ```js
 // La verificación final es la que manda: si no cuadra, no se escribe nada.
 if (departamentos.length !== 22 || municipios.length !== 340) {
   console.error(`Conteo inesperado: ${departamentos.length} departamentos, ${municipios.length} municipios.`);
   process.exit(1);
 }
+if (new Set(municipios.map((m) => m.codigo)).size !== 340) {
+  console.error("Hay códigos de municipio repetidos.");
+  process.exit(1);
+}
 if (municipios.some((m) => !m.nombre?.trim())) {
-  console.error("Hay municipios sin nombre. Compruébalos en el PDF; no los rellenes de memoria.");
+  const huecos = municipios.filter((m) => !m.nombre?.trim()).map((m) => m.codigo);
+  console.error(
+    `Sin nombre: ${huecos.join(", ")}.\n` +
+      "Compruébalos en la página 7 del PDF y declara la corrección en CORRECCIONES.\n" +
+      "No los rellenes de memoria, y no des por vacía una celda que quizá sí trae texto.",
+  );
   process.exit(1);
 }
 writeFileSync("db/datos/geografia-gt.json", JSON.stringify({ departamentos, municipios }, null, 2) + "\n");
@@ -257,7 +327,7 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ./scripts/preparar-geografia
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/geografia-instantanea.test.ts
 ```
 
-Esperado: PASA, cinco pruebas.
+Esperado: PASA, ocho pruebas.
 
 - [ ] **Paso 7: Registrar la segunda huella en la especificación**
 
@@ -265,8 +335,12 @@ Esperado: PASA, cinco pruebas.
 sha256sum db/datos/geografia-gt.json
 ```
 
-Escribe ese valor en la fila «SHA-256 de la instantánea normalizada» de §4.2.1, borra de
-§4.2.3 la frase sobre el municipio sin nombre y completa la tabla de erratas.
+Escribe ese valor en la fila «SHA-256 de la instantánea normalizada» de §4.2.1 y comprueba
+que la tabla de correcciones de §4.2.3 coincide **exactamente** con `CORRECCIONES` del
+script y con `db/datos/geografia-gt.FUENTE.md`: las tres tienen que decir lo mismo.
+
+**Esta tarea no está terminada hasta que la huella esté escrita.** Ninguna migración puede
+crearse antes; es el criterio de aceptación 14.
 
 - [ ] **Paso 8: Dar de alta la prueba y hacer commit**
 
