@@ -114,19 +114,44 @@ export function fusionarLineas(
 export type DecisionDeFusion = { accion: "fusionar" } | { accion: "ya-aplicada" };
 
 /**
+ * Cuántas fusiones se recuerdan por carrito.
+ *
+ * El navegador genera un token por inicio de sesión y lo borra en cuanto la fusión le
+ * consta confirmada, así que veinte cubre veinte accesos: de sobra para reconocer un
+ * duplicado retrasado, y lejos de convertir la fila en un registro histórico de nadie.
+ */
+export const TOKENS_RECORDADOS = 20;
+
+/** Solo cadenas: la columna es `jsonb` y lo que venga de ahí es dato de fuera. */
+const soloTokens = (valor: unknown): string[] =>
+  Array.isArray(valor) ? valor.filter((x): x is string => typeof x === "string") : [];
+
+/** Apunta el token aplicado: el más reciente primero, sin repetir y con tope. */
+export function registrarToken(
+  aplicados: unknown,
+  token: string,
+  maximo: number = TOKENS_RECORDADOS,
+): string[] {
+  const previos = soloTokens(aplicados).filter((x) => x !== token);
+  return [token, ...previos].slice(0, maximo);
+}
+
+/**
  * Si esta fusión hay que aplicarla o ya se aplicó.
  *
- * El token lo genera el navegador y lo repite mientras la fusión no le conste
- * confirmada. Sin esta comprobación, una respuesta perdida por la red haría que el
- * reintento sumara las cantidades por segunda vez y el cliente encontrara el doble de
- * todo sin haber tocado nada.
+ * Se recuerdan **los últimos tokens, no el último**. Guardar solo el último deja una
+ * puerta abierta: el navegador conserva su token hasta que la fusión le consta confirmada,
+ * así que un reintento normal repite el mismo y se reconoce, pero una petición duplicada
+ * que llega **tarde** —el reintento de un proxy, una pestaña colgada, una respuesta
+ * perdida seguida de otro inicio de sesión— trae un token *anterior*. Con un solo hueco
+ * ese token ya no coincide y la fusión se aplicaría por segunda vez: el cliente se
+ * encontraría el doble de todo sin haber tocado nada.
  */
 export function decidirFusion(
-  carrito: { fusionToken: string | null } | null,
+  carrito: { tokensAplicados: unknown } | null,
   token: string,
 ): DecisionDeFusion {
-  if (carrito && carrito.fusionToken !== null && carrito.fusionToken === token) {
-    return { accion: "ya-aplicada" };
-  }
-  return { accion: "fusionar" };
+  return carrito && soloTokens(carrito.tokensAplicados).includes(token)
+    ? { accion: "ya-aplicada" }
+    : { accion: "fusionar" };
 }

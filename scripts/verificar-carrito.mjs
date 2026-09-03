@@ -114,6 +114,23 @@ async function principal() {
       "repetir el mismo token no vuelve a sumar",
     );
 
+    // --- Reintento retrasado, fuera de orden -------------------------------------------
+    //
+    // El duplicado de una fusion antigua que llega despues de otra mas reciente. Con un
+    // solo token recordado, su token ya no coincidiria y la fusion se aplicaria por
+    // segunda vez.
+    const antesDelRetrasado = await leerCarritoCon(ejecutar, usuarioA);
+    const retrasada = await fusionarCarritoCon(ejecutar, usuarioA, {
+      token: `${SUFIJO}-t1`,
+      lineas: [{ econoluzReference: refA, cantidad: 2 }],
+    });
+    const despuesDelRetrasado = await leerCarritoCon(ejecutar, usuarioA);
+    comprobar(
+      retrasada.ok &&
+        JSON.stringify(antesDelRetrasado) === JSON.stringify(despuesDelRetrasado),
+      "un duplicado retrasado de una fusion anterior no vuelve a sumar",
+    );
+
     // --- Tope de 999 ------------------------------------------------------------------
     const tope = await fusionarCarritoCon(ejecutar, usuarioA, {
       token: `${SUFIJO}-t3`,

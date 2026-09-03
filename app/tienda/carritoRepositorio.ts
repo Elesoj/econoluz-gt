@@ -1,8 +1,10 @@
+import { aCentavos } from "../lib/dinero";
 import type { Ejecutor } from "../lib/datos/consulta";
 import type { CarritoPublico, CuerpoDeFusion, ErrorDeCarrito } from "./carritoContratos";
 import {
   decidirFusion,
   fusionarLineas,
+  registrarToken,
   type Descarte,
   type LineaDeCarrito,
   type ProductoDelCatalogo,
@@ -54,9 +56,11 @@ async function leerCatalogo(
           productId: String(fila.id),
           econoluzReference: referencia,
           publicado: Boolean(fila.published),
-          // El importe se recalcula al pintar; aquí solo importa si **hay** precio.
+          // El importe se recalcula al pintar; aquí solo importa si **hay** precio. Aun
+          // así la conversión pasa por `aCentavos`, que es la de todo el proyecto: tener
+          // una segunda forma de convertir dinero es tener dos que algún día no coinciden.
           precioCentavos:
-            precio === null || precio === undefined ? null : Math.round(Number(precio) * 100),
+            precio === null || precio === undefined ? null : aCentavos(Number(precio)),
         },
       ];
     }),
@@ -159,8 +163,8 @@ export async function vaciarCarritoCon(
   ejecutar: Ejecutor,
   userId: string,
 ): Promise<CarritoPublico> {
-  // Se borran las líneas y **se conserva el carrito**: la fila de `carts` guarda el token
-  // de la última fusión, y perderlo haría que un reintento volviera a sumar.
+  // Se borran las líneas y **se conserva el carrito**: la fila de `carts` guarda los
+  // tokens de las últimas fusiones, y perderlos haría que un reintento volviera a sumar.
   await ejecutar(
     `delete from cart_items ci
       using carts c
@@ -185,15 +189,17 @@ export async function fusionarCarritoCon(
   // —dos pestañas, o un reintento que se cruza con el original— leerían el mismo estado
   // y la segunda escribiría encima de la primera.
   const bloqueadas = (await ejecutar(
-    `select id::text, fusion_token from carts where user_id = $1 for update`,
+    `select id::text, fusion_tokens from carts where user_id = $1 for update`,
     [userId],
-  )) as { id: string; fusion_token: string | null }[];
+  )) as { id: string; fusion_tokens: unknown }[];
 
   const carrito = bloqueadas[0] ?? null;
   const cartId = carrito ? String(carrito.id) : await asegurarCarrito(ejecutar, userId);
 
-  if (decidirFusion(carrito ? { fusionToken: carrito.fusion_token } : null, cuerpo.token)
-      .accion === "ya-aplicada") {
+  if (
+    decidirFusion(carrito ? { tokensAplicados: carrito.fusion_tokens } : null, cuerpo.token)
+      .accion === "ya-aplicada"
+  ) {
     // El reintento de una fusión ya aplicada devuelve lo que hay, sin sumar otra vez.
     return { ok: true, carrito: await leerCarritoCon(ejecutar, userId), descartes: [] };
   }
@@ -237,8 +243,8 @@ export async function fusionarCarritoCon(
   }
 
   await ejecutar(
-    `update carts set fusion_token = $2, actualizado_en = now() where user_id = $1`,
-    [userId, cuerpo.token],
+    `update carts set fusion_tokens = $2::jsonb, actualizado_en = now() where user_id = $1`,
+    [userId, JSON.stringify(registrarToken(carrito?.fusion_tokens, cuerpo.token))],
   );
 
   return { ok: true, carrito: await leerCarritoCon(ejecutar, userId), descartes };

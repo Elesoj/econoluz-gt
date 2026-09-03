@@ -130,7 +130,7 @@ test("vaciar borra las lineas y conserva el carrito", async () => {
 test("la fusion bloquea el carrito antes de leer sus lineas", async () => {
   const { ejecutar, sentencias } = ejecutorFalso({
     "insert into carts": [{ id: "7" }],
-    "for update": [{ id: "7", fusion_token: null }],
+    "for update": [{ id: "7", fusion_tokens: [] }],
     "from products": CATALOGO,
   });
 
@@ -152,7 +152,7 @@ test("la fusion bloquea el carrito antes de leer sus lineas", async () => {
 test("la fusion suma y devuelve el carrito resultante", async () => {
   const { ejecutar } = ejecutorFalso({
     "insert into carts": [{ id: "7" }],
-    "for update": [{ id: "7", fusion_token: null }],
+    "for update": [{ id: "7", fusion_tokens: [] }],
     "from products": CATALOGO,
     "select ci.econoluz": [],
   });
@@ -169,7 +169,7 @@ test("la fusion suma y devuelve el carrito resultante", async () => {
 test("repetir la fusion con el mismo token no vuelve a escribir lineas", async () => {
   const { ejecutar, sentencias } = ejecutorFalso({
     "insert into carts": [{ id: "7" }],
-    "for update": [{ id: "7", fusion_token: "tok-de-prueba-1234" }],
+    "for update": [{ id: "7", fusion_tokens: ["tok-de-prueba-1234"] }],
     "from cart_items": [{ econoluz_reference: "ECO-ELE-0001", cantidad: 2 }],
   });
 
@@ -189,7 +189,7 @@ test("repetir la fusion con el mismo token no vuelve a escribir lineas", async (
 test("la fusion guarda el token para que el reintento lo encuentre", async () => {
   const { ejecutar, sentencias } = ejecutorFalso({
     "insert into carts": [{ id: "7" }],
-    "for update": [{ id: "7", fusion_token: null }],
+    "for update": [{ id: "7", fusion_tokens: [] }],
     "from products": CATALOGO,
   });
 
@@ -197,13 +197,17 @@ test("la fusion guarda el token para que el reintento lo encuentre", async () =>
 
   const guardado = sentencias.find((s) => /update carts set/.test(s.sql));
   assert.ok(guardado, "tiene que guardar el token");
-  assert.ok(guardado.parametros.includes("tok-de-prueba-1234"));
+  assert.ok(
+    guardado.parametros.some(
+      (p) => typeof p === "string" && p.includes("tok-de-prueba-1234"),
+    ),
+  );
 });
 
 test("la fusion informa de lo que descarto", async () => {
   const { ejecutar } = ejecutorFalso({
     "insert into carts": [{ id: "7" }],
-    "for update": [{ id: "7", fusion_token: null }],
+    "for update": [{ id: "7", fusion_tokens: [] }],
     "from products": CATALOGO,
   });
 
@@ -230,7 +234,7 @@ test("la fusion informa de lo que descarto", async () => {
 test("el precio se lee del catalogo y no se guarda en el carrito", async () => {
   const { ejecutar, sentencias } = ejecutorFalso({
     "insert into carts": [{ id: "7" }],
-    "for update": [{ id: "7", fusion_token: null }],
+    "for update": [{ id: "7", fusion_tokens: [] }],
     "from products": CATALOGO,
   });
 
@@ -252,7 +256,7 @@ test("el precio se lee del catalogo y no se guarda en el carrito", async () => {
 test("la consulta al catalogo no trae ninguna columna del proveedor", async () => {
   const { ejecutar, sentencias } = ejecutorFalso({
     "insert into carts": [{ id: "7" }],
-    "for update": [{ id: "7", fusion_token: null }],
+    "for update": [{ id: "7", fusion_tokens: [] }],
     "from products": CATALOGO,
   });
 

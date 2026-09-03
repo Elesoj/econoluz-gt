@@ -16,10 +16,18 @@ create table if not exists carts (
   -- Único: un cliente tiene **un** carrito activo. Eso convierte «créalo si no existe» en
   -- un `on conflict do nothing` y hace imposible que dos peticiones simultáneas creen dos.
   user_id        bigint      not null unique references users(id) on delete cascade,
-  -- El token de la última fusión aplicada. Reintentar la misma fusión —porque la red se
-  -- cortó justo al responder— no puede volver a sumar las cantidades; comparando este
-  -- token, el segundo intento devuelve el carrito tal como quedó.
-  fusion_token   text,
+  -- Los tokens de las últimas fusiones aplicadas, el más reciente primero.
+  --
+  -- Son **los últimos, no el último**. Guardar uno solo deja una puerta abierta: el
+  -- navegador conserva su token hasta que la fusión le consta confirmada, así que un
+  -- reintento normal repite el mismo y se reconoce; pero una petición duplicada que llega
+  -- **tarde** —el reintento de un proxy, una pestaña colgada, una respuesta perdida
+  -- seguida de otro inicio de sesión— trae un token anterior, y con un solo hueco la
+  -- fusión se aplicaría por segunda vez. El cliente se encontraría el doble de todo.
+  --
+  -- La lista va acotada en la aplicación: es una defensa contra duplicados retrasados, no
+  -- un registro histórico de por dónde ha entrado nadie.
+  fusion_tokens  jsonb       not null default '[]'::jsonb,
   creado_en      timestamptz not null default now(),
   actualizado_en timestamptz not null default now()
 );

@@ -40,8 +40,13 @@ test("borrar al usuario se lleva su carrito", () => {
   assert.match(bloqueDeTabla("carts"), /references users\(id\)\s+on delete cascade/i);
 });
 
-test("el carrito guarda el token de la ultima fusion, para no repetirla", () => {
-  assert.ok(columnasDeTabla("carts").includes("fusion_token"));
+test("el carrito guarda los tokens de las ultimas fusiones, para no repetirlas", () => {
+  assert.ok(columnasDeTabla("carts").includes("fusion_tokens"));
+  assert.match(
+    bloqueDeTabla("carts"),
+    /fusion_tokens\s+jsonb\s+not null default '\[\]'::jsonb/i,
+    "una lista, no un solo token: un duplicado retrasado trae uno anterior",
+  );
 });
 
 test("las dos tablas llevan fechas de creacion y de modificacion", () => {
