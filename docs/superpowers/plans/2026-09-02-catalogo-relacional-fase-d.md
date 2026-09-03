@@ -1,5 +1,10 @@
 # Catálogo relacional — plan de la Fase D (activación escalonada en Producción)
 
+> **EJECUTADO Y TERMINADO el 02/09/2026.** Producción sirve `relational_v2` con la
+> reversión disponible y probada. El resultado, los conteos y toda la evidencia están en
+> `docs/CONTINUAR-PANEL.md`, sección «Fase D ejecutada». No hizo falta la reversión.
+> Las ocho tareas de abajo se cumplieron; se conservan como registro de lo planeado.
+
 > **Para quien ejecute esto con agentes:** SUB-SKILLS OBLIGATORIAS:
 > `superpowers:executing-plans`, `superpowers:test-driven-development` en cada tarea de
 > código y `superpowers:verification-before-completion` antes de cualquier afirmación de

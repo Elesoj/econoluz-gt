@@ -92,7 +92,25 @@ Leer esta documentación no ejecuta esa retirada ni basta como autorización.
 
 ---
 
-## 0.1 Qué hacer ahora (01/09/2026)
+## 0.1 Qué hacer ahora (02/09/2026)
+
+**El subproyecto 3 está terminado y activo en Producción.** `modelo_catalogo` vale
+`relational_v2`, el catálogo público se sirve del modelo relacional a través del rol
+`econoluz_publico`, y el modelo antiguo sigue completo para volver atrás con una sola
+orden y sin desplegar. Todo el detalle, la evidencia y el procedimiento exacto de
+reversión están en la sección **«Fase D ejecutada»**, al final de este documento.
+Léela antes de tocar el catálogo.
+
+Lo siguiente en la hoja de ruta es el **subproyecto 5, carrito persistente**. El
+**subproyecto 11 —retirar el modelo antiguo— no ha empezado y no debe empezar** sin
+autorización expresa del dueño: es justo lo que hoy hace posible la reversión.
+
+Dos cosas siguen bloqueadas por decisiones de fuera del código: los **consentimientos**
+(faltan los textos legales y sus versiones) y el **acceso de clientes**, cuyas variables
+de Firebase no están configuradas en Production a petición del dueño.
+
+Lo que sigue en esta sección es la fotografía anterior, del 01/09/2026, y se conserva
+porque explica cómo se llegó hasta aquí.
 
 El subproyecto 1 ya no está pendiente de integración:
 
@@ -1856,3 +1874,197 @@ ejecución**, y mirar `test-results/` y el nombre de la prueba antes de tocar na
   No se borró porque `CLAUDE.md` prohíbe borrar archivos sin preguntar.
 - `AGENTS.md` lo reescribe `next dev` en cada arranque. Es normal; se commitea con el
   resto y ya está.
+
+---
+
+## Fase D ejecutada: Producción sirve el catálogo relacional (02/09/2026)
+
+**Estado final: `modelo_catalogo = relational_v2` en Producción, y `legacy` intacto a un
+comando de distancia.** El plan seguido es
+`docs/superpowers/plans/2026-09-02-catalogo-relacional-fase-d.md`.
+
+### Cómo volver atrás, si hace falta
+
+Una sola orden, sin desplegar nada y en menos de un minuto:
+
+```bash
+PERMITIR_ESCRITURA_PRODUCCION=true CONFIRMAR_PRODUCCION=modelo-catalogo-en-produccion npm run catalogo:relacional:modelo -- --poner legacy --produccion
+```
+
+Necesita además `NEON_ENDPOINT_PRODUCCION=ep-misty-sun-avmcbgly.c-11.us-east-1.aws.neon.tech`
+y una `DATABASE_URL` conectada a Producción. **Este camino se probó de verdad antes de
+depender de él**, haciendo el viaje completo `legacy → shadow → legacy → shadow` sobre la
+base de Producción, y se comprobó que el guardián corta en los tres casos peligrosos: sin
+la bandera, sin la palabra literal y con las llaves puestas pero apuntando a desarrollo.
+
+**El modelo antiguo sigue completo.** No se borró ninguna tabla, ninguna columna ni ningún
+dato: `products` conserva sus 313 filas y el lector `legacy` no cambió ni un carácter. La
+vuelta atrás no depende de `FASE_D_AUTORIZADA`: la bandera de la base sola basta.
+
+### Lo que hizo falta tocar antes, y por qué
+
+Cuatro herramientas estaban **selladas a la rama aislada de desarrollo**, de modo que la
+Fase D era literalmente imposible sin abrirles un camino. **El guardián no se relajó**: se
+añadieron caminos aparte que hay que pedir por su nombre.
+
+- `exigirDestinoDeLectura` en `scripts/guarda-neon.mjs`, para lo que solo lee:
+  `--produccion` exige estar conectado justo al endpoint de Producción. No pide las tres
+  llaves porque no puede escribir —va en una transacción de solo lectura que acaba en
+  `ROLLBACK`—, y exigirlas para leer acabaría con esas llaves puestas «por si acaso», que
+  es justo lo que las inutiliza.
+- `catalogo:relacional:modelo` acepta ya `relational_v2` y escribe en Producción con las
+  tres llaves. La reversión usa **ese mismo camino**, y por eso está siempre disponible.
+- El importador relacional gana `--produccion`, con la palabra
+  `importar-relacional-en-produccion` y conservando su transacción única.
+- El comparador y el verificador pueden leer Producción sin poder escribir.
+- `db:migrar` gana `--simular`: aplica **todas** las pendientes en una sola transacción y
+  la revierte. Archivo por archivo no valdría, porque una migración puede apoyarse en la
+  anterior y revirtiendo cada una por separado la siguiente correría sobre un esquema que
+  no existe.
+- El verificador tenía dos comprobaciones que solo valían en desarrollo y hacían fallar
+  Producción sin que nada estuviera mal: exigir el marcador de rama —que Producción **no
+  tiene ni debe tener**, porque tenerlo la haría pasar por rama de desarrollo ante todos
+  los guardianes— y prohibir `relational_v2`. Ninguna se eliminó: pasan a depender del
+  destino.
+
+### Lo que se hizo en Neon Producción
+
+Rama `main` (`br-flat-dew-avc2njed`), endpoint `ep-misty-sun-avmcbgly`, proyecto
+`dry-firefly-38616588`. Confirmado con `neonctl`, no copiado de documentos previos.
+
+| Paso | Resultado |
+|---|---|
+| Migraciones pendientes | **`009` y `010`**, comprobado; no supuesto |
+| Simulación de las migraciones | Correcta; el `ROLLBACK` dejó 8 migraciones y 11 tablas |
+| Aplicación real | 10 migraciones, **23 tablas**, `btree_gist` instalada |
+| Simulación de la importación | 313 fuente, 313 aceptados, **0 rechazados** |
+| Importación real | 313 modificados, 0 omitidos, **0 rechazados** |
+| Segunda importación | **0 modificados, 313 omitidos**, huella idéntica `7b63b9ba0d6ce416091725aca8605790` |
+
+Conteos resultantes: 36 categorías, 313 relaciones producto-categoría, 313 datos privados,
+327 imágenes, 7 atributos, 0 opciones, 45 valores, **25 precios** y 313 en la proyección
+pública. **Los 288 precios que faltan siguen faltando**: no se inventó ni uno.
+
+### Paridad, antes y después de activar
+
+`npm run catalogo:relacional:comparar -- --produccion` sobre los 313 productos, en una
+transacción de solo lectura que acaba siempre en `ROLLBACK`:
+
+| Momento | Resultado |
+|---|---|
+| Con Producción en `legacy` | 313/313, **0 diferencias**, 1 consulta legacy + 6 relacionales, **0 escrituras**, 1,1 s |
+| Con Producción en `relational_v2` | 313/313, **0 diferencias**, las mismas consultas, 0 escrituras, 1,2 s |
+
+### `shadow` en Producción, con evidencia de los registros reales
+
+Las páginas públicas se prerrenderizan, así que la comparación corre al construir. Los
+registros del despliegue de Production muestran **tres comparaciones**, una por página
+prerrenderizada, cada una con `productosLegacy: 313`, `productosRelacional: 313`,
+`comparados: 313`, **`diferencias: 0`**, `omitidas: 0` y **`consultasRelacionales: 6`**,
+en 293, 159 y 148 ms. **Cero** `catalogo-shadow-error`, cero degradaciones, cero eventos
+de nivel `error` y **cero escrituras**. El visitante recibió `legacy` en todo momento.
+
+La comprobación se repitió **después** de abrir `FASE_D_AUTORIZADA`, con la base todavía
+en `shadow`: otras tres comparaciones idénticas, 0 diferencias y 6 consultas.
+
+### La prueba de que `relational_v2` lee de verdad por el rol público
+
+La ausencia de errores no demuestra por sí sola de dónde salen los datos, así que se hizo
+la prueba en los dos sentidos, contra la base de Producción:
+
+- **Con la conexión pública correcta:** ninguna degradación registrada; el catálogo se
+  sirvió por el camino relacional.
+- **Rompiendo a propósito `DATABASE_URL_PUBLIC`:** aparecen tres
+  `catalogo-degradacion-relacional` con `sirviendo: legacy`. El camino relacional depende
+  por tanto de la conexión del rol público, y la cadena de respaldo `relational_v2` →
+  `legacy` funciona como se diseñó, sin saltar al catálogo escrito en el código.
+
+Del error solo se registra **la clase**, nunca su texto: en el registro se lee
+`causa: bG` —el nombre minificado de la clase—, sin host, sin rol y sin contraseña.
+
+Neon no pudo aportar registros de consulta: `neonctl logs` responde «telemetry is not
+available in this region». Por eso la evidencia es la de arriba y la de las pruebas que
+fijan la clave de caché `catalogo-publico-relacional`, la etiqueta `catalogo` y la
+caducidad de 3600 segundos.
+
+### Vercel
+
+| Variable | Estado |
+|---|---|
+| `DATABASE_URL_PUBLIC` | **Secret, solo Production**, con la conexión del rol `econoluz_publico` de la rama de Producción. Se borró y recreó para no depender de un valor anterior que era opaco y no se podía leer |
+| `FASE_D_AUTORIZADA` | `"true"`, solo Production. Nació como `"false"` y se abrió únicamente tras comprobar `shadow` |
+
+La cadena **nunca se imprimió ni se escribió en ningún archivo**: se comprobó buscando su
+contraseña en todos los archivos versionados y no ignorados de los dos árboles de trabajo,
+con **cero** coincidencias. `.env.local` conservó su huella (`4b5ee720f9a41dd1`, 1 315
+bytes) idéntica antes y después de cada operación con la CLI de Vercel, incluidos los
+`env pull`, que fueron siempre a un archivo temporal aparte, borrado después.
+
+**No se activó Firebase de clientes ni se configuró ningún proveedor de acceso**, como
+pidió el dueño: no forman parte de esta fase.
+
+### Integración y despliegue
+
+`feat/catalogo-relacional` se fusionó en `main` **por avance rápido** (`git merge
+--ff-only`), sin commit de fusión. `main` pasó de `b5669c0` a `f9c3d7f` y se publicó con
+un push normal, nunca forzado. **La rama y el worktree se conservan**, igual que los cinco
+worktrees del repositorio, y los `output/` y `tmp/` no rastreados del checkout principal
+siguen intactos.
+
+> **Efecto colateral que conviene tener presente:** ese push publicó también los 41
+> commits del **subproyecto 2, identidad de clientes**, que estaban fusionados en `main`
+> pero nunca desplegados. Viajan **apagados**: ninguna navegación pública enlaza
+> `/cuenta`, y sus variables (`FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_*`,
+> `AUTH_EVENT_IP_PEPPER`) siguen sin configurar en Production a petición expresa del
+> dueño. Entrar a mano en esas rutas da un error controlado, no una caída del sitio; las
+> pruebas de `cuenta.spec.ts` pasan contra Production y confirman la redirección prevista.
+
+### Comprobaciones del sitio público
+
+Con Producción ya en `relational_v2`:
+
+| Comprobación | Resultado |
+|---|---|
+| `/`, `/catalogo`, `/carrito`, `/asesoria`, `/calculadora-led`, `/politica-devoluciones` | **200** todas |
+| Referencias distintas en `/catalogo` | **313** |
+| Productos con precio | **25**, ninguno inventado |
+| Rutas de imagen distintas | **326**, y solo por `arquitectonico/`, `lineal/` y `electrico/` |
+| Galerías no vacías | **6**, las mismas que dejó la limpieza |
+| Tiempos de respuesta | 109–378 ms, con `x-vercel-cache` en `PRERENDER`/`HIT` |
+| Datos del proveedor en el HTML | **ninguno** |
+
+> **Un matiz del escaneo, para que nadie lo lea como una fuga:** la portada contiene
+> «Construlita» y «Highlum» como **texto alternativo de los logos de la cinta de
+> proveedores**, que el home enseña a propósito desde siempre (`CLAUDE.md` §9). No es
+> catálogo, no es una regresión y no lo introdujo esta fase. El escaneo lo descuenta de
+> forma explícita para que el resto siga siendo estricto.
+
+### Verificación completa
+
+| Comprobación | Resultado |
+|---|---|
+| `test:datos` | **446/446** |
+| `test:admin` | 196/196 |
+| `test:proveedores` | 3/3 |
+| `test:permisos` contra el rol público de **Producción** | correcto: **22 tablas denegadas**, `public_products` legible |
+| `typecheck` y `lint` | limpios |
+| `build` | correcto, 16 páginas |
+| Playwright local, con `relational_v2` activo | **70/70** |
+| Playwright **contra Production** | **38/38** |
+| `catalogo:relacional:comparar -- --produccion` | 0 diferencias, 0 escrituras |
+| `catalogo:relacional:verificar -- --produccion` | `ok: true`, `modelo: relational_v2` |
+| `catalogo:auditar` | 313 productos, 408 identificadores, **0 coincidencias** |
+
+Playwright contra Production deja fuera a propósito `admin-auth.spec.ts`: intentar entrar
+dejaría intentos fallidos y podría bloquear una cuenta real del panel. Su configuración
+temporal vive en `.superpowers/`, que no se versiona.
+
+**No se usó la reversión**: ninguna comprobación falló. El viaje de ida y vuelta de la
+bandera fue una prueba deliberada del procedimiento, no una vuelta atrás.
+
+### Lo que esta fase NO hizo
+
+No se borró el modelo antiguo, ni ramas, ni worktrees, ni datos históricos. **El
+subproyecto 11 —la retirada de `products.stock`, `disponibilidad.server.ts`, el aviso del
+carrito y `app/data/products.ts`— no ha empezado** y sigue necesitando autorización
+expresa del dueño en su momento.

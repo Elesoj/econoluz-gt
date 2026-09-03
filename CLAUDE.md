@@ -497,14 +497,16 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
   cambiar el DNS es tarea del dueño del proyecto, no del código.
 - Base de datos: **Postgres 18 en Neon**, con `@neondatabase/serverless`, creada desde el
-  Marketplace de Vercel (región AWS US East 1). **En producción hay once tablas**:
-  `leads`, `products`, `admin_users`, `admin_sessions`, `admin_login_attempts`,
-  `projects`, `project_images`, `schema_migrations`, `public_products`, `app_settings` y
-  `audit_log`. Las migraciones `005` a `008` llegaron a producción el 01/09/2026; la
-  proyección quedó poblada con 313 filas y el rol `econoluz_publico` solo puede leerla.
-  La rama de desarrollo `identidad-clientes-dev` añade `users`, `user_addresses`,
-  `user_consents` y `auth_events` mediante la migración `009`; esas cuatro tablas aún no
-  existen en producción.
+  Marketplace de Vercel (región AWS US East 1). **En producción hay veintitrés tablas**:
+  las once de siempre —`leads`, `products`, `admin_users`, `admin_sessions`,
+  `admin_login_attempts`, `projects`, `project_images`, `schema_migrations`,
+  `public_products`, `app_settings` y `audit_log`—, las cuatro de identidad (`users`,
+  `user_addresses`, `user_consents`, `auth_events`) y las ocho del catálogo relacional
+  (`categories`, `product_categories`, `product_private_data`, `product_images`,
+  `attributes`, `attribute_options`, `product_attribute_values`, `product_prices`).
+  Las diez migraciones están aplicadas: `005`–`008` el 01/09/2026 y **`009` y `010` el
+  02/09/2026**, con `btree_gist` instalada. El rol `econoluz_publico` solo puede leer
+  `public_products`; las otras veintidós tablas le están denegadas.
   Las migraciones se aplican con `npm run db:migrar`, que es repetible. `DATABASE_URL`
   está en `.env.local` (ignorado por git) y en Vercel; `DATABASE_URL_PUBLIC` está en
   Vercel como secreto exclusivo de Production.
@@ -678,6 +680,7 @@ npm run lint
 npx playwright test        # batería completa
 
 npm run db:migrar          # aplica las migraciones de db/ que falten, repetible
+npm run db:migrar -- --simular   # las aplica en una transaccion y la revierte, sin escribir
 npm run catalogo:importar  # SIMULA la subida de los productos; -- --aplicar la escribe
 npm run catalogo:verificar # ensayo de la migración, sin tocar la base de datos
 npm run catalogo:auditar   # busca nombres de proveedor en el catálogo público
@@ -692,6 +695,20 @@ npm run admin:crear        # da de alta un administrador o le cambia la contrase
 npm run test:datos         # capa de datos, ajustes e identidad (167)
 npm run test:permisos      # comprueba contra Neon que el rol público solo lee la proyección
 npm run catalogo:reproyectar # SIMULA reconstruir la proyección pública; -- --aplicar la escribe
+
+# Catálogo relacional. Sin `--produccion` hablan con la rama aislada de desarrollo.
+npm run catalogo:relacional:modelo      # lee la bandera `modelo_catalogo`
+npm run catalogo:relacional:comparar    # compara los dos modelos; solo lectura, acaba en ROLLBACK
+npm run catalogo:relacional:verificar   # invariantes, permisos y privacidad del modelo nuevo
+npm run catalogo:relacional:simular     # ensaya la importación relacional sin escribir
+npm run catalogo:relacional:importar    # la escribe
+
+# Contra Producción hay que pedirlo por su nombre. Leer solo necesita la bandera y el
+# endpoint; escribir exige además las tres llaves. La reversión usa este mismo camino:
+#   PERMITIR_ESCRITURA_PRODUCCION=true
+#   CONFIRMAR_PRODUCCION=modelo-catalogo-en-produccion
+#   NEON_ENDPOINT_PRODUCCION=ep-misty-sun-avmcbgly.c-11.us-east-1.aws.neon.tech
+npm run catalogo:relacional:modelo -- --poner legacy --produccion
 
 npm run identidad:adc       # valida ADC contra el proyecto Firebase configurado
 npm run identidad:federacion # valida la identidad federada de Vercel de extremo a extremo
@@ -1057,16 +1074,40 @@ antes de cachearlas. Comparte la etiqueta `catalogo` y la caducidad de una hora 
 administración, importación y `shadow`, y `supplier_code` sigue siendo exclusivamente
 privado. Preparar estas piezas no autoriza la Fase D ni cambia la fuente servida.
 
-**Existe una segunda llave para la Fase D:** `FASE_D_AUTORIZADA`, en
-`app/data/catalogo/seleccion.ts`, vale `false`. Se lee de la variable de entorno del mismo
-nombre y **solo la cadena exacta `"true"` la abre**. Mientras lo valga, poner `modelo_catalogo`
-en `relational_v2` **no activa nada**: degrada a `shadow` y se sigue sirviendo `legacy`.
-Activar la Fase D exigirá cambiar código y desplegar. La vuelta atrás no depende de esa
-llave: la bandera en `legacy` basta, sin desplegar.
+**La segunda llave, `FASE_D_AUTORIZADA`, está abierta desde el 02/09/2026.** Se lee de la
+variable de entorno del mismo nombre y **solo la cadena exacta `"true"` la abre**; en
+Vercel vale `"true"` únicamente en Production. Mientras valió `"false"`, poner
+`modelo_catalogo` en `relational_v2` no activaba nada. La vuelta atrás **no depende de esa
+llave**: la bandera en `legacy` basta, sin desplegar.
 
-`modelo_catalogo` está en **`shadow` en la rama de desarrollo** y en **`legacy` en
-Producción**, que no se tocó. No se activó `relational_v2`, no cambió la fuente del
-catálogo público y la Fase D no ha empezado. Tampoco hubo push, merge ni despliegue.
+### La Fase D está ejecutada: Producción sirve `relational_v2` (02/09/2026)
+
+`modelo_catalogo` vale **`relational_v2` en Producción**. El catálogo público se lee de
+`public_products` a través del rol `econoluz_publico` con `DATABASE_URL_PUBLIC`, en una
+sola consulta cacheada con la etiqueta `catalogo` y una hora de caducidad. En Neon
+Producción se aplicaron las migraciones `009` y `010` y se importaron los 313 productos de
+forma idempotente: la segunda importación dio 0 modificados y 313 omitidos con la misma
+huella. La comparación completa contra el modelo antiguo da **0 diferencias** en los 313
+productos, antes y después de activar.
+
+**El modelo antiguo sigue completo y la reversión está probada.** No se borró ninguna
+tabla, columna ni dato, y `legacy` vuelve con una sola orden, sin desplegar:
+
+```bash
+PERMITIR_ESCRITURA_PRODUCCION=true CONFIRMAR_PRODUCCION=modelo-catalogo-en-produccion npm run catalogo:relacional:modelo -- --poner legacy --produccion
+```
+
+La rama `feat/catalogo-relacional` se fusionó en `main` por avance rápido y se publicó;
+la rama y el worktree se conservan. Ese push publicó además el subproyecto 2, identidad de
+clientes, que **viaja apagado**: ninguna navegación enlaza `/cuenta` y sus variables de
+Firebase siguen sin configurar en Production a petición del dueño.
+
+Toda la evidencia —conteos, registros reales de `shadow`, la prueba de que el camino
+relacional depende del rol público, las variables de Vercel y las baterías— está en
+`docs/CONTINUAR-PANEL.md`, sección «Fase D ejecutada».
+
+**La retirada del modelo antiguo es el subproyecto 11 y no ha empezado.** Es justo lo que
+hoy hace posible la reversión, así que no se toca sin autorización expresa del dueño.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar
