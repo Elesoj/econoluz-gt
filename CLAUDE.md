@@ -1023,8 +1023,23 @@ privado y la verificación campo a campo confirma que nunca aparece en `public_p
 El rol público no puede leer ninguna de las ocho tablas nuevas y sí puede leer la
 proyección.
 
-`modelo_catalogo` sigue en `legacy`: no se activó `relational_v2`, no cambió la fuente del
-catálogo público y no empezaron las fases C ni D. Tampoco hubo push, merge ni despliegue.
+**La Fase C se ejecutó el 02/09/2026 y quedó bloqueada por una diferencia.** El modo
+`shadow` está implementado y comprobado contra Neon y contra un Preview real, ya borrado:
+el visitante recibió siempre el resultado `legacy`. De 313 productos comparados quedan
+**128 diferencias, todas de una sola causa**: los 64 productos con galería repiten la foto
+principal como primera miniatura y el importador relacional quita la repetida. Ninguna
+otra dimensión difiere. Resolverlo es **decisión del dueño** —limpiar el dato, reproducir
+la repetición o aceptar la divergencia— y está detallado en `docs/CONTINUAR-PANEL.md`.
+
+**Existe una segunda llave para la Fase D:** `FASE_D_AUTORIZADA`, en
+`app/data/catalogo/seleccion.ts`, vale `false`. Mientras lo valga, poner `modelo_catalogo`
+en `relational_v2` **no activa nada**: degrada a `shadow` y se sigue sirviendo `legacy`.
+Activar la Fase D exigirá cambiar código y desplegar. La vuelta atrás no depende de esa
+llave: la bandera en `legacy` basta, sin desplegar.
+
+`modelo_catalogo` está en **`shadow` en la rama de desarrollo** y en **`legacy` en
+Producción**, que no se tocó. No se activó `relational_v2`, no cambió la fuente del
+catálogo público y la Fase D no ha empezado. Tampoco hubo push, merge ni despliegue.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar

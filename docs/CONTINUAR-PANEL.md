@@ -260,6 +260,114 @@ estado `passed` y ningún caso fallido; no se repitió.
 `modelo_catalogo` continúa en `legacy`. No se activó `relational_v2`, no empezó la Fase C
 ni la D y no hubo push, merge ni despliegue. La siguiente fase necesita autorización nueva.
 
+### Subproyecto 3: Fase C ejecutada, y bloqueada por una diferencia (02/09/2026)
+
+El modo `shadow` está implementado, probado y comprobado contra Neon y contra un Preview
+real. **El visitante siguió recibiendo el resultado `legacy` en todo momento.** La fase
+**no se puede declarar en paridad**: quedan 128 diferencias, todas de la misma causa, y
+resolverlas exige una decisión del dueño.
+
+El plan ejecutado es `docs/superpowers/plans/2026-09-02-catalogo-relacional-fase-c.md`.
+
+**Cómo está montado.** `app/data/catalogo/seleccion.ts` es el selector tipado:
+en `legacy` no se ejecuta ni una consulta relacional; en `shadow` se sirve la lectura de
+siempre y **después** se compara, dentro de un `try` que no puede dejar subir ningún
+fallo. `app/data/catalogo/comparacion.ts` traduce los dos catálogos a una representación
+canónica construida **campo a campo**, sin ningún dato del proveedor, y calcula las
+diferencias. `app/data/catalog.server.ts` solo gana el enganche: su consulta `legacy` no
+cambió ni un carácter, y la comparación usa una consulta aparte que además pide
+`published`.
+
+**La llave de la Fase D.** `FASE_D_AUTORIZADA` vale `false` en `seleccion.ts`. Con ella
+cerrada, poner `modelo_catalogo` en `relational_v2` **no activa nada**: degrada a `shadow`
+y el visitante sigue recibiendo `legacy`. Activar la Fase D exigirá cambiar código y
+desplegar. La vuelta atrás no depende de esa llave: poner la bandera en `legacy` devuelve
+el catálogo antiguo en menos de un minuto y sin desplegar.
+
+**Dónde se trabajó.** Rama Neon `catalogo-relacional-fase-b` (`br-quiet-hat-avozt905`,
+endpoint `ep-green-union-avi3x99e`), hija de Production `main` (`br-flat-dew-avc2njed`,
+endpoint `ep-misty-sun-avmcbgly`), comprobada de nuevo: no es primaria ni predeterminada y
+su endpoint es distinto. `modelo_catalogo` pasó de `legacy` a **`shadow` solo en esa
+rama**. Producción se leyó una vez, sin escribir, y sigue en `legacy`.
+
+**Resultado de la comparación completa:** 313 productos en los dos lados, 313 comparados,
+**128 diferencias**, 1 consulta legacy + **6 relacionales**, **0 escrituras**, entre
+1,0 y 1,2 s.
+
+| Campo | Diferencias |
+|---|---:|
+| `imagenes` | 64 |
+| `proyeccion.images` | 64 |
+
+**No hay ninguna otra diferencia**: identificadores, referencias, nombres, descripciones,
+orden, categorías, categoría principal, los siete atributos con sus unidades, precios,
+promociones y estado de publicación coinciden en los 313 productos.
+
+**La causa, única y comprobada.** Los 64 productos que tienen galería —los únicos 64 de
+313 con galería no vacía— **repiten la foto principal como primera miniatura**. En 58 la
+galería es *solo* esa repetición; en 6 hay además una foto distinta. El importador
+relacional quita la repetida, porque `(product_id, posicion)` es único y guardar dos veces
+el mismo archivo sería un dato malo. Resultado: hoy la ficha enseña la foto principal dos
+veces, y el modelo nuevo la enseñaría una.
+
+**Es una diferencia real y visible, no un artefacto de la comparación.** Se dejó a la
+vista a propósito: el canónico del lado antiguo **no deduplica**, justamente para que esto
+no quedara escondido detrás de una normalización cómoda.
+
+**Decisión pendiente del dueño**, y por eso la fase queda bloqueada:
+
+1. **Limpiar el dato antiguo** —quitar la repetida de `products.images` en esos 64— y que
+   la ficha deje de enseñar la foto principal dos veces. Es escritura en Producción y
+   cambia lo que ve el visitante hoy.
+2. **Conservar la repetición** y hacer que el modelo nuevo la reproduzca.
+3. **Aceptar la diferencia** como mejora deliberada y anotarla como divergencia conocida
+   antes de la Fase D.
+
+No se tocó ningún dato para forzar igualdad ni se inventó contenido.
+
+**El Preview temporal.** `https://econoluz-7blxslmmv-joseangel-s-projects.vercel.app`,
+creado sin `--prod`, con `DATABASE_URL` fijada **solo para ese despliegue** en compilación
+y ejecución; las variables compartidas del proyecto no se tocaron. Hizo falta fijarla
+también en compilación porque `/catalogo`, `/carrito` y `/asesoria` se prerrenderizan: con
+la variable solo en ejecución, `shadow` no llegaba a correr. Sus registros muestran tres
+comparaciones, cada una con `productosLegacy: 313`, `comparados: 313`,
+`diferencias: 128`, `omitidas: 103`, `consultasRelacionales: 6` y 374, 176 y 159 ms; y
+**cero** `catalogo-shadow-error`. Las tres páginas respondieron `200`, el catálogo sirvió
+sus 313 productos y la galería seguía repitiendo la principal, que es exactamente el
+comportamiento `legacy`. **El Preview se borró** en cuanto se recogió la evidencia; la
+rama de Neon se conserva. Un primer Preview de tanteo
+(`econoluz-i0c8xe8tw-…`) también se borró.
+
+**Privacidad.** Ni el HTML servido ni los registros del Preview contienen marca, serie,
+código, nombre ni descripción del proveedor, cadenas de conexión o credenciales; se buscó
+uno por uno. Los eventos solo llevan identificador público, tipo, nombre de campo público,
+conteos, huellas SHA-256 truncadas, duración e identificador de correlación. Una prueba
+con centinelas privados lo vigila, y **se rompió a propósito** —registrando
+`error.message` en lugar de la clase del error— para verla fallar antes de darla por
+buena.
+
+**Verificación completa:**
+
+| Comprobación | Resultado |
+|---|---|
+| `test:datos` | **369/369** (332 + 37 nuevas) |
+| `test:admin` | 196/196 |
+| `test:proveedores` | 3/3 |
+| `test:permisos` | correcto: 22 tablas denegadas, `public_products` legible |
+| `typecheck` y `lint` | limpios |
+| `build` | correcto, 16 páginas |
+| Playwright local | **70/70**, con `shadow` activo contra la rama de desarrollo |
+| `catalogo:relacional:verificar` | `ok: true`, sin fallos |
+
+**Comandos nuevos:** `npm run catalogo:relacional:comparar` (comparación completa en
+transacción de solo lectura, termina siempre en `ROLLBACK`) y
+`npm run catalogo:relacional:modelo [-- --poner shadow|legacy]`. Los dos exigen el
+guardián de rama, que se comprobó rechazando un endpoint equivocado. `relational_v2` no se
+acepta como valor.
+
+No hubo push, ni merge, ni despliegue de Production, ni borrado de la rama de Neon. La
+Fase D no ha empezado.
+
 ### Correcciones post-revisión aplicadas el 02/09/2026
 
 La revisión técnica independiente encontró dos defectos confirmados en el rango
