@@ -17,14 +17,38 @@
 
 import type { ModeloDeCatalogo } from "../../lib/ajustes";
 
-/** Cerrada durante la Fase C. Solo la Fase D, con autorización expresa, la abre. */
-export const FASE_D_AUTORIZADA = false;
+/**
+ * Traduce el valor del entorno a un booleano, **sin trucos de veracidad**.
+ *
+ * Solo la cadena exacta `"true"` autoriza. Ni `"1"`, ni `"si"`, ni `"True"`, ni un objeto
+ * vacío: en JavaScript todos ellos son verdaderos, y una activación que dependa de eso se
+ * enciende sola el día que alguien escriba mal la variable. Aquí la duda siempre se
+ * resuelve en «no autorizada», que es el lado seguro.
+ */
+export function interpretarAutorizacionFaseD(valor: unknown): boolean {
+  return valor === "true";
+}
+
+/**
+ * Cerrada durante la Fase C. La abre la variable de entorno `FASE_D_AUTORIZADA`, y solo
+ * con el valor exacto `true`.
+ *
+ * Es la **segunda** llave, no la única: activar la Fase D exigirá además poner
+ * `modelo_catalogo` en `relational_v2`. La vuelta atrás no depende de esta variable —la
+ * bandera de la base sola basta y no necesita despliegue—, así que un entorno mal
+ * configurado puede impedir una activación pero nunca impedir una reversión.
+ */
+export const FASE_D_AUTORIZADA = interpretarAutorizacionFaseD(
+  process.env.FASE_D_AUTORIZADA,
+);
 
 export function modeloEfectivo(
   modelo: ModeloDeCatalogo,
   faseDAutorizada: boolean = FASE_D_AUTORIZADA,
 ): ModeloDeCatalogo {
-  if (modelo === "relational_v2" && !faseDAutorizada) return "shadow";
+  // `=== true` y no `!faseDAutorizada`: cualquier valor verdadero abriría la puerta, y
+  // este módulo también se consume desde scripts `.mjs` donde los tipos no protegen.
+  if (modelo === "relational_v2" && faseDAutorizada !== true) return "shadow";
   return modelo;
 }
 

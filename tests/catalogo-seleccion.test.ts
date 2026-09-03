@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { interpretarModelo } from "../app/lib/ajustes";
 import {
   FASE_D_AUTORIZADA,
+  interpretarAutorizacionFaseD,
   modeloEfectivo,
   servirSegunModelo,
 } from "../app/data/catalogo/seleccion";
@@ -66,6 +67,67 @@ test("la llave de la Fase D está cerrada en la Fase C", () => {
   assert.equal(modeloEfectivo("relational_v2"), "shadow");
   assert.equal(modeloEfectivo("shadow"), "shadow");
   assert.equal(modeloEfectivo("legacy"), "legacy");
+});
+
+// --- La autorización de la Fase D se parsea, no se adivina ---------------------------
+
+test("solo la cadena exacta «true» autoriza la Fase D", () => {
+  assert.equal(interpretarAutorizacionFaseD("true"), true);
+});
+
+test("ningún otro valor de entorno autoriza la Fase D", () => {
+  const rechazados = [
+    undefined,
+    null,
+    "",
+    "false",
+    "False",
+    "TRUE",
+    "True",
+    " true",
+    "true ",
+    "1",
+    "0",
+    "si",
+    "yes",
+    "on",
+    1,
+    0,
+    true,
+    false,
+    {},
+    [],
+    [1],
+    "{}",
+  ];
+  for (const valor of rechazados) {
+    assert.equal(
+      interpretarAutorizacionFaseD(valor),
+      false,
+      `${JSON.stringify(valor)} no debe autorizar la Fase D`,
+    );
+  }
+});
+
+test("modeloEfectivo exige el booleano true, no cualquier valor verdadero", () => {
+  const verdaderosQueNoSonTrue = [1, "true", "false", {}, [], [0], "0", -1, Infinity];
+  for (const valor of verdaderosQueNoSonTrue) {
+    assert.equal(
+      modeloEfectivo("relational_v2", valor as unknown as boolean),
+      "shadow",
+      `${JSON.stringify(valor)} no debe activar relational_v2`,
+    );
+  }
+  assert.equal(modeloEfectivo("relational_v2", true), "relational_v2");
+});
+
+test("servirSegunModelo tampoco se deja activar con un valor solo verdadero", async () => {
+  const { llamadas, fuentes } = fuentesEspia();
+  assert.equal(
+    await servirSegunModelo("relational_v2", fuentes, 1 as unknown as boolean),
+    "catálogo-legacy",
+  );
+  assert.equal(llamadas.includes("relacional"), false);
 });
 
 test("relational_v2 no se activa con ningún valor que no sea exactamente ese", () => {
