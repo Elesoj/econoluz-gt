@@ -1,4 +1,9 @@
-// Comparación completa del catálogo antiguo contra el relacional en la rama aislada.
+// Comparación completa del catálogo antiguo contra el relacional.
+//
+// Por defecto, en la rama aislada de desarrollo. Con `--produccion` se compara contra
+// Producción, que es lo que la Fase D necesita para demostrar paridad antes de activar
+// nada: sigue sin poder escribir, porque la transacción es de solo lectura y termina
+// siempre en ROLLBACK.
 //
 // Se ejecuta dentro de una transacción de solo lectura y termina siempre en ROLLBACK: esta
 // comparación no puede modificar nada, ni siquiera por accidente.
@@ -15,10 +20,10 @@ import {
   normalizarFilaLegacy,
 } from "../app/data/catalogo/comparacion.ts";
 import { leerCatalogoRelacional } from "../app/data/catalogo/lectura.ts";
-import { exigirRamaDeDesarrollo } from "./guarda-neon.mjs";
+import { decidirDestinoDeLectura, exigirDestinoDeLectura } from "./guarda-neon.mjs";
 
-export async function compararEnSombra(cliente, entorno = process.env) {
-  await exigirRamaDeDesarrollo(cliente, entorno);
+export async function compararEnSombra(cliente, entorno = process.env, destino = "desarrollo") {
+  await exigirDestinoDeLectura(cliente, entorno, destino);
 
   const sentencias = [];
   const ejecutar = async (sql, parametros = []) => {
@@ -61,7 +66,11 @@ async function ejecutarDesdeTerminal() {
   await cliente.connect();
   try {
     await cliente.query("begin transaction isolation level repeatable read read only");
-    const resultado = await compararEnSombra(cliente);
+    const resultado = await compararEnSombra(
+      cliente,
+      process.env,
+      decidirDestinoDeLectura(process.argv.slice(2)),
+    );
     await cliente.query("rollback");
     console.log(JSON.stringify(resultado, null, 2));
     if (!resultado.ok) process.exitCode = 1;

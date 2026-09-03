@@ -8,7 +8,7 @@ import { planificarProducto } from "../app/data/catalogo/importacion.ts";
 import { buscarPorCodigoDeProveedor } from "../app/data/catalogo/lectura.ts";
 import { fromProductRow } from "../app/data/productRow.ts";
 import { aFilaProyeccion } from "../app/data/proyeccionPublica.ts";
-import { exigirRamaDeDesarrollo } from "./guarda-neon.mjs";
+import { decidirDestinoDeLectura, exigirDestinoDeLectura } from "./guarda-neon.mjs";
 import { normalizarFilaDeCatalogo } from "./importar-catalogo-relacional.mjs";
 
 const TABLAS_NUEVAS = [
@@ -90,11 +90,15 @@ function agregarFallo(fallos, condicion, mensaje) {
   if (!condicion) fallos.push(mensaje);
 }
 
-export async function verificarCatalogoRelacional(cliente, entorno = process.env) {
+export async function verificarCatalogoRelacional(
+  cliente,
+  entorno = process.env,
+  destino = "desarrollo",
+) {
   const ejecutar = async (sql, parametros = []) => (await cliente.query(sql, parametros)).rows;
   const fallos = [];
 
-  await exigirRamaDeDesarrollo(cliente, entorno);
+  await exigirDestinoDeLectura(cliente, entorno, destino);
 
   const tablas = (await ejecutar(
     `select table_name
@@ -386,7 +390,11 @@ async function ejecutarDesdeTerminal() {
   await cliente.connect();
   try {
     await cliente.query("begin transaction isolation level repeatable read read only");
-    const resultado = await verificarCatalogoRelacional(cliente);
+    const resultado = await verificarCatalogoRelacional(
+      cliente,
+      process.env,
+      decidirDestinoDeLectura(process.argv.slice(2)),
+    );
     await cliente.query("rollback");
     console.log(JSON.stringify(resultado, null, 2));
     if (!resultado.ok) process.exitCode = 1;

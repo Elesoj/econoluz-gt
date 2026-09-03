@@ -15,7 +15,10 @@ import {
 import { aplicarProducto } from "../app/data/catalogo/escritura.ts";
 import { productoCoincideConEntrada } from "../app/data/catalogo/idempotencia.ts";
 import { leerProductoRelacional } from "../app/data/catalogo/lectura.ts";
-import { exigirRamaDeDesarrollo } from "./guarda-neon.mjs";
+import { autorizarEscritura, exigirDestinoDeLectura } from "./guarda-neon.mjs";
+
+/** La palabra literal que hay que escribir para importar en Producción. */
+export const CONFIRMACION_PRODUCCION = "importar-relacional-en-produccion";
 
 const TABLAS_DE_RESUMEN = [
   "products",
@@ -254,14 +257,29 @@ async function ejecutarImportacion(ejecutar, simular) {
   };
 }
 
-export async function importarCatalogoRelacional({ simular, entorno = process.env }) {
+export async function importarCatalogoRelacional({
+  simular,
+  produccion = false,
+  entorno = process.env,
+}) {
   if (!entorno.DATABASE_URL) throw new Error("Falta DATABASE_URL.");
   neonConfig.webSocketConstructor = globalThis.WebSocket;
   const pool = new Pool({ connectionString: entorno.DATABASE_URL, max: 1 });
   const cliente = await pool.connect();
   let transaccion = false;
   try {
-    await exigirRamaDeDesarrollo(cliente, entorno);
+    // Simular no escribe nada fuera de una transacción que se revierte, pero sí tiene que
+    // saber a qué base está hablando: una simulación contra la base equivocada mide otra
+    // cosa y da confianza falsa.
+    if (simular) {
+      await exigirDestinoDeLectura(cliente, entorno, produccion ? "produccion" : "desarrollo");
+    } else {
+      await autorizarEscritura(cliente, {
+        modo: produccion ? "aplicar-produccion" : "aplicar",
+        entorno,
+        confirmacionEsperada: CONFIRMACION_PRODUCCION,
+      });
+    }
     await cliente.query("begin");
     transaccion = true;
     await cliente.query("set local statement_timeout = 60000");
@@ -282,10 +300,11 @@ export async function importarCatalogoRelacional({ simular, entorno = process.en
 async function ejecutarDesdeTerminal() {
   const argumentos = new Set(process.argv.slice(2));
   const simular = argumentos.has("--simular");
+  const produccion = argumentos.has("--produccion");
   if (!simular && !argumentos.has("--importar")) {
     throw new Error("Usa --simular o --importar.");
   }
-  const resultado = await importarCatalogoRelacional({ simular });
+  const resultado = await importarCatalogoRelacional({ simular, produccion });
   console.log(JSON.stringify(resultado, null, 2));
 }
 

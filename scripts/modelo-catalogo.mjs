@@ -1,14 +1,28 @@
-// Lee o cambia `modelo_catalogo`, siempre dentro de la rama aislada de desarrollo.
+// Lee o cambia `modelo_catalogo`, en la rama aislada de desarrollo o —con autorización
+// expresa— en Producción.
 //
-// `relational_v2` no se acepta aquí: activarlo es la Fase D y necesita otra autorización.
+// `relational_v2` se acepta desde la Fase D. Escribirlo en Producción exige las tres
+// llaves del guardián; **volver a `legacy` usa exactamente este mismo camino**, y por eso
+// la reversión no depende de ningún despliegue ni de ninguna variable de la aplicación.
 
 import { fileURLToPath } from "node:url";
 
 import { Client, neonConfig } from "@neondatabase/serverless";
 
-import { exigirRamaDeDesarrollo } from "./guarda-neon.mjs";
+import {
+  autorizarEscritura,
+  decidirDestinoDeLectura,
+  exigirDestinoDeLectura,
+} from "./guarda-neon.mjs";
 
-const PERMITIDOS = new Set(["legacy", "shadow"]);
+const PERMITIDOS = new Set(["legacy", "shadow", "relational_v2"]);
+
+/** La palabra literal que hay que escribir para tocar la bandera en Producción. */
+export const CONFIRMACION_PRODUCCION = "modelo-catalogo-en-produccion";
+
+export function valorDeModeloAceptado(valor) {
+  return PERMITIDOS.has(valor);
+}
 
 export async function leerModelo(cliente) {
   const { rows } = await cliente.query(
@@ -17,17 +31,23 @@ export async function leerModelo(cliente) {
   return rows[0]?.valor ?? null;
 }
 
-export async function ponerModelo(cliente, valor, entorno = process.env) {
-  if (!PERMITIDOS.has(valor)) {
-    throw new Error(`Valor no permitido en esta fase: ${valor}. Solo legacy o shadow.`);
+export async function ponerModelo(cliente, valor, entorno = process.env, destino = "desarrollo") {
+  if (!valorDeModeloAceptado(valor)) {
+    throw new Error(`Valor no permitido: ${valor}. Solo legacy, shadow o relational_v2.`);
   }
-  await exigirRamaDeDesarrollo(cliente, entorno);
+
+  await autorizarEscritura(cliente, {
+    modo: destino === "produccion" ? "aplicar-produccion" : "aplicar",
+    entorno,
+    confirmacionEsperada: CONFIRMACION_PRODUCCION,
+  });
+
   await cliente.query("begin");
   try {
     await cliente.query(
-      `update app_settings set valor = $1, actualizado_por = 'catalogo-relacional-fase-c'
+      `update app_settings set valor = $1, actualizado_por = $2
         where clave = 'modelo_catalogo'`,
-      [valor],
+      [valor, destino === "produccion" ? "catalogo-relacional-fase-d" : "catalogo-relacional-fase-c"],
     );
     await cliente.query("commit");
   } catch (error) {
@@ -38,17 +58,22 @@ export async function ponerModelo(cliente, valor, entorno = process.env) {
 }
 
 async function ejecutarDesdeTerminal() {
-  const [accion, valor] = process.argv.slice(2);
+  const argumentos = process.argv.slice(2);
+  const destino = decidirDestinoDeLectura(argumentos);
+  const indice = argumentos.indexOf("--poner");
   if (!process.env.DATABASE_URL) throw new Error("Falta DATABASE_URL.");
   neonConfig.webSocketConstructor = globalThis.WebSocket;
   const cliente = new Client(process.env.DATABASE_URL);
   await cliente.connect();
   try {
-    if (accion === "--poner") {
-      console.log(`modelo_catalogo = ${await ponerModelo(cliente, valor)}`);
+    if (indice !== -1) {
+      const valor = argumentos[indice + 1];
+      console.log(
+        `modelo_catalogo = ${await ponerModelo(cliente, valor, process.env, destino)} (${destino})`,
+      );
     } else {
-      await exigirRamaDeDesarrollo(cliente);
-      console.log(`modelo_catalogo = ${await leerModelo(cliente)}`);
+      await exigirDestinoDeLectura(cliente, process.env, destino);
+      console.log(`modelo_catalogo = ${await leerModelo(cliente)} (${destino})`);
     }
   } finally {
     await cliente.end();

@@ -6,7 +6,10 @@
 // media instrucción y quedarse a medias.
 //
 // Uso:
-//   npm run db:migrar
+//   npm run db:migrar                 aplica lo que falte
+//   npm run db:migrar -- --simular    lo aplica todo dentro de una transacción y la
+//                                     revierte: comprueba de verdad que el SQL entra,
+//                                     sin dejar nada escrito
 
 import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -16,6 +19,7 @@ import { Client, neonConfig } from "@neondatabase/serverless";
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const migrationsDir = join(projectRoot, "db");
 
+const simular = process.argv.slice(2).includes("--simular");
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
@@ -40,6 +44,7 @@ const client = new Client(connectionString);
 // Nunca imprimir `connectionString`: lleva la contraseña de la base de datos.
 console.log(`Base de datos:  ${new URL(connectionString).host}`);
 console.log(`Migraciones:    ${migrations.length} archivo(s) en db/`);
+console.log(`Modo:           ${simular ? "SIMULACIÓN (termina en ROLLBACK)" : "aplicación real"}`);
 console.log("");
 
 await client.connect();
@@ -56,24 +61,29 @@ try {
   const applied = new Set(rows.map((row) => row.filename));
 
   let executed = 0;
-
+  const pendientes = migrations.filter((filename) => !applied.has(filename));
   for (const filename of migrations) {
-    if (applied.has(filename)) {
-      console.log(`  ya estaba   ${filename}`);
-      continue;
-    }
+    if (applied.has(filename)) console.log(`  ya estaba   ${filename}`);
+  }
 
+  // La simulación mete **todas** las pendientes en una sola transacción y la revierte.
+  // Archivo por archivo no valdría: una migración puede apoyarse en la anterior, y
+  // revirtiendo cada una por separado la siguiente correría sobre un esquema que no
+  // existe. Así se comprueba la secuencia entera, que es justo la que se va a aplicar.
+  if (simular) await client.query("begin");
+
+  for (const filename of pendientes) {
     const sql = readFileSync(join(migrationsDir, filename), "utf8");
 
-    // Cada archivo va dentro de una transacción: si una instrucción falla,
-    // se deshace el archivo entero y no queda un esquema a medio crear.
-    await client.query("begin");
+    // Fuera de la simulación, cada archivo va dentro de su propia transacción: si una
+    // instrucción falla, se deshace el archivo entero y no queda un esquema a medias.
+    if (!simular) await client.query("begin");
 
     try {
       await client.query(sql);
       await client.query("insert into schema_migrations (filename) values ($1)", [filename]);
-      await client.query("commit");
-      console.log(`  APLICADA    ${filename}`);
+      if (!simular) await client.query("commit");
+      console.log(`  ${simular ? "SIMULADA" : "APLICADA"}    ${filename}`);
       executed += 1;
     } catch (error) {
       await client.query("rollback");
@@ -82,11 +92,17 @@ try {
     }
   }
 
+  if (simular) {
+    await client.query("rollback");
+    console.log("");
+    console.log("ROLLBACK hecho: la base queda exactamente como estaba.");
+  }
+
   console.log("");
   console.log(
     executed === 0
       ? "La base de datos ya estaba al día."
-      : `Listo: ${executed} migración(es) aplicada(s).`,
+      : `Listo: ${executed} migración(es) ${simular ? "simulada(s)" : "aplicada(s)"}.`,
   );
 } finally {
   await client.end();

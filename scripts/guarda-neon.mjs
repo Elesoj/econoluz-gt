@@ -99,6 +99,50 @@ export function decidirEscrituraEnProduccion({
   return { ok: true };
 }
 
+/**
+ * Leer Producción es otra cosa que escribir en ella, y confundirlas tiene coste en las dos
+ * direcciones: si se exigieran las tres llaves para una comparación de solo lectura, la
+ * gente acabaría teniéndolas puestas «por si acaso», que es justo lo que las inutiliza.
+ *
+ * Aquí basta con **pedirlo por su nombre** y estar conectado al endpoint de Producción. La
+ * operación no puede escribir —va dentro de una transacción de solo lectura que termina en
+ * `ROLLBACK`—, así que la garantía la da la propia transacción, no la ceremonia.
+ */
+export function decidirDestinoDeLectura(argumentos = []) {
+  return [...argumentos].includes("--produccion") ? "produccion" : "desarrollo";
+}
+
+export function decidirLecturaEnProduccion({ host, hostProduccion }) {
+  if (!hostProduccion) {
+    return { ok: false, motivo: "Falta NEON_ENDPOINT_PRODUCCION: no se sabe cuál es." };
+  }
+
+  const conectado = endpointCanonico(host);
+  if (!conectado || conectado !== endpointCanonico(hostProduccion)) {
+    return {
+      ok: false,
+      motivo: `El endpoint conectado no es el de Producción: ${host || "vacío"}.`,
+    };
+  }
+
+  return { ok: true };
+}
+
+/** El guardián que toca según a dónde se quiera leer. Lanza cuando no cuadra. */
+export async function exigirDestinoDeLectura(cliente, entorno = process.env, destino = "desarrollo") {
+  if (destino !== "produccion") {
+    await exigirRamaDeDesarrollo(cliente, entorno);
+    return;
+  }
+
+  if (!entorno.DATABASE_URL) throw new Error("Falta DATABASE_URL.");
+  const decision = decidirLecturaEnProduccion({
+    host: new URL(entorno.DATABASE_URL).host,
+    hostProduccion: entorno.NEON_ENDPOINT_PRODUCCION,
+  });
+  if (!decision.ok) throw new Error(decision.motivo);
+}
+
 /** Un conteo solo vale si es un entero y es exactamente el que se esperaba. */
 export function comprobarConteo({ esperado, obtenido, etiqueta = "filas" }) {
   if (!Number.isInteger(obtenido)) {

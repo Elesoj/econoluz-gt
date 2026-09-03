@@ -5,11 +5,15 @@ import { readFileSync } from "node:fs";
 import {
   autorizarEscritura,
   comprobarConteo,
+  decidirDestinoDeLectura,
   decidirEscrituraEnProduccion,
+  decidirLecturaEnProduccion,
   decidirModo,
   decidirSiPuedeEscribir,
+  exigirDestinoDeLectura,
   interpretarBandera,
 } from "../scripts/guarda-neon.mjs";
+import { ponerModelo, valorDeModeloAceptado } from "../scripts/modelo-catalogo.mjs";
 
 const DESARROLLO = "ep-catalogo-fase-b.c-11.us-east-1.aws.neon.tech";
 const PRODUCCION = "ep-produccion.c-11.us-east-1.aws.neon.tech";
@@ -311,5 +315,159 @@ test("los scripts que reescriben el catálogo entero siguen protegidos", () => {
     assert.ok(fuente.includes(confirmacion), `${ruta} debe exigir «${confirmacion}»`);
     assert.match(fuente, /rollback/, `${ruta} debe poder revertir`);
     assert.match(fuente, /"begin"/, `${ruta} debe escribir en transacción`);
+  }
+});
+
+// --- Lectura en Producción: un camino aparte, explícito y sin escritura ----------------
+//
+// La Fase D necesita comparar y verificar **contra Producción**, y eso el guardián de rama
+// lo prohíbe por diseño. La salida no es relajarlo, sino un camino distinto que solo sirve
+// para leer: exige pedirlo por su nombre y estar conectado justo al endpoint de Producción.
+
+test("sin bandera, la lectura sigue siendo la de la rama de desarrollo", () => {
+  assert.equal(decidirDestinoDeLectura([]), "desarrollo");
+  assert.equal(decidirDestinoDeLectura(["--otra-cosa"]), "desarrollo");
+});
+
+test("leer Producción hay que pedirlo por su nombre", () => {
+  assert.equal(decidirDestinoDeLectura(["--produccion"]), "produccion");
+});
+
+test("un argumento parecido no abre la lectura de Producción", () => {
+  assert.equal(decidirDestinoDeLectura(["--produccion-no"]), "desarrollo");
+});
+
+test("leer Producción exige estar conectado a Producción", () => {
+  const decision = decidirLecturaEnProduccion({
+    host: DESARROLLO,
+    hostProduccion: PRODUCCION,
+  });
+
+  assert.equal(decision.ok, false);
+  assert.match(decision.motivo ?? "", /no es el de Producci[oó]n/);
+});
+
+test("sin saber cuál es el endpoint de Producción, tampoco se lee", () => {
+  const decision = decidirLecturaEnProduccion({ host: PRODUCCION, hostProduccion: "" });
+
+  assert.equal(decision.ok, false);
+  assert.match(decision.motivo ?? "", /NEON_ENDPOINT_PRODUCCION/);
+});
+
+test("conectado a Producción y pidiéndolo, se puede leer", () => {
+  const decision = decidirLecturaEnProduccion({
+    host: `${PRODUCCION.replace(".c-11", "-pooler.c-11")}`,
+    hostProduccion: PRODUCCION,
+  });
+
+  assert.equal(decision.ok, true);
+});
+
+test("el destino «desarrollo» sigue leyendo el marcador de rama", async () => {
+  const { cliente, consultas } = clienteFalso();
+  await exigirDestinoDeLectura(cliente, ENTORNO_DESARROLLO, "desarrollo");
+  assert.equal(consultas.length, 1);
+  assert.match(consultas[0], /app_settings/);
+});
+
+test("el destino «produccion» no consulta el marcador, que allí no existe", async () => {
+  const { cliente, consultas } = clienteFalso();
+  await exigirDestinoDeLectura(
+    cliente,
+    entornoFalso({
+      DATABASE_URL: `postgresql://u:p@${PRODUCCION}/neondb`,
+      NEON_ENDPOINT_PRODUCCION: PRODUCCION,
+    }),
+    "produccion",
+  );
+  assert.deepEqual(consultas, []);
+});
+
+test("el destino «produccion» se niega si la conexión es la de desarrollo", async () => {
+  const { cliente } = clienteFalso();
+  await assert.rejects(
+    () => exigirDestinoDeLectura(cliente, ENTORNO_DESARROLLO, "produccion"),
+    /no es el de Producci[oó]n/,
+  );
+});
+
+// --- La bandera del modelo: `relational_v2` y su camino a Producción -------------------
+
+test("el modelo relacional ya es un valor aceptable, y la basura no", () => {
+  assert.equal(valorDeModeloAceptado("legacy"), true);
+  assert.equal(valorDeModeloAceptado("shadow"), true);
+  assert.equal(valorDeModeloAceptado("relational_v2"), true);
+  assert.equal(valorDeModeloAceptado("relacional"), false);
+  assert.equal(valorDeModeloAceptado(""), false);
+  assert.equal(valorDeModeloAceptado(undefined), false);
+});
+
+test("cambiar el modelo en Producción exige las tres llaves", async () => {
+  const { cliente } = clienteFalso();
+  await assert.rejects(
+    () =>
+      ponerModelo(cliente, "relational_v2", entornoFalso({
+        DATABASE_URL: `postgresql://u:p@${PRODUCCION}/neondb`,
+        NEON_ENDPOINT_PRODUCCION: PRODUCCION,
+        PERMITIR_ESCRITURA_PRODUCCION: "true",
+      }), "produccion"),
+    /confirmaci[oó]n literal/,
+  );
+});
+
+test("con las tres llaves, el modelo se escribe en Producción", async () => {
+  const { cliente, consultas } = clienteFalso("relational_v2");
+  const valor = await ponerModelo(cliente, "relational_v2", entornoFalso({
+    DATABASE_URL: `postgresql://u:p@${PRODUCCION}/neondb`,
+    NEON_ENDPOINT_PRODUCCION: PRODUCCION,
+    PERMITIR_ESCRITURA_PRODUCCION: "true",
+    CONFIRMAR_PRODUCCION: "modelo-catalogo-en-produccion",
+  }), "produccion");
+
+  assert.equal(valor, "relational_v2");
+  assert.ok(consultas.some((sql) => /update app_settings/.test(sql)), "debe actualizar");
+  assert.ok(consultas.includes("commit"), "debe confirmar la transacción");
+});
+
+test("la vuelta a legacy es el mismo camino, y por eso está siempre disponible", async () => {
+  const { cliente, consultas } = clienteFalso("legacy");
+  const valor = await ponerModelo(cliente, "legacy", entornoFalso({
+    DATABASE_URL: `postgresql://u:p@${PRODUCCION}/neondb`,
+    NEON_ENDPOINT_PRODUCCION: PRODUCCION,
+    PERMITIR_ESCRITURA_PRODUCCION: "true",
+    CONFIRMAR_PRODUCCION: "modelo-catalogo-en-produccion",
+  }), "produccion");
+
+  assert.equal(valor, "legacy");
+  assert.ok(consultas.includes("commit"));
+});
+
+// --- Que los caminos de Producción de la Fase D no se pierdan sin avisar ---------------
+
+test("los scripts de la Fase D conservan su autorización de Producción", () => {
+  const guardados = [
+    ["scripts/importar-catalogo-relacional.mjs", "importar-relacional-en-produccion"],
+    ["scripts/modelo-catalogo.mjs", "modelo-catalogo-en-produccion"],
+  ] as const;
+
+  for (const [ruta, confirmacion] of guardados) {
+    const fuente = readFileSync(ruta, "utf8");
+    assert.match(fuente, /from "\.\/guarda-neon\.mjs"/, `${ruta} debe usar el guardián`);
+    assert.match(fuente, /autorizarEscritura/, `${ruta} debe autorizar antes de escribir`);
+    assert.ok(fuente.includes(confirmacion), `${ruta} debe exigir «${confirmacion}»`);
+    assert.match(fuente, /rollback/, `${ruta} debe poder revertir`);
+  }
+
+  const soloLectura = [
+    "scripts/comparar-catalogo-shadow.mjs",
+    "scripts/verificar-catalogo-relacional.mjs",
+  ];
+  for (const ruta of soloLectura) {
+    const fuente = readFileSync(ruta, "utf8");
+    assert.match(fuente, /exigirDestinoDeLectura/, `${ruta} debe exigir destino de lectura`);
+    assert.ok(
+      !fuente.includes("autorizarEscritura"),
+      `${ruta} solo lee: no debe pedir autorización de escritura`,
+    );
   }
 });
