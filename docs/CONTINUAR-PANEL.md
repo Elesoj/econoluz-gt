@@ -2317,3 +2317,61 @@ sesión no vuelve dinámicas las páginas prerrenderizadas.
 Producción no recibió ninguna escritura: sigue con 10 migraciones, 23 tablas y **sin las
 dos del carrito**. No hubo push, ni merge, ni despliegue, ni cambios en Vercel ni en
 Firebase de Producción.
+
+---
+
+## Subproyecto 5 desplegado en Producción (03/09/2026)
+
+El dueño autorizó expresamente aplicar la migración `011`, integrar
+`feat/carrito-persistente`, publicar `main` y realizar un único despliegue Production.
+El SHA revisado e integrado por avance rápido fue
+`14f6e0174c022834e5400729f077746f5b94334d` (12 commits desde `80410e5`), sin commit de
+fusión y con push normal. La rama y todos los worktrees se conservan.
+
+### Neon Producción
+
+- Preflight de solo lectura: 10 migraciones, 23 tablas, 0 tablas del carrito, 313 filas en
+  `public_products` y `modelo_catalogo=relational_v2`.
+- La simulación encontró únicamente `011_carrito.sql`, la aplicó dentro de una transacción
+  y terminó en `ROLLBACK`.
+- La aplicación real registró exclusivamente `011_carrito.sql`.
+- Estado posterior: 11 migraciones distintas, `011` una sola vez, 25 tablas, 0 carritos,
+  0 líneas, 313 productos y 313 filas en `public_products`.
+- Se comprobaron las claves foráneas con borrado en cascada, los índices, el único carrito
+  por usuario, una línea por carrito y producto, `cantidad` entre 1 y 999 y
+  `fusion_tokens jsonb not null default '[]'`.
+- El rol `econoluz_publico` tiene denegadas las 24 tablas protegidas y las dos secuencias
+  del carrito; solo `public_products` continúa legible.
+- La comparación relacional terminó con 313/313 productos, 0 diferencias y 0 escrituras;
+  el verificador terminó con `ok: true` y `modelo: relational_v2`.
+
+### Despliegue y comprobaciones
+
+Vercel creó automáticamente **un solo** deployment Production para ese SHA:
+`5DXmYeSVcdgHW6zwueHDMRie1H9m` (`6239297162` en GitHub), URL inmutable
+`https://econoluz-pbd0zniit-joseangel-s-projects.vercel.app`. Terminó `Ready` en 34 s y
+quedó `Latest`/`Current` en `https://econoluz-gt.vercel.app`.
+
+- `/`, `/catalogo`, `/carrito` y `/asesoria`: 200 y `PRERENDER`.
+- `GET /api/v1/carrito` y una mutación con origen correcto, sin sesión: 401
+  `sin-sesion`; la misma mutación sin origen: 403 `origen-no-valido`. Todas las respuestas
+  privadas llevan `private, no-store` y no exponen detalles internos.
+- El carrito anónimo añadió un producto, conservó `econoluz_carrito` en `localStorage` y,
+  tras recargar `/carrito`, mantuvo el total exacto `Q100.00`.
+- Runtime logs: 0 warnings, 0 errors y 0 fatal. El build no mostró secretos; la única
+  advertencia fue la política de npm `allow-scripts` para tres dependencias y no afectó
+  la compilación.
+
+La verificación fresca anterior a publicar dio carrito 96/96, `test:datos` 542/542,
+`test:admin` 196/196, `test:proveedores` 3/3, permisos correctos, `typecheck` y `lint`
+limpios, build correcto y Playwright 70/70 tanto con `relational_v2` como con `legacy`.
+
+Firebase Producción no se configuró ni se tocó. `output/`, `tmp/`, la rama y los cinco
+worktrees quedaron intactos. Si hubiera que revertir, primero se vuelve el código al SHA
+anterior `80410e5` mediante un commit normal y un único despliegue autorizado; las tablas
+aditivas `carts` y `cart_items` se dejan inactivas. Borrarlas exige otra autorización.
+
+> **Commit documental posterior:** Vercel está en `Ignored Build Step: Automatic` y la
+> opción de omitir despliegues sin cambios está desactivada. Un segundo push a `main`
+> provocaría otro Production, así que este cierre no se debe publicar hasta recibir una
+> instrucción que resuelva el conflicto con el requisito de un único despliegue.
