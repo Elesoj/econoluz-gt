@@ -415,8 +415,16 @@ export type Registro = (
   datos?: Record<string, string | number | boolean>,
 ) => void;
 
-/** Las seis consultas globales de `leerCatalogoRelacional`; no puede volver el N+1. */
-const CONSULTAS_RELACIONALES_ESPERADAS = 6;
+/**
+ * Cuántas consultas globales emite hoy `leerCatalogoRelacional`. **Es una referencia, no
+ * lo que se registra**: el número que va al log se cuenta de verdad, envolviendo el
+ * ejecutor. Publicar esta constante como si fuera una medición dejaría el registro
+ * diciendo «6» aunque volviera el N+1, que es justo lo que ese campo debe delatar.
+ */
+export const CONSULTAS_RELACIONALES_ESPERADAS = 6;
+
+/** El lector del catálogo relacional. Se inyecta para poder medirlo en las pruebas. */
+export type LectorRelacional = (ejecutar: Ejecutor) => Promise<ProductoRelacional[]>;
 
 /** Las filas llegan de Postgres con `numeric` en texto y `jsonb` ya expandido. */
 export function normalizarFilaLegacy(fila: Record<string, unknown>): FilaDeCatalogo {
@@ -452,7 +460,11 @@ export function normalizarFilaLegacy(fila: Record<string, unknown>): FilaDeCatal
 /**
  * Lee los dos catálogos, los compara y registra el resultado.
  *
- * **Nunca lanza.** Devuelve `null` si algo falló, y quien llama sigue sirviendo `legacy`.
+ * **No lanza por un fallo de la base ni de la comparación:** devuelve `null` y quien llama
+ * sigue sirviendo `legacy`. Sí puede propagar el fallo de `registro` —si el propio
+ * registro está roto no hay dónde anotarlo—, y por eso `servirSegunModelo` vuelve a
+ * protegerla: la garantía de que el visitante recibe `legacy` se sostiene allí, no aquí.
+ *
  * Del error solo se registra su clase: el texto de Postgres puede llevar el host, el rol o
  * la contraseña, y esos no entran en un registro.
  */
@@ -460,15 +472,24 @@ export async function ejecutarComparacion(
   ejecutar: Ejecutor,
   registro: Registro,
   ahora: Date = new Date(),
+  lector: LectorRelacional = leerCatalogoRelacional,
 ): Promise<ResumenDeComparacion | null> {
   const correlacion = randomBytes(6).toString("hex");
   const arranque = Date.now();
+
+  // Se cuentan las consultas que emite el lector relacional, no las que se supone que
+  // emite. Es la única forma de que el registro delate un N+1 en cuanto vuelva.
+  let consultasRelacionales = 0;
+  const ejecutarContando: Ejecutor = (texto, parametros) => {
+    consultasRelacionales += 1;
+    return ejecutar(texto, parametros);
+  };
 
   try {
     const filas = (await ejecutar(CONSULTA_LEGACY_COMPLETA, [])) as Record<string, unknown>[];
     const legacy = catalogoCanonicoDesdeLegacy(filas.map(normalizarFilaLegacy));
     const relacional = catalogoCanonicoDesdeRelacional(
-      await leerCatalogoRelacional(ejecutar),
+      await lector(ejecutarContando),
       ahora,
     );
 
@@ -492,7 +513,7 @@ export async function ejecutarComparacion(
       comparados: resumen.comparados,
       diferencias: resumen.totalDiferencias,
       omitidas: resumen.omitidas,
-      consultasRelacionales: CONSULTAS_RELACIONALES_ESPERADAS,
+      consultasRelacionales,
       duracionMs: Date.now() - arranque,
     });
 

@@ -509,6 +509,42 @@ test("la comparación no escribe nunca en la base", async () => {
   }
 });
 
+test("el registro dice cuántas consultas relacionales se ejecutaron de verdad", async () => {
+  const { ejecutar } = ejecutorFalso([{ patron: PATRON_LEGACY, filas: [] }]);
+  const { lineas, registro } = registroEspia();
+
+  // Un lector que emite nueve consultas en vez de seis. Si el registro publicara una
+  // constante, seguiría diciendo 6 y esta prueba no lo detectaría.
+  const lectorDeNueveConsultas = async (ejecutarRelacional: Ejecutor) => {
+    for (let i = 0; i < 9; i += 1) {
+      await ejecutarRelacional("select 1 from product_images", []);
+    }
+    return [];
+  };
+
+  await ejecutarComparacion(ejecutar, registro, AHORA, lectorDeNueveConsultas);
+
+  const cierre = lineas.find((l) => l.suceso === "catalogo-shadow-resumen");
+  assert.equal(cierre?.datos.consultasRelacionales, 9);
+});
+
+test("con el lector de verdad, las consultas relacionales registradas son seis", async () => {
+  const { ejecutar } = ejecutorFalso(RESPUESTAS_IGUALES);
+  const { lineas, registro } = registroEspia();
+  await ejecutarComparacion(ejecutar, registro, AHORA);
+  const cierre = lineas.find((l) => l.suceso === "catalogo-shadow-resumen");
+  assert.equal(cierre?.datos.consultasRelacionales, 6);
+});
+
+test("la lectura legacy de la comparación no se cuenta como relacional", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso(RESPUESTAS_IGUALES);
+  const { lineas, registro } = registroEspia();
+  await ejecutarComparacion(ejecutar, registro, AHORA);
+  const cierre = lineas.find((l) => l.suceso === "catalogo-shadow-resumen");
+  assert.equal(sentencias.length, 7);
+  assert.equal(cierre?.datos.consultasRelacionales, 6);
+});
+
 test("catálogos equivalentes registran cero diferencias, duración y correlación", async () => {
   const { ejecutar } = ejecutorFalso(RESPUESTAS_IGUALES);
   const { lineas, registro } = registroEspia();
