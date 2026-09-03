@@ -141,7 +141,7 @@ create table if not exists geo_municipios (
 | **URL de descarga** | `https://www.ine.gob.gt/wp-content/uploads/2025/06/BOLETA-ENEIC_LARGA.pdf` |
 | **Tamaño** | 436 417 bytes |
 | **SHA-256 del PDF** | `1eb2a2e3a718c7132c944a26a83a1d2a317c42e7fc4f3ab4862026950da7ca0e` |
-| **SHA-256 de la instantánea normalizada** | **Se registra al completarla** — ver §4.2.3 |
+| **SHA-256 de la instantánea normalizada** | `33297eebe05a155b3e63f0fac15d21a1306a0257b8b7b3f2149f08ce926a7e66` |
 
 **Validación del universo y del formato:** *Metodología de actualización del Directorio
 Nacional Estadístico de Empresas (DINESE)*, diciembre de 2023, §2.4 — **22 departamentos,
@@ -165,19 +165,26 @@ dígitos**: `101` → `0101`, cuyo departamento es `01`.
 Esa regla es la que hace cierta la restricción `left(codigo, 2) = departamento_codigo` de
 §4.2.
 
-#### 4.2.3 Estado real de la extracción, y lo que falta
+#### 4.2.3 Estado real de la extracción, cerrada en la tarea 1
 
-El PDF se descargó y se procesó el 03/09/2026. Resultados **verificados sobre el archivo
-cuya huella figura arriba**:
+El PDF se descargó y se procesó el 03/09/2026 con `scripts/preparar-geografia.mjs`.
+Resultados **verificados sobre el archivo cuya huella figura arriba**, y contrastados
+además contra una extracción independiente (`pdftotext -raw`, ajena a este script) que
+coincidió en los 340 códigos:
 
 - **340 códigos municipales únicos**, que coinciden exactamente con el universo declarado
   por el DINESE. Descartados los códigos de país que la misma boleta incluye (`3030` Cuba,
   `4007` Bélgica, `5008` China…), todos ≥ 3000.
-- **339 de los 340 nombres** quedaron emparejados automáticamente. El emparejado se hizo por
-  coordenadas y **se comprobó que ampliar la tolerancia no alteró ningún emparejamiento
-  previo**: cero cambios, once huecos rellenados.
+- **Los 340 nombres quedaron emparejados automáticamente**, sin ningún hueco. El emparejado
+  se hace por coordenadas con una asignación global (todas las parejas candidatas dentro de
+  tolerancia, confirmadas de mejor a peor puntaje, sin repetir código ni nombre) y descarta
+  de antemano los rótulos en mayúsculas (países y encabezados de continente), que de otro
+  modo podían ganarle el emparejado a un nombre real de municipio.
 - **El municipio `0923` es La Esperanza, Quetzaltenango**, y está **confirmado por el dueño
-  contra la página 7**, entre `0922 Flores Costa Cuca` y `0924 Palestina de los Altos`.
+  contra la página 7**, entre `0922 Flores Costa Cuca` y `0924 Palestina de los Altos`. La
+  extracción automática ya lo resuelve sola: la corrección de la tabla de abajo queda
+  declarada de todas formas por si un cambio futuro en el extractor volviera a romperlo, tal
+  como exige el criterio de aceptación 14, y el script solo avisa si de verdad tiene efecto.
 
 **Corrección de un error de informe, para que no se repita.** Una versión anterior de esta
 sección afirmaba que la celda de `0923` **estaba vacía en el PDF**. Es falso: el nombre está
@@ -194,13 +201,14 @@ lleva a conclusiones equivocadas sobre la calidad de la fuente.
 
 Cada corrección adicional que aparezca al completar la extracción **se añade a esta tabla**,
 con su código, el texto original, el almacenado y el motivo. Ninguna se aplica sin quedar
-escrita aquí y sin respaldo en la página 7.
+escrita aquí y sin respaldo en la página 7. Esta tabla, la de
+`db/datos/geografia-gt.FUENTE.md` y el mapa `CORRECCIONES` de
+`scripts/preparar-geografia.mjs` dicen exactamente lo mismo.
 
-**Por qué la segunda huella todavía no está.** El catálogo ya está completo conceptualmente,
-pero la instantánea **se genera al ejecutar la tarea 1 del plan**, y su SHA-256 solo puede
-calcularse sobre el archivo real. Se registra en la tabla de §4.2.1 **antes de que
-`012_geografia_gt.sql` exista**; el criterio de aceptación 14 lo exige y ninguna migración
-puede escribirse antes.
+**La segunda huella ya está registrada** (§4.2.1): la instantánea se generó al ejecutar la
+tarea 1 del plan, `db/datos/geografia-gt.json` existe con 22 departamentos y 340
+municipios, y su SHA-256 quedó escrito **antes de que `012_geografia_gt.sql` exista**; el
+criterio de aceptación 14 lo exigía y ninguna migración se ha escrito todavía.
 
 **La completitud se verifica contra este conjunto exacto versionado** —22 departamentos y
 340 municipios—, nunca comprobando que los códigos formen una secuencia numérica continua:
