@@ -371,9 +371,9 @@ texto era idéntico a `products.image` del mismo producto. Nada más: ni una fot
 distinta, ni un archivo de disco, ni un archivo de Vercel Blob. Una ruta que se parece
 —otro nombre, otra caja de mayúsculas— no se toca, y hay una prueba que lo fija.
 
-**Dónde está aplicado.** Solo en la rama Neon de desarrollo `catalogo-relacional-fase-b`.
-**Producción no se ha tocado**, y `app/data/products.ts` tampoco: las dos cosas siguen
-pendientes de decisión, y están explicadas al final de esta sección.
+**Dónde está aplicado.** En los tres sitios donde vivía el dato, todos con autorización
+expresa del dueño el 02/09/2026: la rama Neon de desarrollo `catalogo-relacional-fase-b`,
+**la rama de Producción** y `app/data/products.ts`. Las tres dan las mismas cifras.
 
 **Conteos, antes y después, sobre los 313 productos:**
 
@@ -405,6 +405,7 @@ la rama aislada y rechaza expresamente el de Producción:
 ```bash
 npm run catalogo:galerias                       # simula: no escribe nada
 npm run catalogo:galerias -- --aplicar <respaldo.json>
+npm run catalogo:galerias -- --aplicar-produccion <respaldo.json>
 npm run catalogo:galerias -- --restaurar <respaldo.json>
 ```
 
@@ -435,26 +436,68 @@ repositorio desde siempre dentro de `app/data/products.ts`, así que no expone n
 |---|---|
 | `catalogo:relacional:comparar` | **0 diferencias**, 313 comparados, 6 consultas, 0 escrituras, 1,2 s |
 | `catalogo:relacional:verificar` | `ok: true`, sin fallos |
-| `test:datos` | **378/378** (369 + 9 de la limpieza) |
+| `test:datos` | **384/384** (369 + 15 de la limpieza) |
 | `test:admin` | 196/196 |
 | `test:proveedores` | 3/3 |
 | `test:permisos` | correcto |
 | `catalogo:auditar` | 313 productos, 408 identificadores, **0** coincidencias |
-| `typecheck`, `lint`, `build` | limpios |
+| `catalogo:verificar` | 313 filas, 6 con galería, idénticas antes y después del viaje |
+| `typecheck`, `lint`, `build` | limpios, sin avisos |
 | Playwright | **70/70** |
 
-**Dos cosas quedan pendientes de tu decisión, y conviene no darlas por hechas:**
+Las cifras de `test:datos` son las finales, con las 15 pruebas de la limpieza incluidas.
 
-1. **Producción sigue con las galerías repetidas.** La corrección está solo en la rama de
-   desarrollo. Aplicarla en Producción cambia lo que ve el visitante en cuanto caduque la
-   caché del catálogo, y el guardián de rama la rechaza por diseño, así que haría falta un
-   camino aparte y una autorización explícita.
-2. **`app/data/products.ts` conserva las repeticiones**, y es una trampa real: `images`
-   está en `CATALOG_COLUMNS`, de modo que un `npm run catalogo:importar` volvería a
-   escribirlas y **desharía la limpieza sin que nadie se entere**. Limpiarlo obliga además
-   a regenerar `tests/fixtures/catalog-baseline.json`, que es justamente la huella
-   congelada que existe para detectar cambios en ese archivo; regenerarla es una decisión
-   deliberada, no un trámite.
+### Producción, el catálogo del código y las dos huellas congeladas
+
+**Producción.** El guardián de rama rechaza Producción por diseño, y eso **no se relajó**:
+se abrió un camino aparte, `--aplicar-produccion`, que exige **dos cosas a la vez** —estar
+conectado justo al endpoint de Producción y escribir la palabra exacta en
+`CONFIRMAR_PRODUCCION`—, porque cada una por separado puede darse por descuido y las dos
+juntas no. Se comprobó que corta en los tres casos peligrosos: sin confirmación, con la
+confirmación mal escrita, y con la confirmación puesta pero conectado a Desarrollo. Hay
+seis pruebas propias. La simulación previa en Producción dio los mismos 64, y la escritura
+dejó 0 galerías repetidas y 0 galerías vacías. El respaldo está en
+`docs/respaldos/2026-09-02-galerias-duplicadas-produccion.json`, y `--restaurar` reconoce
+por el propio respaldo que toca Producción y vuelve a exigir la misma confirmación: sin
+eso, se podría limpiar Producción pero no deshacerlo.
+
+**La proyección pública de Producción se quedó desalineada** al limpiar `products`, porque
+no se mantiene sola. Antes de reconstruirla se midió campo a campo qué cambiaría: **solo
+`images`, en los mismos 64 productos**, así que reproyectar era exactamente la corrección
+autorizada aplicada al espejo. `catalogo:reproyectar` dejó 313 proyectados y 0 retirados, y
+la comparación posterior da 0 productos distintos.
+
+> Un aviso para quien repita esa medición: `jsonb` devuelve las claves en su propio orden,
+> así que comparar con `JSON.stringify` sin canonizar dice que difieren 312 productos en
+> `technical_specs`. Es un espejismo. Canonizando, la única diferencia real eran las 64
+> galerías.
+
+**`app/data/products.ts`.** Se limpió también, y no era opcional: `images` está en
+`CATALOG_COLUMNS`, de modo que un `npm run catalogo:importar` habría vuelto a escribir las
+repeticiones y **habría deshecho la limpieza sin que nadie se enterase**. Las cifras
+coinciden con las de la base: 64 afectados, 64 repeticiones quitadas, 14 fotografías
+conservadas, 58 productos que se quedan sin galería. El script está en
+`.superpowers/fase-c/limpiar-products-ts.mjs` y se niega a escribir si no encuentra
+exactamente 64.
+
+**Las dos huellas congeladas que eso movió**, y cómo se resolvió cada una:
+
+1. **`tests/fixtures/catalog-baseline.json`.** Se regeneró **solo lo que la prueba
+   compara**: `verificationAggregateHashes`, `references` y las huellas por ficha.
+   `capturedAggregateHashes` es el registro histórico del catálogo original, **no lo
+   compara nadie** y se conservó intacto a propósito, porque es la marca de dónde vino
+   esto. Cambiaron 64 huellas de ficha, 0 huellas de ficha técnica, y `referenceMapSha256`
+   **no cambió**: las referencias son las mismas. Los mismos cuatro valores están
+   duplicados como literales en `tests/catalog-data-baseline.spec.ts` y también se
+   actualizaron ahí.
+2. **La huella de rutas de imagen de `tests/catalog-production-boundary.spec.ts`
+   no se tocó, porque el defecto estaba en la derivación.** Esa lista exime del escaneo de
+   fugas las rutas públicas legítimas, y se construía tomando *la galería si existe, y si
+   no la principal*. Solo funcionaba por accidente: como las 64 galerías repetían su
+   principal, nunca faltaba ninguna. Al quitar la repetición, la principal de los 6
+   productos con galería real se caía de la lista. Corregida la derivación a *principal
+   **y** galería*, la huella sale **idéntica** a la congelada —326 y el mismo SHA—, así
+   que no hubo que re-firmar nada.
 
 ### Correcciones post-revisión aplicadas el 02/09/2026
 

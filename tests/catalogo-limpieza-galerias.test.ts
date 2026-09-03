@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { planDeLimpieza, resumirPlan } from "../scripts/limpiar-galerias-duplicadas.mjs";
+import {
+  CONFIRMACION_PRODUCCION,
+  decidirEscrituraEnProduccion,
+  planDeLimpieza,
+  resumirPlan,
+} from "../scripts/limpiar-galerias-duplicadas.mjs";
 
 const base = {
   id: "p-1",
@@ -59,6 +64,75 @@ test("el orden de las fotografías conservadas no cambia", () => {
   const plan = planDeLimpieza({ ...base, images: [a, base.image, b] });
   assert.ok(plan);
   assert.deepEqual(plan.nuevas, [a, b]);
+});
+
+// --- El camino explícito hacia Producción -------------------------------------------
+
+const PROD = "ep-misty-sun-avmcbgly.c-11.us-east-1.aws.neon.tech";
+const DEV = "ep-green-union-avi3x99e.c-11.us-east-1.aws.neon.tech";
+
+test("sin confirmación explícita no se escribe en Producción", () => {
+  const decision = decidirEscrituraEnProduccion({
+    host: PROD,
+    hostProduccion: PROD,
+    confirmacion: undefined,
+  });
+  assert.equal(decision.ok, false);
+  assert.match(String(decision.motivo), /confirmaci/i);
+});
+
+test("una confirmación equivocada tampoco vale", () => {
+  for (const confirmacion of ["si", "SI", "produccion", CONFIRMACION_PRODUCCION.toUpperCase()]) {
+    const decision = decidirEscrituraEnProduccion({
+      host: PROD,
+      hostProduccion: PROD,
+      confirmacion,
+    });
+    assert.equal(decision.ok, false, `${confirmacion} no debería valer`);
+  }
+});
+
+test("este camino no puede tocar la rama de desarrollo por equivocación", () => {
+  const decision = decidirEscrituraEnProduccion({
+    host: DEV,
+    hostProduccion: PROD,
+    confirmacion: CONFIRMACION_PRODUCCION,
+  });
+  assert.equal(decision.ok, false);
+  assert.match(String(decision.motivo), /no es el de Producci/i);
+});
+
+test("sin saber cuál es el endpoint de Producción, no se escribe", () => {
+  const decision = decidirEscrituraEnProduccion({
+    host: PROD,
+    hostProduccion: "",
+    confirmacion: CONFIRMACION_PRODUCCION,
+  });
+  assert.equal(decision.ok, false);
+  assert.match(String(decision.motivo), /NEON_ENDPOINT_PRODUCCION/);
+});
+
+test("con el endpoint de Producción y la confirmación exacta, se permite", () => {
+  assert.deepEqual(
+    decidirEscrituraEnProduccion({
+      host: PROD,
+      hostProduccion: PROD,
+      confirmacion: CONFIRMACION_PRODUCCION,
+    }),
+    { ok: true },
+  );
+});
+
+test("el sufijo -pooler no confunde a la comprobación", () => {
+  const conPooler = PROD.replace(".c-11", "-pooler.c-11");
+  assert.equal(
+    decidirEscrituraEnProduccion({
+      host: conPooler,
+      hostProduccion: PROD,
+      confirmacion: CONFIRMACION_PRODUCCION,
+    }).ok,
+    true,
+  );
 });
 
 test("el resumen cuenta productos afectados y fotografías conservadas", () => {

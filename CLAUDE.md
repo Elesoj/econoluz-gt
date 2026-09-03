@@ -1032,9 +1032,16 @@ Quitada esa repetición en la rama de desarrollo, la comparación quedó en **0 
 La corrección es reversible desde `docs/respaldos/`; el detalle está en
 `docs/CONTINUAR-PANEL.md`.
 
-**Dos cosas siguen pendientes de decisión del dueño:** Producción conserva las galerías
-repetidas, y `app/data/products.ts` también —lo segundo importa porque `images` está en
-`CATALOG_COLUMNS` y un `catalogo:importar` desharía la limpieza en silencio—.
+**La limpieza está aplicada en los tres sitios donde vivía el dato**, con autorización
+expresa: la rama de desarrollo, **la rama de Producción** y `app/data/products.ts`. Lo
+último no era opcional: `images` está en `CATALOG_COLUMNS`, así que un `catalogo:importar`
+habría deshecho la limpieza en silencio. En Producción se reconstruyó además la proyección
+pública, que no se mantiene sola, tras comprobar que solo cambiaban esas 64 galerías.
+
+**Producción se escribe por un camino aparte, no relajando el guardián.**
+`catalogo:galerias -- --aplicar-produccion` exige a la vez estar conectado al endpoint de
+Producción y la confirmación exacta en `CONFIRMAR_PRODUCCION`; sin las dos, se niega. La
+vuelta atrás usa el mismo camino y los respaldos de `docs/respaldos/`.
 
 **Existe una segunda llave para la Fase D:** `FASE_D_AUTORIZADA`, en
 `app/data/catalogo/seleccion.ts`, vale `false`. Mientras lo valga, poner `modelo_catalogo`

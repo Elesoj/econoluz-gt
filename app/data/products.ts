@@ -918,10 +918,7 @@ const construlitaAltoMontajeProducts = [
     description:
       "Luminario LED de alto montaje con eficiencia de 170 lm/W, opciones de 75 a 200 W, flujo hasta 34 000 lm y montaje suspendido o sobrepuesto.",
     image: "/catalogos/construlita/alto_montaje/eco-industrial-001.webp",
-    images: [
-      "/catalogos/construlita/alto_montaje/eco-industrial-001.webp",
-      "/catalogos/construlita/alto_montaje/eco-industrial-002.webp",
-    ],
+    images: ["/catalogos/construlita/alto_montaje/eco-industrial-002.webp"],
     technicalSpecs: {
       productCode:
         "IN8031NBNA / IN8028NBFA / IN8028NBNA / IN8029NBFA / IN8029NBNA / IN8030NBFA / IN8030NBNA",
@@ -1037,10 +1034,7 @@ const construlitaAltoMontajeProducts = [
     description:
       "Luminario LED de alto montaje con selector de potencia, selector de lentes, 170 lm/W, IP65 y ángulos configurables de 60°, 85° o 105°.",
     image: "/catalogos/construlita/alto_montaje/eco-industrial-005.webp",
-    images: [
-      "/catalogos/construlita/alto_montaje/eco-industrial-005.webp",
-      "/catalogos/construlita/alto_montaje/eco-industrial-006.webp",
-    ],
+    images: ["/catalogos/construlita/alto_montaje/eco-industrial-006.webp"],
     technicalSpecs: {
       productCode: "IN8025BBFA",
       luminousFlux: "15 300 lm / 20 400 lm / 25 500 lm",
@@ -1620,7 +1614,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la línea Bronce con base G4.",
     image: "/catalogos/construlita/bronce/eco-exterior-002.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-002.webp"],
     technicalSpecs: {
       productCode: "OU2001C00K",
       material: "Laton con acabado bronce",
@@ -1646,7 +1639,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la línea Bronce con base GX5.3.",
     image: "/catalogos/construlita/bronce/eco-exterior-005.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-005.webp"],
     technicalSpecs: {
       productCode: "OU6026C00K",
       material: "Laton con acabado bronce",
@@ -1672,7 +1664,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la línea Bronce con base GU10.",
     image: "/catalogos/construlita/bronce/eco-exterior-003.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-003.webp"],
     technicalSpecs: {
       productCode: "OU3022C00K",
       material: "Laton con acabado bronce",
@@ -1698,7 +1689,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la línea Bronce con base Gx5.3.",
     image: "/catalogos/construlita/bronce/eco-exterior-004.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-004.webp"],
     technicalSpecs: {
       productCode: "OU3023C00K",
       material: "Laton con acabado bronce",
@@ -1724,7 +1714,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la linea Bronce con base G4.",
     image: "/catalogos/construlita/bronce/eco-exterior-006.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-006.webp"],
     technicalSpecs: {
       productCode: "OU7012C00K",
       material: "Laton con acabado bronce",
@@ -1750,7 +1739,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la linea Bronce con base GU10.",
     image: "/catalogos/construlita/bronce/eco-exterior-007.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-007.webp"],
     technicalSpecs: {
       productCode: "OU7014C00K",
       material: "Laton con acabado bronce",
@@ -1776,7 +1764,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario colgante de la linea Bronce con base Gx5.3.",
     image: "/catalogos/construlita/bronce/eco-exterior-011.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-011.webp"],
     technicalSpecs: {
       productCode: "RE8200C00K",
       material: "Laton con acabado bronce",
@@ -1803,7 +1790,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario colgante de la linea Bronce con base Gx5.3.",
     image: "/catalogos/construlita/bronce/eco-exterior-012.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-012.webp"],
     technicalSpecs: {
       productCode: "RE8201C00K",
       material: "Laton con acabado bronce",
@@ -1830,7 +1816,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la linea Bronce con base G4.",
     image: "/catalogos/construlita/bronce/eco-exterior-008.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-008.webp"],
     technicalSpecs: {
       productCode: "OU9010C00K",
       material: "Laton con acabado bronce",
@@ -1856,7 +1841,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la linea Bronce con LED integrado.",
     image: "/catalogos/construlita/bronce/eco-exterior-009.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-009.webp"],
     technicalSpecs: {
       productCode: "OU9011CBCF",
       luminousFlux: "65 lm",
@@ -1891,7 +1875,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Luminario de la linea Bronce con base G4.",
     image: "/catalogos/construlita/bronce/eco-exterior-010.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-010.webp"],
     technicalSpecs: {
       productCode: "OU9012C00K",
       material: "Laton con acabado bronce",
@@ -1917,7 +1900,6 @@ const construlitaBronceCatalogProducts = [
     finish: "Bronce",
     description: "Accesorio para sobreponer luminarios con estaca o pedestal.",
     image: "/catalogos/construlita/bronce/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/bronce/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode: "AC7600C",
       material: "Laton con acabado bronce",
@@ -1955,7 +1937,6 @@ const construlitaSombraProducts = [
     description:
       "Familia de arbotantes cilindricos y minimalistas para espacios interiores o exteriores, con emision directa e indirecta y opticas intercambiables.",
     image: "/catalogos/construlita/arbotantes/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/arbotantes/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode:
         "OU6093NBCA / OU6094NBCA / OU6093NBNA / OU6094NBNA / OU6093BBCA / OU6094BBCA / OU6093BBNA / OU6094BBNA",
@@ -2004,7 +1985,6 @@ const construlitaLandscapeProducts = [
     description:
       "Familia Landscape de proyectores exteriores con opciones de potencia, temperatura de color y apertura de 15 o 30 grados.",
     image: "/catalogos/construlita/proyector/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/proyector/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode:
         "OU7030NBCA / OU7031NBCA / OU7032NBCA / OU7030NBNA / OU7031NBNA / OU7032NBNA / OU7033NBCA / OU7034NBCA / OU7035NBCA / OU7033NBNA / OU7034NBNA / OU7035NBNA",
@@ -2051,7 +2031,6 @@ const construlitaPosteProducts = [
     description:
       "Luminario para punta de poste con diseno optico que proporciona iluminacion indirecta y alto confort visual, disponible en 3000 K y 4000 K.",
     image: "/catalogos/construlita/luminarios_para_poste/eco-exterior-002.webp",
-    images: ["/catalogos/construlita/luminarios_para_poste/eco-exterior-002.webp"],
     technicalSpecs: {
       productCode: "OU9023SBCA / OU9023SBNA",
       luminousFlux: "5 000 lm",
@@ -2089,7 +2068,6 @@ const construlitaPosteProducts = [
     description:
       "Luminaria exterior Bright de diseno moderno y elegante, con optica especial para iluminacion uniforme de alta calidad en entornos urbanos.",
     image: "/catalogos/construlita/luminarios_para_poste/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/luminarios_para_poste/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode: "OU9032NBCA / OU9032NBNA / OU9033NBNA",
       luminousFlux: "3 700 lm / 5 107 lm",
@@ -2127,7 +2105,6 @@ const construlitaPosteProducts = [
     description:
       "Luminario para punta de poste con cuerpo en inyeccion de aluminio y acabado grafito, disenado para zonas urbanas peatonales, parques, jardines y calles de fraccionamientos privados.",
     image: "/catalogos/construlita/luminarios_para_poste/eco-exterior-006.webp",
-    images: ["/catalogos/construlita/luminarios_para_poste/eco-exterior-006.webp"],
     technicalSpecs: {
       productCode: "OU9086FBFA / OU9087FBFA / OU9100FBNA",
       luminousFlux: "9 200 lm / 13 700 lm / 8 100 lm",
@@ -2165,7 +2142,6 @@ const construlitaPosteProducts = [
     description:
       "Luminario para punta de poste con cuerpo en inyeccion de aluminio y acabado grafito, disenado para zonas urbanas peatonales, parques, jardines y calles de fraccionamientos privados.",
     image: "/catalogos/construlita/luminarios_para_poste/eco-exterior-005.webp",
-    images: ["/catalogos/construlita/luminarios_para_poste/eco-exterior-005.webp"],
     technicalSpecs: {
       productCode: "OU9021FBNA",
       luminousFlux: "8 000 lm",
@@ -2201,7 +2177,6 @@ const construlitaPosteProducts = [
     description:
       "Luminario tipo farol colonial para punta de poste, con tecnologia LED y opticas para proyectos exteriores arquitectonicos.",
     image: "/catalogos/construlita/luminarios_para_poste/eco-exterior-003.webp",
-    images: ["/catalogos/construlita/luminarios_para_poste/eco-exterior-003.webp"],
     technicalSpecs: {
       productCode: "OU9035FBCA / OU9036FBCA",
       luminousFlux: "7 700 lm",
@@ -2235,7 +2210,6 @@ const construlitaPosteProducts = [
     description:
       "Luminario tipo farol colonial para punta de poste, con tecnologia LED y optica Tipo V para proyectos exteriores arquitectonicos.",
     image: "/catalogos/construlita/luminarios_para_poste/eco-exterior-004.webp",
-    images: ["/catalogos/construlita/luminarios_para_poste/eco-exterior-004.webp"],
     technicalSpecs: {
       productCode: "OU9906NBCA",
       luminousFlux: "7 700 lm",
@@ -2268,7 +2242,6 @@ const construlitaPosteProducts = [
     description:
       "Poste luminoso de tres metros de altura con iluminacion bilateral, disenado para proporcionar iluminacion en parques, plazas publicas, circulaciones peatonales y ciclovias.",
     image: "/catalogos/construlita/poste/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/poste/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode: "OU9051GBNA",
       luminousFlux: "6 700 lm",
@@ -2305,7 +2278,6 @@ const construlitaPosteProducts = [
     description:
       "Miniposte de 680 mm de altura con emision luminosa anti deslumbramiento, pensado para circulaciones peatonales, zonas comerciales y proyectos hospitalarios.",
     image: "/catalogos/construlita/minipostes/eco-exterior-006.webp",
-    images: ["/catalogos/construlita/minipostes/eco-exterior-006.webp"],
     technicalSpecs: {
       productCode: "OU9047GBNB",
       luminousFlux: "220 lm",
@@ -2342,7 +2314,6 @@ const construlitaPosteProducts = [
     description:
       "Bolardo Softglow de diseno moderno y sofisticado, con iluminacion suave y calida para crear ambientes acogedores en cualquier entorno.",
     image: "/catalogos/construlita/minipostes/eco-exterior-007.webp",
-    images: ["/catalogos/construlita/minipostes/eco-exterior-007.webp"],
     technicalSpecs: {
       productCode: "OU9095FBCA",
       luminousFlux: "1 850 lm",
@@ -2378,7 +2349,6 @@ const construlitaPosteProducts = [
     description:
       "Miniposte Corvus para iluminacion exterior peatonal, con emision LED controlada y acabado cafe para proyectos arquitectonicos.",
     image: "/catalogos/construlita/minipostes/eco-exterior-005.webp",
-    images: ["/catalogos/construlita/minipostes/eco-exterior-005.webp"],
     technicalSpecs: {
       productCode: "OU9093CBCA",
       luminousFlux: "1 900 lm",
@@ -2414,7 +2384,6 @@ const construlitaPosteProducts = [
     description:
       "Miniposte Corvus para iluminacion exterior peatonal, con emision LED controlada y acabado bronce para proyectos arquitectonicos.",
     image: "/catalogos/construlita/minipostes/eco-exterior-004.webp",
-    images: ["/catalogos/construlita/minipostes/eco-exterior-004.webp"],
     technicalSpecs: {
       productCode: "OU9092CBCA",
       luminousFlux: "2 100 lm",
@@ -2450,7 +2419,6 @@ const construlitaPosteProducts = [
     description:
       "Miniposte Corvus para iluminacion exterior peatonal, con emision LED controlada y acabado satinado para proyectos arquitectonicos.",
     image: "/catalogos/construlita/minipostes/eco-exterior-003.webp",
-    images: ["/catalogos/construlita/minipostes/eco-exterior-003.webp"],
     technicalSpecs: {
       productCode: "OU9089SBCB",
       luminousFlux: "1 000 lm",
@@ -2486,7 +2454,6 @@ const construlitaPosteProducts = [
     description:
       "Bolardo LED para circulaciones exteriores, con acabado negro e iluminacion controlada para zonas peatonales y paisajismo.",
     image: "/catalogos/construlita/minipostes/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/minipostes/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode: "OU9090FBNB",
       luminousFlux: "245 lm",
@@ -2522,7 +2489,6 @@ const construlitaPosteProducts = [
     description:
       "Bolardo LED para circulaciones exteriores, con acabado negro e iluminacion controlada para zonas peatonales y paisajismo.",
     image: "/catalogos/construlita/minipostes/eco-exterior-002.webp",
-    images: ["/catalogos/construlita/minipostes/eco-exterior-002.webp"],
     technicalSpecs: {
       productCode: "OU9091FBNB",
       luminousFlux: "780 lm",
@@ -2562,7 +2528,6 @@ const construlitaVialidadesProducts = [
     description:
       "Familia de luminarias viales Evolight de diseno ultra delgado, alto rendimiento y eficacia de hasta 160 lm/W para proyectos de vialidad exterior.",
     image: "/catalogos/construlita/vialidades/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode:
         "V05516040U2MVN5 / V05516050U2MVN5 / V07516040U2MVN5 / V07516050U2MVN5 / V09016040U2MVN5 / V09016050U2MVN5",
@@ -2604,7 +2569,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Nanovia de cuerpo compacto para proyectos exteriores, con optica Tipo II M y acabado satinado.",
     image: "/catalogos/construlita/vialidades/eco-exterior-003.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-003.webp"],
     technicalSpecs: {
       productCode: "V0040UN2M50",
       luminousFlux: "4 780 lm",
@@ -2640,7 +2604,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Nanovia de cuerpo compacto para proyectos exteriores, con optica Tipo II M y acabado satinado.",
     image: "/catalogos/construlita/vialidades/eco-exterior-004.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-004.webp"],
     technicalSpecs: {
       productCode: "V0052UN2M50",
       luminousFlux: "5 000 lm",
@@ -2676,7 +2639,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Nanovia de 100 W para proyectos exteriores, con optica Tipo II M y opciones 5000 K o 4000 K.",
     image: "/catalogos/construlita/vialidades/eco-exterior-005.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-005.webp"],
     technicalSpecs: {
       productCode: "V0100UN2M50 / V0100UN2M40",
       luminousFlux: "11 000 lm",
@@ -2713,7 +2675,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Nanovia UL de 40 W para proyectos exteriores, con optica Tipo II M y opciones 4000 K o 5000 K.",
     image: "/catalogos/construlita/vialidades/eco-exterior-002.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-002.webp"],
     technicalSpecs: {
       productCode: "U0040UN2M40 / U0040UN2M50",
       luminousFlux: "4 350 lm",
@@ -2750,7 +2711,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
     image: "/catalogos/construlita/vialidades/eco-exterior-009.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-009.webp"],
     technicalSpecs: {
       productCode: "V1050UN2M40 / V1050UN2M50",
       luminousFlux: "6 750 lm",
@@ -2782,7 +2742,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
     image: "/catalogos/construlita/vialidades/eco-exterior-010.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-010.webp"],
     technicalSpecs: {
       productCode: "V1070UN2M40 / V1070UN2M50",
       luminousFlux: "9 800 lm",
@@ -2814,7 +2773,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
     image: "/catalogos/construlita/vialidades/eco-exterior-011.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-011.webp"],
     technicalSpecs: {
       productCode: "V2100UN2M40 / V2100UN2M50",
       luminousFlux: "13 000 lm",
@@ -2846,7 +2804,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
     image: "/catalogos/construlita/vialidades/eco-exterior-012.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-012.webp"],
     technicalSpecs: {
       productCode: "V2130UN2M40 / V2130UN2M50",
       luminousFlux: "16 900 lm",
@@ -2878,7 +2835,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Vialed para proyectos exteriores, con optica Tipo II M, acabado gris y opciones 4000 K o 5000 K.",
     image: "/catalogos/construlita/vialidades/eco-exterior-013.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-013.webp"],
     technicalSpecs: {
       productCode: "V3160UN2M40 / V3160UN2M50",
       luminousFlux: "20 800 lm",
@@ -2910,7 +2866,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Vialed UL para alumbrado publico, con certificacion UL, optica Tipo II M y acabado gris.",
     image: "/catalogos/construlita/vialidades/eco-exterior-006.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-006.webp"],
     technicalSpecs: {
       productCode: "U1050UN2M40 / U1050UN2M50",
       luminousFlux: "6 300 lm",
@@ -2947,7 +2902,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Vialed UL para alumbrado publico, con certificacion UL, optica Tipo II M y acabado gris.",
     image: "/catalogos/construlita/vialidades/eco-exterior-007.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-007.webp"],
     technicalSpecs: {
       productCode: "U1070UN2M40 / U1070UN2M50",
       luminousFlux: "8 730 lm",
@@ -2984,7 +2938,6 @@ const construlitaVialidadesProducts = [
     description:
       "Luminario vial Vialed UL para alumbrado publico, con certificacion UL, optica Tipo II M y acabado gris.",
     image: "/catalogos/construlita/vialidades/eco-exterior-008.webp",
-    images: ["/catalogos/construlita/vialidades/eco-exterior-008.webp"],
     technicalSpecs: {
       productCode: "U1090UN2M40 / U1090UN2M50",
       luminousFlux: "10 800 lm",
@@ -3038,7 +2991,6 @@ const construlitaGranAmplitudProducts = [
     description:
       "Sistema Module configurable para proyeccion de gran amplitud, con opciones por instalacion, cantidad de tarjetas LED, potencia, color, TCC y optica.",
     image: "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-007.webp",
-    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-007.webp"],
     technicalSpecs: {
       productCode: "ML + instalacion + tarjetas LED + watts + color + TCC + version + optica + opcional",
       power: "Configurable",
@@ -3063,7 +3015,6 @@ const construlitaGranAmplitudProducts = [
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 45 W para proyeccion de gran amplitud.",
     image: "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-007.webp",
-    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-007.webp"],
     technicalSpecs: {
       productCode: "ML ... 05 ...",
       power: "45 W",
@@ -3085,7 +3036,6 @@ const construlitaGranAmplitudProducts = [
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 90 W para proyeccion de gran amplitud.",
     image: "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-006.webp",
-    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-006.webp"],
     technicalSpecs: {
       productCode: "ML ... 09 ...",
       power: "90 W",
@@ -3107,7 +3057,6 @@ const construlitaGranAmplitudProducts = [
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 135 W para proyeccion de gran amplitud.",
     image: "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode: "ML ... 13 ...",
       power: "135 W",
@@ -3129,7 +3078,6 @@ const construlitaGranAmplitudProducts = [
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 180 W para proyeccion de gran amplitud.",
     image: "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-002.webp",
-    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-002.webp"],
     technicalSpecs: {
       productCode: "ML ... 18 ...",
       power: "180 W",
@@ -3151,7 +3099,6 @@ const construlitaGranAmplitudProducts = [
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 270 W para proyeccion de gran amplitud.",
     image: "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-003.webp",
-    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-003.webp"],
     technicalSpecs: {
       productCode: "ML ... 27 ...",
       power: "270 W",
@@ -3173,7 +3120,6 @@ const construlitaGranAmplitudProducts = [
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 360 W para proyeccion de gran amplitud.",
     image: "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-004.webp",
-    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-004.webp"],
     technicalSpecs: {
       productCode: "ML ... 36 ...",
       power: "360 W",
@@ -3195,7 +3141,6 @@ const construlitaGranAmplitudProducts = [
     finish: "Negro / Gris / Grafito",
     description: "Variante Module de 540 W para proyeccion de gran amplitud.",
     image: "/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-005.webp",
-    images: ["/catalogos/construlita/proyector_areas_gran_amplitud/eco-exterior-005.webp"],
     technicalSpecs: {
       productCode: "ML ... 60 ...",
       power: "540 W",
@@ -3220,7 +3165,6 @@ const construlitaSumergiblesCatalogProducts = [
     finish: "Satin",
     description: "Luminario sumergible empotrado para salidas de agua a presion.",
     image: "/catalogos/construlita/sumergibles/eco-exterior-001.webp",
-    images: ["/catalogos/construlita/sumergibles/eco-exterior-001.webp"],
     technicalSpecs: {
       productCode: "OU7056SBCG",
       luminousFlux: "330 lm",
@@ -3255,7 +3199,6 @@ const construlitaSumergiblesCatalogProducts = [
     finish: "Satin",
     description: "Luminario sumergible empotrado para salidas de agua a presion.",
     image: "/catalogos/construlita/sumergibles/eco-exterior-002.webp",
-    images: ["/catalogos/construlita/sumergibles/eco-exterior-002.webp"],
     technicalSpecs: {
       productCode: "OU7057SBCG",
       luminousFlux: "715 lm",
@@ -3290,7 +3233,6 @@ const construlitaSumergiblesCatalogProducts = [
     finish: "Satin",
     description: "Proyector sumergible para iluminacion subacuatica.",
     image: "/catalogos/construlita/sumergibles/eco-exterior-003.webp",
-    images: ["/catalogos/construlita/sumergibles/eco-exterior-003.webp"],
     technicalSpecs: {
       productCode: "OU7058SBCG",
       luminousFlux: "215 lm",
@@ -3325,7 +3267,6 @@ const construlitaSumergiblesCatalogProducts = [
     finish: "Satin",
     description: "Proyector sumergible para iluminacion subacuatica.",
     image: "/catalogos/construlita/sumergibles/eco-exterior-004.webp",
-    images: ["/catalogos/construlita/sumergibles/eco-exterior-004.webp"],
     technicalSpecs: {
       productCode: "OU7059SBCG",
       luminousFlux: "650 lm",
@@ -3365,7 +3306,6 @@ const construlitaUplightsProducts = [
       "Uplights empotrados en piso con opticas dirigibles individuales para iluminacion rasante en superficies verticales e instalacion sin marco.",
     image: "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-005.webp",
     images: [
-      "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-005.webp",
       "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-006.webp",
       "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-007.webp",
       "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-008.webp",
@@ -3423,7 +3363,6 @@ const construlitaFragataProProducts = [
     description:
       "Uplight de alta potencia para empotrar en piso con tecnologia LED, operacion de 50 W y configuraciones por temperatura de color y angulo de apertura.",
     image: "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-001.webp",
-    images: ["/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-001.webp"],
     technicalSpecs: {
       productCode: "OU3595SBCA / OU3595SBFA / OU3596SBCA / OU3596SBFA / OU3597SBCA / OU3597SBFA",
       luminousFlux: "4 000 lm",
@@ -3468,7 +3407,6 @@ const construlitaGoletaProProducts = [
     description:
       "Luminario empotrado en piso inyectado en policarbonato de alta resistencia, con opticas de policarbonato y protector de cristal templado.",
     image: "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-002.webp",
-    images: ["/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-002.webp"],
     technicalSpecs: {
       productCode:
         "OU3150NBCB / OU3150NBFB / OU3152NBCB / OU3152NBFB / OU3154NBCB / OU3174NBCA / OU3174NBFA / OU3176NAMA / OU3176NBCA / OU3176NBFA / OU3178NAMA / OU3178NBCA / OU3178NBFA",
@@ -3522,10 +3460,7 @@ const construlitaRoadlightProducts = [
     description:
       "Familia de luminarios para empotrar en piso con materiales que soportan el paso de trafico vehicular ligero e iluminacion de cortesia.",
     image: "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-004.webp",
-    images: [
-      "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-004.webp",
-      "/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-003.webp",
-    ],
+    images: ["/catalogos/construlita/empotrados_en_piso/eco-arquitectonico-003.webp"],
     technicalSpecs: {
       productCode: "OU3027GBCF / OU3028GBCF",
       luminousFlux: "60 lm / 30 lm",
@@ -3570,7 +3505,6 @@ const construlitaWalklightProducts = [
       "Familia de luminarios compactos para luz de cortesia en muro con acabados blanco o negro y temperatura 3000 K o 4000 K.",
     image: "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-001.webp",
     images: [
-      "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-001.webp",
       "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-002.webp",
       "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-003.webp",
       "/catalogos/construlita/luz_cortesia_muro/eco-cortesia-004.webp",
@@ -3618,7 +3552,6 @@ const construlitaBarraProProducts = [
       "Iluminacion lineal para proyectos exteriores con instalacion empotrada o sobrepuesta en superficies verticales u horizontales.",
     image: "/catalogos/construlita/barras/eco-lineal-001.webp",
     images: [
-      "/catalogos/construlita/barras/eco-lineal-001.webp",
       "/catalogos/construlita/barras/eco-lineal-002.webp",
       "/catalogos/construlita/barras/eco-lineal-003.webp",
       "/catalogos/construlita/barras/eco-lineal-004.webp",
@@ -3682,7 +3615,6 @@ const construlitaUplightLinealProducts = [
     description:
       "Luminarios lineales de diseno compacto y sutil integracion con la arquitectura exterior o interior, para instalacion sobrepuesta en superficies horizontales o verticales.",
     image: "/catalogos/construlita/barras/eco-lineal-007.webp",
-    images: ["/catalogos/construlita/barras/eco-lineal-007.webp"],
     technicalSpecs: {
       productCode:
         "OU6608GBCA / OU6609GBCA / OU6608GBNA / OU6609GBNA / OU6615GBCA / OU6616GBCA / OU6615GBNA / OU6616GBNA",
@@ -3729,7 +3661,6 @@ const construlitaUplightLinealProducts = [
     description:
       "Luminario lineal de 50 cm disenado para empotrarse en piso, con cuerpo optico dirigible para enfocar objetos o regular el efecto de iluminacion rasante en superficies verticales.",
     image: "/catalogos/construlita/barras/eco-lineal-006.webp",
-    images: ["/catalogos/construlita/barras/eco-lineal-006.webp"],
     technicalSpecs: {
       productCode: "OU3705SBCA / OU3705SBNA",
       luminousFlux: "2 300 lm",
@@ -3770,7 +3701,6 @@ const construlitaUplightLinealProducts = [
     description:
       "Luminario lineal disenado para instalarse a baja altura en el parapeto de vialidades, con optica para iluminacion rasante sobre carpeta vehicular y perimetros de puentes o distribuidores viales.",
     image: "/catalogos/construlita/barras/eco-lineal-005.webp",
-    images: ["/catalogos/construlita/barras/eco-lineal-005.webp"],
     technicalSpecs: {
       productCode: "OU7161FBFA",
       luminousFlux: "2 677 lm",

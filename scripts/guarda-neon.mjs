@@ -12,7 +12,7 @@ import { Client, neonConfig } from "@neondatabase/serverless";
 const CLAVE_RAMA = "rama_neon";
 const BLOQUEO_SELLADO = 20260902;
 
-function endpointCanonico(host) {
+export function endpointCanonico(host) {
   return String(host ?? "")
     .trim()
     .toLowerCase()

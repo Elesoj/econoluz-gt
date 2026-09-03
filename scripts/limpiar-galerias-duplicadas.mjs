@@ -22,7 +22,39 @@ import { fileURLToPath } from "node:url";
 
 import { Client, neonConfig } from "@neondatabase/serverless";
 
-import { exigirRamaDeDesarrollo } from "./guarda-neon.mjs";
+import { endpointCanonico, exigirRamaDeDesarrollo } from "./guarda-neon.mjs";
+
+/**
+ * La palabra exacta que hay que escribir para poder tocar Producción.
+ *
+ * El guardián de rama rechaza Producción por diseño, y eso no se toca: este es un camino
+ * **aparte**, que no relaja aquel. Para escribir en Producción hacen falta dos cosas a la
+ * vez —estar conectado justo a su endpoint y escribir esta palabra— porque cada una sola
+ * puede darse por descuido, y las dos juntas no.
+ */
+export const CONFIRMACION_PRODUCCION = "limpiar-galerias-produccion";
+
+export function decidirEscrituraEnProduccion({ host, hostProduccion, confirmacion }) {
+  if (!hostProduccion) {
+    return { ok: false, motivo: "Falta NEON_ENDPOINT_PRODUCCION: no se sabe cuál es." };
+  }
+  if (confirmacion !== CONFIRMACION_PRODUCCION) {
+    return {
+      ok: false,
+      motivo: `Falta la confirmación explícita «${CONFIRMACION_PRODUCCION}».`,
+    };
+  }
+
+  const conectado = endpointCanonico(host);
+  if (!conectado || conectado !== endpointCanonico(hostProduccion)) {
+    return {
+      ok: false,
+      motivo: `El endpoint conectado no es el de Producción: ${host || "vacío"}.`,
+    };
+  }
+
+  return { ok: true };
+}
 
 /** Cuántos productos deben quedar afectados. Si no son exactamente estos, se revierte. */
 export const AFECTADOS_ESPERADOS = 64;
@@ -93,8 +125,17 @@ export async function simular(cliente) {
   return resumirPlan(await leerFilas(cliente));
 }
 
-export async function aplicar(cliente, entorno = process.env, rutaRespaldo) {
-  await exigirRamaDeDesarrollo(cliente, entorno);
+export async function aplicar(cliente, entorno = process.env, rutaRespaldo, destino = "desarrollo") {
+  if (destino === "produccion") {
+    const decision = decidirEscrituraEnProduccion({
+      host: new URL(entorno.DATABASE_URL).host,
+      hostProduccion: entorno.NEON_ENDPOINT_PRODUCCION,
+      confirmacion: entorno.CONFIRMAR_PRODUCCION,
+    });
+    if (!decision.ok) throw new Error(decision.motivo);
+  } else {
+    await exigirRamaDeDesarrollo(cliente, entorno);
+  }
 
   const resumen = resumirPlan(await leerFilas(cliente));
 
@@ -102,7 +143,14 @@ export async function aplicar(cliente, entorno = process.env, rutaRespaldo) {
     mkdirSync(dirname(rutaRespaldo), { recursive: true });
     writeFileSync(
       rutaRespaldo,
-      `${JSON.stringify(armarRespaldo(resumen, entorno.NEON_RAMA_ESPERADA), null, 2)}\n`,
+      `${JSON.stringify(
+        armarRespaldo(
+          resumen,
+          destino === "produccion" ? "produccion" : entorno.NEON_RAMA_ESPERADA,
+        ),
+        null,
+        2,
+      )}\n`,
       "utf8",
     );
   }
@@ -139,8 +187,20 @@ export async function aplicar(cliente, entorno = process.env, rutaRespaldo) {
 }
 
 export async function restaurar(cliente, rutaRespaldo, entorno = process.env) {
-  await exigirRamaDeDesarrollo(cliente, entorno);
   const respaldo = JSON.parse(readFileSync(rutaRespaldo, "utf8"));
+
+  // El propio respaldo dice dónde se hizo la limpieza, así que la vuelta atrás usa el
+  // mismo guardián que la ida. Si no, Producción se podría limpiar pero no deshacer.
+  if (respaldo.rama === "produccion") {
+    const decision = decidirEscrituraEnProduccion({
+      host: new URL(entorno.DATABASE_URL).host,
+      hostProduccion: entorno.NEON_ENDPOINT_PRODUCCION,
+      confirmacion: entorno.CONFIRMAR_PRODUCCION,
+    });
+    if (!decision.ok) throw new Error(decision.motivo);
+  } else {
+    await exigirRamaDeDesarrollo(cliente, entorno);
+  }
 
   await cliente.query("begin");
   try {
@@ -173,9 +233,10 @@ async function ejecutarDesdeTerminal() {
   await cliente.connect();
 
   try {
-    if (accion === "--aplicar") {
-      const resultado = await aplicar(cliente, process.env, argumento);
-      console.log(JSON.stringify({ ...resultado, resumen: undefined }, null, 2));
+    if (accion === "--aplicar" || accion === "--aplicar-produccion") {
+      const destino = accion === "--aplicar-produccion" ? "produccion" : "desarrollo";
+      const resultado = await aplicar(cliente, process.env, argumento, destino);
+      console.log(JSON.stringify({ destino, ...resultado, resumen: undefined }, null, 2));
       if (!resultado.ok) process.exitCode = 1;
     } else if (accion === "--restaurar") {
       if (!argumento) throw new Error("Uso: --restaurar <archivo de respaldo>");

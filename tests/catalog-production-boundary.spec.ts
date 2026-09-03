@@ -37,14 +37,17 @@ const textArtifactExtensions = new Set([
   ".txt",
 ]);
 
+// La principal **y** la galería, no una u otra. Hasta el 02/09/2026 esto tomaba la
+// galería cuando existía y la principal cuando no, y funcionaba solo por accidente: las
+// 64 galerías repetían su foto principal, así que nunca faltaba ninguna. Al quitar esa
+// repetición, la principal de los 6 productos con galería real se caía de la lista.
+// Con la derivación correcta la huella congelada sale idéntica a la de siempre.
 const knownPublicImagePaths = [
   ...new Set(
     products.flatMap((product) => {
       const publicProduct = toPublicProduct(product);
 
-      return publicProduct.images?.length
-        ? publicProduct.images
-        : [publicProduct.image];
+      return [publicProduct.image, ...(publicProduct.images ?? [])];
     }),
   ),
 ].sort((left, right) => right.length - left.length);

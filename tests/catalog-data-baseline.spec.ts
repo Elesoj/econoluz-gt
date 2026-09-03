@@ -17,13 +17,17 @@ const fixtureMetadata = catalogBaseline as unknown as {
   capturedAggregateHashes: Record<string, string>;
   verificationAggregateHashes: Record<string, string>;
 };
+// Estas cuatro huellas se refrescaron el 02/09/2026, al quitar de las 64 galerías la
+// repetición exacta de la foto principal. `referenceMapSha256` **no cambió**, porque las
+// referencias son las mismas: cambió el contenido de 64 fichas y nada más. Las huellas
+// históricas de `capturedAggregateHashes` se conservan intactas más abajo.
 const verificationBaseline = {
   ...catalogBaseline,
   verificationAggregateHashes: {
-    publicCanonicalSha256: "dd4292fa0b1b43259d3fb95301e1e3ce95faaaf41eb34e1191ca476020fc51e9",
-    internalCanonicalSha256: "7266b816c4a7081c9cd7023bdc58261f70bbe0ca906c49c6c54eedfdf5b53863",
+    publicCanonicalSha256: "dd359d6e54aa2e7221887d598ee9226c2f302d6d4e373f0e431fc1c13045f934",
+    internalCanonicalSha256: "bd511fc0bc8be857c8dc2c29059e2f130306abcdbcf12af868591eb3dfb3534b",
     referenceMapSha256: "57307a880fe854730ee43816b3f8f45153b3732e51a28e9aa6b332e7a8a3dcd9",
-    productHashMapSha256: "549b4f30980322b2b37d1fd207da5cd6c02760599fe244bbdb21d0856f7e0170",
+    productHashMapSha256: "78c501e3459d8f21a244d27981e4ebdcca31510436a6254b6469d29e1c1baa8f",
   },
 } as unknown as CatalogBaseline;
 
