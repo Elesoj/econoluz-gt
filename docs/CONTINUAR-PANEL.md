@@ -314,16 +314,12 @@ veces, y el modelo nuevo la enseñaría una.
 vista a propósito: el canónico del lado antiguo **no deduplica**, justamente para que esto
 no quedara escondido detrás de una normalización cómoda.
 
-**Decisión pendiente del dueño**, y por eso la fase queda bloqueada:
+**El dueño autorizó limpiar el dato antiguo el 02/09/2026**, y así se hizo. Ver la sección
+«La limpieza de las galerías repetidas» más abajo. La comparación pasó de **128 diferencias
+a 0**.
 
-1. **Limpiar el dato antiguo** —quitar la repetida de `products.images` en esos 64— y que
-   la ficha deje de enseñar la foto principal dos veces. Es escritura en Producción y
-   cambia lo que ve el visitante hoy.
-2. **Conservar la repetición** y hacer que el modelo nuevo la reproduzca.
-3. **Aceptar la diferencia** como mejora deliberada y anotarla como divergencia conocida
-   antes de la Fase D.
-
-No se tocó ningún dato para forzar igualdad ni se inventó contenido.
+No se tocó ningún dato para forzar igualdad ni se inventó contenido: se quitó una
+referencia duplicada que el propio catálogo ya tenía por partida doble.
 
 **El Preview temporal.** `https://econoluz-7blxslmmv-joseangel-s-projects.vercel.app`,
 creado sin `--prod`, con `DATABASE_URL` fijada **solo para ese despliegue** en compilación
@@ -367,6 +363,98 @@ acepta como valor.
 
 No hubo push, ni merge, ni despliegue de Production, ni borrado de la rama de Neon. La
 Fase D no ha empezado.
+
+### La limpieza de las galerías repetidas (02/09/2026)
+
+**Qué se quitó, exactamente.** De `products.images` se eliminó **solo** la entrada cuyo
+texto era idéntico a `products.image` del mismo producto. Nada más: ni una fotografía
+distinta, ni un archivo de disco, ni un archivo de Vercel Blob. Una ruta que se parece
+—otro nombre, otra caja de mayúsculas— no se toca, y hay una prueba que lo fija.
+
+**Dónde está aplicado.** Solo en la rama Neon de desarrollo `catalogo-relacional-fase-b`.
+**Producción no se ha tocado**, y `app/data/products.ts` tampoco: las dos cosas siguen
+pendientes de decisión, y están explicadas al final de esta sección.
+
+**Conteos, antes y después, sobre los 313 productos:**
+
+| | Antes | Después |
+|---|---:|---:|
+| Productos con galería | 64 | 6 |
+| Fotografías en las galerías | 78 | 14 |
+| Galerías que repiten la principal | 64 | **0** |
+| Galerías vacías (`[]`, estado inválido) | 0 | **0** |
+| Diferencias de la comparación `shadow` | 128 | **0** |
+
+Los 64 se reparten en **58** cuya galería era *solo* la repetición —que quedan con
+`images = null`, no con una lista vacía— y **6** que además tenían fotografías reales, las
+14 que se conservan.
+
+**Los dos casos, comprobados uno a uno tras escribir:**
+
+| Producto | Principal | Galería después |
+|---|---|---|
+| `ECO-CAT-0059` | `…/bronce/eco-exterior-002.webp` | `null` |
+| `ECO-IND-0042` | `…/alto_montaje/eco-industrial-001.webp` | `["…/alto_montaje/eco-industrial-002.webp"]` |
+
+En los 313 productos, `images @> to_jsonb(image)` da **0**.
+
+**Cómo se ejecutó.** `npm run catalogo:galerias` tiene tres modos y **todos los que
+escriben exigen el guardián de rama**, que ya rechaza cualquier endpoint que no sea el de
+la rama aislada y rechaza expresamente el de Producción:
+
+```bash
+npm run catalogo:galerias                       # simula: no escribe nada
+npm run catalogo:galerias -- --aplicar <respaldo.json>
+npm run catalogo:galerias -- --restaurar <respaldo.json>
+```
+
+La escritura va en **una sola transacción**. Dentro de ella se cuentan las filas escritas
+y se vuelve a leer la tabla entera: si las filas no son exactamente **64**, o si queda
+aunque sea un producto sin limpiar, hace `ROLLBACK` y no confirma nada. La simulación
+previa dio 64 antes de escribir.
+
+**Mecanismo exacto de recuperación.** Antes de abrir la transacción se escribió
+`docs/respaldos/2026-09-02-galerias-duplicadas-desarrollo.json`, con una entrada por
+producto: `id`, `referencia`, `imagen` principal, `imagesOriginal` e `imagesNuevo`. No
+lleva ningún campo del proveedor —ni código, ni marca, ni serie, ni nombre, ni
+descripción, ni precios—. Para deshacer la corrección:
+
+```bash
+npm run catalogo:galerias -- --restaurar docs/respaldos/2026-09-02-galerias-duplicadas-desarrollo.json
+```
+
+Reescribe `imagesOriginal` en los 64 productos, en una transacción, y hace `ROLLBACK` si
+el respaldo no cuadra con la base. El respaldo **está versionado en el repositorio** a
+propósito: si viviera fuera, una corrección reversible sobre el papel dejaría de serlo en
+cuanto se perdiera el archivo. Contiene rutas internas de imagen, que ya están en el
+repositorio desde siempre dentro de `app/data/products.ts`, así que no expone nada nuevo.
+
+**Verificación tras la limpieza:**
+
+| Comprobación | Resultado |
+|---|---|
+| `catalogo:relacional:comparar` | **0 diferencias**, 313 comparados, 6 consultas, 0 escrituras, 1,2 s |
+| `catalogo:relacional:verificar` | `ok: true`, sin fallos |
+| `test:datos` | **378/378** (369 + 9 de la limpieza) |
+| `test:admin` | 196/196 |
+| `test:proveedores` | 3/3 |
+| `test:permisos` | correcto |
+| `catalogo:auditar` | 313 productos, 408 identificadores, **0** coincidencias |
+| `typecheck`, `lint`, `build` | limpios |
+| Playwright | **70/70** |
+
+**Dos cosas quedan pendientes de tu decisión, y conviene no darlas por hechas:**
+
+1. **Producción sigue con las galerías repetidas.** La corrección está solo en la rama de
+   desarrollo. Aplicarla en Producción cambia lo que ve el visitante en cuanto caduque la
+   caché del catálogo, y el guardián de rama la rechaza por diseño, así que haría falta un
+   camino aparte y una autorización explícita.
+2. **`app/data/products.ts` conserva las repeticiones**, y es una trampa real: `images`
+   está en `CATALOG_COLUMNS`, de modo que un `npm run catalogo:importar` volvería a
+   escribirlas y **desharía la limpieza sin que nadie se entere**. Limpiarlo obliga además
+   a regenerar `tests/fixtures/catalog-baseline.json`, que es justamente la huella
+   congelada que existe para detectar cambios en ese archivo; regenerarla es una decisión
+   deliberada, no un trámite.
 
 ### Correcciones post-revisión aplicadas el 02/09/2026
 

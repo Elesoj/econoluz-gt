@@ -1023,13 +1023,18 @@ privado y la verificación campo a campo confirma que nunca aparece en `public_p
 El rol público no puede leer ninguna de las ocho tablas nuevas y sí puede leer la
 proyección.
 
-**La Fase C se ejecutó el 02/09/2026 y quedó bloqueada por una diferencia.** El modo
-`shadow` está implementado y comprobado contra Neon y contra un Preview real, ya borrado:
-el visitante recibió siempre el resultado `legacy`. De 313 productos comparados quedan
-**128 diferencias, todas de una sola causa**: los 64 productos con galería repiten la foto
-principal como primera miniatura y el importador relacional quita la repetida. Ninguna
-otra dimensión difiere. Resolverlo es **decisión del dueño** —limpiar el dato, reproducir
-la repetición o aceptar la divergencia— y está detallado en `docs/CONTINUAR-PANEL.md`.
+**La Fase C se ejecutó el 02/09/2026 y alcanzó paridad.** El modo `shadow` está
+implementado y comprobado contra Neon y contra un Preview real, ya borrado: el visitante
+recibió siempre el resultado `legacy`. La comparación de los 313 productos arrojó
+**128 diferencias, todas de una sola causa** —los 64 productos con galería repetían su
+foto principal como primera miniatura— y **el dueño autorizó limpiar el dato antiguo**.
+Quitada esa repetición en la rama de desarrollo, la comparación quedó en **0 diferencias**.
+La corrección es reversible desde `docs/respaldos/`; el detalle está en
+`docs/CONTINUAR-PANEL.md`.
+
+**Dos cosas siguen pendientes de decisión del dueño:** Producción conserva las galerías
+repetidas, y `app/data/products.ts` también —lo segundo importa porque `images` está en
+`CATALOG_COLUMNS` y un `catalogo:importar` desharía la limpieza en silencio—.
 
 **Existe una segunda llave para la Fase D:** `FASE_D_AUTORIZADA`, en
 `app/data/catalogo/seleccion.ts`, vale `false`. Mientras lo valga, poner `modelo_catalogo`
