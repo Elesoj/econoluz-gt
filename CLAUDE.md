@@ -678,7 +678,7 @@ npm run lint
 npx playwright test        # batería completa
 
 npm run db:migrar          # aplica las migraciones de db/ que falten, repetible
-npm run catalogo:importar  # sube los productos del código a Neon y verifica el resultado
+npm run catalogo:importar  # SIMULA la subida de los productos; -- --aplicar la escribe
 npm run catalogo:verificar # ensayo de la migración, sin tocar la base de datos
 npm run catalogo:auditar   # busca nombres de proveedor en el catálogo público
 npm run test:proveedores   # frontera pública neutra e información interna intacta
@@ -691,7 +691,7 @@ npm run admin:crear        # da de alta un administrador o le cambia la contrase
 
 npm run test:datos         # capa de datos, ajustes e identidad (167)
 npm run test:permisos      # comprueba contra Neon que el rol público solo lee la proyección
-npm run catalogo:reproyectar # reconstruye entera la proyección pública, de forma idempotente
+npm run catalogo:reproyectar # SIMULA reconstruir la proyección pública; -- --aplicar la escribe
 
 npm run identidad:adc       # valida ADC contra el proyecto Firebase configurado
 npm run identidad:federacion # valida la identidad federada de Vercel de extremo a extremo
@@ -1038,13 +1038,20 @@ expresa: la rama de desarrollo, **la rama de Producción** y `app/data/products.
 habría deshecho la limpieza en silencio. En Producción se reconstruyó además la proyección
 pública, que no se mantiene sola, tras comprobar que solo cambiaban esas 64 galerías.
 
+**Los comandos que reescriben el catálogo entero simulan por defecto** desde el
+endurecimiento previo a la Fase D: `catalogo:importar` y `catalogo:reproyectar` no escriben
+sin `-- --aplicar`, van en transacción y revierten si el conteo no cuadra. Antes escribían
+por el mero hecho de ejecutarlos y sobre cualquier base.
+
 **Producción se escribe por un camino aparte, no relajando el guardián.**
-`catalogo:galerias -- --aplicar-produccion` exige a la vez estar conectado al endpoint de
-Producción y la confirmación exacta en `CONFIRMAR_PRODUCCION`; sin las dos, se niega. La
-vuelta atrás usa el mismo camino y los respaldos de `docs/respaldos/`.
+Escribir en Producción exige **tres** llaves a la vez: estar conectado a su endpoint,
+`PERMITIR_ESCRITURA_PRODUCCION=true` y la palabra literal en `CONFIRMAR_PRODUCCION`. La
+decisión vive en `scripts/guarda-neon.mjs` y la comparten los tres comandos que pueden
+escribir. La vuelta atrás usa el mismo camino y los respaldos de `docs/respaldos/`.
 
 **Existe una segunda llave para la Fase D:** `FASE_D_AUTORIZADA`, en
-`app/data/catalogo/seleccion.ts`, vale `false`. Mientras lo valga, poner `modelo_catalogo`
+`app/data/catalogo/seleccion.ts`, vale `false`. Se lee de la variable de entorno del mismo
+nombre y **solo la cadena exacta `"true"` la abre**. Mientras lo valga, poner `modelo_catalogo`
 en `relational_v2` **no activa nada**: degrada a `shadow` y se sigue sirviendo `legacy`.
 Activar la Fase D exigirá cambiar código y desplegar. La vuelta atrás no depende de esa
 llave: la bandera en `legacy` basta, sin desplegar.

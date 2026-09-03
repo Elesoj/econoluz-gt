@@ -260,6 +260,83 @@ estado `passed` y ningún caso fallido; no se repitió.
 `modelo_catalogo` continúa en `legacy`. No se activó `relational_v2`, no empezó la Fase C
 ni la D y no hubo push, merge ni despliegue. La siguiente fase necesita autorización nueva.
 
+### Endurecimiento previo a la Fase D (02/09/2026)
+
+Una revisión independiente de la Fase C encontró cinco cosas que arreglar antes de que la
+Fase D sea segura. **No activa nada**: `FASE_D_AUTORIZADA` sigue cerrada, `modelo_catalogo`
+no se tocó y no hubo escrituras en Neon.
+
+**1. El conteo de consultas del registro era una constante.** `consultasRelacionales`
+publicaba el número `6` pasara lo que pasara, así que el log habría seguido diciendo 6
+aunque volviera el N+1 —justo lo que ese campo existe para delatar—. Ahora se cuenta
+envolviendo el ejecutor, y el lector se puede inyectar para medirlo desde una prueba que
+hace emitir nueve consultas y exige leer nueve. **Esto invalida una frase del informe de
+cierre de la Fase C**, que citaba esa línea de los registros del Preview como evidencia de
+las seis consultas: era circular. La propiedad sigue siendo cierta —está medida en las
+pruebas y en `catalogo:relacional:comparar`—, pero la evidencia buena es esa, no el log.
+
+**2. La llave de la Fase D exige ahora el booleano `true` exacto.** Se lee de la variable
+de entorno `FASE_D_AUTORIZADA` y solo la cadena `"true"` la abre: `"1"`, `"si"`, `"True"`
+o un objeto vacío son verdaderos en JavaScript y ya no valen. El selector comprueba
+`=== true` en vez de la veracidad, porque el módulo también se consume desde scripts
+`.mjs` donde los tipos no protegen. La vuelta atrás no depende de esta variable: la
+bandera de la base sola basta y no necesita despliegue.
+
+**3. La cadena de respaldo.** En `relational_v2`, un fallo del modelo nuevo caía
+directamente al catálogo escrito en el código. Ahora intenta primero el lector `legacy` y
+solo si ese también falla usa el estático; cada degradación se registra con la clase del
+error, nunca con su texto. Además el camino relacional quedó **cableado a la lectura de
+verdad** (`leerCatalogoPublicoRelacional`): si la Fase D se limitara a abrir la llave sin
+conectarlo, el sitio caería al catálogo del código sin que nadie lo esperase.
+
+> **Pendiente para la Fase D:** esa lectura relacional **no tiene caché**. La `legacy` se
+> apoya en `unstable_cache` con la etiqueta `CATALOG_CACHE_TAG`, que el panel invalida al
+> guardar. Decidir la caché del camino nuevo, y quién la invalida, es trabajo de la Fase D.
+
+**4. El importador y la reproyección estaban sin guardián.** `catalogo:importar` y
+`catalogo:reproyectar` escribían por el mero hecho de ejecutarlos, sobre lo que hubiera al
+otro lado de `DATABASE_URL` —Producción incluida—, y el importador además **sin
+transacción**. Con `images` dentro de `CATALOG_COLUMNS`, una ejecución distraída deshacía
+la limpieza de galerías. Ahora los dos:
+
+- **simulan por defecto**, y la simulación hace el trabajo entero dentro de una transacción
+  que se revierte, para comprobar de verdad que las filas entran en vez de suponerlo;
+- escriben solo con `-- --aplicar`, que pasa por el guardián de rama de desarrollo;
+- revierten si el conteo no cuadra.
+
+```bash
+npm run catalogo:importar                          # simula
+npm run catalogo:importar -- --aplicar             # escribe en desarrollo
+npm run catalogo:reproyectar                       # simula
+npm run catalogo:reproyectar -- --aplicar          # escribe en desarrollo
+```
+
+**Escribir en Producción exige ahora tres llaves a la vez**, y ninguna sola basta: estar
+conectado al endpoint de Producción, `PERMITIR_ESCRITURA_PRODUCCION=true` y
+`CONFIRMAR_PRODUCCION` con la palabra literal de esa operación —`importar-en-produccion`,
+`reproyectar-en-produccion` o `limpiar-galerias-produccion`—. La decisión vive en
+`scripts/guarda-neon.mjs`, compartida por los tres comandos: una sola implementación que
+endurecer, y no tres que se van separando. `limpiar-galerias` pasó a usarla, así que **su
+comando de restauración necesita también la bandera**:
+
+```bash
+PERMITIR_ESCRITURA_PRODUCCION=true CONFIRMAR_PRODUCCION=limpiar-galerias-produccion \
+npm run catalogo:galerias -- --restaurar docs/respaldos/2026-09-02-galerias-duplicadas-produccion.json
+```
+
+Una prueba guardiana comprueba que los dos scripts siguen importando `guarda-neon`,
+autorizando antes de escribir, comprobando el conteo y escribiendo en transacción. Se
+rompió a propósito quitando la autorización de `reproyectar-catalogo.mjs` y se la vio
+fallar antes de deshacer la rotura.
+
+**5. El comentario que mentía.** `ejecutarComparacion` decía «Nunca lanza», y sí lanza si
+falla el propio registro. Corregido: la garantía de que el visitante recibe `legacy` se
+sostiene en `servirSegunModelo`, no ahí.
+
+**Verificación del endurecimiento:** pruebas de catálogo **259/259**, `test:datos`
+**417/417**, `test:admin` 196/196, `test:proveedores` 3/3, `typecheck` y `lint` limpios.
+No se repitieron build ni Playwright porque no se tocó ninguna interfaz.
+
 ### Subproyecto 3: Fase C ejecutada, y bloqueada por una diferencia (02/09/2026)
 
 El modo `shadow` está implementado, probado y comprobado contra Neon y contra un Preview
