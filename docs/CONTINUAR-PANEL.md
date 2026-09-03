@@ -101,10 +101,12 @@ orden y sin desplegar. Todo el detalle, la evidencia y el procedimiento exacto d
 reversión están en la sección **«Fase D ejecutada»**, al final de este documento.
 Léela antes de tocar el catálogo.
 
-El **subproyecto 5, carrito persistente, está implementado y verificado en Desarrollo**
-(03/09/2026) en la rama `feat/carrito-persistente`, **sin fusionar ni desplegar**. Su
-detalle está en la sección «Subproyecto 5», al final de este documento; incluye un fallo de
-Playwright que **no es suyo** y que espera una decisión del dueño.
+El **subproyecto 5, carrito persistente, está implementado, revisado y verificado en
+Desarrollo** (03/09/2026) en la rama `feat/carrito-persistente`, **sin fusionar ni
+desplegar**. La revisión independiente encontró y corrigió cuatro defectos —dos de ellos
+graves— y resolvió el fallo de Playwright, que era una prueba obsoleta de la Fase D. El
+detalle está en las secciones «Subproyecto 5» y «Revisión independiente», al final de este
+documento.
 
 Lo siguiente sería el **subproyecto 6, checkout y pedidos**. El **subproyecto 11 —retirar
 el modelo antiguo— no ha empezado y no debe empezar** sin autorización expresa del dueño:
@@ -2180,7 +2182,12 @@ solo el `select … for update`, el resultado sigue siendo 34, porque el `upsert
 concurrentes revientan contra `cart_items_uno_por_producto`. Es decir: el `for update` es
 explícito y no es el único guardián, y la restricción única es la última red.
 
-### Un fallo de Playwright que **no** es de este subproyecto
+### Un fallo de Playwright que **no** era de este subproyecto (resuelto)
+
+> **Resuelto en la revisión del 03/09/2026**, más abajo. Se conserva el diagnóstico porque
+> explica la causa; el resultado hoy es **70/70 en los dos modelos**.
+
+### Un fallo de Playwright — diagnóstico original
 
 `tests/catalog-production-boundary.spec.ts:449` falla **cuando el catálogo lo sirve
 `relational_v2`**, y pasa cuando lo sirve `legacy`. Se comprobó alternando únicamente
@@ -2224,3 +2231,89 @@ Ni checkout, ni pedidos, ni pagos, ni envíos, ni FEL. No se usó ni se expuso `
 escribió en Neon Producción, no se tocó Vercel, no se configuró Firebase de Producción y no
 hubo push, merge ni despliegue. El acceso de clientes **sigue sin enlazarse** en la
 navegación.
+
+### Revisión independiente del subproyecto 5 (03/09/2026)
+
+Se revisó `git diff 80410e5..HEAD` completo. **Cuatro hallazgos, los cuatro corregidos**, y
+el fallo de Playwright dejó de estar pendiente: era una prueba obsoleta y se arregló la
+causa.
+
+**1. Grave — un reintento retrasado volvía a sumar las cantidades.** `carts` recordaba
+**solo el último** token de fusión. El navegador conserva su token hasta que la fusión le
+consta confirmada, así que un reintento normal repite el mismo y se reconoce; pero una
+petición duplicada que llega **tarde** —el reintento de un proxy, una pestaña colgada, una
+respuesta perdida seguida de otro inicio de sesión— trae un token *anterior*. Con un solo
+hueco ese token ya no coincidía y la fusión se aplicaba por segunda vez: **el cliente se
+encontraba el doble de todo sin haber tocado nada.**
+
+La columna pasa a `fusion_tokens jsonb`, una lista acotada de los últimos tokens aplicados.
+Sigue siendo el diseño de dos tablas y sigue sin guardar nada más del cliente. Como la
+`011` todavía no está en Producción, se corrigió la migración en vez de añadir una `012`
+que parchee algo que nunca llegó a publicarse; en la rama de desarrollo se retiró y se
+volvió a aplicar. Hay una comprobación nueva contra la base real, y **se vio fallar**
+volviendo al comportamiento anterior.
+
+**2. Grave — la fusión no se disparaba al iniciar sesión en la misma pestaña.** La
+comprobación de sesión es una por pestaña para no cobrarle al visitante anónimo una
+petición por navegación, pero **iniciar sesión no remonta el layout**: Next conserva el
+árbol en una navegación de cliente. El sincronizador no se enteraba, y quien acababa de
+entrar seguía viendo su carrito local hasta la siguiente recarga —justo lo que esta
+función existe para evitar—. La pantalla de acceso pide ahora la comprobación en cuanto la
+sesión queda abierta. La decisión —cuándo preguntar, cuándo marcar la pestaña y qué hacer
+si algo falla— vive en `carritoSincronizacion`, con cinco pruebas propias; un fallo ya no
+deja la pestaña marcada, porque entonces el reintento no llegaría nunca.
+
+**3. Media — la respuesta de un carrito podía quedarse en una caché intermedia.** Next
+marca como dinámicas las rutas que leen la cookie, pero eso es una consecuencia del
+framework, no una promesa escrita. Ahora la cabecera `private, no-store` se pone a mano y
+**se comprueba de verdad**: para poder hacerlo, la forma del sobre —cabeceras, tope del
+cuerpo y origen— se separó en `respuesta.ts`, que no arrastra `server-only`. Antes solo se
+inspeccionaba el texto del archivo. De paso, el tope del cuerpo pasa a medirse en bytes
+reales: `String.length` cuenta unidades UTF-16 y un cuerpo lleno de acentos pasaba de largo
+un tope que dice llamarse de bytes.
+
+**4. Baja — había una segunda forma de convertir dinero.** El precio se convertía a
+centavos a mano en vez de con `aCentavos`. Hoy da igual, porque ese valor solo decide si
+**hay** precio, pero dos conversiones de dinero son dos que algún día no coinciden.
+
+**El fallo de Playwright era una prueba obsoleta, no una regresión ni una fuga.**
+`catalog-production-boundary` eximía las colisiones aprobadas comparando el **JSON completo**
+de `toPublicProduct`, construido desde `app/data/products.ts`. Desde la Fase D la carga sale
+de `public_products`, donde `technical_specs` es `jsonb` y **devuelve sus claves en su
+propio orden**: mismos valores, distinta serialización, y la exención dejaba de encajar, de
+modo que los tres tokens aprobados —`Spotlight COB`, `YS-I`, `YS-L`— se reportaban como
+hallazgos. Es la misma trampa del `jsonb` ya anotada más arriba en este documento.
+
+Ahora se exime el par `"campo":valor` del campo que aprueba la colisión, que no depende del
+orden de las claves hermanas. **La exención queda más estrecha que antes** —un campo
+concreto en vez de todos los del producto— y se exige además que el valor declarado siga
+estando ahí: si alguien lo cambia, la prueba falla en vez de quedarse sin exención. La
+prueba que vigila que no se exima la colisión en el producto, campo o artefacto equivocado
+sigue pasando.
+
+**Lo que se revisó y estaba bien**, para que nadie lo repita: la migración crea
+exclusivamente las dos tablas, es aditiva y repetible, y el rol público las tiene denegadas
+línea a línea; el `user_id` sale siempre de `leerClienteActual()` y **ninguna sentencia deja
+de acotarse por él**; no hay IDOR ni por descuido; no se introduce `stock`; los errores son
+códigos cerrados y del fallo solo se registra la clase; el carrito anónimo sigue viviendo
+solo en `localStorage`; el precio se resuelve siempre en el servidor; y el enganche con la
+sesión no vuelve dinámicas las páginas prerrenderizadas.
+
+**Verificación final, tras las correcciones:**
+
+| Comprobación | Resultado |
+|---|---|
+| Suites del carrito (7 archivos) | **96/96** |
+| `test:datos` | **542/542** |
+| `test:admin` | 196/196 |
+| `test:proveedores` | 3/3 |
+| `test:permisos` contra desarrollo | correcto: 24 tablas denegadas, `public_products` legible |
+| `carrito:verificar` contra Neon de desarrollo | **15/15** |
+| `typecheck` y `lint` | limpios, sin avisos |
+| `build` | correcto; `/catalogo`, `/carrito` y `/asesoria` **siguen estáticas** |
+| Playwright con `relational_v2` | **70/70** |
+| Playwright con `legacy` | **70/70** |
+
+Producción no recibió ninguna escritura: sigue con 10 migraciones, 23 tablas y **sin las
+dos del carrito**. No hubo push, ni merge, ni despliegue, ni cambios en Vercel ni en
+Firebase de Producción.
