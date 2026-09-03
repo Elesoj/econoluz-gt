@@ -609,6 +609,8 @@ frontend/
     007_app_settings.sql          configuración persistente; guarda `modelo_catalogo`
     008_audit_log.sql             quién cambió qué, con el antes y el después
     009_identidad_clientes.sql    clientes, direcciones, consentimientos y eventos de acceso
+    010_catalogo_relacional.sql   las ocho tablas del nucleo relacional de productos
+    011_carrito.sql               carrito del cliente con sesion: carts y cart_items
   scripts/                        utilidades de línea de comandos (ver "Comandos")
   docs/CONTINUAR-PANEL.md         hoja de traspaso: qué falta y cómo hacerlo
   docs/OPERACION-ROL-PUBLICO.md   crear, rotar y verificar la credencial del rol público
@@ -709,6 +711,8 @@ npm run catalogo:relacional:importar    # la escribe
 #   CONFIRMAR_PRODUCCION=modelo-catalogo-en-produccion
 #   NEON_ENDPOINT_PRODUCCION=ep-misty-sun-avmcbgly.c-11.us-east-1.aws.neon.tech
 npm run catalogo:relacional:modelo -- --poner legacy --produccion
+
+npm run carrito:verificar   # comprueba el carrito contra una base de verdad; se niega en Produccion
 
 npm run identidad:adc       # valida ADC contra el proyecto Firebase configurado
 npm run identidad:federacion # valida la identidad federada de Vercel de extremo a extremo
@@ -1108,6 +1112,33 @@ relacional depende del rol público, las variables de Vercel y las baterías— 
 
 **La retirada del modelo antiguo es el subproyecto 11 y no ha empezado.** Es justo lo que
 hoy hace posible la reversión, así que no se toca sin autorización expresa del dueño.
+
+### El subproyecto 5, carrito persistente, está en su rama (03/09/2026)
+
+Implementado y verificado en `feat/carrito-persistente`, **sin fusionar, sin publicar y sin
+desplegar**. Producción no recibió ninguna escritura.
+
+El carrito del visitante anónimo **no cambia**: sigue viviendo solo en `localStorage`. Lo
+nuevo es que el del cliente con sesión vive en Neon y sobrevive al dispositivo. La migración
+`011` crea **dos tablas y ni una más** —`carts` y `cart_items`—, que guardan qué y cuánto:
+ni precios, ni nombres, ni imágenes, ni datos del proveedor, ni existencias. El rol público
+las tiene denegadas de forma explícita.
+
+Al iniciar sesión el servidor bloquea el carrito, suma, recorta a 999, descarta lo que ya no
+se puede comprar y confirma en una transacción; el carrito anónimo se borra **solo después**
+del éxito, y repetir la fusión con el mismo token no vuelve a sumar. Se comprobó contra una
+base de verdad, incluidas dos fusiones concurrentes y la reversión completa.
+
+**Un detalle que conviene no deshacer:** el enganche con la sesión es **cliente**, no
+servidor. Leer la cookie en el layout raíz volvería dinámicas las páginas que hoy se
+prerrenderizan y perderíamos la caché del catálogo.
+
+Queda **pendiente de decisión del dueño** un fallo de `catalog-production-boundary.spec.ts`
+que **no es de este subproyecto**: aparece cuando el catálogo lo sirve `relational_v2` y
+desaparece con `legacy`. No es una fuga —`catalogo:auditar` sigue dando 0 coincidencias—,
+sino que la exención de colisiones aprobadas de esa prueba se construye desde
+`app/data/products.ts` y no encaja con la carga que sale de `public_products`. El detalle
+está en `docs/CONTINUAR-PANEL.md`.
 
 **En paralelo, y sin código de por medio:** contratar la pasarela de pago y el
 certificador FEL, redactar los textos legales de venta en línea y —lo más lento— fijar

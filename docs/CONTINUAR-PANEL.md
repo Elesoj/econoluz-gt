@@ -101,9 +101,14 @@ orden y sin desplegar. Todo el detalle, la evidencia y el procedimiento exacto d
 reversión están en la sección **«Fase D ejecutada»**, al final de este documento.
 Léela antes de tocar el catálogo.
 
-Lo siguiente en la hoja de ruta es el **subproyecto 5, carrito persistente**. El
-**subproyecto 11 —retirar el modelo antiguo— no ha empezado y no debe empezar** sin
-autorización expresa del dueño: es justo lo que hoy hace posible la reversión.
+El **subproyecto 5, carrito persistente, está implementado y verificado en Desarrollo**
+(03/09/2026) en la rama `feat/carrito-persistente`, **sin fusionar ni desplegar**. Su
+detalle está en la sección «Subproyecto 5», al final de este documento; incluye un fallo de
+Playwright que **no es suyo** y que espera una decisión del dueño.
+
+Lo siguiente sería el **subproyecto 6, checkout y pedidos**. El **subproyecto 11 —retirar
+el modelo antiguo— no ha empezado y no debe empezar** sin autorización expresa del dueño:
+es justo lo que hoy hace posible la reversión.
 
 Dos cosas siguen bloqueadas por decisiones de fuera del código: los **consentimientos**
 (faltan los textos legales y sus versiones) y el **acceso de clientes**, cuyas variables
@@ -2068,3 +2073,154 @@ No se borró el modelo antiguo, ni ramas, ni worktrees, ni datos históricos. **
 subproyecto 11 —la retirada de `products.stock`, `disponibilidad.server.ts`, el aviso del
 carrito y `app/data/products.ts`— no ha empezado** y sigue necesitando autorización
 expresa del dueño en su momento.
+
+---
+
+## Subproyecto 5: carrito persistente, implementado en Desarrollo (03/09/2026)
+
+Vive en `feat/carrito-persistente`, worktree `.worktrees/carrito-persistente`, partiendo de
+`80410e5`. El plan es `docs/superpowers/plans/2026-09-03-carrito-persistente.md`.
+**No se ha fusionado, ni publicado, ni desplegado, y Producción no recibió ni una
+escritura.**
+
+### Qué hace
+
+El carrito del **visitante anónimo no cambia**: sigue viviendo solo en `localStorage`, con
+el mismo motor, la misma página y el mismo aspecto. Lo nuevo es que el carrito de un
+cliente **con sesión** vive en Neon y sobrevive al dispositivo.
+
+Al iniciar sesión, el navegador manda sus referencias y cantidades; el servidor bloquea el
+carrito del cliente, suma, recorta cada línea a 999, descarta lo que ya no se puede
+comprar, confirma todo en una transacción y devuelve el carrito **y los descartes**. El
+carrito anónimo se borra **solo después** de ese éxito.
+
+### La migración `011`
+
+Dos tablas y ni una más, las del diseño §5.4:
+
+- **`carts`** — `id`, `user_id` **único** con clave foránea a `users`, `fusion_token` y las
+  dos fechas. Que `user_id` sea único convierte «créalo si no existe» en un `on conflict` y
+  hace imposible que dos peticiones simultáneas creen dos carritos.
+- **`cart_items`** — `id`, `cart_id`, `product_id` hacia `products(id)`, `cantidad` entre 1
+  y 999, las dos fechas y **único `(cart_id, product_id)`**.
+
+**No guardan precios, nombres, imágenes, datos del proveedor ni existencias**, y hay una
+prueba que lo fija por lista de columnas prohibidas. El rol público las tiene denegadas con
+un `revoke` explícito por tabla: no basta con no concederle nada, porque una concesión
+futura por descuido pasaría inadvertida.
+
+`cart_items` apunta a la **clave interna** del producto, no a la referencia pública. La
+referencia es lo que habla el navegador; guardar los dos identificadores del mismo producto
+es guardarse la posibilidad de que un día no coincidan.
+
+### Cómo está montado
+
+| Pieza | Qué es |
+|---|---|
+| `app/tienda/carritoServidor.ts` | La fusión, pura: suma, tope, descartes con motivo e idempotencia por token |
+| `app/tienda/carritoContratos.ts` | Tipos, validadores y códigos de error, **reutilizables por el subproyecto 10** |
+| `app/tienda/carritoRepositorio.ts` | El SQL, con el ejecutor y el usuario inyectados |
+| `app/tienda/carrito.server.ts` | La conexión y la transacción de verdad |
+| `app/tienda/carritoSincronizacion.ts` | La política del navegador: reversión, borrado tras el éxito y fin de sesión |
+| `app/tienda/carritoRemoto.ts` | El transporte hacia la API, sin decisiones |
+| `app/tienda/SincronizarCarrito.tsx` | Lo engancha en el layout; no pinta nada |
+| `app/api/v1/carrito/*` | `GET` obtener · `DELETE` vaciar · `PUT`/`DELETE` línea · `POST` fusionar |
+
+**El catálogo entra por un puerto, no por una consulta incrustada.** La fusión recibe «dame
+estos productos» y devuelve qué descarta; hoy el puerto hace **una sola consulta** a
+`products` pidiendo `id`, `econoluz_reference`, `published` y `price_gtq`, ninguna columna
+del proveedor. Cuando el subproyecto 11 retire esa tabla se cambia el puerto y no la lógica.
+
+### Decisiones que conviene no deshacer sin leer esto
+
+**`SincronizarCarrito` es cliente, no servidor.** Leer la cookie de sesión en el layout raíz
+volvería dinámicas las páginas que hoy se prerrenderizan —catálogo, carrito y asesoría— y
+perderíamos su caché, que es justo lo que la Fase D verificó. El `build` confirma que las
+tres **siguen estáticas**. La sesión se pregunta desde el navegador **una vez por pestaña**:
+para el visitante anónimo es una sola respuesta 401 y nada más.
+
+**El 401 no es un fallo cualquiera.** Un fallo se reintenta; una sesión terminada obliga a
+volver al carrito anónimo y a no dejar nada privado en el navegador. Como **todavía no hay
+botón de cerrar sesión**, esta es hoy la única vía por la que eso ocurre, y funciona igual
+cuando la sesión caduca o se revoca desde otro dispositivo.
+
+**En modo remoto el store no escribe en `localStorage`**: el carrito ya no es de este
+dispositivo, sino de la cuenta.
+
+### La rama de Neon
+
+`carrito-persistente-dev` = **`br-bold-block-avbraewe`**, endpoint
+**`ep-patient-tree-av63ruxz`**, hija de Producción `main` (`br-flat-dew-avc2njed`,
+`ep-misty-sun-avmcbgly`). Comprobado antes de escribir nada: no es primaria, ni
+predeterminada, ni protegida, y su endpoint es distinto del de Producción. La `011` se
+simuló primero —`ROLLBACK` limpio— y después se aplicó solo ahí.
+
+### La verificación contra una base de verdad
+
+`npm run carrito:verificar` se niega a correr contra Producción, crea dos usuarios
+sintéticos, comprueba y los borra. **14 comprobaciones, 0 fallos:**
+
+| Comprobación | Resultado |
+|---|---|
+| La primera fusión crea el carrito | correcto |
+| Un token nuevo suma sobre lo guardado (2 + 3 = 5) | correcto |
+| Repetir el mismo token **no** vuelve a sumar | correcto |
+| La suma se recorta a 999 y la restricción la acepta | correcto |
+| Un producto inexistente se descarta y se informa | correcto |
+| El usuario A no ve nada del carrito de B | correcto |
+| A no puede borrar una línea del carrito de B ni por equivocación | correcto |
+| **Dos fusiones concurrentes suman las dos** (4 + 10 + 20 = 34) | correcto |
+| Una transacción deshecha no deja ni una línea escrita | correcto |
+| Las dos tablas no tienen columnas de precio, proveedor ni existencias | correcto |
+| No queda ningún usuario sintético | correcto |
+
+**La concurrencia está serializada por partida doble**, y se comprobó rompiéndola: quitando
+solo el `select … for update`, el resultado sigue siendo 34, porque el `upsert` de
+`asegurarCarrito` ya bloquea la fila del carrito; quitando **los dos**, las fusiones
+concurrentes revientan contra `cart_items_uno_por_producto`. Es decir: el `for update` es
+explícito y no es el único guardián, y la restricción única es la última red.
+
+### Un fallo de Playwright que **no** es de este subproyecto
+
+`tests/catalog-production-boundary.spec.ts:449` falla **cuando el catálogo lo sirve
+`relational_v2`**, y pasa cuando lo sirve `legacy`. Se comprobó alternando únicamente
+`FASE_D_AUTORIZADA` y reconstruyendo: **70/70 en `legacy`, 69/70 en `relational_v2`**. Esta
+rama no toca esa prueba ni el catálogo público —su único cambio en `app/data/` es un
+comentario—, así que el defecto es anterior.
+
+**Qué pasa exactamente.** La prueba exime las «colisiones aprobadas» —textos públicos
+legítimos que contienen cadenas que también aparecen en datos internos— comparando el
+**JSON exacto** de `toPublicProduct(producto)` construido desde `app/data/products.ts`. Con
+`relational_v2` la carga viene de `public_products` y **se serializa distinto**, así que la
+exención no encaja y los tres tokens aprobados —`Spotlight COB`, `YS-I`, `YS-L`— se
+reportan como hallazgos.
+
+**No es una fuga.** Los tres tokens están **también** en la carga construida con `legacy`,
+donde la exención sí los reconoce; y las comprobaciones independientes siguen limpias:
+`catalogo:auditar` da 313 productos, 408 identificadores y **0 coincidencias**, y
+`test:proveedores` pasa 3/3. Es muy probable que sea el orden de claves de `jsonb`, la misma
+trampa ya anotada más arriba en este documento.
+
+**Queda pendiente de decisión del dueño**, porque arreglarlo es tocar la prueba antifuga del
+catálogo y eso no pertenece a este subproyecto.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `test:datos` (incluye las **6 suites nuevas** del carrito) | **530/530** |
+| `test:admin` | 196/196 |
+| `test:proveedores` | 3/3 |
+| `test:permisos` contra la rama de desarrollo | correcto: **24 tablas denegadas**, `public_products` legible |
+| `typecheck` y `lint` | limpios, sin avisos |
+| `build` | correcto; `/catalogo`, `/carrito` y `/asesoria` **siguen estáticas** |
+| `carrito:verificar` contra Neon de desarrollo | 14/14 |
+| Playwright con `legacy` | **70/70** |
+| Playwright con `relational_v2` | 69/70, con el fallo anterior explicado arriba |
+
+### Lo que este subproyecto NO hizo
+
+Ni checkout, ni pedidos, ni pagos, ni envíos, ni FEL. No se usó ni se expuso `stock`. No se
+escribió en Neon Producción, no se tocó Vercel, no se configuró Firebase de Producción y no
+hubo push, merge ni despliegue. El acceso de clientes **sigue sin enlazarse** en la
+navegación.
