@@ -321,12 +321,19 @@ privilegiado hizo fallar la prueba. También quedaron fijadas por prueba la clav
 **Verificación local de esta preparación:** las 16 suites del catálogo pasan **277/277**;
 `test:datos`, **427/427**; `test:admin`, **196/196**; `test:proveedores`, **3/3**;
 `typecheck`, `lint` y `build`, correctos. No se ejecutó Playwright porque no cambió ningún
-comportamiento renderizado. `test:permisos` no pudo completarse de nuevo: este worktree y
-el entorno del proceso no tienen `DATABASE_URL_PUBLIC`, y la credencial heredada del
-worktree de fundamentos no autentica en el endpoint documentado de la rama relacional.
-El último resultado real de esa rama sigue siendo el de la Fase B —rol
-`econoluz_publico`, `public_products` legible y 22 tablas protegidas denegadas—, pero no se
-presenta como una comprobación fresca. No se ejecutó ningún comando de escritura en Neon.
+comportamiento renderizado.
+
+**Validación remota pública completada el 02/09/2026:** con la autenticación existente de
+`neonctl` se reconfirmó por nombre e identificador la rama
+`catalogo-relacional-fase-b` (`br-quiet-hat-avozt905`) y su endpoint de Desarrollo
+`ep-green-union-avi3x99e`. La cadena del rol ya existente `econoluz_publico` permaneció
+solo en una variable temporal de PowerShell y se asignó temporalmente a
+`DATABASE_URL_PUBLIC`. La única batería ejecutada fue `npm run test:permisos`: confirmó
+`current_user`, permitió `SELECT` sobre `public_products` y recibió permiso denegado en
+las **22 tablas protegidas**. La prueba y las comprobaciones previas fueron exclusivamente
+de lectura; no hubo escrituras en Neon. Al terminar se eliminó la variable del entorno y
+un escaneo de todos los archivos versionados y no ignorados encontró **cero** copias de la
+cadena. Producción no se consultó ni se modificó.
 
 **4. El importador y la reproyección estaban sin guardián.** `catalogo:importar` y
 `catalogo:reproyectar` escribían por el mero hecho de ejecutarlos, sobre lo que hubiera al
