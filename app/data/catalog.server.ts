@@ -82,10 +82,10 @@ export const getPublicCatalog = async (): Promise<PublicProduct[]> => {
     // puede alterar ni romper lo que se devuelve.
     return await servirSegunModelo(await obtenerModeloDeCatalogo(), {
       legacy: getCachedCatalog,
-      // El camino relacional pertenece a la Fase D. Hoy es inalcanzable —la llave
-      // `FASE_D_AUTORIZADA` está cerrada y `relational_v2` degrada a `shadow`— pero
-      // ya está cableado a la lectura de verdad: si la Fase D solo abriera la llave
-      // sin cablearlo, el sitio caería al catálogo del código sin que nadie lo espere.
+      // El camino relacional está activo en Producción desde la Fase D (02/09/2026):
+      // `FASE_D_AUTORIZADA` vale `true` y `modelo_catalogo` es `relational_v2`, así que
+      // esto es lo que sirve el catálogo. Volver a `legacy` es cambiar la bandera de la
+      // base, sin desplegar.
       relacional: leerCatalogoPublicoRelacional,
       comparar: compararCatalogoEnSombra,
       estatico: catalogFromCode,
