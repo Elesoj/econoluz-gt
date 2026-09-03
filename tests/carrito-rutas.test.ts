@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { estadoDelError } from "../app/tienda/carritoContratos";
+import { fallar, responder } from "../app/api/v1/carrito/respuesta";
 
 /**
  * Vigila las rutas del carrito por su **texto**.
@@ -39,8 +40,7 @@ test("todas las rutas del carrito corren en Node, no en edge", () => {
  * `usuarioDeLaSesion`, y esa función —y solo esa— consulta `leerClienteActual`.
  */
 test("el usuario sale siempre de la sesion verificada", () => {
-  const comun = readFileSync(join(RAIZ, "app", "api", "v1", "carrito", "comun.ts"), "utf8");
-  assert.match(comun, /leerClienteActual/);
+  assert.match(COMUN, /leerClienteActual/);
 
   for (const [nombre, fuente] of RUTAS) {
     assert.match(fuente, /usuarioDeLaSesion/, `${nombre} no pide la identidad de la sesion`);
@@ -52,7 +52,9 @@ test("el usuario sale siempre de la sesion verificada", () => {
   }
 });
 
-const COMUN = readFileSync(join(RAIZ, "app", "api", "v1", "carrito", "comun.ts"), "utf8");
+const COMUN =
+  readFileSync(join(RAIZ, "app", "api", "v1", "carrito", "comun.ts"), "utf8") +
+  readFileSync(join(RAIZ, "app", "api", "v1", "carrito", "respuesta.ts"), "utf8");
 
 test("sin sesion se responde 401, y esa decision vive en un solo sitio", () => {
   assert.match(COMUN, /"sin-sesion"/);
@@ -144,4 +146,27 @@ test("el servicio del carrito escribe siempre dentro de una transaccion", () => 
       `${operacion} tiene que ir dentro de escribir()`,
     );
   }
+});
+
+// --- La respuesta de un carrito es privada ------------------------------------------------
+
+/**
+ * El carrito de un cliente no puede quedarse en ninguna caché intermedia. Next marca como
+ * dinámicas las rutas que leen la cookie, pero eso es una consecuencia del framework, no
+ * una promesa escrita: si mañana una de estas rutas dejara de leer la sesión antes de
+ * responder, la cabecera desaparecería sin que nadie se enterase. Se pone a mano.
+ */
+test("toda respuesta del carrito prohibe cachearla y la marca como privada", async () => {
+  const respuesta = responder({ ok: true, carrito: { lineas: [] } });
+  const cabecera = respuesta.headers.get("cache-control") ?? "";
+
+  assert.match(cabecera, /private/);
+  assert.match(cabecera, /no-store/);
+});
+
+test("tambien los errores viajan sin cachear", async () => {
+  const respuesta = fallar("sin-sesion");
+
+  assert.equal(respuesta.status, 401);
+  assert.match(respuesta.headers.get("cache-control") ?? "", /no-store/);
 });
