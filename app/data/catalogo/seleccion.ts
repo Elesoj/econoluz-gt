@@ -52,6 +52,13 @@ export function modeloEfectivo(
   return modelo;
 }
 
+/** Registro estructurado; solo admite escalares, igual que el de la capa de datos. */
+export type RegistroDeSeleccion = (
+  nivel: "info" | "error",
+  suceso: string,
+  datos?: Record<string, string | number | boolean>,
+) => void;
+
 export type FuentesDeCatalogo<T> = {
   /** El camino probado. Es lo que recibe el visitante en `legacy` y en `shadow`. */
   legacy: () => Promise<T>;
@@ -59,7 +66,14 @@ export type FuentesDeCatalogo<T> = {
   relacional: () => Promise<T>;
   /** Lee el modelo relacional y compara. **No debe lanzar**; aun así se protege aquí. */
   comparar: () => Promise<void>;
+  /** El catálogo escrito en el código. Último recurso, nunca el primero. */
+  estatico: () => T;
+  registrar: RegistroDeSeleccion;
 };
+
+/** Del error solo su clase: el texto puede llevar el host, el rol o la contraseña. */
+const claseDeError = (error: unknown) =>
+  error instanceof Error ? error.constructor.name : "desconocida";
 
 export async function servirSegunModelo<T>(
   modelo: ModeloDeCatalogo,
@@ -68,7 +82,29 @@ export async function servirSegunModelo<T>(
 ): Promise<T> {
   const efectivo = modeloEfectivo(modelo, faseDAutorizada);
 
-  if (efectivo === "relational_v2") return fuentes.relacional();
+  if (efectivo === "relational_v2") {
+    // La cadena de respaldo, en orden de preferencia y sin saltarse escalones: el modelo
+    // nuevo, después el probado, y solo si los dos fallan el catálogo del código. Cada
+    // caída se registra, porque un respaldo silencioso es un respaldo que nadie arregla.
+    try {
+      return await fuentes.relacional();
+    } catch (error) {
+      fuentes.registrar("error", "catalogo-degradacion-relacional", {
+        causa: claseDeError(error),
+        sirviendo: "legacy",
+      });
+    }
+
+    try {
+      return await fuentes.legacy();
+    } catch (error) {
+      fuentes.registrar("error", "catalogo-degradacion-legacy", {
+        causa: claseDeError(error),
+        sirviendo: "estatico",
+      });
+      return fuentes.estatico();
+    }
+  }
 
   const resultado = await fuentes.legacy();
   if (efectivo === "legacy") return resultado;

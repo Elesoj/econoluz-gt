@@ -9,26 +9,105 @@ import {
   servirSegunModelo,
 } from "../app/data/catalogo/seleccion";
 
-function fuentesEspia(alComparar?: () => Promise<void>) {
+type Fallos = {
+  alComparar?: () => Promise<void>;
+  relacionalFalla?: boolean;
+  legacyFalla?: boolean;
+};
+
+function fuentesEspia(fallos: Fallos = {}) {
   const llamadas: string[] = [];
+  const registros: { nivel: string; suceso: string; datos: Record<string, unknown> }[] = [];
   return {
     llamadas,
+    registros,
     fuentes: {
       legacy: async () => {
         llamadas.push("legacy");
+        if (fallos.legacyFalla) throw new Error("legacy caido: password=secreta");
         return "catálogo-legacy";
       },
       relacional: async () => {
         llamadas.push("relacional");
+        if (fallos.relacionalFalla) {
+          throw new Error("relacional caido en ep-secreto.neon.tech");
+        }
         return "catálogo-relacional";
       },
       comparar: async () => {
         llamadas.push("comparar");
-        if (alComparar) await alComparar();
+        if (fallos.alComparar) await fallos.alComparar();
+      },
+      estatico: () => {
+        llamadas.push("estatico");
+        return "catálogo-estático";
+      },
+      registrar: (nivel: "info" | "error", suceso: string, datos = {}) => {
+        registros.push({ nivel, suceso, datos });
       },
     },
   };
 }
+
+// --- La cadena de respaldo de relational_v2 -------------------------------------------
+//
+// Se prueba con la llave abierta a propósito: es la única forma de cubrir el camino que
+// la Fase D usará. La constante `FASE_D_AUTORIZADA` sigue cerrada.
+
+test("relational_v2 correcto sirve el catálogo relacional y no toca los demás", async () => {
+  const { llamadas, registros, fuentes } = fuentesEspia();
+  assert.equal(await servirSegunModelo("relational_v2", fuentes, true), "catálogo-relacional");
+  assert.deepEqual(llamadas, ["relacional"]);
+  assert.deepEqual(registros, []);
+});
+
+test("si el relacional falla, se sirve legacy y queda constancia", async () => {
+  const { llamadas, registros, fuentes } = fuentesEspia({ relacionalFalla: true });
+  assert.equal(await servirSegunModelo("relational_v2", fuentes, true), "catálogo-legacy");
+  assert.deepEqual(llamadas, ["relacional", "legacy"]);
+
+  const aviso = registros.find((r) => r.suceso === "catalogo-degradacion-relacional");
+  assert.ok(aviso, "la degradación tiene que registrarse");
+  assert.equal(aviso?.nivel, "error");
+  assert.equal(registros.some((r) => r.suceso === "catalogo-degradacion-legacy"), false);
+});
+
+test("si fallan relacional y legacy, entra el catálogo estático", async () => {
+  const { llamadas, registros, fuentes } = fuentesEspia({
+    relacionalFalla: true,
+    legacyFalla: true,
+  });
+  assert.equal(await servirSegunModelo("relational_v2", fuentes, true), "catálogo-estático");
+  assert.deepEqual(llamadas, ["relacional", "legacy", "estatico"]);
+  assert.equal(registros.filter((r) => r.suceso.startsWith("catalogo-degradacion")).length, 2);
+});
+
+test("el estático es el último recurso, nunca el primero", async () => {
+  const { llamadas } = fuentesEspia();
+  assert.equal(llamadas.includes("estatico"), false);
+
+  const soloRelacionalFalla = fuentesEspia({ relacionalFalla: true });
+  await servirSegunModelo("relational_v2", soloRelacionalFalla.fuentes, true);
+  assert.equal(soloRelacionalFalla.llamadas.includes("estatico"), false);
+});
+
+test("las degradaciones no filtran el texto del error ni credenciales", async () => {
+  const { registros, fuentes } = fuentesEspia({ relacionalFalla: true, legacyFalla: true });
+  await servirSegunModelo("relational_v2", fuentes, true);
+  const serializado = JSON.stringify(registros);
+  assert.equal(serializado.includes("password"), false);
+  assert.equal(serializado.includes("secreta"), false);
+  assert.equal(serializado.includes("ep-secreto"), false);
+  assert.equal(serializado.includes("neon.tech"), false);
+});
+
+test("legacy y shadow no usan la cadena de respaldo: su fallo sube a quien llama", async () => {
+  for (const modelo of ["legacy", "shadow"] as const) {
+    const { llamadas, fuentes } = fuentesEspia({ legacyFalla: true });
+    await assert.rejects(() => servirSegunModelo(modelo, fuentes));
+    assert.equal(llamadas.includes("estatico"), false, `${modelo} no debe caer al estático`);
+  }
+});
 
 test("legacy no consulta el modelo relacional ni compara", async () => {
   const { llamadas, fuentes } = fuentesEspia();
@@ -43,8 +122,10 @@ test("shadow ejecuta ambos caminos pero devuelve exactamente legacy", async () =
 });
 
 test("un fallo de la comparación no rompe la respuesta legacy", async () => {
-  const { llamadas, fuentes } = fuentesEspia(async () => {
-    throw new Error("la lectura relacional falló");
+  const { llamadas, fuentes } = fuentesEspia({
+    alComparar: async () => {
+      throw new Error("la lectura relacional falló");
+    },
   });
   assert.equal(await servirSegunModelo("shadow", fuentes), "catálogo-legacy");
   assert.deepEqual(llamadas, ["legacy", "comparar"]);

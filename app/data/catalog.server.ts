@@ -1,9 +1,10 @@
 import "server-only";
 
-import { leer } from "../lib/datos";
+import { leer, registrar } from "../lib/datos";
 import { unstable_cache } from "next/cache";
 import { obtenerModeloDeCatalogo } from "../lib/ajustes.server";
 import { compararCatalogoEnSombra } from "./catalogo/comparacion.server";
+import { leerCatalogoPublicoRelacional } from "./catalogo/lectura.server";
 import { servirSegunModelo } from "./catalogo/seleccion";
 import { products } from "./products";
 import { CATALOG_COLUMNS, fromProductRow, type CatalogRow } from "./productRow";
@@ -82,12 +83,14 @@ export const getPublicCatalog = async (): Promise<PublicProduct[]> => {
     // puede alterar ni romper lo que se devuelve.
     return await servirSegunModelo(await obtenerModeloDeCatalogo(), {
       legacy: getCachedCatalog,
-      // El camino relacional pertenece a la Fase D y hoy es inalcanzable: la llave
-      // `FASE_D_AUTORIZADA` está cerrada y `relational_v2` degrada a `shadow`.
-      relacional: async () => {
-        throw new Error("la Fase D no está autorizada");
-      },
+      // El camino relacional pertenece a la Fase D. Hoy es inalcanzable —la llave
+      // `FASE_D_AUTORIZADA` está cerrada y `relational_v2` degrada a `shadow`— pero
+      // ya está cableado a la lectura de verdad: si la Fase D solo abriera la llave
+      // sin cablearlo, el sitio caería al catálogo del código sin que nadie lo espere.
+      relacional: leerCatalogoPublicoRelacional,
       comparar: compararCatalogoEnSombra,
+      estatico: catalogFromCode,
+      registrar,
     });
   } catch (error) {
     // Antes el catálogo era un archivo fijo y no podía fallar; ahora depende
