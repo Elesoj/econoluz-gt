@@ -1049,6 +1049,14 @@ Escribir en Producción exige **tres** llaves a la vez: estar conectado a su end
 decisión vive en `scripts/guarda-neon.mjs` y la comparten los tres comandos que pueden
 escribir. La vuelta atrás usa el mismo camino y los respaldos de `docs/respaldos/`.
 
+**El lector público está preparado, pero no activado.** `relational_v2` ya tiene un
+camino cacheado que usa exclusivamente `DATABASE_URL_PUBLIC`, hace una sola consulta a
+`public_products` con orden determinista y valida/traduce las filas a `PublicProduct`
+antes de cachearlas. Comparte la etiqueta `catalogo` y la caducidad de una hora con
+`legacy`; un rollback no invalida. El lector privado de seis consultas se conserva para
+administración, importación y `shadow`, y `supplier_code` sigue siendo exclusivamente
+privado. Preparar estas piezas no autoriza la Fase D ni cambia la fuente servida.
+
 **Existe una segunda llave para la Fase D:** `FASE_D_AUTORIZADA`, en
 `app/data/catalogo/seleccion.ts`, vale `false`. Se lee de la variable de entorno del mismo
 nombre y **solo la cadena exacta `"true"` la abre**. Mientras lo valga, poner `modelo_catalogo`

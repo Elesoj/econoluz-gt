@@ -289,9 +289,38 @@ error, nunca con su texto. Además el camino relacional quedó **cableado a la l
 verdad** (`leerCatalogoPublicoRelacional`): si la Fase D se limitara a abrir la llave sin
 conectarlo, el sitio caería al catálogo del código sin que nadie lo esperase.
 
-> **Pendiente para la Fase D:** esa lectura relacional **no tiene caché**. La `legacy` se
-> apoya en `unstable_cache` con la etiqueta `CATALOG_CACHE_TAG`, que el panel invalida al
-> guardar. Decidir la caché del camino nuevo, y quién la invalida, es trabajo de la Fase D.
+**3.b Preparación técnica del lector público, sin activar la Fase D.** El camino nuevo ya
+no reconstruye la respuesta pública mediante el lector privado de seis consultas. Ahora
+`leerCatalogoPublicoRelacional` usa exclusivamente `leerPublico` —y, por tanto,
+`DATABASE_URL_PUBLIC`— para emitir una sola consulta global, con columnas explícitas, a
+`public_products`, ordenada por `position`, `econoluz_reference` e `id`. La ausencia o el
+fallo de esa conexión sube al selector y conserva la cadena `relational_v2` → `legacy` →
+catálogo estático; nunca prueba la conexión privilegiada como sustituta.
+
+La fila se valida y se traduce campo a campo a `PublicProduct` antes de entrar en
+`unstable_cache`. Solo ese array saneado es cacheable: no lo son el ejecutor, la conexión,
+los errores ni los resultados de respaldo. Comparte la etiqueta `catalogo` y la caducidad
+de una hora con `legacy`; el panel sigue invalidándola con `updateTag` después de que la
+transacción relacional confirme. Una prueba de rollback se rompió deliberadamente
+moviendo la invalidación a `finally`, falló y se restauró, igual que la prueba de etiqueta
+falló al sustituir temporalmente `catalogo` por otra etiqueta.
+
+El lector privado completo sigue emitiendo seis consultas y permanece reservado a
+administración, importación y `shadow`; la búsqueda por `supplier_code` sigue usando
+`product_private_data` con el ejecutor privado y no entra en ninguna caché pública.
+`FASE_D_AUTORIZADA=false` queda explícito en `.env.example` y la llave sigue cerrada en el
+código. Esta preparación no cambia `modelo_catalogo`, no escribe en Neon y no comienza la
+Fase D.
+
+**Verificación local de esta preparación:** las 16 suites del catálogo pasan **276/276**;
+`test:datos`, **425/425**; `test:admin`, **196/196**; `test:proveedores`, **3/3**;
+`typecheck`, `lint` y `build`, correctos. No se ejecutó Playwright porque no cambió ningún
+comportamiento renderizado. `test:permisos` no pudo completarse de nuevo: este worktree y
+el entorno del proceso no tienen `DATABASE_URL_PUBLIC`, y la credencial heredada del
+worktree de fundamentos no autentica en el endpoint documentado de la rama relacional.
+El último resultado real de esa rama sigue siendo el de la Fase B —rol
+`econoluz_publico`, `public_products` legible y 22 tablas protegidas denegadas—, pero no se
+presenta como una comprobación fresca. No se ejecutó ningún comando de escritura en Neon.
 
 **4. El importador y la reproyección estaban sin guardián.** `catalogo:importar` y
 `catalogo:reproyectar` escribían por el mero hecho de ejecutarlos, sobre lo que hubiera al
