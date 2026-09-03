@@ -319,7 +319,7 @@ privilegiado hizo fallar la prueba. También quedaron fijadas por prueba la clav
 `catalogo-publico-relacional`, la etiqueta `catalogo` y la caducidad de 3600 segundos.
 
 **Verificación local de esta preparación:** las 16 suites del catálogo pasan **277/277**;
-`test:datos`, **426/426**; `test:admin`, **196/196**; `test:proveedores`, **3/3**;
+`test:datos`, **427/427**; `test:admin`, **196/196**; `test:proveedores`, **3/3**;
 `typecheck`, `lint` y `build`, correctos. No se ejecutó Playwright porque no cambió ningún
 comportamiento renderizado. `test:permisos` no pudo completarse de nuevo: este worktree y
 el entorno del proceso no tienen `DATABASE_URL_PUBLIC`, y la credencial heredada del
