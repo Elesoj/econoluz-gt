@@ -320,9 +320,49 @@ type ApprovedSerializedCollisionContext = {
   serialized: string;
 };
 
+/**
+ * Serializa el **par `"campo":valor`** del campo público que aprueba la colisión: de
+ * `technicalSpecs.specialFeatures[11]` sale `"specialFeatures":[…lista entera…]`, y de
+ * `publicDescription` sale `"publicDescription":"…"`.
+ *
+ * Un par no depende del orden de las claves hermanas, que es justo lo que rompía la
+ * exención anterior, y conserva el ámbito del campo: el valor aprobado sigue sin eximirse
+ * si aparece en otro campo o suelto.
+ *
+ * Se exige además que el valor declarado en la lista **esté de verdad ahí dentro**: si
+ * alguien renombra el campo o cambia el texto, la prueba falla en vez de quedarse sin
+ * exención y empezar a reportar la colisión aprobada como si fuera una fuga.
+ */
+const serializeApprovedFieldPair = (
+  publicProduct: unknown,
+  publicField: string,
+  approvedValue: string,
+): string => {
+  const path = publicField.replace(/\[\d+\]$/, "").split(".");
+  const leafKey = path[path.length - 1];
+  const fieldValue = path.reduce<unknown>(
+    (value, key) =>
+      value && typeof value === "object"
+        ? (value as Record<string, unknown>)[key]
+        : undefined,
+    publicProduct,
+  );
+
+  if (fieldValue === undefined) {
+    throw new Error(`missing approved collision field: ${publicField}`);
+  }
+
+  const serializedValue = JSON.stringify(fieldValue);
+  if (!serializedValue.includes(approvedValue)) {
+    throw new Error(`approved collision value is no longer in ${publicField}`);
+  }
+
+  return `${JSON.stringify(leafKey)}:${serializedValue}`;
+};
+
 const approvedSerializedCollisionContexts: ApprovedSerializedCollisionContext[] =
   expectedApprovedInternalTokenCollisions.flatMap(
-    ({ token, publicReference, publicField }) => {
+    ({ token, publicReference, publicField, value }) => {
       const internalProduct = products.find(
         (product) => product.econoluzReference === publicReference,
       );
@@ -332,11 +372,23 @@ const approvedSerializedCollisionContexts: ApprovedSerializedCollisionContext[] 
       }
 
       const publicProduct = toPublicProduct(internalProduct);
-      const serializedProduct = JSON.stringify(publicProduct);
+      // Se exime **el contenedor del campo aprobado**, no el producto entero.
+      //
+      // Antes se comparaba el JSON completo de `toPublicProduct`, y eso ataba la exención
+      // al orden de claves de `app/data/products.ts`. Desde la Fase D la carga sale de
+      // `public_products`, donde `technical_specs` es `jsonb` y **devuelve sus claves en
+      // su propio orden**: mismos valores, distinta serialización, y la exención dejaba
+      // de encajar. Es la misma trampa que ya está anotada en `docs/CONTINUAR-PANEL.md`.
+      //
+      // El contenedor es un array —`specialFeatures`—, y los arrays sí conservan su orden
+      // en `jsonb`, así que su serialización es idéntica en los dos modelos. Además la
+      // exención queda **más estrecha** que antes: cubre una lista concreta de un producto
+      // concreto en vez de todos sus campos.
+      const serializedField = serializeApprovedFieldPair(publicProduct, publicField, value);
       const catalogPayloadContexts = [
-        serializedProduct,
-        JSON.stringify(serializedProduct).slice(1, -1),
-        serializedProduct
+        serializedField,
+        JSON.stringify(serializedField).slice(1, -1),
+        serializedField
           .replace(/&/g, "\\u0026")
           .replace(/>/g, "\\u003e")
           .replace(/</g, "\\u003c")
