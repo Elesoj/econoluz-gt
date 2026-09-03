@@ -1,13 +1,14 @@
 import "server-only";
 
-import { leer, type Ejecutor } from "../../lib/datos";
-import { desdeFilaProyeccion } from "../proyeccionPublica";
+import { unstable_cache } from "next/cache";
+import { leer, leerPublico, type Ejecutor } from "../../lib/datos";
 import type { PublicProduct } from "../publicProduct";
 import {
   buscarPorCodigoDeProveedor as buscarConEjecutor,
+  crearLectorCatalogoPublicoCacheado,
+  leerCatalogoPublicoDesdeProyeccion,
   leerCatalogoRelacional as leerCatalogoConEjecutor,
   leerProductoRelacional as leerProductoConEjecutor,
-  proyeccionDesdeRelacional as proyeccionDesdeRelacionalConEjecutor,
 } from "./lectura";
 
 const ejecutarPrivado: Ejecutor = (texto, parametros = []) =>
@@ -29,7 +30,7 @@ export function buscarPorCodigoDeProveedor(texto: string) {
 }
 
 /**
- * El catálogo público reconstruido desde el modelo relacional.
+ * El catálogo público se limita a la proyección saneada y al rol público.
  *
  * **Es la pieza que servirá la Fase D**, y hoy no la llama nadie: `servirSegunModelo` solo
  * llega aquí con `modelo_catalogo = relational_v2` y la llave `FASE_D_AUTORIZADA` abierta,
@@ -37,24 +38,23 @@ export function buscarPorCodigoDeProveedor(texto: string) {
  * llave sin conectar esto, el sitio caería al catálogo escrito en el código sin que nadie
  * lo esperase.
  *
- * **Sin caché todavía.** La lectura `legacy` se apoya en `unstable_cache` con la etiqueta
- * `CATALOG_CACHE_TAG`, que el panel invalida al guardar. Decidir la caché de este camino
- * —y quién la invalida— es trabajo de la Fase D, no de la Fase C: cachearlo ahora sería
- * fijar una decisión que todavía no se ha tomado.
+ * La función cacheada se construye una vez, fuera de cualquier petición. Dentro solo se
+ * obtiene y valida el resultado público: no entran ejecutores, conexiones, errores ni
+ * datos dinámicos de la petición en el valor almacenado.
  */
-export async function leerCatalogoPublicoRelacional(): Promise<PublicProduct[]> {
-  const ahora = new Date();
-  const productos = await leerCatalogoConEjecutor(ejecutarPrivado);
+const ejecutarPublico: Ejecutor = async (texto, parametros = []) => {
+  const filas = leerPublico<Record<string, unknown>>(texto, parametros);
+  if (!filas) throw new Error("Falta la conexión pública del catálogo.");
+  return filas;
+};
 
-  return productos
-    .filter((producto) => producto.nucleo.published)
-    .sort(
-      (a, b) =>
-        a.nucleo.position - b.nucleo.position ||
-        a.nucleo.econoluz_reference.localeCompare(b.nucleo.econoluz_reference),
-    )
-    .map((producto) => desdeFilaProyeccion(proyeccionDesdeRelacionalConEjecutor(producto, ahora)));
-}
+const leerCatalogoPublicoSaneado = (): Promise<PublicProduct[]> =>
+  leerCatalogoPublicoDesdeProyeccion(ejecutarPublico);
+
+export const leerCatalogoPublicoRelacional = crearLectorCatalogoPublicoCacheado(
+  leerCatalogoPublicoSaneado,
+  unstable_cache,
+);
 
 export { proyeccionDesdeRelacional } from "./lectura";
 export type { ProductoRelacional } from "./lectura";

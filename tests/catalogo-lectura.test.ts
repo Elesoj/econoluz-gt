@@ -4,11 +4,14 @@ import { test } from "node:test";
 import type { Ejecutor } from "../app/lib/datos/consulta";
 import {
   buscarPorCodigoDeProveedor,
+  crearLectorCatalogoPublicoCacheado,
+  leerCatalogoPublicoDesdeProyeccion,
   leerCatalogoRelacional,
   leerProductoRelacional,
   proyeccionDesdeRelacional,
   type ProductoRelacional,
 } from "../app/data/catalogo/lectura";
+import type { PublicProduct } from "../app/data/publicProduct";
 import { planificarProducto } from "../app/data/catalogo/importacion";
 import { fromProductRow } from "../app/data/productRow";
 import { aFilaProyeccion } from "../app/data/proyeccionPublica";
@@ -24,6 +27,46 @@ function ejecutorFalso(respuestas: readonly Respuesta[]) {
   };
   return { ejecutar, sentencias };
 }
+
+function cacheFalsa() {
+  let valor: PublicProduct[] | undefined;
+  let tags: string[] = [];
+  const cachear = (
+    leer: () => Promise<PublicProduct[]>,
+    _claves: string[],
+    opciones: { tags: string[]; revalidate: number },
+  ) => {
+    tags = opciones.tags;
+    return async () => {
+      if (valor !== undefined) return structuredClone(valor);
+      const resultado = await leer();
+      valor = structuredClone(resultado);
+      return structuredClone(resultado);
+    };
+  };
+  return {
+    cachear,
+    invalidar(tag: string) {
+      if (tags.includes(tag)) valor = undefined;
+    },
+  };
+}
+
+const PRODUCTO_PUBLICO: PublicProduct = {
+  id: "prod-1",
+  econoluzReference: "ECO-ARQ-0001",
+  publicName: "Downlight orientable",
+  publicDescription: "Iluminación arquitectónica interior.",
+  image: "/catalogos/arquitectonico/eco-arq-0001.png",
+  productType: "iluminacion_arquitectonica",
+  application: "empotrables",
+  finish: "blanco",
+  labels: {
+    productType: "Iluminación arquitectónica",
+    application: "Empotrables",
+    finish: "Blanco",
+  },
+};
 
 const PRODUCTO: ProductoRelacional = {
   id: "apl-001",
@@ -268,6 +311,148 @@ test("leerCatalogoRelacional con 313 productos no escala en consultas (emite exa
     6,
     `esperadas 6 consultas globales, pero se ejecutaron ${sentencias.length}`,
   );
+});
+
+test("existe un lector público independiente del lector relacional completo", async () => {
+  const lectura = await import("../app/data/catalogo/lectura");
+
+  assert.equal(typeof lectura.leerCatalogoPublicoDesdeProyeccion, "function");
+});
+
+test("existe una fábrica separada para cachear solo la lectura pública", async () => {
+  const lectura = await import("../app/data/catalogo/lectura");
+
+  assert.equal(typeof lectura.crearLectorCatalogoPublicoCacheado, "function");
+});
+
+test("el lector público hace una sola consulta determinista a public_products y devuelve PublicProduct saneado", async () => {
+  const { ejecutar, sentencias } = ejecutorFalso([
+    {
+      patron: /from public_products/i,
+      filas: [
+        {
+          id: "prod-1",
+          econoluz_reference: "ECO-ARQ-0001",
+          position: 10,
+          public_name: "Downlight orientable",
+          public_description: "Iluminación arquitectónica interior.",
+          image: "/catalogos/arquitectonico/eco-arq-0001.png",
+          images: ["/catalogos/arquitectonico/eco-arq-0001-2.png"],
+          product_type: "iluminacion_arquitectonica",
+          application: "empotrables",
+          finish: "blanco",
+          label_product_type: "Iluminación arquitectónica",
+          label_application: "Empotrables",
+          label_finish: "Blanco",
+          technical_specs: { power: "12 W" },
+          price_cents: 129900,
+          supplier_code: "SECRETO-NO-PUBLICABLE",
+        },
+      ],
+    },
+  ]);
+
+  const resultado = await leerCatalogoPublicoDesdeProyeccion(ejecutar);
+
+  assert.deepEqual(resultado, [
+    {
+      id: "prod-1",
+      econoluzReference: "ECO-ARQ-0001",
+      publicName: "Downlight orientable",
+      publicDescription: "Iluminación arquitectónica interior.",
+      image: "/catalogos/arquitectonico/eco-arq-0001.png",
+      images: ["/catalogos/arquitectonico/eco-arq-0001-2.png"],
+      productType: "iluminacion_arquitectonica",
+      application: "empotrables",
+      finish: "blanco",
+      labels: {
+        productType: "Iluminación arquitectónica",
+        application: "Empotrables",
+        finish: "Blanco",
+      },
+      technicalSpecs: { power: "12 W" },
+      priceGtq: 1299,
+    },
+  ]);
+  assert.equal(sentencias.length, 1);
+  assert.match(sentencias[0].texto, /from public_products/i);
+  assert.match(sentencias[0].texto, /order by position, econoluz_reference, id/i);
+  assert.doesNotMatch(sentencias[0].texto, /product_private_data|\bproducts\b|supplier_/i);
+  assert.doesNotMatch(JSON.stringify(resultado), /SECRETO-NO-PUBLICABLE/);
+});
+
+test("el lector público rechaza una fila inválida sin repetir su valor en el error", async () => {
+  const centinela = "SECRETO-FILA-CORRUPTA";
+  const { ejecutar } = ejecutorFalso([
+    {
+      patron: /from public_products/i,
+      filas: [
+        {
+          id: "prod-1",
+          econoluz_reference: "ECO-ARQ-0001",
+          position: 10,
+          public_name: { valorPrivado: centinela },
+          public_description: "Descripción pública",
+          image: "/catalogos/arquitectonico/eco-arq-0001.png",
+          images: null,
+          product_type: "iluminacion_arquitectonica",
+          application: "empotrables",
+          finish: "blanco",
+          label_product_type: "Iluminación arquitectónica",
+          label_application: "Empotrables",
+          label_finish: "Blanco",
+          technical_specs: null,
+          price_cents: null,
+        },
+      ],
+    },
+  ]);
+
+  await assert.rejects(
+    () => leerCatalogoPublicoDesdeProyeccion(ejecutar),
+    (error: Error) => error.message === "Fila pública de catálogo inválida." && !error.message.includes(centinela),
+  );
+});
+
+test("las llamadas repetidas reutilizan el resultado público cacheado", async () => {
+  const cache = cacheFalsa();
+  let lecturas = 0;
+  const leer = crearLectorCatalogoPublicoCacheado(async () => {
+    lecturas += 1;
+    return [PRODUCTO_PUBLICO];
+  }, cache.cachear);
+
+  assert.deepEqual(await leer(), [PRODUCTO_PUBLICO]);
+  assert.deepEqual(await leer(), [PRODUCTO_PUBLICO]);
+  assert.equal(lecturas, 1);
+});
+
+test("invalidar la etiqueta catalogo obliga a realizar una lectura pública nueva", async () => {
+  const cache = cacheFalsa();
+  let lecturas = 0;
+  const leer = crearLectorCatalogoPublicoCacheado(async () => {
+    lecturas += 1;
+    return [{ ...PRODUCTO_PUBLICO, publicName: `Lectura ${lecturas}` }];
+  }, cache.cachear);
+
+  assert.equal((await leer())[0].publicName, "Lectura 1");
+  cache.invalidar("catalogo");
+  assert.equal((await leer())[0].publicName, "Lectura 2");
+  assert.equal(lecturas, 2);
+});
+
+test("un error de lectura pública no se conserva en la caché", async () => {
+  const cache = cacheFalsa();
+  let lecturas = 0;
+  const leer = crearLectorCatalogoPublicoCacheado(async () => {
+    lecturas += 1;
+    if (lecturas === 1) throw new Error("fallo transitorio");
+    return [PRODUCTO_PUBLICO];
+  }, cache.cachear);
+
+  await assert.rejects(() => leer(), /fallo transitorio/);
+  assert.deepEqual(await leer(), [PRODUCTO_PUBLICO]);
+  assert.equal(lecturas, 2);
 });
 
 test("la búsqueda interna encuentra un código dentro de una lista", async () => {

@@ -3,6 +3,10 @@ import "server-only";
 import { leer, registrar } from "../lib/datos";
 import { unstable_cache } from "next/cache";
 import { obtenerModeloDeCatalogo } from "../lib/ajustes.server";
+import {
+  CATALOG_CACHE_TAG,
+  CATALOG_REVALIDATE_SECONDS,
+} from "./catalogo/cache";
 import { compararCatalogoEnSombra } from "./catalogo/comparacion.server";
 import { leerCatalogoPublicoRelacional } from "./catalogo/lectura.server";
 import { servirSegunModelo } from "./catalogo/seleccion";
@@ -12,12 +16,7 @@ import { toPublicProduct, type PublicProduct } from "./publicProduct";
 
 // Etiqueta con la que se marca el catálogo en la caché. El panel la usará para
 // decir "esto ya no vale" al guardar un producto, y la página se rehace sola.
-export const CATALOG_CACHE_TAG = "catalogo";
-
-// Una hora. No es el plazo con el que se ven los cambios del panel —esos son
-// inmediatos, porque el panel invalida la etiqueta— sino el máximo que puede
-// quedar una versión vieja si algo fallara al invalidar.
-const CATALOG_REVALIDATE_SECONDS = 3600;
+export { CATALOG_CACHE_TAG } from "./catalogo/cache";
 
 // `price_gtq` no está en CATALOG_COLUMNS —esa lista es la del catálogo escrito
 // en el código, que no tiene precios— pero sí viaja al navegador desde que el

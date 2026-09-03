@@ -1,7 +1,13 @@
 import type { Ejecutor } from "../../lib/datos/consulta";
 import { aQuetzales } from "../../lib/dinero";
 import { fromProductRow, type ProductRow } from "../productRow";
-import { aFilaProyeccion, type FilaProyeccion } from "../proyeccionPublica";
+import {
+  aFilaProyeccion,
+  desdeFilaProyeccion,
+  type FilaProyeccion,
+} from "../proyeccionPublica";
+import type { PublicProduct } from "../publicProduct";
+import { CATALOG_CACHE_TAG, CATALOG_REVALIDATE_SECONDS } from "./cache";
 import type { TipoDeAtributo } from "./atributos";
 import type {
   DatosPrivadosDeProducto,
@@ -299,6 +305,121 @@ export async function leerCatalogoRelacional(
       atributosPorProducto.get(productoId) ?? [],
       preciosPorProducto.get(productoId) ?? [],
     );
+  });
+}
+
+const COLUMNAS_PROYECCION_PUBLICA = [
+  "id",
+  "econoluz_reference",
+  "position",
+  "public_name",
+  "public_description",
+  "image",
+  "images",
+  "product_type",
+  "application",
+  "finish",
+  "label_product_type",
+  "label_application",
+  "label_finish",
+  "technical_specs",
+  "price_cents",
+] as const;
+
+const esRegistro = (valor: unknown): valor is Record<string, unknown> =>
+  typeof valor === "object" && valor !== null && !Array.isArray(valor);
+
+function filaPublicaValidada(valor: unknown): FilaProyeccion {
+  if (!esRegistro(valor)) throw new Error("Fila pública de catálogo inválida.");
+
+  const cadenas = [
+    "id",
+    "econoluz_reference",
+    "public_name",
+    "public_description",
+    "image",
+    "product_type",
+    "application",
+    "finish",
+    "label_product_type",
+    "label_application",
+    "label_finish",
+  ] as const;
+  if (cadenas.some((campo) => typeof valor[campo] !== "string")) {
+    throw new Error("Fila pública de catálogo inválida.");
+  }
+  if (typeof valor.position !== "number" || !Number.isSafeInteger(valor.position)) {
+    throw new Error("Fila pública de catálogo inválida.");
+  }
+  if (
+    valor.images !== null &&
+    (!Array.isArray(valor.images) || valor.images.some((imagen) => typeof imagen !== "string"))
+  ) {
+    throw new Error("Fila pública de catálogo inválida.");
+  }
+  if (
+    valor.technical_specs !== null &&
+    (!esRegistro(valor.technical_specs) ||
+      Object.values(valor.technical_specs).some(
+        (dato) =>
+          typeof dato !== "string" &&
+          (!Array.isArray(dato) || dato.some((elemento) => typeof elemento !== "string")),
+      ))
+  ) {
+    throw new Error("Fila pública de catálogo inválida.");
+  }
+
+  const centavos = valor.price_cents === null ? null : Number(valor.price_cents);
+  if (centavos !== null && (!Number.isSafeInteger(centavos) || centavos <= 0)) {
+    throw new Error("Fila pública de catálogo inválida.");
+  }
+
+  return {
+    id: valor.id as string,
+    econoluz_reference: valor.econoluz_reference as string,
+    position: valor.position,
+    public_name: valor.public_name as string,
+    public_description: valor.public_description as string,
+    image: valor.image as string,
+    images: valor.images as string[] | null,
+    product_type: valor.product_type as string,
+    application: valor.application as string,
+    finish: valor.finish as string,
+    label_product_type: valor.label_product_type as string,
+    label_application: valor.label_application as string,
+    label_finish: valor.label_finish as string,
+    technical_specs: valor.technical_specs as Record<string, string | string[]> | null,
+    price_cents: centavos,
+  };
+}
+
+/** Lectura pública: una sola consulta a la proyección ya saneada. */
+export async function leerCatalogoPublicoDesdeProyeccion(
+  ejecutar: Ejecutor,
+): Promise<PublicProduct[]> {
+  const filas = await ejecutar(
+    `select ${COLUMNAS_PROYECCION_PUBLICA.join(", ")}
+       from public_products
+      order by position, econoluz_reference, id`,
+  );
+
+  return filas.map((fila) => desdeFilaProyeccion(filaPublicaValidada(fila)));
+}
+
+export type CachearCatalogoPublico = (
+  leer: () => Promise<PublicProduct[]>,
+  claves: string[],
+  opciones: { tags: string[]; revalidate: number },
+) => () => Promise<PublicProduct[]>;
+
+/** Envuelve únicamente el resultado público ya traducido. */
+export function crearLectorCatalogoPublicoCacheado(
+  leerCatalogoPublico: () => Promise<PublicProduct[]>,
+  cachear: CachearCatalogoPublico,
+): () => Promise<PublicProduct[]> {
+  return cachear(leerCatalogoPublico, ["catalogo-publico-relacional"], {
+    tags: [CATALOG_CACHE_TAG],
+    revalidate: CATALOG_REVALIDATE_SECONDS,
   });
 }
 
