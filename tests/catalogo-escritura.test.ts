@@ -286,6 +286,28 @@ test("la caché se invalida solo después de confirmar la transacción", async (
   assert.deepEqual(sucesos, ["begin", "commit", "invalidar"]);
 });
 
+test("un rollback no invalida la caché pública", async () => {
+  const { ejecutar } = ejecutorFalso();
+  let invalidaciones = 0;
+  const escribirConRollback = async (trabajo: (ejecutor: Ejecutor) => Promise<void>) => {
+    await trabajo(ejecutar);
+    throw new Error("rollback simulado");
+  };
+
+  await assert.rejects(
+    () =>
+      guardarProductoCon(
+        escribirConRollback,
+        () => {
+          invalidaciones += 1;
+        },
+        ENTRADA,
+      ),
+    /rollback simulado/,
+  );
+  assert.equal(invalidaciones, 0);
+});
+
 // ---------------------------------------------------------------------------
 // Precios
 // ---------------------------------------------------------------------------
