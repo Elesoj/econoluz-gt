@@ -13,6 +13,7 @@ import { createInterface } from "node:readline";
 import { pathToFileURL } from "node:url";
 import { hashPassword } from "../app/admin/auth/crypto.ts";
 import { normalizeEmail } from "../app/admin/auth/policy.ts";
+import { ROLES, validarRol } from "../app/admin/auth/types.ts";
 
 /** Doce caracteres es el mínimo: `scrypt` frena la fuerza bruta, no la adivinanza. */
 const LONGITUD_MINIMA = 12;
@@ -37,8 +38,14 @@ export function validatePasswordConfirmation(password, confirmation) {
 /**
  * Crea el administrador o reemplaza su contraseña. Repetible por correo: es
  * justo lo que hace falta cuando alguien la olvida.
+ *
+ * `rol` es obligatorio y no lleva valor por defecto aquí tampoco: quien llama
+ * a `saveAdmin` decide explícitamente qué rol guardar, igual que exige
+ * `UpsertAdminUserInput`. Esta función no rechaza `empleado` por sí sola —esa
+ * puerta se cierra en `main()`, antes de llegar aquí— para que las pruebas
+ * puedan seguir ejerciendo el camino completo del alta sin invocar el CLI.
  */
-export async function saveAdmin({ name, email, password }, repository) {
+export async function saveAdmin({ name, email, password, rol }, repository) {
   const correo = normalizeEmail(String(email ?? ""));
   if (!PATRON_CORREO.test(correo)) {
     throw new Error("El correo no tiene una forma válida.");
@@ -53,6 +60,11 @@ export async function saveAdmin({ name, email, password }, repository) {
     throw new Error("La contraseña debe tener al menos doce caracteres.");
   }
 
+  const rolValidado = validarRol(rol);
+  if (!rolValidado.ok) {
+    throw new Error(`El rol debe ser uno de: ${ROLES.join(", ")}.`);
+  }
+
   const { salt, hash } = await hashPassword(password);
 
   // La contraseña en claro no se guarda, ni se imprime, ni se devuelve.
@@ -61,6 +73,7 @@ export async function saveAdmin({ name, email, password }, repository) {
     name: nombre,
     passwordHash: hash,
     salt,
+    rol: rolValidado.rol,
     now: new Date(),
   });
 
@@ -151,11 +164,35 @@ async function main() {
 
   let nombre;
   let correo;
+  let rolBruto;
   try {
     nombre = await preguntar(rl, "Nombre visible en el panel: ");
     correo = await preguntar(rl, "Correo electrónico: ");
+    rolBruto = await preguntar(rl, `Rol (${ROLES.join("/")}): `);
   } finally {
     rl.close();
+  }
+
+  const rolValidado = validarRol(rolBruto.trim());
+  if (!rolValidado.ok) {
+    console.error(`El rol debe ser uno de: ${ROLES.join(", ")}. No se guardó nada.`);
+    process.exit(1);
+  }
+
+  // Cerrado a propósito durante el subproyecto 9A: proteger solo las acciones
+  // nuevas de envíos dejaría abiertas las de productos y proyectos, que
+  // todavía comprueban únicamente que exista sesión. Una cuenta que aparenta
+  // una restricción que no existe es peor que no tener roles. La restricción
+  // de la base admite los dos valores; el que se cierra aquí es el camino de
+  // alta. Ver db/014_roles_admin.sql y docs/superpowers/specs/2026-09-03-envios-tarifas-design.md §7.1.
+  if (rolValidado.rol === "empleado") {
+    console.error(
+      "Durante el subproyecto 9A no se pueden crear cuentas de empleado.\n" +
+        "Las acciones de productos y proyectos todavia comprueban solo que exista sesion,\n" +
+        "asi que una cuenta 'limitada' tendria esas acciones abiertas.\n" +
+        "Primero hay que aplicar la matriz de permisos a todas las acciones existentes.",
+    );
+    process.exit(1);
   }
 
   const password = await preguntarSecreto("Contraseña (no se muestra): ");
@@ -166,7 +203,10 @@ async function main() {
     process.exit(1);
   }
 
-  const guardado = await saveAdmin({ name: nombre, email: correo, password }, repositorio);
+  const guardado = await saveAdmin(
+    { name: nombre, email: correo, password, rol: rolValidado.rol },
+    repositorio,
+  );
 
   console.log("");
   console.log(`Listo. Ya puedes entrar en /admin/entrar con ${guardado}.`);

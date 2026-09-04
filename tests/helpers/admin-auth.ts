@@ -94,6 +94,9 @@ export async function createInMemoryAuthFixture(seed: FixtureSeed = {}) {
       name: "Administración",
       passwordHash: stored.hash,
       salt: stored.salt,
+      // La fixture representa la cuenta administradora ya existente antes de
+      // la migración 014: es la que la migración deja como está.
+      rol: "administrador",
       active: true,
       createdAt: TEST_NOW,
       lastLoginAt: null,
@@ -208,6 +211,7 @@ export async function createInMemoryAuthFixture(seed: FixtureSeed = {}) {
         existing.name = input.name;
         existing.passwordHash = input.passwordHash;
         existing.salt = input.salt;
+        existing.rol = input.rol;
         existing.active = true;
         await repository.deleteSessionsForUser(existing.id);
         return;
@@ -218,6 +222,7 @@ export async function createInMemoryAuthFixture(seed: FixtureSeed = {}) {
         name: input.name,
         passwordHash: input.passwordHash,
         salt: input.salt,
+        rol: input.rol,
         active: true,
         createdAt: input.now,
         lastLoginAt: null,

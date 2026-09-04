@@ -14,6 +14,7 @@ test("solo reconstruye usuarios activos con todos sus campos de autenticación",
           name: "Administración",
           password_hash: "ab".repeat(64),
           salt: "cd".repeat(16),
+          rol: "administrador",
           active: true,
         },
       ],
@@ -26,6 +27,7 @@ test("solo reconstruye usuarios activos con todos sus campos de autenticación",
     name: "Administración",
     passwordHash: "ab".repeat(64),
     salt: "cd".repeat(16),
+    rol: "administrador",
   });
 });
 
@@ -148,6 +150,7 @@ test("guardar un administrador parametriza todos sus datos de autenticación", a
         "Administración",
         "ab".repeat(64),
         "cd".repeat(16),
+        "administrador",
         now.toISOString(),
       ],
       rows: [],
@@ -159,6 +162,7 @@ test("guardar un administrador parametriza todos sus datos de autenticación", a
     name: "Administración",
     passwordHash: "ab".repeat(64),
     salt: "cd".repeat(16),
+    rol: "administrador",
     now,
   });
 });

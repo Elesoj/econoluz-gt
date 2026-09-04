@@ -4,6 +4,7 @@ import type {
   AdminLoginAttempt,
   AdminSession,
   AdminUser,
+  RolAdmin,
 } from "./types";
 
 const LOGIN_FAILURE_LIMIT = 5;
@@ -18,7 +19,7 @@ export function createAdminAuthRepository(query: AdminAuthQuery): AdminAuthRepos
     async findActiveUserByEmail(email) {
       const rows = await query(
         `
-          select id::text, email, name, password_hash, salt
+          select id::text, email, name, password_hash, salt, rol
           from admin_users
           where email = $1 and active
           limit 1
@@ -34,6 +35,9 @@ export function createAdminAuthRepository(query: AdminAuthQuery): AdminAuthRepos
         name: String(row.name),
         passwordHash: String(row.password_hash),
         salt: String(row.salt),
+        // La restricción `admin_users_rol_valido` garantiza que solo llegan
+        // los dos valores admitidos; no hace falta volver a validarlo aquí.
+        rol: row.rol as RolAdmin,
       } satisfies AdminUser;
     },
 
@@ -200,24 +204,25 @@ export function createAdminAuthRepository(query: AdminAuthQuery): AdminAuthRepos
       };
     },
 
-    async upsertAdminUser({ email, name, passwordHash, salt, now }) {
+    async upsertAdminUser({ email, name, passwordHash, salt, rol, now }) {
       await query(
         `
           with saved_user as (
-            insert into admin_users (email, name, password_hash, salt, created_at, active)
-            values ($1, $2, $3, $4, $5::timestamptz, true)
+            insert into admin_users (email, name, password_hash, salt, rol, created_at, active)
+            values ($1, $2, $3, $4, $5, $6::timestamptz, true)
             on conflict (email) do update
             set
               name = excluded.name,
               password_hash = excluded.password_hash,
               salt = excluded.salt,
+              rol = excluded.rol,
               active = true
             returning id
           )
           delete from admin_sessions
           where user_id = (select id from saved_user)
         `,
-        [email, name, passwordHash, salt, toIsoString(now)],
+        [email, name, passwordHash, salt, rol, toIsoString(now)],
       );
     },
   };

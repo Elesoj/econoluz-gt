@@ -12,12 +12,22 @@ import { createInMemoryAuthFixture, createStoredSession } from "./helpers/admin-
 test("crear de nuevo el mismo correo cambia la contraseña e invalida sus sesiones", async () => {
   const fixture = await createInMemoryAuthFixture({ withoutUser: true });
   await saveAdmin(
-    { name: "Administración", email: " ADMIN@EJEMPLO.COM ", password: "primera frase segura" },
+    {
+      name: "Administración",
+      email: " ADMIN@EJEMPLO.COM ",
+      password: "primera frase segura",
+      rol: "administrador",
+    },
     fixture.repository,
   );
   fixture.state.sessions.push(createStoredSession({ userId: "1", tokenHash: "sesion-anterior" }));
   await saveAdmin(
-    { name: "Administración", email: "admin@ejemplo.com", password: "segunda frase segura" },
+    {
+      name: "Administración",
+      email: "admin@ejemplo.com",
+      password: "segunda frase segura",
+      rol: "administrador",
+    },
     fixture.repository,
   );
   assert.equal(fixture.state.users.length, 1);
@@ -35,7 +45,12 @@ test("crear de nuevo el mismo correo cambia la contraseña e invalida sus sesion
 test("la contraseña se guarda con sal propia y nunca en claro", async () => {
   const fixture = await createInMemoryAuthFixture({ withoutUser: true });
   await saveAdmin(
-    { name: "Administración", email: "admin@ejemplo.com", password: "frase segura de prueba" },
+    {
+      name: "Administración",
+      email: "admin@ejemplo.com",
+      password: "frase segura de prueba",
+      rol: "administrador",
+    },
     fixture.repository,
   );
   const guardado = fixture.state.users[0];
@@ -49,7 +64,12 @@ test("rechaza una contraseña de menos de doce caracteres", async () => {
   await assert.rejects(
     () =>
       saveAdmin(
-        { name: "Administración", email: "admin@ejemplo.com", password: "demasiado" },
+        {
+          name: "Administración",
+          email: "admin@ejemplo.com",
+          password: "demasiado",
+          rol: "administrador",
+        },
         fixture.repository,
       ),
     /doce caracteres/,
@@ -62,10 +82,42 @@ test("rechaza un correo sin forma válida sin tocar la base de datos", async () 
   await assert.rejects(
     () =>
       saveAdmin(
-        { name: "Administración", email: "sin-arroba", password: "frase segura de prueba" },
+        {
+          name: "Administración",
+          email: "sin-arroba",
+          password: "frase segura de prueba",
+          rol: "administrador",
+        },
         fixture.repository,
       ),
     /correo/i,
+  );
+  assert.equal(fixture.state.users.length, 0);
+});
+
+test("saveAdmin no acepta un rol ausente ni uno inventado", async () => {
+  const fixture = await createInMemoryAuthFixture({ withoutUser: true });
+  await assert.rejects(
+    () =>
+      saveAdmin(
+        // @ts-expect-error se comprueba justo el caso que TypeScript ya impide en compilación
+        { name: "Administración", email: "admin@ejemplo.com", password: "frase segura de prueba" },
+        fixture.repository,
+      ),
+    /rol/i,
+  );
+  await assert.rejects(
+    () =>
+      saveAdmin(
+        {
+          name: "Administración",
+          email: "admin@ejemplo.com",
+          password: "frase segura de prueba",
+          rol: "root",
+        },
+        fixture.repository,
+      ),
+    /rol/i,
   );
   assert.equal(fixture.state.users.length, 0);
 });
