@@ -83,3 +83,68 @@ test("la estimación anónima se marca como tal", async () => {
     deps(), { estimacion: true, lineas: [{ econoluzReference: "ECO-0001", cantidad: 1 }] });
   assert.equal(r.estimacion, true);
 });
+
+test("una zona con una tarifa cerrada en el pasado y otra vigente resuelve limpiamente la vigente sin error de determinismo", async () => {
+  const r = await orquestar(
+    { tipo: "destino_directo", departamentoCodigo: "01", municipioCodigo: "0101" },
+    deps({
+      ahora: () => new Date("2026-06-01T00:00:00Z"),
+      leerConfiguracion: async () => ({
+        recogidaActiva: true,
+        cobertura: [{ zoneId: 1, municipioCodigo: "0101", departamentoCodigo: null, activa: true }],
+        zonas: [{ id: 1, codigo: "metropolitana", nombre: "Metropolitana", metodo: "mensajero_propio", activa: true }],
+        tarifas: [
+          {
+            zoneId: 1,
+            publicada: true,
+            importeCents: 2500,
+            vigenteDesde: new Date("2025-01-01T00:00:00Z"),
+            vigenteHasta: new Date("2026-01-01T00:00:00Z"),
+          },
+          {
+            zoneId: 1,
+            publicada: true,
+            importeCents: 3500,
+            vigenteDesde: new Date("2026-01-01T00:00:00Z"),
+            vigenteHasta: null,
+          },
+        ],
+      }),
+    }),
+  );
+
+  assert.equal(r.tipo, "con_tarifa");
+  if (r.tipo === "con_tarifa") {
+    assert.equal(r.envioCents, 3500);
+    assert.equal(r.zonaCodigo, "metropolitana");
+  }
+});
+
+test("una zona sin tarifa vigente devuelve requiere_cotizacion por sin_tarifa_vigente", async () => {
+  const r = await orquestar(
+    { tipo: "destino_directo", departamentoCodigo: "01", municipioCodigo: "0101" },
+    deps({
+      ahora: () => new Date("2026-06-01T00:00:00Z"),
+      leerConfiguracion: async () => ({
+        recogidaActiva: true,
+        cobertura: [{ zoneId: 1, municipioCodigo: "0101", departamentoCodigo: null, activa: true }],
+        zonas: [{ id: 1, codigo: "metropolitana", nombre: "Metropolitana", metodo: "mensajero_propio", activa: true }],
+        tarifas: [
+          {
+            zoneId: 1,
+            publicada: true,
+            importeCents: 2500,
+            vigenteDesde: new Date("2025-01-01T00:00:00Z"),
+            vigenteHasta: new Date("2026-01-01T00:00:00Z"),
+          },
+        ],
+      }),
+    }),
+  );
+
+  assert.equal(r.tipo, "requiere_cotizacion");
+  if (r.tipo === "requiere_cotizacion") {
+    assert.equal(r.motivo, "sin_tarifa_vigente");
+  }
+});
+

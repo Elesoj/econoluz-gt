@@ -4,7 +4,7 @@ import { ErrorDeDatos } from "../lib/datos/errores";
 import { aCentavos } from "../lib/dinero";
 import type { DestinoDeEnvio, ResultadoDeEnvio, ResultadoDeEnvioBase } from "./contratos";
 import { resolverZona, type Cobertura } from "./zonas";
-import { calcularEnvio, type Tarifa, type Zona } from "./tarifas";
+import { calcularEnvio, estaVigente, type Tarifa, type Zona } from "./tarifas";
 
 export type LineaDeEntrada = {
   econoluzReference: string;
@@ -39,6 +39,30 @@ export type OpcionesEnvios = {
   estimacion?: boolean;
   lineas?: readonly LineaDeEntrada[];
 };
+
+function construirTarifa(rawTarifa: Partial<Tarifa>): Tarifa {
+  return {
+    importeCents: rawTarifa.importeCents ?? 0,
+    umbralGratisCents: rawTarifa.umbralGratisCents ?? null,
+    maxPiezas: rawTarifa.maxPiezas ?? null,
+    maxImporteCents: rawTarifa.maxImporteCents ?? null,
+    plazoMinDias: rawTarifa.plazoMinDias ?? 2,
+    plazoMaxDias: rawTarifa.plazoMaxDias ?? 3,
+    publicada: Boolean(rawTarifa.publicada),
+    vigenteDesde:
+      rawTarifa.vigenteDesde instanceof Date
+        ? rawTarifa.vigenteDesde
+        : rawTarifa.vigenteDesde
+          ? new Date(rawTarifa.vigenteDesde)
+          : new Date(0),
+    vigenteHasta:
+      rawTarifa.vigenteHasta instanceof Date
+        ? rawTarifa.vigenteHasta
+        : rawTarifa.vigenteHasta
+          ? new Date(rawTarifa.vigenteHasta)
+          : null,
+  };
+}
 
 /**
  * Función central de orquestación de envíos.
@@ -194,8 +218,9 @@ export async function orquestar(
     };
 
     // 7. Tarifa publicada y vigente. Determinismo: si hay más de una fila, error interno.
+    const ahora = deps.ahora ? deps.ahora() : new Date();
     const tarifasCoincidentes = (config.tarifas ?? []).filter(
-      (t) => t.zoneId === zoneId && t.publicada,
+      (t) => t.zoneId === zoneId && t.publicada && estaVigente(construirTarifa(t), ahora),
     );
 
     if (tarifasCoincidentes.length > 1) {
@@ -212,21 +237,9 @@ export async function orquestar(
       };
     }
 
-    const rawTarifa = tarifasCoincidentes[0];
-    const tarifa: Tarifa = {
-      importeCents: rawTarifa.importeCents ?? 0,
-      umbralGratisCents: rawTarifa.umbralGratisCents ?? null,
-      maxPiezas: rawTarifa.maxPiezas ?? null,
-      maxImporteCents: rawTarifa.maxImporteCents ?? null,
-      plazoMinDias: rawTarifa.plazoMinDias ?? 2,
-      plazoMaxDias: rawTarifa.plazoMaxDias ?? 3,
-      publicada: Boolean(rawTarifa.publicada),
-      vigenteDesde: rawTarifa.vigenteDesde ?? new Date(0),
-      vigenteHasta: rawTarifa.vigenteHasta ?? null,
-    };
+    const tarifa: Tarifa = construirTarifa(tarifasCoincidentes[0]);
 
     // 8. Cálculo de tarifa.
-    const ahora = deps.ahora ? deps.ahora() : new Date();
     const resultadoBase: ResultadoDeEnvioBase = calcularEnvio(
       tarifa,
       zona,
