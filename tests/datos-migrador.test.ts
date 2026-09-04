@@ -34,7 +34,7 @@ test("008_audit_log.sql crea la tabla y sus dos índices con IF NOT EXISTS", () 
 
   assert.match(contenido, /create table if not exists audit_log/i);
   assert.match(contenido, /create index if not exists audit_log_entidad_idx/i);
-  assert.match(contenido, /create index if not exists audit_log_creado_en_idx/i);
+  assert.match(contenido, /create index if not exists audit_log_ocurrido_en_idx/i);
 });
 
 test("009_identidad_clientes.sql es idempotente y no borra nada", () => {
