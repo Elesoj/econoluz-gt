@@ -23,6 +23,20 @@
 --
 -- Aditiva, transaccional y repetible como las anteriores: el migrador
 -- (`scripts/migrate.mjs`) garantiza que este archivo no se ejecuta dos veces.
+--
+-- PRECONDICIÓN DE DESPLIEGUE, y no es opcional: `app/admin/auth/repository.ts` ya hace
+-- `select … rol from admin_users` en el mismo commit que esta migración. Si el código
+-- llega a un entorno donde esta migración todavía no está aplicada, esa consulta falla
+-- con «column "rol" does not exist» y **nadie puede entrar al panel**: no se degrada, se
+-- cae entero, porque `findActiveUserByEmail` es el primer paso de cualquier acceso.
+--
+-- Por eso esta migración tiene que aplicarse, con `npm run db:migrar`, en **cada rama de
+-- Neon** —Producción y cualquier rama de desarrollo o de otro subproyecto— **antes** de
+-- que el código que la acompaña llegue a esa rama. Una rama de Neon **no hereda** las
+-- migraciones que se aplican después de haberla creado: es una copia congelada en el
+-- momento de crearla, así que aplicar `014` en Producción no la aplica automáticamente en
+-- una rama de desarrollo ya existente, ni al revés. Cada rama se comprueba y se migra por
+-- separado.
 
 -- Paso 1: la columna nace nullable, sin ninguna fila obligada a tener ya un valor.
 alter table admin_users add column rol text;

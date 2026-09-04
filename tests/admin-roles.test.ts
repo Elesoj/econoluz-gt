@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { validarRol, ROLES } from "../app/admin/auth/types";
 
 const sql = readFileSync("db/014_roles_admin.sql", "utf8");
@@ -9,15 +10,40 @@ test("la columna nace sin valor por defecto", () => {
   assert.doesNotMatch(sql, /add column\s+rol[^;]*default/i);
 });
 
-// Refuerzo: la prueba anterior solo mira la sentencia que añade la columna.
-// Un `default` colado por una `alter column ... set default` aparte, en
-// cualquier punto del archivo, no la haría fallar. Esta sí: ningún `default`
-// puede acompañar a `rol` bajo ninguna forma, y "administrador" no puede
-// aparecer junto a la palabra `default` en ningún punto del archivo.
-test("ningún `default` acompaña al rol, ni siquiera en una sentencia aparte", () => {
-  assert.doesNotMatch(sql, /default[^;]*'administrador'/i);
-  assert.doesNotMatch(sql, /'administrador'[^;]*default/i);
-  assert.doesNotMatch(sql, /set\s+default/i);
+// Refuerzo pedido en revisión: la prueba anterior solo mira la sentencia que
+// añade la columna en ESTE archivo. Un `default` colado por una
+// `alter column ... set default` aparte —en este archivo, o en cualquier
+// migración futura, `015_*.sql` o posterior— no la haría fallar: la
+// reintroducción por la puerta de atrás seguiría siendo posible, solo que un
+// archivo más allá. Por eso esta prueba recorre **todos** los `db/*.sql`, no
+// solo el de esta tarea.
+test("ningún `default` acompaña al rol, ni siquiera en una sentencia aparte de otra migración", () => {
+  const archivosSql = readdirSync("db").filter((nombre) => nombre.endsWith(".sql"));
+  assert.ok(archivosSql.length > 0, "no se encontró ninguna migración en db/");
+
+  for (const archivo of archivosSql) {
+    const contenido = readFileSync(join("db", archivo), "utf8");
+    assert.doesNotMatch(
+      contenido,
+      /default[^;]*'administrador'/i,
+      `${archivo}: un default seguido de 'administrador' reintroduciría la elevación silenciosa`,
+    );
+    assert.doesNotMatch(
+      contenido,
+      /'administrador'[^;]*default/i,
+      `${archivo}: 'administrador' seguido de default reintroduciría la elevación silenciosa`,
+    );
+    // Ninguna migración pone jamás un `default` sobre `admin_users.rol`: ni
+    // siquiera un `set default` con otro valor sería correcto, porque el
+    // punto entero es que la columna se quede sin ninguno.
+    if (/admin_users/i.test(contenido) && /\brol\b/i.test(contenido)) {
+      assert.doesNotMatch(
+        contenido,
+        /alter\s+column\s+rol\s+set\s+default/i,
+        `${archivo}: ninguna migración puede poner un default sobre admin_users.rol`,
+      );
+    }
+  }
 });
 
 test("la migración va en tres pasos", () => {
