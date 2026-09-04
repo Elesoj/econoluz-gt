@@ -27,6 +27,7 @@
     "catalogo:relacional:modelo": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/modelo-catalogo.mjs",
     "catalogo:relacional:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/verificar-catalogo-relacional.mjs",
     "carrito:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/verificar-carrito.mjs",
+    "envios:verificar": "node --env-file-if-exists=.env.local ./scripts/verificar-envios.mjs",
     "test:proveedores": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --import ./scripts/register-ts.mjs tests/catalog-supplier-privacy.test.ts",
     "proyectos:verificar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs ./scripts/verify-project-rows.mjs",
     "proyectos:importar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local --import ./scripts/register-ts.mjs ./scripts/import-projects.mjs",

@@ -1290,13 +1290,13 @@ git commit -m "feat(envios): orquestacion con carrito del servidor"
 - Consume: `scripts/guarda-neon.mjs`.
 - Produce: `npm run envios:verificar`.
 
-- [ ] **Paso 1: Pedir autorización para crear la rama de Neon**
+- [x] **Paso 1: Pedir autorización para crear la rama de Neon**
 
 **Detente aquí.** Crear `envios-tarifas-dev` desde Producción es una acción operativa sobre
 la infraestructura y **necesita el visto bueno expreso del dueño**. No la crees por tu
 cuenta ni reutilices otra rama existente.
 
-- [ ] **Paso 2: Aplicar las migraciones en simulación**
+- [x] **Paso 2: Aplicar las migraciones en simulación**
 
 ```bash
 npm run db:migrar -- --simular
@@ -1304,7 +1304,7 @@ npm run db:migrar -- --simular
 
 Esperado: prueba las tres pendientes y termina en `ROLLBACK`, sin escribir.
 
-- [ ] **Paso 3: Aplicarlas de verdad y comprobar la idempotencia**
+- [x] **Paso 3: Aplicarlas de verdad y comprobar la idempotencia**
 
 ```bash
 npm run db:migrar
@@ -1314,7 +1314,7 @@ npm run db:migrar
 Esperado: la primera aplica `012`, `013` y `014`; la segunda informa de que **no queda nada
 pendiente**.
 
-- [ ] **Paso 4: Escribir `scripts/verificar-envios.mjs`**
+- [x] **Paso 4: Escribir `scripts/verificar-envios.mjs`**
 
 Se niega en Producción, igual que `carrito:verificar`, y ejecuta todo dentro de una
 transacción que **siempre** revierte. Comprobaciones, cada una con su mensaje:
@@ -1336,7 +1336,7 @@ transacción que **siempre** revierte. Comprobaciones, cada una con su mensaje:
 15. `audit_log` recibe `antes` y `despues` en la misma transacción.
 16. Las cuentas existentes quedan como `administrador`.
 
-- [ ] **Paso 5: Ejecutar la verificación**
+- [x] **Paso 5: Ejecutar la verificación**
 
 ```bash
 npm run envios:verificar
@@ -1349,7 +1349,7 @@ configuración siguen con **cero filas**:
 npm run envios:verificar -- --contar
 ```
 
-- [ ] **Paso 6: Ampliar `test:permisos` y ejecutarlo**
+- [x] **Paso 6: Ampliar `test:permisos` y ejecutarlo**
 
 Añade las cinco tablas nuevas a la lista de `scripts/verificar-permisos.mjs`.
 
@@ -1359,7 +1359,7 @@ npm run test:permisos
 
 Esperado: las cinco denegadas al rol público, y sus secuencias también.
 
-- [ ] **Paso 7: Commit**
+- [x] **Paso 7: Commit**
 
 ```bash
 git add scripts/verificar-envios.mjs scripts/verificar-permisos.mjs package.json
