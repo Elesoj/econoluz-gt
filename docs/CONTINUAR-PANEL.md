@@ -92,7 +92,34 @@ Leer esta documentación no ejecuta esa retirada ni basta como autorización.
 
 ---
 
-## 0.1 Qué hacer ahora (02/09/2026)
+## 0.1 Qué hacer ahora (03/09/2026)
+
+### Estado del subproyecto 9A — Envíos y tarifas (03/09/2026)
+
+Subproyecto 9A **completado** en la rama `feat/envios-tarifas` (HEAD: `d4b5e9e`). Incluye:
+
+- **5 tablas nuevas**: `geo_departamentos`, `geo_municipios`, `shipping_zones`, `shipping_zone_areas`, `shipping_rates`. Total base de datos en la rama: 30 tablas.
+- **2 columnas nuevas**: `user_addresses.departamento_codigo` (char(2), FK) y `user_addresses.municipio_codigo` (char(4), FK compuesta).
+- **Migraciones**: `012_geografia_gt.sql`, `013_envios_tarifas.sql`, `014_roles_admin.sql`.
+- **Módulos del cálculo**: `contratos.ts`, `validacion.ts`, `zonas.ts`, `tarifas.ts`, `geografia.ts`, `envios.server.ts`.
+- **Panel administrativo**: portada `/admin/envios` con encabezado honesto y tabla de departamentos; ficha de zona `/admin/envios/[zona]` con gestión de coberturas y publicación de tarifas.
+- **Catálogo geográfico INE**: 22 departamentos y 340 municipios en `db/datos/geografia-gt.json`.
+- **Pruebas**: 628 unitarias (`test:datos`), 216 administrativas (`test:admin`), 71 specs de Playwright con el nuevo `admin-envios.spec.ts`.
+
+**Datos que debe cargar el dueño antes de activar envíos en producción:**
+1. Crear las zonas de reparto reales desde el panel `/admin/envios`.
+2. Asignar coberturas geográficas a cada zona.
+3. Publicar tarifas oficiales (importe, umbral de gratuidad, plazos).
+4. Configurar la recogida en tienda si aplica.
+5. Ejecutar `npm run direcciones:migrar-codigos` en producción para rellenar los códigos INE de las direcciones existentes.
+
+**Ramas de Neon creadas para 9A** (no borrar hasta que la rama se integre en `main`):
+- `envios-tarifas-dev` (ep-plain-frog-av82z3py): solo esquema, para pruebas de desarrollo.
+- `envios-tarifas-e2e` (ep-jolly-grass-avtkgl2b): migraciones 012-014 aplicadas, para pruebas Playwright.
+
+**El subproyecto 9B** (envíos operativos y seguimiento) es el siguiente paso.
+
+---
 
 **El subproyecto 3 está terminado y activo en Producción.** `modelo_catalogo` vale
 `relational_v2`, el catálogo público se sirve del modelo relacional a través del rol
@@ -107,6 +134,9 @@ desplegar**. La revisión independiente encontró y corrigió cuatro defectos �
 graves— y resolvió el fallo de Playwright, que era una prueba obsoleta de la Fase D. El
 detalle está en las secciones «Subproyecto 5» y «Revisión independiente», al final de este
 documento.
+
+**El subproyecto 9A, envíos y tarifas, está completado** en la rama `feat/envios-tarifas`
+(commit de cierre pendiente de fusión). Ver bloque «Estado del subproyecto 9A» de arriba.
 
 Lo siguiente sería el **subproyecto 6, checkout y pedidos**. El **subproyecto 11 —retirar
 el modelo antiguo— no ha empezado y no debe empezar** sin autorización expresa del dueño:

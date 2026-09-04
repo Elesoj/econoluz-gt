@@ -497,16 +497,23 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
   cambiar el DNS es tarea del dueño del proyecto, no del código.
 - Base de datos: **Postgres 18 en Neon**, con `@neondatabase/serverless`, creada desde el
-  Marketplace de Vercel (región AWS US East 1). **En producción hay veintitrés tablas**:
-  las once de siempre —`leads`, `products`, `admin_users`, `admin_sessions`,
-  `admin_login_attempts`, `projects`, `project_images`, `schema_migrations`,
-  `public_products`, `app_settings` y `audit_log`—, las cuatro de identidad (`users`,
-  `user_addresses`, `user_consents`, `auth_events`) y las ocho del catálogo relacional
-  (`categories`, `product_categories`, `product_private_data`, `product_images`,
-  `attributes`, `attribute_options`, `product_attribute_values`, `product_prices`).
-  Las diez migraciones están aplicadas: `005`–`008` el 01/09/2026 y **`009` y `010` el
-  02/09/2026**, con `btree_gist` instalada. El rol `econoluz_publico` solo puede leer
-  `public_products`; las otras veintidós tablas le están denegadas.
+  Marketplace de Vercel (región AWS US East 1). **En producción hay veintitrés tablas**
+  (las once de siempre, cuatro de identidad, ocho del catálogo relacional, más `carts` y
+  `cart_items` del subproyecto 5); **en la rama `feat/envios-tarifas` hay 30 tablas**
+  —las 25 anteriores más las 5 del subproyecto 9A: `geo_departamentos`, `geo_municipios`,
+  `shipping_zones`, `shipping_zone_areas` y `shipping_rates`—.
+  Las tablas en producción son: las once de siempre —`leads`, `products`, `admin_users`,
+  `admin_sessions`, `admin_login_attempts`, `projects`, `project_images`,
+  `schema_migrations`, `public_products`, `app_settings` y `audit_log`—, las cuatro de
+  identidad (`users`, `user_addresses`, `user_consents`, `auth_events`), las ocho del
+  catálogo relacional (`categories`, `product_categories`, `product_private_data`,
+  `product_images`, `attributes`, `attribute_options`, `product_attribute_values`,
+  `product_prices`) y las dos del carrito (`carts`, `cart_items`).
+  Las migraciones aplicadas en producción: `005`–`008` el 01/09/2026 y **`009` y `010` el
+  02/09/2026**, con `btree_gist` instalada; `011` aún sin aplicar en Production. Las
+  migraciones `012_geografia_gt.sql`, `013_envios_tarifas.sql` y `014_roles_admin.sql` del
+  subproyecto 9A están únicamente en la rama Neon `envios-tarifas-e2e`. El rol
+  `econoluz_publico` solo puede leer `public_products`; las otras tablas le están denegadas.
   Las migraciones se aplican con `npm run db:migrar`, que es repetible. `DATABASE_URL`
   está en `.env.local` (ignorado por git) y en Vercel; `DATABASE_URL_PUBLIC` está en
   Vercel como secreto exclusivo de Production.
@@ -719,7 +726,11 @@ npm run identidad:federacion # valida la identidad federada de Vercel de extremo
 npm run identidad:verificar # invariantes reales en Neon dentro de una transacción reversible
 npm run identidad:probar    # prueba aprovisionamiento concurrente; crea y limpia datos sintéticos
 npm run identidad:reconciliar # solo informa; añadir -- --aplicar para reparar huérfanos
+
+npm run envios:verificar    # verifica los 16 invariantes de esquema en la base de datos de desarrollo
+npm run direcciones:migrar-codigos # empareja códigos INE en user_addresses (idempotente)
 ```
+
 
 `identidad:federacion` necesita el entorno de Vercel descargado **a un archivo aparte**:
 `npx vercel env pull .env.vercel.local`. Nunca sobre `.env.local`, que se sobrescribiría.
@@ -980,11 +991,25 @@ especificación, su plan, sus pruebas y un punto de revisión con el dueño:
 
 1. Fundamentos y capa de datos · 2. Identidad de clientes · 3. Catálogo relacional v2 ·
 5. Carrito persistente · 6. Checkout y pedidos · 7. Pasarela de pago (bloqueado) ·
-8. Facturación FEL (bloqueado) · 9. Envíos · 10. API v1 y preparación móvil ·
-11. Migración final y retirada del modelo antiguo.
+8. Facturación FEL (bloqueado) · **9. Envíos** (dividido en 9A y 9B) ·
+10. API v1 y preparación móvil · 11. Migración final y retirada del modelo antiguo.
 
 **No existe un subproyecto 4:** era inventario y reservas, y desapareció con la decisión
 de §0.2.
+
+**El subproyecto 9 se divide en 9A y 9B:**
+- **9A (completado en `feat/envios-tarifas`):** zonas de reparto, tarifas, algoritmo de
+  cálculo, panel administrativo y catálogo geográfico INE. Añade 5 tablas nuevas
+  (`geo_departamentos`, `geo_municipios`, `shipping_zones`, `shipping_zone_areas`,
+  `shipping_rates`) y 2 columnas en `user_addresses` (`departamento_codigo` y
+  `municipio_codigo`). El catálogo geográfico vive en `db/datos/geografia-gt.json`
+  (22 departamentos y 340 municipios extraídos del INE, ENEIC 2024-2025).
+  SHA-256 del JSON: `33297eebe05a155b3e63f0fac15d21a1306a0257b8b7b3f2149f08ce926a7e66`.
+  SHA-256 del PDF fuente: `1eb2a2e3a718c7132c944a26a83a1d2a317c42e7fc4f3ab4862026950da7ca0e`.
+  Ramas Neon creadas para 9A (no borrar hasta que la rama se integre en `main`):
+  `envios-tarifas-dev` (solo esquema) y `envios-tarifas-e2e` (migraciones 012-014 aplicadas).
+- **9B (pendiente):** envíos operativos y seguimiento de pedidos.
+
 
 **El subproyecto 1 está terminado y desplegado**; su estado preciso está en §0.4 y en
 `docs/superpowers/plans/2026-08-30-fundamentos-backend.md`. Se cerraron sus doce tareas,
