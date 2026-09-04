@@ -497,11 +497,11 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
   cambiar el DNS es tarea del dueño del proyecto, no del código.
 - Base de datos: **Postgres 18 en Neon**, con `@neondatabase/serverless`, creada desde el
-  Marketplace de Vercel (región AWS US East 1). **En producción hay veintitrés tablas**
-  (las once de siempre, cuatro de identidad, ocho del catálogo relacional, más `carts` y
-  `cart_items` del subproyecto 5); **en la rama `feat/envios-tarifas` hay 30 tablas**
-  —las 25 anteriores más las 5 del subproyecto 9A: `geo_departamentos`, `geo_municipios`,
-  `shipping_zones`, `shipping_zone_areas` y `shipping_rates`—.
+  Marketplace de Vercel (región AWS US East 1). **En producción hay veinticinco tablas**
+  (las once de siempre, cuatro de identidad, ocho del catálogo relacional y dos de carrito);
+  **en la rama `feat/envios-tarifas` hay 30 tablas** —las 25 anteriores más las 5 del
+  subproyecto 9A: `geo_departamentos`, `geo_municipios`, `shipping_zones`,
+  `shipping_zone_areas` y `shipping_rates`—.
   Las tablas en producción son: las once de siempre —`leads`, `products`, `admin_users`,
   `admin_sessions`, `admin_login_attempts`, `projects`, `project_images`,
   `schema_migrations`, `public_products`, `app_settings` y `audit_log`—, las cuatro de
@@ -509,14 +509,15 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   catálogo relacional (`categories`, `product_categories`, `product_private_data`,
   `product_images`, `attributes`, `attribute_options`, `product_attribute_values`,
   `product_prices`) y las dos del carrito (`carts`, `cart_items`).
-  Las migraciones aplicadas en producción: `005`–`008` el 01/09/2026 y **`009` y `010` el
-  02/09/2026**, con `btree_gist` instalada; `011` aún sin aplicar en Production. Las
-  migraciones `012_geografia_gt.sql`, `013_envios_tarifas.sql` y `014_roles_admin.sql` del
-  subproyecto 9A están únicamente en la rama Neon `envios-tarifas-e2e`. El rol
-  `econoluz_publico` solo puede leer `public_products`; las otras tablas le están denegadas.
-  Las migraciones se aplican con `npm run db:migrar`, que es repetible. `DATABASE_URL`
-  está en `.env.local` (ignorado por git) y en Vercel; `DATABASE_URL_PUBLIC` está en
-  Vercel como secreto exclusivo de Production.
+  Las migraciones aplicadas en producción: `005`–`008` el 01/09/2026, `009` y `010` el
+  02/09/2026 y `011` (carrito), sumando las 25 tablas actuales; las migraciones
+  `012_geografia_gt.sql`, `013_envios_tarifas.sql` y `014_roles_admin.sql` del subproyecto 9A
+  están aplicadas únicamente en las ramas de desarrollo y E2E de Neon, y siguen **pendientes de
+  aplicar en Producción**. El rol `econoluz_publico` solo puede leer `public_products`; las
+  otras tablas le están denegadas. Las migraciones se aplican con `npm run db:migrar`, que es
+  repetible y soporta `--simular`, `--aplicar` y `--aplicar-produccion`. `DATABASE_URL` está
+  en `.env.local` (ignorado por git) y en Vercel; `DATABASE_URL_PUBLIC` está en Vercel como
+  secreto exclusivo de Production.
 - Identidad de clientes: **Firebase Authentication**. El navegador usa el SDK web y el
   servidor `firebase-admin`. En local se autentica con credenciales predeterminadas (ADC);
   en Vercel, con **Workload Identity Federation**, ya montada y demostrada el 01/09/2026

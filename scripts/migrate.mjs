@@ -6,104 +6,178 @@
 // media instrucción y quedarse a medias.
 //
 // Uso:
-//   npm run db:migrar                 aplica lo que falte
+//   npm run db:migrar                 aplica lo que falte en desarrollo sellado
 //   npm run db:migrar -- --simular    lo aplica todo dentro de una transacción y la
 //                                     revierte: comprueba de verdad que el SQL entra,
 //                                     sin dejar nada escrito
+//   node scripts/migrate.mjs --aplicar-produccion  aplica en Producción exigiendo las tres llaves
 
 import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { Client, neonConfig } from "@neondatabase/serverless";
+import { autorizarEscritura } from "./guarda-neon.mjs";
 
-const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
-const migrationsDir = join(projectRoot, "db");
+export const CONFIRMACION_MIGRAR_PRODUCCION = "migrar-en-produccion";
 
-const simular = process.argv.slice(2).includes("--simular");
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  console.error(
-    "Falta DATABASE_URL.\n\n" +
-      "Abre el archivo frontend/.env.local y pega ahí la cadena de conexión de\n" +
-      "Neon, entre las comillas. Luego vuelve a ejecutar este comando.",
-  );
-  process.exit(1);
+export function decidirModoMigracion(argumentos = []) {
+  const lista = [...argumentos];
+  if (lista.includes("--simular")) return "simular";
+  if (lista.includes("--aplicar-produccion")) return "aplicar-produccion";
+  if (lista.includes("--aplicar")) return "aplicar";
+  return "aplicar";
 }
 
-// El driver de Neon habla por WebSocket. Node 22 en adelante trae uno nativo,
-// así que no hace falta ninguna dependencia extra.
-neonConfig.webSocketConstructor = globalThis.WebSocket;
+/**
+ * Ejecuta el migrador con el cliente y dependencias provistas.
+ * Permite probar unitariamente la secuencia transaccional y las protecciones.
+ */
+export async function ejecutarMigrador({
+  client,
+  migrations,
+  leerSql,
+  modo = "aplicar",
+  entorno = process.env,
+  onLog = () => {},
+}) {
+  const simular = modo === "simular";
+  let transaccionAbierta = false;
 
-const migrations = readdirSync(migrationsDir)
-  .filter((file) => file.endsWith(".sql"))
-  .sort();
-
-const client = new Client(connectionString);
-
-// Nunca imprimir `connectionString`: lleva la contraseña de la base de datos.
-console.log(`Base de datos:  ${new URL(connectionString).host}`);
-console.log(`Migraciones:    ${migrations.length} archivo(s) en db/`);
-console.log(`Modo:           ${simular ? "SIMULACIÓN (termina en ROLLBACK)" : "aplicación real"}`);
-console.log("");
-
-await client.connect();
-
-try {
-  await client.query(`
-    create table if not exists schema_migrations (
-      filename   text        primary key,
-      applied_at timestamptz not null default now()
-    )
-  `);
-
-  const { rows } = await client.query("select filename from schema_migrations");
-  const applied = new Set(rows.map((row) => row.filename));
-
-  let executed = 0;
-  const pendientes = migrations.filter((filename) => !applied.has(filename));
-  for (const filename of migrations) {
-    if (applied.has(filename)) console.log(`  ya estaba   ${filename}`);
-  }
-
-  // La simulación mete **todas** las pendientes en una sola transacción y la revierte.
-  // Archivo por archivo no valdría: una migración puede apoyarse en la anterior, y
-  // revirtiendo cada una por separado la siguiente correría sobre un esquema que no
-  // existe. Así se comprueba la secuencia entera, que es justo la que se va a aplicar.
-  if (simular) await client.query("begin");
-
-  for (const filename of pendientes) {
-    const sql = readFileSync(join(migrationsDir, filename), "utf8");
-
-    // Fuera de la simulación, cada archivo va dentro de su propia transacción: si una
-    // instrucción falla, se deshace el archivo entero y no queda un esquema a medias.
-    if (!simular) await client.query("begin");
-
-    try {
-      await client.query(sql);
-      await client.query("insert into schema_migrations (filename) values ($1)", [filename]);
-      if (!simular) await client.query("commit");
-      console.log(`  ${simular ? "SIMULADA" : "APLICADA"}    ${filename}`);
-      executed += 1;
-    } catch (error) {
-      await client.query("rollback");
-      console.error(`\nFalló ${filename} y se deshizo entero:\n`);
-      throw error;
+  try {
+    if (simular) {
+      // 1. En modo simulación, BEGIN debe ejecutarse antes de cualquier DDL,
+      // incluida la creación condicional de schema_migrations.
+      await client.query("begin");
+      transaccionAbierta = true;
+    } else {
+      // 2. Para escribir en desarrollo o producción, exigir autorizacion estricta.
+      await autorizarEscritura(client, {
+        modo,
+        entorno,
+        confirmacionEsperada: CONFIRMACION_MIGRAR_PRODUCCION,
+      });
     }
+
+    await client.query(`
+      create table if not exists schema_migrations (
+        filename   text        primary key,
+        applied_at timestamptz not null default now()
+      )
+    `);
+
+    const { rows } = await client.query("select filename from schema_migrations");
+    const applied = new Set((rows ?? []).map((row) => row.filename));
+
+    let executed = 0;
+    const pendientes = migrations.filter((filename) => !applied.has(filename));
+    for (const filename of migrations) {
+      if (applied.has(filename)) onLog(`  ya estaba   ${filename}`);
+    }
+
+    for (const filename of pendientes) {
+      const sql = leerSql(filename);
+
+      if (!simular) await client.query("begin");
+
+      try {
+        await client.query(sql);
+        await client.query("insert into schema_migrations (filename) values ($1)", [filename]);
+        if (!simular) await client.query("commit");
+        onLog(`  ${simular ? "SIMULADA" : "APLICADA"}    ${filename}`);
+        executed += 1;
+      } catch (error) {
+        await client.query("rollback");
+        throw error;
+      }
+    }
+
+    if (simular) {
+      await client.query("rollback");
+      transaccionAbierta = false;
+      onLog("ROLLBACK hecho: la base queda exactamente como estaba.");
+    }
+
+    return {
+      ok: true,
+      executed,
+      simular,
+      destino: modo === "aplicar-produccion" ? "produccion" : simular ? "simulacion" : "desarrollo",
+    };
+  } catch (error) {
+    if (simular && transaccionAbierta) {
+      try {
+        await client.query("rollback");
+      } catch {
+        // ignorar fallo secundario al revertir
+      }
+    }
+    throw error;
+  }
+}
+
+async function principal() {
+  const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const migrationsDir = join(projectRoot, "db");
+
+  const modo = decidirModoMigracion(process.argv.slice(2));
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    console.error(
+      "Falta DATABASE_URL.\n\n" +
+        "Abre el archivo frontend/.env.local y pega ahí la cadena de conexión de\n" +
+        "Neon, entre las comillas. Luego vuelve a ejecutar este comando.",
+    );
+    process.exit(1);
   }
 
-  if (simular) {
-    await client.query("rollback");
-    console.log("");
-    console.log("ROLLBACK hecho: la base queda exactamente como estaba.");
-  }
+  neonConfig.webSocketConstructor = globalThis.WebSocket;
 
-  console.log("");
+  const migrations = readdirSync(migrationsDir)
+    .filter((file) => file.endsWith(".sql"))
+    .sort();
+
+  const client = new Client(connectionString);
+
+  console.log(`Base de datos:  ${new URL(connectionString).host}`);
+  console.log(`Migraciones:    ${migrations.length} archivo(s) en db/`);
   console.log(
-    executed === 0
-      ? "La base de datos ya estaba al día."
-      : `Listo: ${executed} migración(es) ${simular ? "simulada(s)" : "aplicada(s)"}.`,
+    `Modo:           ${
+      modo === "simular"
+        ? "SIMULACIÓN (termina en ROLLBACK)"
+        : modo === "aplicar-produccion"
+        ? "APLICACIÓN EN PRODUCCIÓN (tres llaves verificadas)"
+        : "aplicación en desarrollo sellado"
+    }`,
   );
-} finally {
-  await client.end();
+  console.log("");
+
+  await client.connect();
+
+  try {
+    const res = await ejecutarMigrador({
+      client,
+      migrations,
+      leerSql: (filename) => readFileSync(join(migrationsDir, filename), "utf8"),
+      modo,
+      entorno: process.env,
+      onLog: (msg) => console.log(msg),
+    });
+
+    console.log("");
+    console.log(
+      res.executed === 0
+        ? "La base de datos ya estaba al día."
+        : `Listo: ${res.executed} migración(es) ${res.simular ? "simulada(s)" : "aplicada(s)"}.`,
+    );
+  } finally {
+    await client.end();
+  }
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  principal().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });
 }

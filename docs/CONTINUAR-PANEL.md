@@ -106,12 +106,27 @@ Subproyecto 9A **completado** en la rama `feat/envios-tarifas` (HEAD: `d4b5e9e`)
 - **Catálogo geográfico INE**: 22 departamentos y 340 municipios en `db/datos/geografia-gt.json`.
 - **Pruebas**: 628 unitarias (`test:datos`), 216 administrativas (`test:admin`), 71 specs de Playwright con el nuevo `admin-envios.spec.ts`.
 
+**Herramientas protegidas de migración, verificación y despliegue de 9A:**
+
+- **Migrador (`scripts/migrate.mjs` / `npm run db:migrar`):**
+  - Modos: `--simular` (ejecuta todo en transacción con `ROLLBACK` incondicional garantizado antes de cualquier DDL); `--aplicar` (desarrollo sellado); `--aplicar-produccion` (exige las 3 llaves: endpoint canónico de producción, `PERMITIR_ESCRITURA_PRODUCCION="true"` y `CONFIRMAR_PRODUCCION="migrar-en-produccion"`).
+  - Las migraciones `012`, `013` y `014` **no siembran zonas ni tarifas**: crean el esquema e índices dejando `shipping_zones`, `shipping_zone_areas` y `shipping_rates` con 0 filas.
+- **Migración de códigos de direcciones (`scripts/migrar-codigos-direcciones.mjs` / `npm run direcciones:migrar-codigos`):**
+  - Modo por defecto: **simulación** (informa de pendientes, emparejadas y ambiguas, finalizando siempre en `ROLLBACK`).
+  - `--aplicar-produccion`: exige endpoint de producción, `PERMITIR_ESCRITURA_PRODUCCION="true"` y `CONFIRMAR_PRODUCCION="migrar-codigos-direcciones"`.
+  - Invariantes de seguridad: **NUNCA modifica los textos originales** de `departamento` ni `municipio`; solo rellena `departamento_codigo` y `municipio_codigo` de forma unívoca según el catálogo oficial INE; **prohibido registrar o imprimir datos personales ni IDs de clientes** en logs (solo conteos agregados); se ejecuta dentro de una única transacción atómica.
+- **Verificación de invariantes (`scripts/verificar-envios.mjs` / `npm run envios:verificar`):**
+  - Ejecuta 16 invariantes de seguridad contra la base real dentro de una transacción que **SIEMPRE hace `ROLLBACK`** en el bloque `finally`, sin persistir ningún dato de prueba.
+  - Soporta `--produccion` (comprueba endpoint canónico y rechaza desarrollo; rechaza producción si falta `--produccion`) y `--contar` (valida 0 filas residuales antes y después).
+- **Recuperación en caso de fallo:**
+  - Si cualquier paso falla, la transacción en curso revierte (`ROLLBACK`) dejando la base en su estado previo idéntico. En caso de corte catastrófico previo a la confirmación, se dispone de la rama de respaldo en Neon para restauración instantánea sin pérdida de datos.
+
 **Datos que debe cargar el dueño antes de activar envíos en producción:**
 1. Crear las zonas de reparto reales desde el panel `/admin/envios`.
 2. Asignar coberturas geográficas a cada zona.
 3. Publicar tarifas oficiales (importe, umbral de gratuidad, plazos).
 4. Configurar la recogida en tienda si aplica.
-5. Ejecutar `npm run direcciones:migrar-codigos` en producción para rellenar los códigos INE de las direcciones existentes.
+5. Ejecutar `npm run direcciones:migrar-codigos -- --aplicar-produccion` en producción para rellenar los códigos INE de las direcciones existentes.
 
 **Ramas de Neon creadas para 9A** (no borrar hasta que la rama se integre en `main`):
 - `envios-tarifas-dev` (ep-plain-frog-av82z3py): solo esquema, para pruebas de desarrollo.
