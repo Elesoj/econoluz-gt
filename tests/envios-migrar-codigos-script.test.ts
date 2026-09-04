@@ -38,6 +38,9 @@ function crearClienteMock({ filas = [] }: { filas?: FilaDireccionMock[] } = {}) 
     async query(sql: string | { text?: string }, params: unknown[] = []) {
       const texto = typeof sql === "string" ? sql.trim() : (sql?.text ?? "");
       sentencias.push({ sql: texto, params });
+      if (texto.includes("from information_schema.columns")) {
+        return { rows: [{ column_name: "departamento_codigo" }] };
+      }
       if (texto.includes("from user_addresses")) {
         return { rows: filas };
       }

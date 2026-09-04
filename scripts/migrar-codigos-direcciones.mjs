@@ -72,12 +72,28 @@ export async function procesarMigracionDirecciones({
       transaccionAbierta = true;
     }
 
-    const { rows } = await cliente.query(`
-      select id, departamento, municipio
-      from user_addresses
-      where departamento_codigo is null or municipio_codigo is null
-      order by id
+    const { rows: colCheck } = await cliente.query(`
+      select column_name
+      from information_schema.columns
+      where table_name = 'user_addresses'
+        and column_name = 'departamento_codigo'
     `);
+    const columnasExisten = colCheck.length > 0;
+
+    if (!columnasExisten && !simular) {
+      throw new Error("No se han aplicado las migraciones de 9A (falta departamento_codigo en user_addresses).");
+    }
+
+    const consultaSql = columnasExisten
+      ? `select id, departamento, municipio
+         from user_addresses
+         where departamento_codigo is null or municipio_codigo is null
+         order by id`
+      : `select id, departamento, municipio
+         from user_addresses
+         order by id`;
+
+    const { rows } = await cliente.query(consultaSql);
 
     const totalPendientes = rows.length;
     onLog(`Direcciones con códigos pendientes: ${totalPendientes}`);
@@ -94,12 +110,14 @@ export async function procesarMigracionDirecciones({
       );
 
       if (res) {
-        await cliente.query(
-          `update user_addresses
-           set departamento_codigo = $1, municipio_codigo = $2
-           where id = $3`,
-          [res.departamento, res.codigo, fila.id],
-        );
+        if (columnasExisten) {
+          await cliente.query(
+            `update user_addresses
+             set departamento_codigo = $1, municipio_codigo = $2
+             where id = $3`,
+            [res.departamento, res.codigo, fila.id],
+          );
+        }
         emparejadas++;
       } else {
         noEmparejadas++;
