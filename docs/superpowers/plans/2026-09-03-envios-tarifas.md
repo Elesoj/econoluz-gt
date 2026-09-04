@@ -1380,7 +1380,7 @@ git commit -m "feat(envios): verificacion de invariantes contra base real"
 - Produce:
   `resumirCobertura(municipios, cobertura, zonas, tarifas): { codigo: string; nombre: string; estado: "completa" | "parcial" | "sin_cobertura"; municipiosExcluidos: string[] }[]`.
 
-- [ ] **Paso 1: Escribir la prueba**
+- [x] **Paso 1: Escribir la prueba**
 
 ```ts
 // tests/envios-cobertura.test.ts
@@ -1424,15 +1424,15 @@ test("sin ningún registro el departamento no tiene cobertura", () => {
 });
 ```
 
-- [ ] **Paso 2: Ejecutar y verla fallar**
+- [x] **Paso 2: Ejecutar y verla fallar**
 
-- [ ] **Paso 3: Implementar `resumirCobertura` municipio a municipio**
+- [x] **Paso 3: Implementar `resumirCobertura` municipio a municipio**
 
 Reutiliza `resolverZona` de la tarea 7: cada municipio se resuelve igual que en el checkout,
 y el estado del departamento se agrega después. Así el panel y el cliente **no pueden
 discrepar**.
 
-- [ ] **Paso 4: Escribir la portada**
+- [x] **Paso 4: Escribir la portada**
 
 Componente de servidor. Abre con el recuento y la frase honesta:
 
@@ -1445,7 +1445,7 @@ Componente de servidor. Abre con el recuento y la frase honesta:
 
 Y una tabla con los tres estados, nombrando los municipios excluidos de los parciales.
 
-- [ ] **Paso 5: Ejecutar, comprobar en el navegador y hacer commit**
+- [x] **Paso 5: Ejecutar, comprobar en el navegador y hacer commit**
 
 ```bash
 npm run typecheck

@@ -19,6 +19,12 @@ const SECCIONES = [
     estado: "Disponible",
     href: "/admin/proyectos",
   },
+  {
+    titulo: "Envíos y tarifas",
+    descripcion: "Zonas de reparto, tarifas oficiales y cobertura nacional.",
+    estado: "Disponible",
+    href: "/admin/envios",
+  },
 ];
 
 export default async function PanelPage() {
