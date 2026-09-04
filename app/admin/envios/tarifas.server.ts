@@ -46,11 +46,11 @@ export async function publicarTarifaEnBase(
 
   await escribir(
     async (ejecutar) => {
-      const ahora = new Date();
-
       // 1. Bloquear: serializa sustituciones concurrentes sobre la zona y su tarifa vigente.
       // Primero bloqueamos la fila de la zona para garantizar serialización incluso si aún no hay tarifas.
       await ejecutar("select id from shipping_zones where id = $1 for update", [zoneId]);
+      const filasAhora = (await ejecutar("select now() as ahora")) as { ahora: Date | string }[];
+      const ahora = filasAhora[0]?.ahora ?? new Date();
 
       const vigentes = (await ejecutar(SQL_BLOQUEAR_TARIFA_VIGENTE, [zoneId])) as {
         id: number | string;

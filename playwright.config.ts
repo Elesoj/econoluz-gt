@@ -16,6 +16,7 @@ export default defineConfig({
     "ui-botones.spec.ts",
     "tienda-carrito.spec.ts",
     "cuenta.spec.ts",
+    "admin-envios.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,

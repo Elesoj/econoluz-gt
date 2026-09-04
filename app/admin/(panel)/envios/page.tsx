@@ -5,20 +5,26 @@ import { verificarSesion } from "../../auth/authorization.server";
 import { obtenerResumenCoberturaPais } from "../../envios/cobertura.server";
 import { obtenerZonasAdmin } from "../../envios/zonas.server";
 import { obtenerRecogidaEnTienda } from "../../../lib/ajustes.server";
-import { configurarRecogida } from "../../envios/actions";
+import { configurarRecogida, crearZona } from "../../envios/actions";
 import { formatPrice } from "../../../lib/formatters";
 
 export const dynamic = "force-dynamic";
 
-export default async function EnviosPage() {
+export default async function EnviosPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await verificarSesion();
+
+  const consulta = searchParams ? await searchParams : {};
+  const error = typeof consulta.error === "string" ? consulta.error : "";
 
   const [{ departamentos, estadisticas }, zonas, recogida] = await Promise.all([
     obtenerResumenCoberturaPais(),
     obtenerZonasAdmin(),
     obtenerRecogidaEnTienda(),
   ]);
-
 
   const departamentosSinCobertura = departamentos.filter((d) => d.estado === "sin_cobertura");
 
@@ -42,6 +48,12 @@ export default async function EnviosPage() {
       </section>
 
       <div className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
+        {error ? (
+          <p className="mb-6 border-l-2 border-tienda bg-neutral-50 px-4 py-3 text-sm text-tienda">
+            {error}
+          </p>
+        ) : null}
+
         {/* Encabezado honesto (§6.2 del diseño) */}
         <div className="border-l-4 border-tienda bg-neutral-50 p-6 shadow-xs">
           <p className="text-lg text-neutral-900">
@@ -177,6 +189,69 @@ export default async function EnviosPage() {
                 Cada zona agrupa coberturas y una tarifa publicada vigente.
               </p>
             </div>
+          </div>
+
+          {/* Formulario Crear Zona de Reparto */}
+          <div className="mt-6 rounded-xl border border-neutral-200 bg-neutral-50/70 p-6 shadow-xs">
+            <h3 className="text-sm font-semibold text-proyectos">Crear nueva zona de reparto</h3>
+            <p className="mt-1 text-xs text-neutral-500">
+              Registra una zona con su código identificador y método de entrega. Podrás asignar coberturas y tarifas desde su ficha.
+            </p>
+
+            <form action={crearZona} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label htmlFor="zona-nombre" className="block text-xs font-semibold text-neutral-700">
+                  Nombre de la zona *
+                </label>
+                <input
+                  id="zona-nombre"
+                  name="nombre"
+                  type="text"
+                  required
+                  placeholder="Ej. Metropolitana de Prueba"
+                  className="mt-1 min-h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-tienda focus:outline-none focus:ring-1 focus:ring-tienda"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="zona-codigo" className="block text-xs font-semibold text-neutral-700">
+                  Código / slug (inmutable) *
+                </label>
+                <input
+                  id="zona-codigo"
+                  name="codigo"
+                  type="text"
+                  required
+                  pattern="^[a-z0-9]+(-[a-z0-9]+)*$"
+                  placeholder="Ej. metropolitana-test"
+                  className="mt-1 min-h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 font-mono text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-tienda focus:outline-none focus:ring-1 focus:ring-tienda"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="zona-metodo" className="block text-xs font-semibold text-neutral-700">
+                  Método de entrega *
+                </label>
+                <select
+                  id="zona-metodo"
+                  name="metodo"
+                  defaultValue="mensajero_propio"
+                  className="mt-1 min-h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-tienda focus:outline-none focus:ring-1 focus:ring-tienda"
+                >
+                  <option value="mensajero_propio">Mensajero propio</option>
+                  <option value="paqueteria">Paquetería</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="submit"
+                  className="min-h-10 w-full rounded-md bg-proyectos px-4 py-2 text-sm font-semibold text-white hover:bg-proyectos/90 focus:outline-none focus:ring-2 focus:ring-proyectos/50 cursor-pointer"
+                >
+                  Crear zona
+                </button>
+              </div>
+            </form>
           </div>
 
           {zonas.length === 0 ? (

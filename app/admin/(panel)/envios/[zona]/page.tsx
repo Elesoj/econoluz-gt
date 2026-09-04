@@ -432,10 +432,10 @@ export default async function FichaZonaPage({
                 </div>
 
                 <div>
-                  <label htmlFor="codigo" className="block text-xs font-semibold text-neutral-700">
+                  <label htmlFor="cobertura-codigo" className="block text-xs font-semibold text-neutral-700">
                     Localidad disponible
                   </label>
-                  <select id="codigo" name="codigo" required className={`${claseCampo} mt-1 text-sm`}>
+                  <select id="cobertura-codigo" name="codigo" required className={`${claseCampo} mt-1 text-sm`}>
                     <optgroup label="Departamentos disponibles">
                       {todosDeptos.map((d) => (
                         <option key={d.codigo} value={d.codigo}>
