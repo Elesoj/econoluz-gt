@@ -5,6 +5,7 @@ import { aCentavos } from "../lib/dinero";
 import type { DestinoDeEnvio, ResultadoDeEnvio, ResultadoDeEnvioBase } from "./contratos";
 import { resolverZona, type Cobertura } from "./zonas";
 import { calcularEnvio, estaVigente, type Tarifa, type Zona } from "./tarifas";
+import { validarLineasEstimacion } from "./validacion";
 
 export type LineaDeEntrada = {
   econoluzReference: string;
@@ -90,6 +91,14 @@ export async function orquestar(
     let lineas: readonly LineaDeEntrada[] = [];
     if (estimacion) {
       lineas = opciones?.lineas ?? [];
+      const validacion = validarLineasEstimacion(lineas);
+      if (!validacion.ok) {
+        return {
+          estimacion: true,
+          tipo: "carrito_no_comprable",
+          referencias: [],
+        };
+      }
     } else {
       const carrito = await deps.leerCarrito?.();
       lineas = carrito?.lineas ?? [];

@@ -1,7 +1,7 @@
 // tests/envios-servicio.test.ts
 import test from "node:test";
 import assert from "node:assert/strict";
-import { orquestar } from "../app/envios/envios.server";
+import { orquestar, estimarEnvio } from "../app/envios/envios.server";
 import { ErrorDeDatos } from "../app/lib/datos/errores";
 
 // `orquestar` recibe sus dependencias como parámetro para poder probarse sin Neon.
@@ -146,5 +146,107 @@ test("una zona sin tarifa vigente devuelve requiere_cotizacion por sin_tarifa_vi
   if (r.tipo === "requiere_cotizacion") {
     assert.equal(r.motivo, "sin_tarifa_vigente");
   }
+});
+
+test("la estimación rechaza líneas con cantidad menor a 1", async () => {
+  let llamadoResolver = false;
+  const r = await orquestar(
+    { tipo: "destino_directo", departamentoCodigo: "01", municipioCodigo: "0101" },
+    deps({
+      resolverProductos: async () => {
+        llamadoResolver = true;
+        return { piezas: 0, subtotalCents: 0, descartadas: [] };
+      },
+    }),
+    { estimacion: true, lineas: [{ econoluzReference: "ECO-0001", cantidad: 0 }] },
+  );
+
+  assert.equal(llamadoResolver, false);
+  assert.deepEqual(r, {
+    estimacion: true,
+    tipo: "carrito_no_comprable",
+    referencias: [],
+  });
+});
+
+test("la estimación rechaza líneas con cantidad superior a 999", async () => {
+  let llamadoResolver = false;
+  const r = await orquestar(
+    { tipo: "destino_directo", departamentoCodigo: "01", municipioCodigo: "0101" },
+    deps({
+      resolverProductos: async () => {
+        llamadoResolver = true;
+        return { piezas: 0, subtotalCents: 0, descartadas: [] };
+      },
+    }),
+    { estimacion: true, lineas: [{ econoluzReference: "ECO-0001", cantidad: 1000 }] },
+  );
+
+  assert.equal(llamadoResolver, false);
+  assert.deepEqual(r, {
+    estimacion: true,
+    tipo: "carrito_no_comprable",
+    referencias: [],
+  });
+});
+
+test("la estimación rechaza más de 100 líneas", async () => {
+  let llamadoResolver = false;
+  const lineasMasDe100 = Array.from({ length: 101 }, (_, i) => ({
+    econoluzReference: `ECO-${String(i + 1).padStart(4, "0")}`,
+    cantidad: 1,
+  }));
+
+  const r = await orquestar(
+    { tipo: "destino_directo", departamentoCodigo: "01", municipioCodigo: "0101" },
+    deps({
+      resolverProductos: async () => {
+        llamadoResolver = true;
+        return { piezas: 0, subtotalCents: 0, descartadas: [] };
+      },
+    }),
+    { estimacion: true, lineas: lineasMasDe100 },
+  );
+
+  assert.equal(llamadoResolver, false);
+  assert.deepEqual(r, {
+    estimacion: true,
+    tipo: "carrito_no_comprable",
+    referencias: [],
+  });
+});
+
+test("la estimación rechaza líneas con referencia vacía", async () => {
+  let llamadoResolver = false;
+  const r = await orquestar(
+    { tipo: "destino_directo", departamentoCodigo: "01", municipioCodigo: "0101" },
+    deps({
+      resolverProductos: async () => {
+        llamadoResolver = true;
+        return { piezas: 0, subtotalCents: 0, descartadas: [] };
+      },
+    }),
+    { estimacion: true, lineas: [{ econoluzReference: "   ", cantidad: 1 }] },
+  );
+
+  assert.equal(llamadoResolver, false);
+  assert.deepEqual(r, {
+    estimacion: true,
+    tipo: "carrito_no_comprable",
+    referencias: [],
+  });
+});
+
+test("estimarEnvio rechaza directamente líneas inválidas sin consultar productos ni base de datos", async () => {
+  const r = await estimarEnvio(
+    { tipo: "destino_directo", departamentoCodigo: "01", municipioCodigo: "0101" },
+    [{ econoluzReference: "ECO-0001", cantidad: 0 }],
+  );
+
+  assert.deepEqual(r, {
+    estimacion: true,
+    tipo: "carrito_no_comprable",
+    referencias: [],
+  });
 });
 
