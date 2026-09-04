@@ -44,3 +44,61 @@ export async function leerModeloDeCatalogo(ejecutor: Ejecutor): Promise<ModeloDe
     return MODELO_POR_DEFECTO;
   }
 }
+
+/**
+ * Ajuste de recogida en tienda en app_settings.
+ *
+ * No es una zona geográfica ni una tarifa: es un método de entrega a Q0.
+ * Si el ajuste no existe, está corrupto o la base no responde, la recogida
+ * se desactiva (camino seguro y conservador).
+ */
+export type RecogidaEnTienda = {
+  activa: boolean;
+  texto: string;
+};
+
+export const RECOGIDA_POR_DEFECTO: RecogidaEnTienda = {
+  activa: false,
+  texto: "",
+};
+
+export const CLAVE_RECOGIDA_TIENDA = "recogida_en_tienda";
+
+export function leerRecogidaEnTienda(valor: unknown): RecogidaEnTienda {
+  if (valor === undefined || valor === null) {
+    return { ...RECOGIDA_POR_DEFECTO };
+  }
+
+  let obj: unknown = valor;
+
+  if (typeof valor === "string") {
+    try {
+      obj = JSON.parse(valor);
+    } catch {
+      return { ...RECOGIDA_POR_DEFECTO };
+    }
+  }
+
+  if (typeof obj !== "object" || obj === null || Array.isArray(obj)) {
+    return { ...RECOGIDA_POR_DEFECTO };
+  }
+
+  const candidato = obj as Record<string, unknown>;
+  const activa = candidato.activa === true;
+  const textoCrudo = typeof candidato.texto === "string" ? candidato.texto : "";
+  const texto = textoCrudo.trim().slice(0, 200);
+
+  return { activa, texto };
+}
+
+export async function leerAjusteRecogidaEnTienda(ejecutor: Ejecutor): Promise<RecogidaEnTienda> {
+  try {
+    const filas = await ejecutor("select valor from app_settings where clave = $1", [
+      CLAVE_RECOGIDA_TIENDA,
+    ]);
+    return leerRecogidaEnTienda(filas[0]?.valor);
+  } catch {
+    return { ...RECOGIDA_POR_DEFECTO };
+  }
+}
+

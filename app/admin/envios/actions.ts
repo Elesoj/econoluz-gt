@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
@@ -615,3 +615,28 @@ export async function borrarBorradorDeTarifa(tarifaId: number, slugZona?: string
 
   redirect(`/admin/envios/${slugZona || ""}?guardado=1`);
 }
+
+/**
+ * 11. configurarRecogida(formData: FormData)
+ * Actualiza la configuración de recogida en tienda en app_settings.
+ * Protegido por "envios:escribir", audita e invalida la caché de envíos.
+ */
+export async function configurarRecogida(formData: FormData) {
+  const admin = await verificarPermisoParaAccion("envios:escribir");
+
+  const activa = formData.get("activa") === "on";
+  const texto = String(formData.get("texto") ?? "");
+
+  const { guardarRecogidaEnTienda } = await import("../../lib/ajustes.server");
+
+  try {
+    await guardarRecogidaEnTienda({ activa, texto }, admin.id);
+  } catch (err) {
+    const msg =
+      err instanceof Error ? err.message : "Error al guardar la configuración de recogida en tienda.";
+    redirect(`/admin/envios?error=${encodeURIComponent(msg)}`);
+  }
+
+  redirect("/admin/envios?guardado=1");
+}
+

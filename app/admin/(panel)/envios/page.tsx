@@ -1,9 +1,11 @@
-﻿// app/admin/(panel)/envios/page.tsx
+// app/admin/(panel)/envios/page.tsx
 
 import Link from "next/link";
 import { verificarSesion } from "../../auth/authorization.server";
 import { obtenerResumenCoberturaPais } from "../../envios/cobertura.server";
 import { obtenerZonasAdmin } from "../../envios/zonas.server";
+import { obtenerRecogidaEnTienda } from "../../../lib/ajustes.server";
+import { configurarRecogida } from "../../envios/actions";
 import { formatPrice } from "../../../lib/formatters";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +13,12 @@ export const dynamic = "force-dynamic";
 export default async function EnviosPage() {
   await verificarSesion();
 
-  const [{ departamentos, estadisticas }, zonas] = await Promise.all([
+  const [{ departamentos, estadisticas }, zonas, recogida] = await Promise.all([
     obtenerResumenCoberturaPais(),
     obtenerZonasAdmin(),
+    obtenerRecogidaEnTienda(),
   ]);
+
 
   const departamentosSinCobertura = departamentos.filter((d) => d.estado === "sin_cobertura");
 
@@ -95,6 +99,74 @@ export default async function EnviosPage() {
             <p className="mt-1 text-xs text-neutral-500">Total nacional</p>
           </div>
         </dl>
+
+        {/* Recogida en tienda (§4.9 del diseño y Tarea 14) */}
+        <section className="mt-12 border border-neutral-200 bg-white p-6 shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-200 pb-4">
+            <div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-semibold text-proyectos">Recogida en tienda</h2>
+                {recogida.activa ? (
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
+                    Activa (Q0)
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-600 border border-neutral-300">
+                    Desactivada
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-neutral-600">
+                Método de entrega sin coste (Q0) que no depende de geografía. Se almacena en la configuración de la tienda.
+              </p>
+            </div>
+          </div>
+
+          <form action={configurarRecogida} className="mt-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="recogida-activa"
+                name="activa"
+                defaultChecked={recogida.activa}
+                className="mt-1 h-4 w-4 rounded border-neutral-300 text-tienda focus:ring-tienda"
+              />
+              <label htmlFor="recogida-activa" className="text-sm font-medium text-neutral-900 cursor-pointer">
+                Habilitar recogida en tienda para los clientes
+                <span className="block text-xs font-normal text-neutral-500">
+                  Si se desactiva, los clientes solo podrán elegir envíos a domicilio en las zonas con cobertura y tarifa.
+                </span>
+              </label>
+            </div>
+
+            <div>
+              <label htmlFor="recogida-texto" className="block text-sm font-medium text-neutral-900">
+                Dirección y horario del punto de entrega
+              </label>
+              <p className="text-xs text-neutral-500 mb-1">
+                Información visible para el cliente durante el pedido (máximo 200 caracteres).
+              </p>
+              <textarea
+                id="recogida-texto"
+                name="texto"
+                rows={2}
+                maxLength={200}
+                defaultValue={recogida.texto}
+                placeholder="Ej.: 21 Avenida 0-18, zona 15, Ciudad de Guatemala. Lunes a viernes de 8:00 a 17:00."
+                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-tienda focus:outline-none focus:ring-1 focus:ring-tienda"
+              />
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="submit"
+                className="rounded-md bg-proyectos px-4 py-2 text-sm font-semibold text-white hover:bg-proyectos/90 focus:outline-none focus:ring-2 focus:ring-proyectos/50 cursor-pointer"
+              >
+                Guardar ajuste de recogida
+              </button>
+            </div>
+          </form>
+        </section>
 
         {/* Listado de Zonas de Reparto */}
         <section className="mt-12">

@@ -265,8 +265,9 @@ export async function orquestar(
 
 async function leerConfiguracionReal(): Promise<ConfiguracionEnvios> {
   const { leer } = await import("../lib/datos");
+  const { obtenerRecogidaEnTienda } = await import("../lib/ajustes.server");
 
-  const [areas, zonas, tarifas] = await Promise.all([
+  const [areas, zonas, tarifas, recogida] = await Promise.all([
     leer<{
       zone_id: number | string;
       departamento_codigo: string | null;
@@ -303,11 +304,13 @@ async function leerConfiguracionReal(): Promise<ConfiguracionEnvios> {
          from shipping_rates
         where publicada = true`,
     ),
+    obtenerRecogidaEnTienda(),
   ]);
 
   return {
-    // Ruling 3: recogida apagada por defecto hasta la tarea 14
-    recogidaActiva: false,
+    // Cierre del Ruling 3: recogida leída de app_settings (apagada por defecto)
+    recogidaActiva: recogida.activa,
+
     cobertura: areas.map((a) => ({
       zoneId: Number(a.zone_id),
       departamentoCodigo: a.departamento_codigo ? String(a.departamento_codigo).trim() : null,

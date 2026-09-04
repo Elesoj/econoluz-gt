@@ -1,8 +1,17 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
-import { ErrorDeDatos, leer, registrar, type Ejecutor } from "./datos";
-import { leerModeloDeCatalogo, MODELO_POR_DEFECTO, type ModeloDeCatalogo } from "./ajustes";
+import { unstable_cache, updateTag } from "next/cache";
+import { ErrorDeDatos, escribir, leer, registrar, type Ejecutor } from "./datos";
+import {
+  CLAVE_RECOGIDA_TIENDA,
+  leerAjusteRecogidaEnTienda,
+  leerModeloDeCatalogo,
+  leerRecogidaEnTienda,
+  MODELO_POR_DEFECTO,
+  RECOGIDA_POR_DEFECTO,
+  type ModeloDeCatalogo,
+  type RecogidaEnTienda,
+} from "./ajustes";
 
 /**
  * Lectura de la bandera del modelo de catálogo contra Neon.
@@ -53,3 +62,75 @@ export async function obtenerModeloDeCatalogo(): Promise<ModeloDeCatalogo> {
     return MODELO_POR_DEFECTO;
   }
 }
+
+const leerRecogidaConCache = unstable_cache(
+  async (): Promise<RecogidaEnTienda> => leerAjusteRecogidaEnTienda(ejecutor),
+
+  ["recogida-en-tienda"],
+  { tags: ["envios-tarifas"], revalidate: SEGUNDOS_DE_CACHE },
+);
+
+export async function obtenerRecogidaEnTienda(): Promise<RecogidaEnTienda> {
+  if (!process.env.DATABASE_URL) {
+    return { ...RECOGIDA_POR_DEFECTO };
+  }
+
+  try {
+    return await leerRecogidaConCache();
+  } catch (error) {
+    registrar("error", "ajustes-recogida-tienda", {
+      causa: error instanceof ErrorDeDatos ? error.causa : "desconocida",
+    });
+    return { ...RECOGIDA_POR_DEFECTO };
+  }
+}
+
+export async function guardarRecogidaEnTienda(
+  config: RecogidaEnTienda,
+  actorId: string,
+): Promise<void> {
+  const normalizada = leerRecogidaEnTienda(config);
+  const valorJson = JSON.stringify(normalizada);
+
+  await escribir(
+    async (ejecutar) => {
+      const anteriores = (await ejecutar(
+        "select valor from app_settings where clave = $1 for update",
+        [CLAVE_RECOGIDA_TIENDA],
+      )) as { valor: string }[];
+
+      const anterior = anteriores[0] ? leerRecogidaEnTienda(anteriores[0].valor) : null;
+
+      await ejecutar(
+        `insert into app_settings (clave, valor, actualizado_en, actualizado_por)
+         values ($1, $2, now(), $3)
+         on conflict (clave) do update
+           set valor = excluded.valor,
+               actualizado_en = now(),
+               actualizado_por = excluded.actualizado_por`,
+        [CLAVE_RECOGIDA_TIENDA, valorJson, actorId],
+      );
+
+      await ejecutar(
+        `insert into audit_log (actor_tipo, actor_id, accion, entidad, entidad_id, antes, despues)
+         values ('admin', $1, 'configurar_recogida', 'app_setting', $2, $3::jsonb, $4::jsonb)`,
+        [
+          actorId,
+          CLAVE_RECOGIDA_TIENDA,
+          anterior ? JSON.stringify(anterior) : null,
+          valorJson,
+        ],
+      );
+    },
+    { suceso: "guardar-recogida-tienda" },
+  );
+
+  try {
+    updateTag("envios-tarifas");
+  } catch (error) {
+    registrar("error", "cache-envios-no-invalidada", {
+      clase: error instanceof Error ? error.constructor.name : "desconocida",
+    });
+  }
+}
+
