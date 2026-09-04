@@ -36,6 +36,16 @@ alter table user_addresses
 -- sea de ese departamento**; la compuesta sí. Es `match simple`, de modo que una dirección
 -- a medio resolver —los dos códigos nulos— sigue siendo legal, y el `check` cierra el
 -- único hueco que eso deja: un municipio sin su departamento.
+--
+-- El `drop constraint if exists` va delante por coherencia interna, no porque el archivo
+-- tenga que poder ejecutarse dos veces a mano —eso lo garantiza `schema_migrations`—:
+-- todo lo demás aquí es `if not exists` u `or replace`, y `add constraint` a secas sería
+-- la única sentencia por la que una reejecución parcial fallaría a mitad. Mismo patrón
+-- que `010_catalogo_relacional.sql`.
+alter table user_addresses
+  drop constraint if exists user_addresses_municipio_del_departamento,
+  drop constraint if exists user_addresses_municipio_exige_departamento;
+
 alter table user_addresses
   add constraint user_addresses_municipio_del_departamento
     foreign key (municipio_codigo, departamento_codigo)
@@ -104,6 +114,12 @@ create unique index if not exists shipping_zone_areas_departamento_unico
 create unique index if not exists shipping_zone_areas_municipio_unico
   on shipping_zone_areas (municipio_codigo) where municipio_codigo is not null;
 
+-- `zone_id` es una clave foránea `on delete restrict` y **Postgres no indexa el lado
+-- hijo**: sin este índice, cada intento de borrar o modificar una zona escanea entera la
+-- tabla de cobertura para comprobar que nadie la referencia. Los dos índices únicos de
+-- arriba no sirven para eso, porque van por código geográfico, no por zona.
+create index if not exists shipping_zone_areas_zone_id_idx on shipping_zone_areas (zone_id);
+
 -- ---------------------------------------------------------------------------
 -- §4.7  `shipping_rates`
 -- ---------------------------------------------------------------------------
@@ -154,6 +170,18 @@ create table if not exists shipping_rates (
 -- nada. Cobrar Q35 y regalar el envío desde Q20 puede ser una promoción deliberada. El
 -- panel advierte, no bloquea (§6.5).
 
+-- El mismo caso que en la cobertura, y por tres motivos:
+--
+-- 1. `zone_id` es una clave foránea `on delete restrict` y **Postgres no indexa el lado
+--    hijo**, así que sin este índice cada borrado o modificación de una zona escanea la
+--    tabla de tarifas completa.
+-- 2. El índice que crea el `exclude` es **GiST y parcial**: solo cubre las publicadas, de
+--    modo que los borradores quedarían sin índice ninguno.
+-- 3. Un GiST sobre `(zone_id, periodo)` tampoco es el índice que uno quiere para resolver
+--    una igualdad simple por zona; para eso está el btree.
+--
+-- Precedente exacto en casa: `010_catalogo_relacional.sql` crea `product_prices_producto_idx`
+-- junto a su propio `exclude` parcial.
 create index if not exists shipping_rates_zone_id_idx on shipping_rates (zone_id);
 
 -- ---------------------------------------------------------------------------
@@ -180,8 +208,9 @@ begin
        or new.plazo_min_dias is distinct from old.plazo_min_dias
        or new.plazo_max_dias is distinct from old.plazo_max_dias
        or new.zone_id is distinct from old.zone_id
-       or new.vigente_desde is distinct from old.vigente_desde then
-      raise exception 'Una tarifa publicada no cambia sus campos economicos';
+       or new.vigente_desde is distinct from old.vigente_desde
+       or new.creado_en is distinct from old.creado_en then
+      raise exception 'Una tarifa publicada no cambia sus campos económicos';
     end if;
     if not new.publicada then
       raise exception 'Una tarifa publicada no se despublica';
@@ -189,19 +218,40 @@ begin
     if old.vigente_hasta is not null and new.vigente_hasta is distinct from old.vigente_hasta then
       raise exception 'La vigencia de una tarifa publicada se cierra una sola vez';
     end if;
+    -- Cerrar a futuro es programar una despublicación, justo lo que §4.8.1 saca del
+    -- alcance, y además es irreversible: la regla de «una sola vez» impide corregir la
+    -- fecha, `shipping_rates_no_borrar()` impide borrar la fila, y mientras tanto su
+    -- `periodo` ocupa el `exclude` de la zona, que no puede publicar la sustituta porque
+    -- el `insert` exige `vigente_desde` no futuro. La zona se quedaría congelada.
+    if old.vigente_hasta is null and new.vigente_hasta > now() then
+      raise exception 'La vigencia de una tarifa publicada se cierra en el momento, no a futuro';
+    end if;
   end if;
   return new;
 end;
 $$ language plpgsql;
 
+drop trigger if exists shipping_rates_no_reescribir on shipping_rates;
 create trigger shipping_rates_no_reescribir
   before update on shipping_rates
   for each row execute function shipping_rates_inmutable();
 
 -- Sin programación futura: una tarifa se publica abierta y en el momento.
+--
+-- Va atado a `insert` **y a `update`**, y guardado por la **transición** a publicada, no
+-- por el estado. Si solo mirase el `insert`, publicar un borrador con un `update` se
+-- saltaría la prohibición entera: `publicada` nace en `false` y §4.7 admite borradores,
+-- así que un borrador con `vigente_desde` en el futuro y `vigente_hasta` ya informado
+-- pasaría a publicado sin que nadie lo mirase —`shipping_rates_inmutable()` no hace nada
+-- porque `old.publicada` es falso—, y la fila quedaría publicada, programada,
+-- inmodificable e imborrable, ocupando el `exclude` de su zona hasta la fecha de cierre.
+--
+-- La guarda por transición es la que deja pasar el cierre legítimo de §6.4, que pone
+-- `vigente_hasta` sobre una fila **ya** publicada: ahí `old.publicada` es verdadero y esta
+-- comprobación no se aplica. Quien vigila ese caso es `shipping_rates_inmutable()`.
 create or replace function shipping_rates_sin_programar() returns trigger as $$
 begin
-  if new.publicada then
+  if new.publicada and (tg_op = 'INSERT' or not old.publicada) then
     if new.vigente_hasta is not null then
       raise exception 'Una tarifa se publica abierta, sin fecha de fin';
     end if;
@@ -213,8 +263,9 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists shipping_rates_no_programar on shipping_rates;
 create trigger shipping_rates_no_programar
-  before insert on shipping_rates
+  before insert or update on shipping_rates
   for each row execute function shipping_rates_sin_programar();
 
 -- Borrar una tarifa publicada no está permitido; se sustituye.
@@ -227,9 +278,53 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists shipping_rates_borrado_restringido on shipping_rates;
 create trigger shipping_rates_borrado_restringido
   before delete on shipping_rates
   for each row execute function shipping_rates_no_borrar();
+
+-- ---------------------------------------------------------------------------
+-- `actualizado_en` se mantiene solo
+-- ---------------------------------------------------------------------------
+--
+-- El diseño global §5.1 lo pide como norma, y `002_products.sql` y `004_projects.sql` ya
+-- lo cumplen. `011_carrito.sql` es la excepción, no el precedente: un carrito es estado
+-- efímero, mientras que una tarifa es el registro de con qué configuración se le cobró a
+-- un pedido. Y sobre todo, esta migración existe para no confiar los invariantes al
+-- código: «la aplicación se acordará de escribirlo en todos los caminos de edición» es
+-- justo esa clase de confianza.
+--
+-- No se estorba con `shipping_rates_inmutable()`: `actualizado_en` no es ninguno de los
+-- nueve campos que vigila, y los disparadores `before` de fila se ejecutan por orden
+-- alfabético de nombre, así que `no_programar` y `no_reescribir` corren antes que `touch`.
+--
+-- `shipping_zone_areas` no tiene esta columna y por eso no lleva disparador.
+
+create or replace function shipping_zones_touch_actualizado_en() returns trigger as $$
+begin
+  new.actualizado_en = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists shipping_zones_touch_actualizado_en on shipping_zones;
+create trigger shipping_zones_touch_actualizado_en
+  before update on shipping_zones
+  for each row
+  execute function shipping_zones_touch_actualizado_en();
+
+create or replace function shipping_rates_touch_actualizado_en() returns trigger as $$
+begin
+  new.actualizado_en = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists shipping_rates_touch_actualizado_en on shipping_rates;
+create trigger shipping_rates_touch_actualizado_en
+  before update on shipping_rates
+  for each row
+  execute function shipping_rates_touch_actualizado_en();
 
 -- ---------------------------------------------------------------------------
 -- §7.3  El rol público no ve nada de esto

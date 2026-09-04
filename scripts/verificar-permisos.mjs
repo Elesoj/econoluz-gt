@@ -38,6 +38,17 @@ const PROHIBIDAS = [
   "product_prices",
   "carts",
   "cart_items",
+  // Las cinco tablas nuevas de 9A (migraciones 012 y 013). La geografía tampoco es
+  // pública: el catálogo no la necesita, y una tabla que no hace falta conceder es una
+  // que se deniega. Las direcciones se resuelven desde el servidor con la conexión de
+  // aplicación. Las zonas, su cobertura y sus tarifas son configuración interna —notas y
+  // límites de cotización incluidos— y el importe de envío lo calcula el servidor, igual
+  // que los precios.
+  "geo_departamentos",
+  "geo_municipios",
+  "shipping_zones",
+  "shipping_zone_areas",
+  "shipping_rates",
 ];
 
 const identificador = (nombre) => {
