@@ -14,7 +14,12 @@ const ESPACIO = 180; // por debajo es kerning, por encima es un espacio real
 
 const rutaPdf = process.argv[2];
 if (!rutaPdf) {
-  console.error("Uso: node ./scripts/preparar-geografia.mjs <ruta-al-pdf>");
+  console.error(
+    "Uso: node ./scripts/preparar-geografia.mjs <ruta-al-pdf>\n" +
+      "El PDF no viaja en el repositorio. Se descarga de:\n" +
+      "  https://www.ine.gob.gt/wp-content/uploads/2025/06/BOLETA-ENEIC_LARGA.pdf\n" +
+      "(o se usa la copia ya verificada en .superpowers/sdd/2026-09-03-envios-tarifas/).",
+  );
   process.exit(1);
 }
 
@@ -68,7 +73,7 @@ function streamDeObjeto(numero) {
 // cada uno por inflateSync, ignorando los que fallen (imágenes y streams sin
 // comprimir). La tabla vive en el único stream que contiene la cadena "Amatitl"
 // (de "Amatitlán", el municipio que aparece en la tabla de códigos).
-function localizarStreamDeLaTabla(pdfBuffer) {
+function localizarStreamDeLaTabla() {
   const marcaObj = /(\d+)\s+\d+\s+obj/g;
   let m;
   while ((m = marcaObj.exec(textoLatin1)) !== null) {
@@ -275,6 +280,13 @@ function separarCodigosYNombres(fragmentos) {
   return { codigos, nombres };
 }
 
+// Completa con un cero inicial los códigos de tres cifras (departamentos 01
+// a 09): la boleta los imprime como `101`, `923`, etc., y aquí se guardan
+// siempre como `char(4)`.
+function normalizarCodigo(codigo) {
+  return codigo.length === 3 ? `0${codigo}` : codigo;
+}
+
 // 4. Emparejar por columna. El nombre de un código está a su derecha y algo
 // más abajo. Tolerancias verificadas: dx = nombre.x - codigo.x en [-30, 110]
 // y dy = codigo.y - nombre.y en [-10, 30]; entre los candidatos, gana el de
@@ -314,9 +326,9 @@ function emparejarCodigosConNombres(codigos, nombres) {
   }
 
   return codigos.map((cod, i) => {
-    // 5. Completar con cero inicial los códigos de tres cifras y derivar el
-    // departamento de los dos primeros dígitos.
-    const codigoNormalizado = cod.codigo.length === 3 ? `0${cod.codigo}` : cod.codigo;
+    // 5. Derivar el departamento de los dos primeros dígitos del código ya
+    // normalizado a cuatro cifras.
+    const codigoNormalizado = normalizarCodigo(cod.codigo);
     const departamento = codigoNormalizado.slice(0, 2);
     const j = nombrePorCodigo[i];
     return {
@@ -329,10 +341,13 @@ function emparejarCodigosConNombres(codigos, nombres) {
 
 // Correcciones puntuales respaldadas por la página 7 del PDF y documentadas
 // en db/datos/geografia-gt.FUENTE.md. Se aplican DESPUÉS del emparejado
-// automático y el script avisa de cada una, para que ninguna pase
-// inadvertida.
+// automático. El script avisa solo cuando una corrección tiene efecto de
+// verdad (cambia el nombre que salió del emparejado); si ya no hace falta
+// -como le pasa hoy a `0923`, que el extractor ya resuelve solo- no avisa,
+// y también avisa por separado si una corrección deja de ser necesaria, para
+// que ese cambio de estado no pase inadvertido.
 const CORRECCIONES = {
-  "0923": "La Esperanza",           // legible en la página 7; falla la extracción por coordenadas
+  "0923": "La Esperanza",           // legible en la página 7 (ver FUENTE.md para el detalle)
   "1330": "Santiago Chimaltenango", // errata tipográfica del documento
 };
 
@@ -346,15 +361,19 @@ function aplicarCorrecciones(municipios) {
     if (fila.nombre !== nombre) {
       console.warn(`Corrección aplicada en ${codigo}: ${JSON.stringify(fila.nombre)} -> ${nombre}`);
       fila.nombre = nombre;
+    } else {
+      console.warn(`Corrección de ${codigo} ya no hace falta: el emparejado automático ya trae "${nombre}". Se puede retirar de CORRECCIONES.`);
     }
   }
 }
 
-// Nombres oficiales de los 22 departamentos de Guatemala, división
-// administrativa fija validada por el DINESE (§2.4) citado en el archivo de
-// procedencia. La tabla del PDF solo lista municipios, no departamentos, así
-// que este catálogo cerrado (nunca un dato comercial ni inventado) completa
-// el nombre a partir de los dos primeros dígitos de cada código municipal.
+// Nombres oficiales de los 22 departamentos de Guatemala. La tabla del PDF
+// solo lista municipios, no departamentos —el DINESE (§2.4) confirma el
+// CONTEO (22, códigos 01-22) pero no enumera los pares nombre<->código—, así
+// que esta lista no tiene una fuente citable con huella verificable dentro
+// de este repositorio. Es nomenclatura geográfica oficial, pública y
+// verificable, pero su procedencia no queda fijada por huella: ver la
+// limitación declarada en db/datos/geografia-gt.FUENTE.md.
 const NOMBRES_DEPARTAMENTOS = {
   "01": "Guatemala",
   "02": "El Progreso",
@@ -380,23 +399,32 @@ const NOMBRES_DEPARTAMENTOS = {
   "22": "Jutiapa",
 };
 
-function construirDepartamentos() {
-  return Object.entries(NOMBRES_DEPARTAMENTOS)
-    .map(([codigo, nombre]) => ({ codigo, nombre }))
+// Construye la lista de departamentos a partir de los códigos que de verdad
+// aparecen en los municipios extraídos (no del literal de NOMBRES_DEPARTAMENTOS
+// a secas): así, si la extracción alguna vez trajera un código fuera de
+// 01-22, o le faltara alguno, el conteo de más abajo lo detecta en vez de
+// limitarse a repetir el tamaño de un objeto fijo.
+function construirDepartamentos(codigosDepartamentoVistos) {
+  return [...codigosDepartamentoVistos]
+    .map((codigo) => ({ codigo, nombre: NOMBRES_DEPARTAMENTOS[codigo] }))
     .sort((a, b) => a.codigo.localeCompare(b.codigo));
 }
 
 // --- Ejecución ---
 
-const { numero: numeroStream, texto: contenido } = localizarStreamDeLaTabla(pdf);
+const { numero: numeroStream, texto: contenido } = localizarStreamDeLaTabla();
 const mapaCidAUnicode = resolverMapaCidAUnicodeDeLaPagina(numeroStream);
 const fragmentos = tokenizarFragmentosDeTexto(contenido, mapaCidAUnicode);
 const { codigos, nombres } = separarCodigosYNombres(fragmentos);
 
 const codigosUnicos = new Map();
 for (const c of codigos) {
-  const normalizado = c.codigo.length === 3 ? `0${c.codigo}` : c.codigo;
-  if (!codigosUnicos.has(normalizado)) codigosUnicos.set(normalizado, c);
+  const normalizado = normalizarCodigo(c.codigo);
+  if (codigosUnicos.has(normalizado)) {
+    console.warn(`Código de municipio repetido en el PDF, se descarta la repetición: ${normalizado}`);
+    continue;
+  }
+  codigosUnicos.set(normalizado, c);
 }
 
 let municipios = emparejarCodigosConNombres([...codigosUnicos.values()], nombres);
@@ -405,9 +433,29 @@ aplicarCorrecciones(municipios);
 
 municipios.sort((a, b) => a.codigo.localeCompare(b.codigo));
 
-const departamentos = construirDepartamentos();
+// Guardián: todo departamento que aparezca en un municipio tiene que existir
+// en NOMBRES_DEPARTAMENTOS. Un código fuera de 01-22 se escribiría igual en
+// el JSON y solo reventaría después, al aplicar la clave foránea de
+// `012_geografia_gt.sql` — este es el sitio del brief donde se pone esa
+// responsabilidad, no la migración.
+const departamentosDesconocidos = municipios
+  .map((m) => m.departamento)
+  .filter((codigo) => !(codigo in NOMBRES_DEPARTAMENTOS));
+if (departamentosDesconocidos.length > 0) {
+  console.error(
+    `Departamento desconocido en NOMBRES_DEPARTAMENTOS: ${[...new Set(departamentosDesconocidos)].join(", ")}.\n` +
+      "Revisa la extracción: un código de municipio fuera de 01-22 no puede escribirse.",
+  );
+  process.exit(1);
+}
+
+const codigosDepartamentoVistos = new Set(municipios.map((m) => m.departamento));
+const departamentos = construirDepartamentos(codigosDepartamentoVistos);
 
 // La verificación final es la que manda: si no cuadra, no se escribe nada.
+// `departamentos.length` sale de los departamentos que de verdad aparecen en
+// los municipios extraídos (arriba), no de un literal fijo, así que esta
+// comprobación sí puede fallar si la extracción trajera de menos.
 if (departamentos.length !== 22 || municipios.length !== 340) {
   console.error(`Conteo inesperado: ${departamentos.length} departamentos, ${municipios.length} municipios.`);
   process.exit(1);

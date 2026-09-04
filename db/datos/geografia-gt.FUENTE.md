@@ -9,14 +9,29 @@ República de Guatemala», página 7.
 - **SHA-256 de `db/datos/geografia-gt.json`:** `33297eebe05a155b3e63f0fac15d21a1306a0257b8b7b3f2149f08ce926a7e66`
 
 **Validación del universo y del formato:** *Metodología de actualización del
-Directorio Nacional Estadístico de Empresas (DINESE)*, diciembre de 2023,
-§2.4 — 22 departamentos, 340 municipios, códigos departamentales 01-22.
+Directorio Nacional Estadístico de Empresas (DINESE)*, INE, diciembre de 2023
+(`https://www.ine.gob.gt/wp-content/uploads/2023/12/METODOLOGIA-DE-ACTUALIZACION-DINESE.pdf`,
+SHA-256 `09821d80a446ed0387d15654d4915e6fb7d44a80f33a9ba657a972b1a724dcf2`), §2.4,
+página 7 del documento: confirma el **conteo** — 22 departamentos, 340
+municipios, códigos departamentales de dos dígitos numerados del 01 al 22 —
+pero **no enumera los 22 pares nombre↔código**. Se descargó y se revisó
+entero (25 páginas) para comprobarlo antes de escribir esta nota.
 
-Los nombres de los 22 departamentos no aparecen en la tabla del PDF (esa tabla
-solo lista municipios): se completan con la división administrativa oficial
-de Guatemala, fija y sin ambigüedad, la misma que valida el DINESE. Ningún
-nombre de departamento es un dato inventado ni comercial: es la nomenclatura
-geográfica oficial del país.
+**Limitación declarada sobre los 22 nombres de departamento.** No aparecen en
+la tabla del PDF (esa tabla solo lista municipios) ni en el DINESE citado
+arriba, que solo confirma el conteo. Tampoco viene de un catálogo distinto
+citado con huella: `Baja Verapaz`, `Alta Verapaz`, `Petén` e `Izabal` no
+aparecen ni una sola vez en todo el PDF de la boleta, y los otros 18 solo
+aparecen ahí como nombre de un *municipio* que coincide con el nombre de su
+departamento (p. ej. `0101 Guatemala`), no como rótulo de departamento. Los
+22 nombres usados en `NOMBRES_DEPARTAMENTOS`
+(`scripts/preparar-geografia.mjs`) son la división administrativa oficial de
+Guatemala, verificable públicamente por cualquiera que conozca la geografía
+del país, pero **no quedan fijados por huella en este repositorio**: es el
+único dato del catálogo cuya procedencia no se puede auditar solo con lo que
+hay aquí dentro. Si en el futuro aparece una fuente oficial que enumere estos
+22 pares con su propia huella verificable, esta nota debe sustituirse por esa
+cita y no al revés.
 
 Generado por `scripts/preparar-geografia.mjs`, que no escribe nada si el
 conteo final no es exactamente 22 departamentos y 340 municipios.
@@ -79,9 +94,14 @@ tipográfica de `1330` que esta misma tabla documenta como corregida.
 `0924 Palestina de los Altos`. Confirmado contra la página 7: no es una celda
 vacía ni un dato inferido — el nombre está en el documento y el motivo real de
 la corrección es que la fuente lo trae vía la fuente Type0/Identity-H
-(descrita en el paso 2 de arriba); esta corrección puntual queda declarada de
-todas formas, tal como pide el criterio de aceptación 14, y el script avisa
-si alguna vez deja de hacer falta (no cambia el nombre ya correcto).
+(descrita en el paso 2 de arriba), ya decodificada por el extractor. Esta
+corrección puntual queda declarada de todas formas, tal como pide el
+criterio de aceptación 14: el script avisa cuando una corrección **sí tiene
+efecto** (cambia el nombre que salió del emparejado automático) y avisa
+también, por separado, cuando una corrección **ya no hace falta** —como le
+pasa hoy a `0923`, que el extractor ya resuelve solo—, para que ese cambio de
+estado no pase inadvertido y quede claro que se puede retirar de
+`CORRECCIONES` si se quiere.
 
 Ninguna corrección adicional hizo falta: la extracción automática, con el
 algoritmo de arriba, resolvió los 340 nombres sin huecos.

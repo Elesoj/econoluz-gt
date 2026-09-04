@@ -144,8 +144,12 @@ create table if not exists geo_municipios (
 | **SHA-256 de la instantánea normalizada** | `33297eebe05a155b3e63f0fac15d21a1306a0257b8b7b3f2149f08ce926a7e66` |
 
 **Validación del universo y del formato:** *Metodología de actualización del Directorio
-Nacional Estadístico de Empresas (DINESE)*, diciembre de 2023, §2.4 — **22 departamentos,
-340 municipios**, códigos departamentales **01–22**.
+Nacional Estadístico de Empresas (DINESE)*, INE, diciembre de 2023
+(`https://www.ine.gob.gt/wp-content/uploads/2023/12/METODOLOGIA-DE-ACTUALIZACION-DINESE.pdf`,
+SHA-256 `09821d80a446ed0387d15654d4915e6fb7d44a80f33a9ba657a972b1a724dcf2`), §2.4, página 7 —
+**22 departamentos, 340 municipios**, códigos departamentales **01–22**. Este documento
+confirma el **conteo**; no enumera los 22 pares nombre↔código de departamento — ver la
+limitación declarada en §4.2.3.
 
 **Fuentes de contraste, que no gobiernan la migración:** el Instituto Geográfico Nacional
 (IGN) y GeoQuetzal pueden consultarse para cotejar, pero **la fuente primaria es el INE** y
@@ -185,6 +189,17 @@ coincidió en los 340 códigos:
   extracción automática ya lo resuelve sola: la corrección de la tabla de abajo queda
   declarada de todas formas por si un cambio futuro en el extractor volviera a romperlo, tal
   como exige el criterio de aceptación 14, y el script solo avisa si de verdad tiene efecto.
+
+**Limitación declarada: los 22 nombres de departamento no tienen huella verificable en
+este repositorio.** El PDF de la boleta solo lista municipios; el DINESE citado en §4.2.1
+solo confirma el conteo. `Baja Verapaz`, `Alta Verapaz`, `Petén` e `Izabal` no aparecen ni
+una sola vez en el PDF, y los otros 18 solo aparecen ahí como nombre de un *municipio* que
+coincide con el de su departamento (`0101 Guatemala`), no como rótulo de departamento. Los
+22 nombres de `NOMBRES_DEPARTAMENTOS` en `scripts/preparar-geografia.mjs` son la división
+administrativa oficial de Guatemala, pública y verificable por cualquiera que conozca la
+geografía del país, pero es el **único dato del catálogo cuya procedencia no se puede
+auditar** solo con lo que hay en este repositorio. Prefiero declarar esto con todas las
+letras a inventar una cita que encaje. El detalle está en `db/datos/geografia-gt.FUENTE.md`.
 
 **Corrección de un error de informe, para que no se repita.** Una versión anterior de esta
 sección afirmaba que la celda de `0923` **estaba vacía en el PDF**. Es falso: el nombre está
