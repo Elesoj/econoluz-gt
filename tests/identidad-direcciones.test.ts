@@ -84,3 +84,27 @@ test("un campo desconocido no rompe el mensaje ni filtra el nombre interno", () 
   assert.equal(mensaje.length > 0, true);
   assert.equal(mensaje.includes("campo_raro"), false);
 });
+
+test("los códigos geográficos se aceptan si tienen el formato oficial de 2 y 4 dígitos", () => {
+  const conCodigos = validarDireccion({
+    ...VALIDA,
+    departamentoCodigo: "01",
+    municipioCodigo: "0108",
+  });
+  assert.equal(conCodigos.ok, true);
+  if (conCodigos.ok) {
+    assert.equal(conCodigos.direccion.departamentoCodigo, "01");
+    assert.equal(conCodigos.direccion.municipioCodigo, "0108");
+  }
+
+  const conCodigosInvalidos = validarDireccion({
+    ...VALIDA,
+    departamentoCodigo: "1",
+    municipioCodigo: "abc",
+  });
+  assert.equal(conCodigosInvalidos.ok, true);
+  if (conCodigosInvalidos.ok) {
+    assert.equal(conCodigosInvalidos.direccion.departamentoCodigo, null);
+    assert.equal(conCodigosInvalidos.direccion.municipioCodigo, null);
+  }
+});

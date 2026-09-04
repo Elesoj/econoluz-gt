@@ -8,6 +8,8 @@ export type DireccionValidada = {
   direccion: string;
   referencias: string;
   predeterminada: boolean;
+  departamentoCodigo?: string | null;
+  municipioCodigo?: string | null;
 };
 
 export type ResultadoDeValidacion =
@@ -80,6 +82,11 @@ export function validarDireccion(entrada: unknown): ResultadoDeValidacion {
     return { ok: false, faltan: ["referencias"] };
   }
 
+  const depCodRaw = texto(datos.departamentoCodigo);
+  const munCodRaw = texto(datos.municipioCodigo);
+  const departamentoCodigo = /^\d{2}$/.test(depCodRaw) ? depCodRaw : null;
+  const municipioCodigo = /^\d{4}$/.test(munCodRaw) ? munCodRaw : null;
+
   return {
     ok: true,
     direccion: {
@@ -90,12 +97,14 @@ export function validarDireccion(entrada: unknown): ResultadoDeValidacion {
       direccion: texto(datos.direccion),
       referencias,
       predeterminada: datos.predeterminada === true,
+      departamentoCodigo,
+      municipioCodigo,
     },
   };
 }
 
 export const SQL_LISTAR_DIRECCIONES = `
-  select id, destinatario, telefono, departamento, municipio, direccion, referencias, predeterminada
+  select id, destinatario, telefono, departamento, municipio, direccion, referencias, predeterminada, departamento_codigo, municipio_codigo
   from user_addresses
   where user_id = $1
   order by predeterminada desc, id
@@ -108,7 +117,7 @@ export const SQL_QUITAR_PREDETERMINADA = `
 
 export const SQL_INSERTAR_DIRECCION = `
   insert into user_addresses
-    (user_id, destinatario, telefono, departamento, municipio, direccion, referencias, predeterminada)
-  values ($1, $2, $3, $4, $5, $6, $7, $8)
+    (user_id, destinatario, telefono, departamento, municipio, direccion, referencias, predeterminada, departamento_codigo, municipio_codigo)
+  values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
   returning id
 `;

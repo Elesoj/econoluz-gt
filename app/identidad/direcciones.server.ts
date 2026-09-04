@@ -29,6 +29,8 @@ export async function guardarDireccion(userId: string, direccion: DireccionValid
         direccion.direccion,
         direccion.referencias,
         direccion.predeterminada,
+        direccion.departamentoCodigo ?? null,
+        direccion.municipioCodigo ?? null,
       ]);
 
       return String(filas[0]?.id ?? "");

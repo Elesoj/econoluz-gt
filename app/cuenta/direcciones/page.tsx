@@ -5,6 +5,7 @@ import { guardarDireccion, listarDirecciones } from "@/app/identidad/direcciones
 import { debeRenovarLaSesion, leerClienteActual } from "@/app/identidad/sesion.server";
 import RenovarSesion from "../RenovarSesion";
 import FormularioDireccion, { type EstadoDelFormulario } from "./FormularioDireccion";
+import geografia from "@/db/datos/geografia-gt.json";
 
 export const metadata = { title: "Mis direcciones · ECONOLUZ" };
 
@@ -27,6 +28,8 @@ async function guardar(
     direccion: datos.get("direccion"),
     referencias: datos.get("referencias"),
     predeterminada: datos.get("predeterminada") === "on",
+    departamentoCodigo: datos.get("departamentoCodigo"),
+    municipioCodigo: datos.get("municipioCodigo"),
   });
 
   // Antes esto era un `return` a secas: la dirección se perdía sin decir nada.
@@ -74,7 +77,11 @@ export default async function DireccionesPage() {
         ) : null}
       </ul>
 
-      <FormularioDireccion accion={guardar} />
+      <FormularioDireccion
+        accion={guardar}
+        departamentos={geografia.departamentos}
+        municipios={geografia.municipios}
+      />
     </main>
   );
 }

@@ -1,37 +1,54 @@
 "use client";
 
-import { useActionState } from "react";
+import { useMemo, useState, useActionState } from "react";
+import type { DepartamentoCatalogo, MunicipioCatalogo } from "@/app/envios/geografia";
 
 export type EstadoDelFormulario = { mensaje: string; guardada: boolean };
 
 export const ESTADO_INICIAL: EstadoDelFormulario = { mensaje: "", guardada: false };
 
-const CAMPOS: readonly (readonly [string, string, string])[] = [
-  ["destinatario", "Quién recibe", "text"],
-  ["telefono", "Teléfono", "tel"],
-  ["departamento", "Departamento", "text"],
-  ["municipio", "Municipio", "text"],
-  ["direccion", "Dirección", "text"],
-];
+export type FormularioDireccionProps = {
+  accion: (estado: EstadoDelFormulario, datos: FormData) => Promise<EstadoDelFormulario>;
+  departamentos: readonly DepartamentoCatalogo[];
+  municipios: readonly MunicipioCatalogo[];
+};
 
 /**
- * El formulario vive aparte de la página porque necesita estado: antes la acción
- * descartaba en silencio lo que no validaba y el cliente se quedaba mirando la pantalla sin
- * saber por qué no se había guardado nada.
- *
- * El aviso se anuncia con `role="alert"` para que un lector de pantalla lo lea al aparecer;
- * si no, el único cambio de la página sería visual y quien no ve la pantalla seguiría sin
- * enterarse.
+ * El formulario de direcciones con selects encadenados para departamento y municipio.
+ * El aviso de error se anuncia con `role="alert"` para accesibilidad.
  */
 export default function FormularioDireccion({
   accion,
-}: {
-  accion: (estado: EstadoDelFormulario, datos: FormData) => Promise<EstadoDelFormulario>;
-}) {
+  departamentos,
+  municipios,
+}: FormularioDireccionProps) {
   const [estado, enviar, enviando] = useActionState(accion, ESTADO_INICIAL);
+  const [departamentoCodigo, setDepartamentoCodigo] = useState("");
+  const [municipioCodigo, setMunicipioCodigo] = useState("");
+
+  const deptosOrdenados = useMemo(
+    () => [...departamentos].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")),
+    [departamentos],
+  );
+
+  const municipiosDisponibles = useMemo(() => {
+    if (!departamentoCodigo) return [];
+    return municipios
+      .filter((m) => m.departamento === departamentoCodigo)
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  }, [municipios, departamentoCodigo]);
+
+  const departamentoNombre =
+    departamentos.find((d) => d.codigo === departamentoCodigo)?.nombre ?? "";
+  const municipioNombre =
+    municipios.find((m) => m.codigo === municipioCodigo)?.nombre ?? "";
 
   return (
-    <form action={enviar} className="mt-10 space-y-3">
+    <form
+      key={estado.guardada ? "guardada" : "pendiente"}
+      action={enviar}
+      className="mt-10 space-y-3"
+    >
       <h2 className="text-lg font-medium text-[#001B59]">Agregar una dirección</h2>
 
       {estado.mensaje ? (
@@ -49,18 +66,82 @@ export default function FormularioDireccion({
         </p>
       ) : null}
 
-      {CAMPOS.map(([nombre, etiqueta, tipo]) => (
-        <label key={nombre} className="block text-sm text-neutral-700">
-          {etiqueta}
-          <input
-            type={tipo}
-            name={nombre}
-            required
-            placeholder={nombre === "telefono" ? "4042 8790" : undefined}
-            className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
-          />
-        </label>
-      ))}
+      <label className="block text-sm text-neutral-700">
+        Quién recibe
+        <input
+          type="text"
+          name="destinatario"
+          required
+          className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
+        />
+      </label>
+
+      <label className="block text-sm text-neutral-700">
+        Teléfono
+        <input
+          type="tel"
+          name="telefono"
+          required
+          placeholder="4042 8790"
+          className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
+        />
+      </label>
+
+      <label className="block text-sm text-neutral-700">
+        Departamento
+        <select
+          name="departamentoCodigo"
+          required
+          value={departamentoCodigo}
+          onChange={(e) => {
+            setDepartamentoCodigo(e.target.value);
+            setMunicipioCodigo("");
+          }}
+          className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2"
+        >
+          <option value="">Selecciona un departamento</option>
+          {deptosOrdenados.map((d) => (
+            <option key={d.codigo} value={d.codigo}>
+              {d.nombre}
+            </option>
+          ))}
+        </select>
+      </label>
+      <input type="hidden" name="departamento" value={departamentoNombre} />
+
+      <label className="block text-sm text-neutral-700">
+        Municipio
+        <select
+          name="municipioCodigo"
+          required
+          disabled={!departamentoCodigo}
+          value={municipioCodigo}
+          onChange={(e) => setMunicipioCodigo(e.target.value)}
+          className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 disabled:bg-neutral-100 disabled:text-neutral-400"
+        >
+          <option value="">
+            {departamentoCodigo
+              ? "Selecciona un municipio"
+              : "Selecciona primero un departamento"}
+          </option>
+          {municipiosDisponibles.map((m) => (
+            <option key={m.codigo} value={m.codigo}>
+              {m.nombre}
+            </option>
+          ))}
+        </select>
+      </label>
+      <input type="hidden" name="municipio" value={municipioNombre} />
+
+      <label className="block text-sm text-neutral-700">
+        Dirección
+        <input
+          type="text"
+          name="direccion"
+          required
+          className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
+        />
+      </label>
 
       <label className="block text-sm text-neutral-700">
         Referencias para encontrarla
