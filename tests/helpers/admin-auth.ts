@@ -129,6 +129,11 @@ export async function createInMemoryAuthFixture(seed: FixtureSeed = {}) {
       unavailableIfNeeded(Boolean(seed.failQueries));
       return state.users.find((user) => user.active && user.email === email) ?? null;
     },
+    async findRoleByUserId(userId) {
+      unavailableIfNeeded(Boolean(seed.failQueries));
+      const user = state.users.find((candidate) => candidate.id === userId && candidate.active);
+      return user ? user.rol : null;
+    },
     async createSessionForUser(userId, tokenHash, now, expiresAt) {
       unavailableIfNeeded(Boolean(seed.failQueries));
       const user = state.users.find((candidate) => candidate.id === userId && candidate.active);

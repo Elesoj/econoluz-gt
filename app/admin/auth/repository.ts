@@ -41,6 +41,22 @@ export function createAdminAuthRepository(query: AdminAuthQuery): AdminAuthRepos
       } satisfies AdminUser;
     },
 
+    async findRoleByUserId(userId) {
+      const rows = await query(
+        `
+          select rol
+          from admin_users
+          where id = $1 and active
+          limit 1
+        `,
+        [userId],
+      );
+      const row = rows[0];
+      if (!row) return null;
+
+      return row.rol as RolAdmin;
+    },
+
     async createSessionForUser(userId, tokenHash, now, expiresAt) {
       await query(
         `

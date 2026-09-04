@@ -51,6 +51,7 @@ export type UpsertAdminUserInput = {
 
 export type AdminAuthRepository = {
   findActiveUserByEmail(email: string): Promise<AdminUser | null>;
+  findRoleByUserId(userId: string): Promise<RolAdmin | null>;
   createSessionForUser(userId: string, tokenHash: string, now: Date, expiresAt: Date): Promise<void>;
   findValidSession(tokenHash: string, now: Date): Promise<AdminSession | null>;
   renewSession(tokenHash: string, expiresAt: Date, now: Date): Promise<boolean>;

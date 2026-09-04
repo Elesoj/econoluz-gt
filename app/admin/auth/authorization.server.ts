@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { hashSessionToken } from "./crypto";
+import { puedeEscribirEnvios } from "./permisos";
 import { getSessionCookieOptions } from "./policy";
 import { getAdminAuthRepository } from "./repository.server";
 import {
@@ -12,6 +13,7 @@ import {
   type SessionUser,
   type SessionValidation,
 } from "./session";
+import type { RolAdmin } from "./types";
 
 export const ADMIN_SESSION_COOKIE = "econoluz_admin";
 export const RUTA_ENTRAR = "/admin/entrar";
@@ -94,6 +96,30 @@ export async function verificarSesionParaAccion(): Promise<SessionUser> {
   }
 
   return resultado.user;
+}
+
+export async function leerRolDeLaBase(userId: string): Promise<RolAdmin> {
+  const repositorio = getAdminAuthRepository();
+  const rol = await repositorio.findRoleByUserId(userId);
+  if (!rol) {
+    redirect(RUTA_ENTRAR);
+  }
+  return rol;
+}
+
+/**
+ * El rol se relee de admin_users en cada acción: nunca se toma de la cookie ni
+ * del formulario, y así un cambio de rol surte efecto sobre sesiones abiertas.
+ */
+export async function verificarPermisoParaAccion(
+  permiso: "envios:escribir",
+): Promise<SessionUser & { rol: RolAdmin }> {
+  const usuario = await verificarSesionParaAccion();
+  const rol = await leerRolDeLaBase(usuario.id);
+  if (permiso === "envios:escribir" && !puedeEscribirEnvios(rol)) {
+    redirect("/admin?error=sin-permiso");
+  }
+  return { ...usuario, rol };
 }
 
 /** Escribe la cookie de sesión. Solo desde Server Actions o Route Handlers. */

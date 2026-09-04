@@ -31,6 +31,28 @@ test("solo reconstruye usuarios activos con todos sus campos de autenticación",
   });
 });
 
+test("obtiene el rol de un usuario activo por su identificador", async () => {
+  const repository = createAdminAuthRepository(
+    createControlledQuery({
+      expectedParams: ["7"],
+      rows: [{ rol: "administrador" }],
+    }),
+  );
+
+  assert.equal(await repository.findRoleByUserId("7"), "administrador");
+});
+
+test("devuelve null al buscar el rol de un usuario inexistente o inactivo", async () => {
+  const repository = createAdminAuthRepository(
+    createControlledQuery({
+      expectedParams: ["99"],
+      rows: [],
+    }),
+  );
+
+  assert.equal(await repository.findRoleByUserId("99"), null);
+});
+
 test("una consulta sin sesión vigente devuelve null", async () => {
   const repository = createAdminAuthRepository(
     createControlledQuery({
