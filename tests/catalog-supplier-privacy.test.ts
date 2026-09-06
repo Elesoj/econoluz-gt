@@ -98,7 +98,7 @@ test("la garantía (warranty) es estrictamente interna y nunca forma parte del c
       technicalSpecs: {
         ...product.technicalSpecs,
         warranty: "5 años",
-      } as Record<string, unknown>,
+      } as Record<string, string | string[] | undefined>,
     });
 
     assert.equal(
