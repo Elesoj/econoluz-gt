@@ -20,8 +20,9 @@ const SECCIONES = [
     href: "/admin/proyectos",
   },
   {
-    titulo: "Envíos y tarifas",
-    descripcion: "Zonas de reparto, tarifas oficiales y cobertura nacional.",
+    titulo: "Envíos",
+    descripcion:
+      "Tarifa del mensajero propio, umbral de envío gratis y qué zona atiende cada método.",
     estado: "Disponible",
     href: "/admin/envios",
   },

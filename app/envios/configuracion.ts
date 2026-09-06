@@ -18,6 +18,9 @@ import {
   type ReglasPropias,
 } from "./tarifas";
 
+/** La misma cota que aplica el panel al escribir; ver `app/admin/envios/formularios.ts`. */
+const MAXIMO_CENTS = 100_000_000;
+
 export const CLAVE_AJUSTE_ZONAS_METODOS = "envios_zonas_metodos";
 export const CLAVE_AJUSTE_REGLAS_PROPIAS = "envios_reglas_propias";
 
@@ -72,8 +75,16 @@ export function interpretarReglasPropias(valor: unknown): ReglasPropias {
   const tarifa = objeto.tarifaCents;
   const umbral = objeto.umbralGratisCents;
 
-  const tarifaValida = typeof tarifa === "number" && Number.isInteger(tarifa) && tarifa >= 0;
-  const umbralValido = typeof umbral === "number" && Number.isInteger(umbral) && umbral >= 0;
+  const tarifaValida =
+    typeof tarifa === "number" &&
+    Number.isSafeInteger(tarifa) &&
+    tarifa >= 0 &&
+    tarifa <= MAXIMO_CENTS;
+  const umbralValido =
+    typeof umbral === "number" &&
+    Number.isSafeInteger(umbral) &&
+    umbral >= 0 &&
+    umbral <= MAXIMO_CENTS;
 
   if (!tarifaValida || !umbralValido) {
     return { ...REGLAS_PROPIAS_DEFECTO };

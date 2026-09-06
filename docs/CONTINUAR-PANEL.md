@@ -138,11 +138,53 @@ integre.
   `shipping_zone_areas` y `shipping_rates` ya no tienen consumidores, pero no se borran.
   El verificador comprueba que siguen a 0 filas antes de empezar.
 
-**Verificación fresca del cierre** (04/09/2026, contra `envios-operativos-dev`):
-`test:datos` 697/697, `test:admin` 224/224, `test:proveedores` 3/3, `test:permisos`
-correcto con las 27 tablas protegidas denegadas, `envios:verificar` **18 de 18** con
-ROLLBACK y 0 filas residuales, `typecheck` y `lint` limpios, `build` correcto y
-**Playwright 82/82**, incluidas las 12 pruebas nuevas con sesión de cliente auténtica.
+**Verificación fresca del cierre** (04/09/2026, contra `envios-operativos-dev`, después
+de aplicar los hallazgos de la revisión independiente):
+`test:datos` **700/700**, `test:admin` **226/226**, `test:proveedores` 3/3,
+`test:permisos` correcto con las 27 tablas protegidas denegadas, `envios:verificar`
+**18 de 18** con ROLLBACK y 0 filas residuales, `typecheck` y `lint` limpios, `build`
+correcto y **Playwright 81 de 83**.
+
+Los dos que faltan son `tienda-carrito.spec.ts:11` y `:41`, la inestabilidad de la
+sección 10.2.bis: **no son de esta rama**, y se comprobó en vez de suponerlo (ver ahí el
+detalle). Las **13 pruebas nuevas** de `envios-operativos.spec.ts`, con sesión de cliente
+auténtica, pasan todas.
+
+**Lo que encontró la revisión independiente, y qué se hizo con cada cosa.** Se pidió una
+revisión del diff completo antes de dar el trabajo por terminado. No encontró nada
+crítico —ni fuga de datos personales, ni salto de permisos, ni IDOR, ni error de dinero—
+y señaló seis puntos importantes:
+
+- **Arreglados**, porque eran del alcance: el verificador reventaba sobre una base con
+  `users` vacía (le faltaba `firebase_uid`, que es `not null`), la prueba que debía
+  haberlo cazado estaba probando el doble en vez del código, y `--contar` consultaba las
+  tablas de 9A aunque no existieran, justo después de haber pasado todo. Los tres tienen
+  ahora su prueba, escrita antes del arreglo y vista fallar.
+- **Arreglados también**, menores: el detalle del error de PostgreSQL viajaba en la barra
+  de direcciones del panel y ahora va al registro; los importes tienen cota superior y
+  `Number.isSafeInteger` en las dos capas; el código huérfano de 9A lleva una cabecera
+  que dice que no debe volver a importarse; y la portada del panel ya no anuncia «zonas
+  de reparto y cobertura nacional».
+- **Rechazado con motivo**: proponía cambiar el `"server-only";` suelto de
+  `envios.server.ts` por un `import` real. Se probó y **rompe las pruebas**: el paquete
+  `server-only` solo resuelve dentro del empaquetador de Next, así que el import deja
+  `node --test` sin poder cargar el archivo. Queda explicado en el propio código para que
+  nadie lo vuelva a «arreglar».
+
+**Tres cosas que la revisión dejó como decisión del dueño, y que conviene mirar:**
+
+1. **El preflight exige 0 filas en las tablas de 9A y aborta si las hay.** Es lo que pide
+   el plan certificado, pero choca con conservarlas «para auditoría histórica»: el día
+   que tengan una fila legítima, `npm run envios:verificar` dejará de poder pasar.
+2. **Los códigos de departamento y municipio no se comprueban contra el catálogo INE**,
+   solo su forma (`\d{2}` y `\d{4}`). Es deuda anterior a este trabajo, pero ahora pesa
+   más: un `POST` a mano con `01`/`0101` convierte cualquier dirección en capitalina y
+   elegible para el mensajero propio a Q35. El catálogo para validarlo ya existe en
+   `app/envios/geografia.ts`.
+3. **El cálculo nuevo todavía no lo llama nadie.** `cotizarEnvioDelCliente`,
+   `estimarEnvio` y `aEnvioPublico` no tienen consumidores: es coherente con el alcance
+   —el checkout es el plan B—, pero significa que la regla «Guatex es `null`, nunca `0`»
+   está demostrada por tipos y pruebas unitarias, **nunca de extremo a extremo**.
 
 **Un dato de la documentación que estaba equivocado, ya corregido:** este archivo y
 `CLAUDE.md` decían que las migraciones `012`–`014` seguían pendientes en Producción. No

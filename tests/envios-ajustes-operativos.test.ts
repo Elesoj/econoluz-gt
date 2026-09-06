@@ -154,3 +154,19 @@ test("fusionarMetodoZona sobre un mapa corrupto parte de la configuración por d
   assert.equal(mapa[25], "guatex");
   assert.equal(mapa[1], "mensajero_propio");
 });
+
+test("interpretarReglasPropias rechaza importes desmesurados guardados en la base", () => {
+  // Aunque el panel los acota, la fila de `app_settings` se puede editar por
+  // fuera. Un número absurdo vuelve a la configuración comercial aprobada.
+  const enorme = interpretarReglasPropias({
+    tarifaCents: 100_000_001,
+    umbralGratisCents: 250000,
+  });
+  assert.deepEqual(enorme, { tarifaCents: 3500, umbralGratisCents: 250000 });
+
+  const inseguro = interpretarReglasPropias({
+    tarifaCents: 3500,
+    umbralGratisCents: Number.MAX_SAFE_INTEGER + 10,
+  });
+  assert.deepEqual(inseguro, { tarifaCents: 3500, umbralGratisCents: 250000 });
+});

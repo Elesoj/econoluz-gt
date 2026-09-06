@@ -9,6 +9,7 @@
 // en PostgreSQL para auditoría histórica, pero se quedan sin consumidores.
 
 import { redirect } from "next/navigation";
+import { registrar } from "../../lib/datos";
 import { verificarPermisoParaAccion } from "../auth/authorization.server";
 import { guardarMetodoZona, guardarReglasPropias } from "../../envios/configuracion.server";
 import {
@@ -31,9 +32,14 @@ export async function cambiarMetodoZonaAction(formData: FormData): Promise<void>
   try {
     await guardarMetodoZona(res.zona, res.metodo, admin.id);
   } catch (err) {
-    const mensaje =
-      err instanceof Error ? err.message : "Error al guardar el método de la zona.";
-    redirect(`/admin/envios?error=${encodeURIComponent(mensaje)}`);
+    // El detalle del fallo va al registro, no a la barra de direcciones: el texto
+    // de PostgreSQL describe el esquema y no le dice nada a quien administra.
+    registrar("error", "admin-cambiar-metodo-zona", {
+      clase: err instanceof Error ? err.constructor.name : "desconocida",
+    });
+    redirect(
+      `/admin/envios?error=${encodeURIComponent("No se pudo guardar el método de la zona. Vuelve a intentarlo.")}`,
+    );
   }
 
   redirect("/admin/envios?guardado=1");
@@ -50,9 +56,12 @@ export async function guardarReglasEnvioAction(formData: FormData): Promise<void
   try {
     await guardarReglasPropias(res.reglas, admin.id);
   } catch (err) {
-    const mensaje =
-      err instanceof Error ? err.message : "Error al guardar las reglas de envío.";
-    redirect(`/admin/envios?error=${encodeURIComponent(mensaje)}`);
+    registrar("error", "admin-guardar-reglas-envio", {
+      clase: err instanceof Error ? err.constructor.name : "desconocida",
+    });
+    redirect(
+      `/admin/envios?error=${encodeURIComponent("No se pudieron guardar las reglas de envío. Vuelve a intentarlo.")}`,
+    );
   }
 
   redirect("/admin/envios?guardado=1");

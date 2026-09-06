@@ -813,13 +813,30 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       const { rows: users } = await cliente.query(`select id from users limit 1`);
       let userId = users[0]?.id;
       if (!userId) {
-        const { rows: u } = await cliente.query(
-          `insert into users (email, nombre, estado)
-           values ('test-verif-015@econoluz.test', 'Usuario Sintetico 015', 'activa')
-           returning id`,
+        // Base recién creada. `users.firebase_uid` es `not null unique` en
+        // db/009, así que hay que dárselo: omitirlo aborta la transacción entera
+        // con un 23502 y las comprobaciones 17 y 18 no llegarían a terminar.
+        // Va en savepoint por lo mismo: para que un fallo aquí se pueda contar
+        // como fallo de la 17 en vez de tumbar el resto.
+        const alta = await ejecutarConSavepoint(cliente, () =>
+          cliente.query(
+            `insert into users (firebase_uid, email, nombre, estado)
+             values ('test-verif-015', 'test-verif-015@econoluz.test', 'Usuario Sintetico 015', 'activa')
+             returning id`,
+          ),
         );
-        userId = u[0]?.id;
+        if (!alta.ok) {
+          registrarMal(
+            "17. Invariantes de zona_capitalina en user_addresses",
+            `no se pudo crear el usuario sintético: ${alta.error.message ?? "error desconocido"}`,
+          );
+          userId = null;
+        } else {
+          userId = alta.resultado.rows[0]?.id;
+        }
       }
+
+      if (userId) {
 
       // 17.a. Municipio de Guatemala (0101) con zona 10 -> admitido
       const intentoValido = await ejecutarConSavepoint(cliente, () =>
@@ -899,6 +916,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
           `zona 10 admitida: ${intentoValido.ok}, zona 20 rechazada: ${!intentoZona20.ok}, sin zona admitida: ${intentoSinZona.ok}, Mixco con zona rechazada: ${!intentoMixcoConZona.ok}`,
         );
       }
+      }
     }
 
     // -------------------------------------------------------------------------
@@ -958,9 +976,11 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
   }
 
 
-  // Si se pide --contar, verificamos tras el ROLLBACK que no quedó nada residual
-  if (debeContar) {
-    const conteosDespues = await contarTablasConfiguracion(cliente);
+  // Si se pide --contar, verificamos tras el ROLLBACK que no quedó nada residual.
+  // Solo si las tablas existen: contar una inexistente reventaría justo después
+  // de haber pasado todas las comprobaciones.
+  if (debeContar && ejecutarBloque9A) {
+    const conteosDespues = await contarTablasConfiguracion(cliente, diagnostico.encontradas);
     const totalFilasDespues = Object.values(conteosDespues).reduce((a, b) => a + b, 0);
     if (totalFilasDespues === 0) {
       onBien("las 3 tablas de configuración tienen 0 filas tras la verificación (--contar)");

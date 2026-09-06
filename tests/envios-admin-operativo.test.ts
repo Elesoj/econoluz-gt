@@ -124,3 +124,26 @@ test("validarFormularioReglasEnvio admite el cero: tarifa gratis y umbral cero s
     assert.equal(r.reglas.umbralGratisCents, 0);
   }
 });
+
+test("validarFormularioReglasEnvio rechaza importes desmesurados", () => {
+  // Un dedazo o un POST a mano no pueden meter un número que después se arrastre
+  // a los cálculos. Cien millones de céntimos son un millón de quetzales.
+  for (const importe of ["100000001", "99999999999999999999", "1e21"]) {
+    const fd = new FormData();
+    fd.set("tarifaCents", importe);
+    fd.set("umbralGratisCents", "250000");
+    assert.equal(validarFormularioReglasEnvio(fd).ok, false, `debería rechazar «${importe}»`);
+
+    const fd2 = new FormData();
+    fd2.set("tarifaCents", "3500");
+    fd2.set("umbralGratisCents", importe);
+    assert.equal(validarFormularioReglasEnvio(fd2).ok, false, `debería rechazar «${importe}»`);
+  }
+});
+
+test("validarFormularioReglasEnvio acepta justo el máximo", () => {
+  const fd = new FormData();
+  fd.set("tarifaCents", "100000000");
+  fd.set("umbralGratisCents", "100000000");
+  assert.equal(validarFormularioReglasEnvio(fd).ok, true);
+});

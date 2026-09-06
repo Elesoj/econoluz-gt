@@ -1,4 +1,11 @@
 ﻿// app/admin/envios/tarifas.ts
+//
+// SIN CONSUMIDORES desde la corrección del modelo operativo de envíos (04/09/2026).
+// Pertenece al modelo de zonas de reparto y tarifas por tramos del subproyecto 9A,
+// derogado por `docs/superpowers/specs/2026-09-04-envios-checkout-operativo-design.md`.
+// Se conserva sin borrar, como las tablas `shipping_zones`, `shipping_zone_areas` y
+// `shipping_rates`, por si hiciera falta para auditoría histórica o recuperación.
+// **No volver a importarlo**: el cálculo vigente es `app/envios/orquestacion.ts`.
 // Módulo funcional puro (sin server-only) que define la secuencia estricta de pasos
 // para la sustitución de tarifas según §6.4 del diseño.
 

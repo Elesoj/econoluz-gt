@@ -1,8 +1,14 @@
-"server-only";
-
 // Adaptador del orquestador de envíos: le da las dependencias reales —Neon, la
 // sesión del cliente y la configuración de `app_settings`— al módulo puro
 // `orquestacion.ts`, que es donde vive la decisión.
+//
+// El marcador de abajo es un literal suelto y **no** un `import "server-only"`, y
+// conviene no «arreglarlo»: el paquete `server-only` solo resuelve dentro del
+// empaquetador de Next, así que un import real impide que `node --test` cargue
+// este archivo y deja `tests/envios-servicio.test.ts` sin poder ejecutarse. La
+// barrera de verdad la da que nada de `app/**` importe esto desde un componente
+// de cliente, y que el acceso a Postgres pase por `app/lib/datos`.
+"server-only";
 
 import { aCentavos } from "../lib/dinero";
 import type {

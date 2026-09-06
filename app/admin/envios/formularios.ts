@@ -21,6 +21,14 @@ export type ResultadoAccionReglas =
   | { ok: true; reglas: ReglasPropias }
   | { ok: false; error: string };
 
+/**
+ * Cien millones de céntimos son un millón de quetzales: muy por encima de
+ * cualquier tarifa o umbral real, y muy por debajo del entero seguro. Una cota
+ * evita que un dedazo o un `POST` a mano metan un número que después se arrastre
+ * a los cálculos.
+ */
+const MAXIMO_CENTS = 100_000_000;
+
 /** Un entero de verdad: ni vacío, ni decimal, ni texto que `Number` convierta a 0. */
 function aEnteroEstricto(bruto: FormDataEntryValue | null): number {
   if (typeof bruto !== "string") return Number.NaN;
@@ -49,13 +57,16 @@ export function validarFormularioReglasEnvio(formData: FormData): ResultadoAccio
   const tarifa = aEnteroEstricto(formData.get("tarifaCents"));
   const umbral = aEnteroEstricto(formData.get("umbralGratisCents"));
 
-  if (!Number.isInteger(tarifa) || tarifa < 0) {
-    return { ok: false, error: "La tarifa debe ser un número entero de céntimos no negativo." };
-  }
-  if (!Number.isInteger(umbral) || umbral < 0) {
+  if (!Number.isSafeInteger(tarifa) || tarifa < 0 || tarifa > MAXIMO_CENTS) {
     return {
       ok: false,
-      error: "El umbral de gratuidad debe ser un número entero de céntimos no negativo.",
+      error: `La tarifa debe ser un número entero de céntimos entre 0 y ${MAXIMO_CENTS}.`,
+    };
+  }
+  if (!Number.isSafeInteger(umbral) || umbral < 0 || umbral > MAXIMO_CENTS) {
+    return {
+      ok: false,
+      error: `El umbral de gratuidad debe ser un número entero de céntimos entre 0 y ${MAXIMO_CENTS}.`,
     };
   }
 

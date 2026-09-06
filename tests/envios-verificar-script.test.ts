@@ -131,6 +131,10 @@ function clienteSimulado(opciones: {
   admiteInsercionesInvalidas?: boolean;
   registro?: string[];
   alRollback?: () => void;
+  /** Simula una base recién creada, sin ninguna fila en `users`. */
+  sinUsuarios?: boolean;
+  /** Columnas que `users` exige de verdad; un insert que las omita falla. */
+  columnasObligatoriasUsers?: string[];
 }): { query: ConsultaSql } {
   const {
     tablas9A = [],
@@ -141,6 +145,8 @@ function clienteSimulado(opciones: {
     admiteInsercionesInvalidas = false,
     registro = [],
     alRollback = () => {},
+    sinUsuarios = false,
+    columnasObligatoriasUsers = ["firebase_uid", "email"],
   } = opciones;
 
   return {
@@ -159,8 +165,21 @@ function clienteSimulado(opciones: {
         alRollback();
         return { rows: [] };
       }
+      if (sql.includes("insert into users")) {
+        // `users.firebase_uid` es `not null` en db/009: un insert que la omita
+        // revienta con 23502, igual que en PostgreSQL.
+        const faltan = columnasObligatoriasUsers.filter((c) => !sql.includes(c));
+        if (faltan.length > 0) {
+          const error = new Error(
+            `null value in column "${faltan[0]}" violates not-null constraint`,
+          ) as Error & { code?: string };
+          error.code = "23502";
+          throw error;
+        }
+        return { rows: [{ id: 77 }] };
+      }
       if (sql.includes("from users")) {
-        return { rows: [{ id: 42 }] };
+        return { rows: sinUsuarios ? [] : [{ id: 42 }] };
       }
       if (sql.includes("insert into user_addresses")) {
         // Las dos que la migración 015 rechaza. La dirección capitalina sin zona
@@ -355,4 +374,48 @@ test("un fallo inesperado durante las comprobaciones se propaga sin ocultarse, y
   );
 
   assert.equal(rollbackEjecutado, true);
+});
+
+test("la comprobación 17 funciona en una base recién creada, sin ninguna fila en users", async () => {
+  // El respaldo que crea un usuario sintético es justo el que se usa en una base
+  // nueva, que es donde más falta hace que el verificador funcione.
+  let rollbackEjecutado = false;
+  const consultas: string[] = [];
+  const cliente = clienteSimulado({
+    sinUsuarios: true,
+    registro: consultas,
+    alRollback: () => {
+      rollbackEjecutado = true;
+    },
+  });
+
+  let check17Ok = false;
+  await ejecutarVerificaciones(cliente, {
+    onBien: (msg: string) => {
+      if (msg.includes("17. Invariantes de zona_capitalina")) check17Ok = true;
+    },
+  });
+
+  assert.equal(check17Ok, true, "la 17 debe completarse aunque users esté vacía");
+  assert.equal(rollbackEjecutado, true);
+
+  const insertsUsers = consultas.filter((q) => q.includes("insert into users"));
+  assert.equal(insertsUsers.length, 1, "debe crear exactamente un usuario sintético");
+  assert.match(insertsUsers[0], /firebase_uid/, "y darle su firebase_uid, que es not null");
+});
+
+test("--contar no consulta las tablas de 9A cuando no existen", async () => {
+  const consultas: string[] = [];
+  const cliente = clienteSimulado({ registro: consultas });
+
+  await ejecutarVerificaciones(cliente, { debeContar: true });
+
+  const conteos9A = consultas.filter((q) =>
+    TABLAS_9A.some((t) => q.includes('from "' + t + '"')),
+  );
+  assert.equal(
+    conteos9A.length,
+    0,
+    "contar una tabla inexistente rompe la ejecución justo después de haber pasado todo",
+  );
 });

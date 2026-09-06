@@ -231,4 +231,33 @@ test.describe("Direcciones del cliente con zona capitalina", () => {
     await expect(page.locator('select[name="zonaCapitalina"] option[value="20"]')).toHaveCount(0);
     await expect(page.locator('select[name="zonaCapitalina"] option[value="25"]')).toHaveCount(1);
   });
+  test("13. quitando el `required` a mano, el servidor sigue rechazando la dirección sin zona", async ({
+    page,
+    context,
+  }) => {
+    await autenticarComoCliente(context, cliente);
+    await page.goto("/cuenta/direcciones");
+
+    await page.fill('input[name="destinatario"]', "Saltandose el navegador");
+    await page.fill('input[name="telefono"]', "55559999");
+    await page.selectOption('select[name="departamentoCodigo"]', "01");
+    await page.selectOption('select[name="municipioCodigo"]', "0101");
+    await page.fill('input[name="direccion"]', "6a Avenida sin zona");
+
+    // La validación del navegador es comodidad, no seguridad. Se le quita el
+    // `required` al desplegable para comprobar quién manda de verdad.
+    await page.locator('select[name="zonaCapitalina"]').evaluate((elemento) => {
+      (elemento as HTMLSelectElement).removeAttribute("required");
+    });
+
+    await page.getByRole("button", { name: /guardar dirección/i }).click();
+
+    // El servidor contesta con el aviso, y no guarda nada. Se busca el aviso del
+    // formulario, no el anunciador de rutas de Next, que también es `role="alert"`.
+    await expect(page.locator('p[role="alert"]')).toContainText(/zona capitalina/i);
+
+    const sql = getE2ESql();
+    const filas = await sql`SELECT count(*)::int AS total FROM user_addresses WHERE user_id = ${cliente.userId}`;
+    expect(filas[0].total).toBe(0);
+  });
 });
