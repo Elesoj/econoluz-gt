@@ -176,12 +176,15 @@ function deducirMetodoZona(
 
 async function leerConfiguracionReal(): Promise<ConfiguracionEnvios> {
   const { obtenerRecogidaEnTienda } = await import("../lib/ajustes.server");
-  const recogida = await obtenerRecogidaEnTienda();
+  const { obtenerMetodosZonas, obtenerReglasPropias } = await import("./configuracion.server");
 
-  return {
-    ...CONFIGURACION_POR_DEFECTO,
-    recogidaActiva: recogida.activa,
-  };
+  const [recogida, metodosZonas, reglasPropias] = await Promise.all([
+    obtenerRecogidaEnTienda(),
+    obtenerMetodosZonas(),
+    obtenerReglasPropias(),
+  ]);
+
+  return { recogidaActiva: recogida.activa, metodosZonas, reglasPropias };
 }
 
 async function resolverProductosReal(
