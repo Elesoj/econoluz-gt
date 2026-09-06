@@ -118,6 +118,19 @@ nunca como cero.
 7. Preflight de tablas de 9A e invariantes de la `015` en `scripts/verificar-envios.mjs`.
 8. Autenticación E2E real de clientes, prueba de Playwright y documentación.
 
+**La suite de Playwright son 83 pruebas en 11 archivos**, y conviene saber de dónde sale
+ese número. `tests/admin-envios.spec.ts` **está fuera de `testMatch` a propósito y no se
+ejecuta**: probaba el panel de creación de zonas de reparto y publicación de tarifas de
+9A, que este trabajo retira, así que mantenerla habría significado exigir un
+comportamiento derogado. Se conserva en disco **solo como evidencia histórica**, porque
+borrarla necesita autorización del dueño, y lleva escrito en su cabecera que no debe
+reactivarse.
+
+**Esa exclusión no es cobertura: es cobertura retirada.** Lo que ocupa su lugar es
+`tests/envios-operativos.spec.ts`, con 13 pruebas del panel operativo y del formulario de
+direcciones. El panel de 9A ya no existe y por eso nadie lo prueba; lo que sí se prueba es
+que su ruta antigua redirige.
+
 **La rama de Neon:** `envios-operativos-dev` (`br-bitter-resonance-avf0rrgg`, endpoint
 `ep-crimson-bonus-av5c0mvh`), creada desde Producción el 04/09/2026 y sellada con su
 marcador `rama_neon`. Es la única base que se tocó. **No borrarla** hasta que la rama se
@@ -2025,41 +2038,54 @@ Lo que se sabe, y lo que no:
 Si vuelve a ocurrir: ejecutar `npx playwright test --reporter=line`, **no repetir la
 ejecución**, y mirar `test-results/` y el nombre de la prueba antes de tocar nada.
 
-#### Identificada el 04/09/2026: es `tienda-carrito.spec.ts`
+#### Resuelta el 04/09/2026: eran dos defectos de las pruebas, no del carrito
 
-Se siguió esa instrucción y esta vez sí se leyó el informe antes de repetir. Las pruebas
-que fallan son dos, las dos del mismo archivo:
+Se siguió la instrucción de leer el informe antes de repetir. Las pruebas que fallaban
+eran `tests/tienda-carrito.spec.ts:11` y `:41`, las dos del mismo archivo. La causa
+resultó ser doble, y ninguna de las dos estaba en el código del carrito.
 
-- `tests/tienda-carrito.spec.ts:11` — «comprar un producto con precio y encontrarlo al volver»
-- `tests/tienda-carrito.spec.ts:41` — «cambiar la cantidad recalcula el total»
+**Primer defecto: se esperaba un plazo en vez de una navegación.** Las dos hacen clic en
+el contador «Ver el carrito» y comprobaban la llegada con
+`expect(page).toHaveURL(/\/carrito$/)`, que sondea **cinco segundos fijos**. Lo que hay
+que esperar tras pulsar un enlace no es que la URL cambie dentro de un plazo, sino la
+navegación. `page.waitForURL()` espera a ese evento con el plazo del test.
 
-**Qué falla, exactamente.** Las dos hacen clic en el contador «Ver el carrito» de la barra
-y esperan llegar a `/carrito`. La aserción `toHaveURL(/\/carrito$/)` agota sus 5 segundos
-con la URL todavía en `/catalogo`. En el volcado de accesibilidad que Playwright guarda en
-`test-results/` se ve que el producto **sí está en el carrito** —«En el carrito (1)»— pero
-el enlace del contador **ya no aparece en la barra**: se pintó, la prueba lo vio, y para
-cuando llegó el clic había dejado de estar. Es una carrera con la hidratación del store
-del carrito, que es justo el pegamento con React que el comentario de la propia prueba
-dice que viene a ejercer.
+Se comprobó, no se supuso: con un doble temporal que retrasaba `/carrito` ocho segundos,
+el patrón viejo falló con el mismo mensaje del fallo intermitente —«Expected pattern:
+/\/carrito$/ · Received string: .../catalogo · Timeout: 5000ms»— y el nuevo pasó.
 
-**No es una regresión del modelo operativo de envíos**, y se comprobó en vez de suponerlo:
+Que la aplicación tarde no es hipotético. En el servidor de desarrollo la ruta compila
+bajo demanda, y en la rama de Neon de este trabajo `modelo_catalogo` vale `relational_v2`
+sin `FASE_D_AUTORIZADA`, de modo que el catálogo corre en **modo `shadow` y compara los
+313 productos en cada carga**: 1.219 ms medidos en el registro del servidor, con
+`GET /carrito` en 1.324 ms.
 
-- La rama `feat/envios-operativos` **no toca ningún archivo** del carrito, de la barra de
-  navegación ni del catálogo (`git diff --name-only main...HEAD`).
-- Sustituyendo `playwright.config.ts` por el de `main` —el único archivo del diff que
-  podía influir en cómo se levanta el servidor— **las dos pruebas fallan exactamente
-  igual**.
-- En dos ejecuciones completas anteriores de esa misma rama, la batería dio **82/82**.
+**Segundo defecto, y el que explica el «después de `npm run build`»:**
+`playwright.config.ts` tenía `reuseExistingServer: !process.env.CI`, o sea `true` en
+local. Cuando Playwright encuentra el puerto ocupado con esa opción, **devuelve sin
+quedarse con nada que cerrar** —se puede leer en
+`node_modules/playwright/lib/runner/index.js:846`—, así que al terminar no mata ese
+servidor y **el puerto 3100 queda ocupado**. De ahí venían tanto el bloqueo al cerrar
+como el comportamiento errático:
 
-**Lo que cambia entre una ejecución que pasa y una que falla** parece ser el estado de la
-caché de compilación del servidor de desarrollo: aparece después de un `npm run build`,
-que deja `.next/` con la compilación de producción y obliga a `next dev` a recompilar bajo
-demanda. Eso es una pista firme, no una demostración.
+- Este repositorio trabaja con **varios worktrees a la vez**. Un servidor olvidado de otra
+  rama se reutilizaba en silencio, y la suite corría contra código que no era el que se
+  estaba probando.
+- `npm run build` **le borra `.next` a un servidor de desarrollo que siga vivo**. A partir
+  de ahí ese servidor recompila cada ruta bajo demanda y tarda mucho más de lo normal, que
+  es justo lo que hacía saltar el plazo de cinco segundos.
 
-**Queda abierta y es una decisión del dueño**, porque arreglarla está fuera del alcance de
-los envíos: lo que habría que hacer es que la prueba espere al enlace de forma estable
-—esperar la navegación en lugar de la URL, o anclar el clic al `href`— en vez de subir el
-tiempo de espera, que solo escondería la carrera.
+Ahora vale `false`: Playwright arranca el suyo, lo mata al acabar y libera el puerto; y si
+estuviera ocupado lo dice en voz alta en lugar de correr contra algo desconocido.
+
+**Una afirmación anterior que había que retirar.** En una versión previa de esta sección
+se dijo que las dos pruebas «fallan exactamente igual con el `playwright.config.ts` de
+`main`». Esa ejecución se hizo de verdad y falló, pero **no demostraba lo que se le hizo
+decir**: solo se sustituyó el archivo de configuración, con el resto del código de la rama
+presente, así que no era una comprobación contra `main`. Además, hoy se sabe que ese
+resultado era consistente con la causa real —la configuración de `main` es precisamente la
+que traía `reuseExistingServer: true`—. Queda retirada y sustituida por la causa
+verificada de arriba.
 
 ### 10.3 Otras
 

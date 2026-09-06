@@ -1195,6 +1195,12 @@ un ID token al emulador de Firebase Authentication y se canjea por
 o cualquiera de sus variables, la suite falla de forma explícita en lugar de degradar a
 un atajo. Cómo levantarlo está en `docs/OPERACION-FIREBASE.md` §6.
 
+**La suite de Playwright son 83 pruebas en 11 archivos.** `tests/admin-envios.spec.ts`
+está fuera de `testMatch` a propósito y **no se ejecuta**: probaba el panel de zonas de
+reparto y tarifas de 9A, retirado aquí. Se conserva en disco solo como evidencia
+histórica —borrarla necesita autorización— y **no cuenta como cobertura vigente**. La
+sustituye `tests/envios-operativos.spec.ts`.
+
 **Lo que este subproyecto NO hace**, y conviene no darlo por hecho: no existe todavía el
 checkout, ni la tabla `orders`, ni la pantalla de confirmación, ni el panel de pedidos.
 Eso es el plan B —`docs/superpowers/plans/2026-09-04-checkout-solicitudes-guatex.md`—,

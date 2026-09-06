@@ -3782,6 +3782,15 @@ llamada REST; lo que no se admite es una tercera vía que se salte
       "@playwright/test": "^1.62.1",
     ```
   - Actualizar `playwright.config.ts` para cargar `.env.local` de forma síncrona antes de definir la configuración, inyectar las 6 variables en `webServer.env` y registrar `envios-operativos.spec.ts` en `testMatch`:
+
+    > **Corregido durante la ejecución (04/09/2026).** El borrador de este plan dejaba
+    > `admin-envios.spec.ts` y `envios-operativos.spec.ts` juntos en `testMatch`, y eso no
+    > podía ser: la primera prueba el panel de creación de zonas de reparto y publicación
+    > de tarifas de 9A, que este mismo plan retira. Mantenerla habría exigido un
+    > comportamiento ya derogado. **`envios-operativos.spec.ts` la sustituye**, y
+    > `admin-envios.spec.ts` sale de `testMatch` y se conserva en disco únicamente como
+    > evidencia histórica, porque borrarla necesita autorización del dueño. La suite
+    > vigente son **83 pruebas en 11 archivos**.
     ```ts
     // playwright.config.ts
     import { defineConfig } from "@playwright/test";
@@ -3807,7 +3816,6 @@ llamada REST; lo que no se admite es una tercera vía que se salte
         "ui-botones.spec.ts",
         "tienda-carrito.spec.ts",
         "cuenta.spec.ts",
-        "admin-envios.spec.ts",
         "envios-operativos.spec.ts",
       ],
       fullyParallel: false,
