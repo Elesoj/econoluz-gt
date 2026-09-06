@@ -1,6 +1,23 @@
 /** Las direcciones de entrega del cliente. */
 
 import { esZonaCapitalinaValida } from "../envios/zonasCapitalinas";
+import {
+  resolverDestinoOficial,
+  type MunicipioCatalogo,
+} from "../envios/geografia";
+import geografia from "../../db/datos/geografia-gt.json" with { type: "json" };
+
+/**
+ * El catálogo oficial del INE, el mismo que alimenta los desplegables. Se importa
+ * aquí porque esta función es la frontera del servidor: los códigos llegan en un
+ * `FormData` que escribe el navegador, y comprobar solo su forma —dos dígitos y
+ * cuatro dígitos— deja pasar códigos inventados y parejas que no se corresponden.
+ *
+ * Importa más desde que la zona capitalina decide el precio: enviar 01/0101 a
+ * mano convertiría cualquier dirección en capitalina y elegible para el mensajero
+ * propio a Q35.
+ */
+const MUNICIPIOS_OFICIALES: readonly MunicipioCatalogo[] = geografia.municipios;
 
 export type DireccionValidada = {
   destinatario: string;
@@ -84,8 +101,22 @@ export function validarDireccion(entrada: unknown): ResultadoDeValidacion {
 
   const depCodRaw = texto(datos.departamentoCodigo);
   const munCodRaw = texto(datos.municipioCodigo);
-  const departamentoCodigo = /^\d{2}$/.test(depCodRaw) ? depCodRaw : null;
-  const municipioCodigo = /^\d{4}$/.test(munCodRaw) ? munCodRaw : null;
+  const tieneFormaDeCodigos = /^\d{2}$/.test(depCodRaw) && /^\d{4}$/.test(munCodRaw);
+
+  // Si vienen códigos, tienen que ser de un destino que existe de verdad. Un
+  // código inventado o una pareja incompatible —Quetzaltenango dentro de
+  // Guatemala— se rechaza, no se ignora en silencio: ignorarlo guardaría la
+  // dirección sin códigos y el envío no se podría calcular.
+  const oficial = tieneFormaDeCodigos
+    ? resolverDestinoOficial(depCodRaw, munCodRaw, MUNICIPIOS_OFICIALES)
+    : null;
+
+  if (tieneFormaDeCodigos && !oficial) {
+    faltan.push("municipio");
+  }
+
+  const departamentoCodigo = oficial ? oficial.departamento.codigo : null;
+  const municipioCodigo = oficial ? oficial.municipio.codigo : null;
 
   // La zona solo existe en el municipio de Guatemala, y allí es obligatoria: es
   // lo único que distingue un destino con mensajero propio de uno que va por
@@ -118,8 +149,10 @@ export function validarDireccion(entrada: unknown): ResultadoDeValidacion {
     direccion: {
       destinatario: texto(datos.destinatario),
       telefono: texto(datos.telefono),
-      departamento: texto(datos.departamento),
-      municipio: texto(datos.municipio),
+      // Con códigos oficiales manda el catálogo, no lo que escribiera el
+      // formulario: el nombre es texto libre que viaja en el `FormData`.
+      departamento: oficial ? oficial.departamento.nombre : texto(datos.departamento),
+      municipio: oficial ? oficial.municipio.nombre : texto(datos.municipio),
       direccion: texto(datos.direccion),
       referencias,
       predeterminada: datos.predeterminada === true,

@@ -100,3 +100,146 @@ test("las SQL de direcciones incluyen la zona capitalina", async () => {
   assert.match(SQL_INSERTAR_DIRECCION, /\$11/);
   assert.equal(SQL_INSERTAR_DIRECCION.includes("$12"), false);
 });
+
+// ---------------------------------------------------------------------------
+// La frontera del servidor no se fía del formulario
+//
+// Todo lo que llega en el `FormData` lo escribe el navegador, y el navegador es
+// del visitante. Comprobar solo la forma —dos dígitos y cuatro dígitos— deja
+// pasar códigos que no existen y parejas que no se corresponden, y eso importa
+// más desde que la zona capitalina decide el precio del envío: bastaría con
+// enviar 01/0101 a mano para que una dirección de Petén se cobrara como
+// capitalina, a Q35 con mensajero propio.
+// ---------------------------------------------------------------------------
+
+test("un municipio con formato válido pero inexistente se rechaza", () => {
+  const r = validarDireccion({
+    destinatario: "Codigo Inventado",
+    telefono: "12345678",
+    departamento: "Guatemala",
+    municipio: "Guatemala",
+    departamentoCodigo: "01",
+    municipioCodigo: "0199", // cuatro dígitos, pero no existe en el catálogo INE
+    direccion: "Calle falsa",
+  });
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.ok(r.faltan.includes("municipio"), `faltan: ${r.faltan.join(", ")}`);
+  }
+});
+
+test("un departamento con formato válido pero inexistente se rechaza", () => {
+  const r = validarDireccion({
+    destinatario: "Departamento Inventado",
+    telefono: "12345678",
+    departamento: "Atlantida",
+    municipio: "Cualquiera",
+    departamentoCodigo: "99",
+    municipioCodigo: "9901",
+    direccion: "Calle falsa",
+  });
+  assert.equal(r.ok, false);
+});
+
+test("un municipio real de otro departamento se rechaza", () => {
+  // 0901 es Quetzaltenango, que no pertenece al departamento 01 (Guatemala).
+  const r = validarDireccion({
+    destinatario: "Pareja Incompatible",
+    telefono: "12345678",
+    departamento: "Guatemala",
+    municipio: "Quetzaltenango",
+    departamentoCodigo: "01",
+    municipioCodigo: "0901",
+    direccion: "Calle falsa",
+  });
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.ok(r.faltan.includes("municipio"), `faltan: ${r.faltan.join(", ")}`);
+  }
+});
+
+test("los nombres que se guardan salen del catálogo, no del formulario", () => {
+  // El navegador manda nombres manipulados junto a códigos correctos. Lo que se
+  // persiste tiene que ser lo que dice el catálogo.
+  const r = validarDireccion({
+    destinatario: "Nombres Manipulados",
+    telefono: "12345678",
+    departamento: "Departamento Inventado S.A.",
+    municipio: "Municipio de Mentira",
+    departamentoCodigo: "01",
+    municipioCodigo: "0108",
+    direccion: "Km 15 Calzada Roosevelt",
+  });
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.direccion.departamento, "Guatemala");
+    assert.equal(r.direccion.municipio, "Mixco");
+  }
+});
+
+test("solo 01/0101 admite zona capitalina, aunque el formulario insista", () => {
+  // Mixco es un municipio real del mismo departamento, y aun así no lleva zona.
+  const mixco = validarDireccion({
+    destinatario: "Mixco Con Zona",
+    telefono: "12345678",
+    departamento: "Guatemala",
+    municipio: "Mixco",
+    departamentoCodigo: "01",
+    municipioCodigo: "0108",
+    direccion: "Calzada Roosevelt",
+    zonaCapitalina: 10,
+  });
+  assert.equal(mixco.ok, true);
+  if (mixco.ok) {
+    assert.equal(mixco.direccion.zonaCapitalina, null);
+  }
+
+  const capital = validarDireccion({
+    destinatario: "Capital Con Zona",
+    telefono: "12345678",
+    departamento: "Guatemala",
+    municipio: "Guatemala",
+    departamentoCodigo: "01",
+    municipioCodigo: "0101",
+    direccion: "7a Avenida",
+    zonaCapitalina: 10,
+  });
+  assert.equal(capital.ok, true);
+  if (capital.ok) {
+    assert.equal(capital.direccion.zonaCapitalina, 10);
+  }
+});
+
+test("un envío manual que finge ser capitalino con un municipio ajeno no cuela", () => {
+  // El ataque que importa: 01/0101 daría mensajero propio a Q35. Aquí se envía
+  // el par correcto pero con un municipio de otro departamento en los códigos.
+  const r = validarDireccion({
+    destinatario: "Peten Disfrazado",
+    telefono: "12345678",
+    departamento: "Guatemala",
+    municipio: "Guatemala",
+    departamentoCodigo: "17", // Petén
+    municipioCodigo: "0101", // pero el municipio es el de la capital
+    direccion: "Flores",
+    zonaCapitalina: 10,
+  });
+  assert.equal(r.ok, false);
+});
+
+test("una dirección legítima del interior sigue guardándose", () => {
+  const r = validarDireccion({
+    destinatario: "Cliente Del Interior",
+    telefono: "12345678",
+    departamento: "Quetzaltenango",
+    municipio: "Quetzaltenango",
+    departamentoCodigo: "09",
+    municipioCodigo: "0901",
+    direccion: "4a Calle",
+  });
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.direccion.departamento, "Quetzaltenango");
+    assert.equal(r.direccion.municipio, "Quetzaltenango");
+    assert.equal(r.direccion.zonaCapitalina, null);
+  }
+});

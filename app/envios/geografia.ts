@@ -104,3 +104,29 @@ export function emparejarMunicipio(
     departamento: municipio.departamento,
   };
 }
+
+/**
+ * Busca un municipio por su código y comprueba que pertenece al departamento que
+ * se dice. Devuelve `null` si el código no existe o si la pareja no cuadra.
+ *
+ * Es lo que separa «tiene forma de código» de «es un destino real»: la forma la
+ * escribe el navegador, y el navegador es del visitante.
+ */
+export function resolverDestinoOficial(
+  departamentoCodigo: string,
+  municipioCodigo: string,
+  catalogoMunicipios: readonly MunicipioCatalogo[],
+  catalogoDepartamentos: readonly DepartamentoCatalogo[] = DEPARTAMENTOS_OFICIALES,
+): { departamento: DepartamentoCatalogo; municipio: MunicipioCatalogo } | null {
+  const departamento = catalogoDepartamentos.find((d) => d.codigo === departamentoCodigo);
+  if (!departamento) {
+    return null;
+  }
+
+  const municipio = catalogoMunicipios.find((m) => m.codigo === municipioCodigo);
+  if (!municipio || municipio.departamento !== departamento.codigo) {
+    return null;
+  }
+
+  return { departamento, municipio };
+}
