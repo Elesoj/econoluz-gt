@@ -236,3 +236,84 @@ Ninguna es una clave privada.
 
 `FIREBASE_PRIVATE_KEY` y `FIREBASE_CLIENT_EMAIL` **no existen en este proyecto**, y la
 prueba de frontera falla si alguien las reintroduce.
+
+---
+
+## 6. El emulador de Authentication para las pruebas E2E (04/09/2026)
+
+Las pruebas de Playwright que necesitan un cliente con sesión —hoy
+`tests/envios-operativos.spec.ts`— se autentican **de verdad**. Conviene entender por
+qué no hay atajo antes de intentar uno.
+
+`app/identidad/sesion.ts` define `COOKIE_SESION_CLIENTE = "econoluz_cliente"`, y
+`leerSesionDeCliente` la entrega a `verificarCookieDeSesion`, que llama a
+`auth().verifySessionCookie(cookie, true)`. Solo vale una cookie emitida por Firebase,
+y además la cuenta tiene que existir en `users` con su `firebase_uid`. Una cookie
+inventada —un JSON en Base64, por ejemplo— no la acepta ninguna página real: la prueba
+que la usara estaría comprobando el atajo, no la aplicación.
+
+El camino que siguen las pruebas es el mismo que el del navegador de un cliente:
+
+1. Piden un **ID token** al emulador por su API REST.
+2. Se lo entregan a `POST /api/clientes/sesion`, que lo verifica con `verificarIdToken`,
+   aprovisiona la fila de `users` con `aprovisionarCliente` y responde con la cookie que
+   emite `crearCookieDeSesion`.
+3. A partir de ahí navegan como cualquier cliente.
+
+### 6.1 Levantar el emulador
+
+En una consola aparte, y dejarlo corriendo:
+
+```bash
+npx firebase-tools emulators:start --only auth --project econoluz-dev-d30ab
+```
+
+No hace falta `firebase login` ni un `firebase.json`: el emulador de Authentication
+funciona con la configuración por defecto y avisa de ambas cosas sin fallar. Tampoco
+necesita Java, a diferencia de los emuladores de Firestore o Pub/Sub.
+
+Escucha en `127.0.0.1:9099`. Se puede comprobar con una petición cualquiera a
+`http://127.0.0.1:9099/`, que responde `200`.
+
+### 6.2 Por qué `firebase-admin` habla con él
+
+`firebase-admin` reconoce el emulador por la variable `FIREBASE_AUTH_EMULATOR_HOST` y
+enruta contra él tanto `verifyIdToken` como `createSessionCookie` y
+`verifySessionCookie`. Se puede leer en
+`node_modules/firebase-admin/lib/auth/auth-api-request.js`, donde el constructor de la
+URL del emulador es
+`http://{host}/identitytoolkit.googleapis.com/{version}/projects/{projectId}{api}`.
+
+Ese mismo prefijo expone la API REST de cliente, así que crear el usuario y pedir su ID
+token es una llamada HTTP a
+`http://{FIREBASE_AUTH_EMULATOR_HOST}/identitytoolkit.googleapis.com/v1/accounts:signUp`.
+
+### 6.3 Variables que hay que dar de alta
+
+Van en el `.env.local` del worktree, y están documentadas en `.env.example`.
+
+| Variable | Para qué |
+|---|---|
+| `FIREBASE_AUTH_EMULATOR_HOST` | Host y puerto del emulador, `127.0.0.1:9099`. La leen `firebase-admin` y el servidor de desarrollo que levanta Playwright |
+| `E2E_FIREBASE_API_KEY` | Clave de API que acepta la REST del emulador. Con el emulador vale cualquier cadena no vacía; se declara para no esconder el requisito |
+| `FIREBASE_PROJECT_ID` | Ya existía. Sin ella `app/identidad/firebase.server.ts` lanza a propósito |
+| `NEON_RAMA_E2E` | Nombre sellado de la rama de Neon, el mismo que guarda `app_settings.rama_neon` |
+| `NEON_ENDPOINT_PRODUCCION` | Ya existía. Se usa para rechazar Producción |
+
+`playwright.config.ts` carga `.env.local` con `loadEnvConfig` de `@next/env` antes de
+definir la configuración, y propaga esas seis variables a `webServer.env`. Así el
+proceso de las pruebas y el subproceso del servidor reciben exactamente lo mismo, y
+nadie tiene que exportar nada a mano en la consola.
+
+### 6.4 Sin emulador no hay atajo
+
+Si falta `FIREBASE_AUTH_EMULATOR_HOST`, `E2E_FIREBASE_API_KEY` o `FIREBASE_PROJECT_ID`,
+`tests/helpers/cliente-e2e.ts` lanza un error explícito y la suite se detiene. La
+alternativa —credenciales E2E autorizadas contra `econoluz-dev-d30ab`— usa exactamente
+el mismo camino cambiando el destino de la llamada REST. Lo que no se admite es una
+tercera vía que se salte `POST /api/clientes/sesion`.
+
+**La base tampoco se da por buena porque «no sea Producción».** `exigirRamaE2E` lee el
+marcador `app_settings.rama_neon` y exige que coincida con `NEON_RAMA_E2E`: estas
+pruebas escriben de verdad, y un endpoint mal configurado podría apuntar a cualquier
+otra rama con datos que importen.

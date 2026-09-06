@@ -51,3 +51,6 @@ next-env.d.ts
 
 # espacio de trabajo de subagent-driven-development (scratch, no versionable)
 /.superpowers/
+
+# Registro que deja el emulador de Firebase al arrancarlo para las pruebas E2E.
+firebase-debug.log

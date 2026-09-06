@@ -510,10 +510,12 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
   `product_images`, `attributes`, `attribute_options`, `product_attribute_values`,
   `product_prices`) y las dos del carrito (`carts`, `cart_items`).
   Las migraciones aplicadas en producción: `005`–`008` el 01/09/2026, `009` y `010` el
-  02/09/2026 y `011` (carrito), sumando las 25 tablas actuales; las migraciones
-  `012_geografia_gt.sql`, `013_envios_tarifas.sql` y `014_roles_admin.sql` del subproyecto 9A
-  están aplicadas únicamente en las ramas de desarrollo y E2E de Neon, y siguen **pendientes de
-  aplicar en Producción**. El rol `econoluz_publico` solo puede leer `public_products`; las
+  02/09/2026, `011` (carrito) y **`012`, `013` y `014` del subproyecto 9A**, que suman las
+  30 tablas actuales. *(Corregido el 04/09/2026: este archivo decía que `012`–`014`
+  seguían pendientes en Producción. Se comprobó leyendo `schema_migrations` en una rama
+  recién creada desde Producción, y las tres constan aplicadas.)*
+  La migración **`015_direccion_zona_capitalina.sql` está aplicada solo en la rama de
+  desarrollo `envios-operativos-dev`** y sigue pendiente en Producción. El rol `econoluz_publico` solo puede leer `public_products`; las
   otras tablas le están denegadas. Las migraciones se aplican con `npm run db:migrar`, que es
   repetible y soporta `--simular`, `--aplicar` y `--aplicar-produccion`. `DATABASE_URL` está
   en `.env.local` (ignorado por git) y en Vercel; `DATABASE_URL_PUBLIC` está en Vercel como
@@ -619,6 +621,10 @@ frontend/
     009_identidad_clientes.sql    clientes, direcciones, consentimientos y eventos de acceso
     010_catalogo_relacional.sql   las ocho tablas del nucleo relacional de productos
     011_carrito.sql               carrito del cliente con sesion: carts y cart_items
+    012_geografia_gt.sql          catalogo INE: 22 departamentos y 340 municipios
+    013_envios_tarifas.sql        zonas de reparto y tarifas de 9A; sin consumidores
+    014_roles_admin.sql           rol de admin_users: administrador y empleado
+    015_direccion_zona_capitalina.sql  zona capitalina en user_addresses y ajustes de envios
   scripts/                        utilidades de línea de comandos (ver "Comandos")
   docs/CONTINUAR-PANEL.md         hoja de traspaso: qué falta y cómo hacerlo
   docs/OPERACION-ROL-PUBLICO.md   crear, rotar y verificar la credencial del rol público
@@ -728,7 +734,7 @@ npm run identidad:verificar # invariantes reales en Neon dentro de una transacci
 npm run identidad:probar    # prueba aprovisionamiento concurrente; crea y limpia datos sintéticos
 npm run identidad:reconciliar # solo informa; añadir -- --aplicar para reparar huérfanos
 
-npm run envios:verificar    # verifica los 16 invariantes de esquema en la base de datos de desarrollo
+npm run envios:verificar    # 18 invariantes de esquema contra la base de desarrollo, siempre en ROLLBACK
 npm run direcciones:migrar-codigos # empareja códigos INE en user_addresses (idempotente)
 ```
 
@@ -999,11 +1005,14 @@ especificación, su plan, sus pruebas y un punto de revisión con el dueño:
 de §0.2.
 
 **El subproyecto 9 se divide en 9A y 9B:**
-- **9A (completado en `feat/envios-tarifas`):** zonas de reparto, tarifas, algoritmo de
-  cálculo, panel administrativo y catálogo geográfico INE. Añade 5 tablas nuevas
-  (`geo_departamentos`, `geo_municipios`, `shipping_zones`, `shipping_zone_areas`,
-  `shipping_rates`) y 2 columnas en `user_addresses` (`departamento_codigo` y
-  `municipio_codigo`). El catálogo geográfico vive en `db/datos/geografia-gt.json`
+- **9A (fusionado en `main`, y con su modelo comercial corregido el 04/09/2026):** zonas
+  de reparto, tarifas, algoritmo de cálculo, panel administrativo y catálogo geográfico
+  INE. Añade 5 tablas nuevas (`geo_departamentos`, `geo_municipios`, `shipping_zones`,
+  `shipping_zone_areas`, `shipping_rates`) y 2 columnas en `user_addresses`
+  (`departamento_codigo` y `municipio_codigo`).
+  **Su interpretación comercial quedó derogada**: ver «El modelo operativo de envíos» más
+  abajo. La infraestructura geográfica, la seguridad y la auditoría siguen vigentes; las
+  tarifas por zona y tramo, no. El catálogo geográfico vive en `db/datos/geografia-gt.json`
   (22 departamentos y 340 municipios extraídos del INE, ENEIC 2024-2025).
   SHA-256 del JSON: `33297eebe05a155b3e63f0fac15d21a1306a0257b8b7b3f2149f08ce926a7e66`.
   SHA-256 del PDF fuente: `1eb2a2e3a718c7132c944a26a83a1d2a317c42e7fc4f3ab4862026950da7ca0e`.
@@ -1138,6 +1147,59 @@ relacional depende del rol público, las variables de Vercel y las baterías— 
 
 **La retirada del modelo antiguo es el subproyecto 11 y no ha empezado.** Es justo lo que
 hoy hace posible la reversión, así que no se toca sin autorización expresa del dueño.
+
+### El modelo operativo de envíos corrige a 9A (04/09/2026)
+
+Implementado en `feat/envios-operativos`, **sin fusionar, sin publicar y sin desplegar**.
+El diseño aprobado es
+`docs/superpowers/specs/2026-09-04-envios-checkout-operativo-design.md` y el plan
+ejecutado, `docs/superpowers/plans/2026-09-04-correccion-envios-operativos.md`.
+
+**La regla de negocio real, que 9A no reflejaba.** ECONOLUZ reparte con **mensajero
+propio solo dentro del municipio de Guatemala**, y allí quien decide es la zona de la
+ciudad. Todo lo demás va con **Guatex**, cuyo coste depende del peso del pedido y **la
+web no lo conoce**.
+
+- Mensajero propio: **Q35,00** de tarifa fija, y **envío gratis a partir de Q2.500,00
+  inclusive** de subtotal de productos. Los dos importes son editables desde
+  `/admin/envios`, se guardan en `app_settings` y se auditan en `audit_log`.
+- Guatex: **coste desconocido**, que se escribe `envioCents: null` y **nunca cero**. Cero
+  significaría que el envío es gratis, y sería una promesa que no podemos cumplir.
+- Las **22 zonas** de la ciudad son 1 a 19, 21, 24 y 25. Las zonas 20, 22 y 23 no existen
+  y se rechazan en el dominio, en el formulario, en el panel y en la base de datos.
+- Las zonas **6, 17 y 18 nacen atendidas por Guatex**; las otras 19, por mensajero propio.
+  El panel permite cambiar cualquiera en los dos sentidos, con un desplegable cerrado.
+
+**Lo que se retiró de 9A, y lo que se conservó.** Desaparecen las tarifas por tramos, los
+plazos de entrega del contrato de envío, el formulario de creación de zonas de reparto y
+la ficha `/admin/envios/[zona]`, que ahora redirige a la portada. **Las tablas
+`shipping_zones`, `shipping_zone_areas` y `shipping_rates` no se tocan**: se conservan
+intactas y vacías, sin consumidores, para auditoría histórica y recuperación. Retirarlas
+necesitaría autorización expresa.
+
+**La migración `015_direccion_zona_capitalina.sql`** añade `user_addresses.zona_capitalina`
+con dominio cerrado a las 22 zonas, impide que exista zona si el destino no es el
+municipio de Guatemala —una dirección de Mixco con «zona 4» sería la zona de otra ciudad—
+y siembra las dos claves de configuración en `app_settings`. La columna **admite NULL a
+propósito**: las direcciones que ya existen no tienen zona y no se pueden invalidar hacia
+atrás. Que sea obligatoria al dar de alta una dirección capitalina lo impone la
+aplicación, en `validarDireccion`.
+
+**Está aplicada únicamente en la rama de Neon `envios-operativos-dev`**
+(`br-bitter-resonance-avf0rrgg`, endpoint `ep-crimson-bonus-av5c0mvh`), hija de Producción
+y sellada con su marcador `rama_neon`. **Producción no recibió ninguna escritura.**
+
+**Las pruebas E2E de clientes se autentican de verdad.** No hay cookie fabricada: se pide
+un ID token al emulador de Firebase Authentication y se canjea por
+`POST /api/clientes/sesion`, la misma frontera que usa el navegador. Si falta el emulador
+o cualquiera de sus variables, la suite falla de forma explícita en lugar de degradar a
+un atajo. Cómo levantarlo está en `docs/OPERACION-FIREBASE.md` §6.
+
+**Lo que este subproyecto NO hace**, y conviene no darlo por hecho: no existe todavía el
+checkout, ni la tabla `orders`, ni la pantalla de confirmación, ni el panel de pedidos.
+Eso es el plan B —`docs/superpowers/plans/2026-09-04-checkout-solicitudes-guatex.md`—,
+que está escrito y registrado pero **sin implementar**, porque depende del resultado de
+este.
 
 ### El subproyecto 5, carrito persistente, está en su rama (03/09/2026)
 

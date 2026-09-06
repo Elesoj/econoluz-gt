@@ -92,7 +92,77 @@ Leer esta documentación no ejecuta esa retirada ni basta como autorización.
 
 ---
 
-## 0.1 Qué hacer ahora (03/09/2026)
+## 0.1 Qué hacer ahora (04/09/2026)
+
+### El modelo operativo de envíos, implementado en `feat/envios-operativos`
+
+Corrige la interpretación comercial de 9A. **Está terminado en su rama, sin fusionar, sin
+publicar y sin desplegar. Producción no recibió ninguna escritura.**
+
+Diseño: `docs/superpowers/specs/2026-09-04-envios-checkout-operativo-design.md`.
+Plan ejecutado: `docs/superpowers/plans/2026-09-04-correccion-envios-operativos.md`.
+
+**Qué cambió, en una frase:** ECONOLUZ reparte con mensajero propio solo dentro del
+municipio de Guatemala, a Q35,00 y gratis desde Q2.500,00 inclusive; todo lo demás va con
+Guatex, cuyo coste **no se conoce desde la web** y por eso se representa como `null`,
+nunca como cero.
+
+**Las ocho tareas del plan, terminadas:**
+
+1. Catálogo puro de las 22 zonas capitalinas (1–19, 21, 24, 25) y su método inicial.
+2. Contratos de envío reescritos y cálculo operativo de tarifas.
+3. Configuración en `app_settings`, separada en módulo puro y módulo del servidor.
+4. Migración `015` y zona capitalina en direcciones, formulario incluido.
+5. Orquestador funcional puro y su adaptador `server-only`.
+6. Portada simplificada de `/admin/envios` con controles de tarifa y método por zona.
+7. Preflight de tablas de 9A e invariantes de la `015` en `scripts/verificar-envios.mjs`.
+8. Autenticación E2E real de clientes, prueba de Playwright y documentación.
+
+**La rama de Neon:** `envios-operativos-dev` (`br-bitter-resonance-avf0rrgg`, endpoint
+`ep-crimson-bonus-av5c0mvh`), creada desde Producción el 04/09/2026 y sellada con su
+marcador `rama_neon`. Es la única base que se tocó. **No borrarla** hasta que la rama se
+integre.
+
+**Cuatro decisiones que conviene no deshacer sin leer esto:**
+
+- **Guatex vale `null`, no `0`.** Cero significa «el envío es gratis». Si alguien
+  «simplifica» esto a cero, la tienda prometerá envíos gratis a todo el interior del país.
+- **La zona capitalina admite NULL en la base a propósito.** Las direcciones que ya
+  existen no tienen zona y no se pueden invalidar hacia atrás. La obligatoriedad al dar
+  de alta una dirección capitalina la impone `validarDireccion`, no el DDL. La
+  comprobación 17 del verificador lo deja escrito.
+- **Un método que no sea exactamente uno de los dos se degrada a Guatex**, nunca a
+  mensajero propio: lo contrario inventaría un importe. Está probado en
+  `tests/envios-servicio.test.ts`.
+- **Las tablas de 9A se conservan intactas y vacías.** `shipping_zones`,
+  `shipping_zone_areas` y `shipping_rates` ya no tienen consumidores, pero no se borran.
+  El verificador comprueba que siguen a 0 filas antes de empezar.
+
+**Verificación fresca del cierre** (04/09/2026, contra `envios-operativos-dev`):
+`test:datos` 697/697, `test:admin` 224/224, `test:proveedores` 3/3, `test:permisos`
+correcto con las 27 tablas protegidas denegadas, `envios:verificar` **18 de 18** con
+ROLLBACK y 0 filas residuales, `typecheck` y `lint` limpios, `build` correcto y
+**Playwright 82/82**, incluidas las 12 pruebas nuevas con sesión de cliente auténtica.
+
+**Un dato de la documentación que estaba equivocado, ya corregido:** este archivo y
+`CLAUDE.md` decían que las migraciones `012`–`014` seguían pendientes en Producción. No
+lo están: se comprobó leyendo `schema_migrations` en una rama recién creada desde
+Producción y las tres constan aplicadas. La que sí sigue pendiente en Producción es la
+`015`.
+
+**Un detalle del entorno que muerde en cada worktree nuevo:** `core.autocrlf` está en
+`true`, así que un `git worktree add` deja `db/datos/geografia-gt.json` con finales CRLF
+y su prueba de huella SHA-256 falla. No es una regresión: se arregla convirtiendo ese
+archivo a LF en el worktree. Un `.gitattributes` con `eol=lf` lo cerraría del todo, pero
+es un cambio de repositorio que necesita el visto bueno del dueño.
+
+**Lo siguiente es el plan B**, `docs/superpowers/plans/2026-09-04-checkout-solicitudes-guatex.md`:
+el checkout, la tabla `orders`, la pantalla de confirmación y el panel de pedidos. Está
+escrito y registrado, y **no se ha implementado nada de él**.
+
+---
+
+## 0.2 La fotografía anterior (03/09/2026)
 
 ### Estado del subproyecto 9A — Envíos y tarifas (03/09/2026)
 

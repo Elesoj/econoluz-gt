@@ -1,3 +1,14 @@
+// OBSOLETA — no se ejecuta. Fuera de `testMatch` desde la corrección del modelo
+// operativo de envíos (04/09/2026).
+//
+// Prueba el panel de zonas de reparto de 9A: crear una zona, activarla, asignarle
+// municipios y publicarle tarifas por tramos. Nada de eso existe ya: la portada
+// `/admin/envios` es ahora la operativa y `/admin/envios/[zona]` redirige a ella.
+// Lo que la sustituye es `tests/envios-operativos.spec.ts`.
+//
+// El archivo se conserva sin borrar, como las tablas de 9A, por si hiciera falta
+// para auditoría histórica. Retirarlo necesita autorización del dueño.
+
 import { expect, test } from "@playwright/test";
 import {
   autenticarComoAdmin,

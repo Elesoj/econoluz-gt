@@ -9,15 +9,14 @@ import { fileURLToPath } from "node:url";
 
 import { Client, neonConfig } from "@neondatabase/serverless";
 
+import { endpointCanonico } from "./endpoint-canonico.mjs";
+
+export { endpointCanonico };
+
 const CLAVE_RAMA = "rama_neon";
 const BLOQUEO_SELLADO = 20260902;
 
-export function endpointCanonico(host) {
-  return String(host ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/-pooler(?=\.)/, "");
-}
+
 
 function decidirEndpointSeguro({ host, hostEsperado, hostProduccion, ramaEsperada }) {
   if (!hostEsperado || !hostProduccion || !ramaEsperada) {
