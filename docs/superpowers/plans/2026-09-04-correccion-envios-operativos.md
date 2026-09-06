@@ -72,7 +72,7 @@
 | `app/admin/envios/actions.ts` | Server Actions para actualizar métodos de zonas y reglas comerciales propias con auditoría. |
 | `app/admin/(panel)/envios/page.tsx` | Portada simplificada: controles de tarifa y umbral global, tabla de 22 zonas con selector de método. |
 | `app/admin/(panel)/envios/[zona]/page.tsx` | Sustituir la ficha de zona por redirección fija a `/admin/envios`. |
-| `scripts/verificar-envios.mjs` | Preflight de tablas de 9A vacías y verificación de invariantes de migración 015 y `app_settings`. |
+| `scripts/verificar-envios.mjs` | Preflight que comprueba **si existen** las tablas de 9A —no que estén vacías— y verificación de invariantes de migración 015 y `app_settings`. |
 | `tests/envios-servicio.test.ts` | Adaptar la prueba existente del orquestador de envíos al modelo operativo (zona capitalina y coste desconocido). |
 | `tests/envios-verificar-script.test.ts` | Prueba unitaria del script de verificación de invariantes. |
 | `playwright.config.ts` | Cargar `.env.local` mediante `loadEnvConfig(process.cwd())` de `@next/env`, propagar variables E2E a `webServer.env` y añadir `tests/envios-operativos.spec.ts` a `testMatch`. |
@@ -2389,6 +2389,19 @@ export default function RedirigirEnviosZona() {
 
 **Files:**
 - Modificar: `scripts/verificar-envios.mjs` (sustitución completa: preflight de existencia de tablas 9A en `information_schema.tables`, preserva literalmente las 16 comprobaciones de 9A cuando existen todas, omite 1–16 y continúa con 17 y 18 si no existe ninguna, falla de inmediato si la presencia es parcial, y nunca consulta filas antes de confirmar existencia)
+
+> **Corregido durante la ejecución (04/09/2026).** El borrador de esta tarea, y el bloque de
+> código que la acompaña más abajo, hacían que el preflight **abortara si las tablas de 9A
+> tenían filas**. Eso contradice §1 del diseño, que manda conservarlas «para permitir
+> recuperación y auditoría histórica»: convertía ese archivo en motivo de fallo e impedía
+> llegar a las comprobaciones 17 y 18, que no dependen de 9A.
+>
+> Lo implementado **cuenta sin juzgar**: informa de cuántas filas históricas hay y sigue.
+> Para convivir con ellas, los fixtures llevan un sufijo propio de cada ejecución y las
+> áreas de prueba se eligen entre los municipios y departamentos **sin cobertura**; al
+> terminar se compara el estado anterior con el posterior al `ROLLBACK` y se exige que sean
+> **idénticos**, no que estén a cero. El código y la prueba que aparecen abajo con
+> `filas residuales` y `0 filas` son la versión del borrador, no la vigente.
 - Crear: `tests/envios-verificar-script.test.ts` (pruebas completas del preflight con los tres estados: todas, ninguna y presencia parcial, del guardián de Producción, del conteo seguro y de la captura y acumulación de fallos con rollback garantizado)
 
 **Interfaces:**
@@ -3828,7 +3841,7 @@ llamada REST; lo que no se admite es una tercera vía que se salte
       webServer: {
         command: `npm.cmd run dev -- --hostname 127.0.0.1 --port ${port}`,
         url: baseURL,
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: false,
         timeout: 120_000,
         env: {
           DATABASE_URL: process.env.DATABASE_URL ?? "",

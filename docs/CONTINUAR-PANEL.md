@@ -147,9 +147,12 @@ integre.
 - **Un método que no sea exactamente uno de los dos se degrada a Guatex**, nunca a
   mensajero propio: lo contrario inventaría un importe. Está probado en
   `tests/envios-servicio.test.ts`.
-- **Las tablas de 9A se conservan intactas y vacías.** `shipping_zones`,
-  `shipping_zone_areas` y `shipping_rates` ya no tienen consumidores, pero no se borran.
-  El verificador comprueba que siguen a 0 filas antes de empezar.
+- **Las tablas de 9A se conservan intactas, y pueden tener datos.** `shipping_zones`,
+  `shipping_zone_areas` y `shipping_rates` ya no tienen consumidores, pero no se borran ni
+  se vacían. El verificador **no exige que estén vacías**: cuenta lo que hay, usa fixtures
+  con sufijo propio sobre áreas sin cobertura, y al terminar compara el estado anterior y
+  el posterior al ROLLBACK para confirmar que quedan idénticas. Hoy la rama de desarrollo
+  conserva 5 filas históricas sembradas a propósito para comprobar precisamente eso.
 
 **Dos correcciones posteriores que conviene conocer** (04/09/2026), pedidas por el dueño
 antes de aceptar el trabajo:
@@ -168,7 +171,7 @@ antes de aceptar el trabajo:
 
 **Verificación fresca del cierre** (04/09/2026, contra `envios-operativos-dev`):
 `test:datos` **709/709**, `test:admin` **226/226**, `test:proveedores` 3/3,
-`test:permisos` correcto con las 27 tablas protegidas denegadas, `envios:verificar`
+`test:permisos` correcto con las **29** tablas protegidas denegadas, `envios:verificar`
 **20 comprobaciones correctas con datos históricos presentes** —conteos y huella de
 contenido idénticos antes y después—, `typecheck` y `lint` limpios, `build` correcto y
 **Playwright 83 de 83**, con salida 0 y el puerto 3100 liberado.
@@ -251,7 +254,11 @@ Subproyecto 9A **completado** en la rama `feat/envios-tarifas` (HEAD: `d4b5e9e`)
   - Invariantes de seguridad: **NUNCA modifica los textos originales** de `departamento` ni `municipio`; solo rellena `departamento_codigo` y `municipio_codigo` de forma unívoca según el catálogo oficial INE; **prohibido registrar o imprimir datos personales ni IDs de clientes** en logs (solo conteos agregados); se ejecuta dentro de una única transacción atómica.
 - **Verificación de invariantes (`scripts/verificar-envios.mjs` / `npm run envios:verificar`):**
   - Ejecuta 16 invariantes de seguridad contra la base real dentro de una transacción que **SIEMPRE hace `ROLLBACK`** en el bloque `finally`, sin persistir ningún dato de prueba.
-  - Soporta `--produccion` (comprueba endpoint canónico y rechaza desarrollo; rechaza producción si falta `--produccion`) y `--contar` (valida 0 filas residuales antes y después).
+  - Soporta `--produccion` (comprueba endpoint canónico y rechaza desarrollo; rechaza producción si falta `--produccion`) y `--contar`.
+  - **Cambiado el 04/09/2026, y esta descripción ya no vale del todo:** son **18**
+    comprobaciones, y `--contar` **ya no exige 0 filas**. Las tablas de 9A pueden conservar
+    datos históricos; lo que se comprueba es que el estado anterior y el posterior al
+    `ROLLBACK` son idénticos. Ver la sección 0.1.
 - **Recuperación en caso de fallo:**
   - Si cualquier paso falla, la transacción en curso revierte (`ROLLBACK`) dejando la base en su estado previo idéntico. En caso de corte catastrófico previo a la confirmación, se dispone de la rama de respaldo en Neon para restauración instantánea sin pérdida de datos.
 

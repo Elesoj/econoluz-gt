@@ -492,7 +492,13 @@ Desigual, Geely, Perfiles LED) son el activo visual más fuerte del sitio: dales
 - Lint: ESLint 9 con `eslint-config-next` (`core-web-vitals` + `typescript`) — `npm run lint`.
 - Pruebas: **Playwright** (`playwright.config.ts`, carpeta `tests/`). El navegador es
   `channel: "msedge"`; **chromium no está instalado**, así que un `npx playwright test`
-  que asuma chromium falla. Levanta su propio servidor en el puerto `3100`.
+  que asuma chromium falla. Levanta su propio servidor en el puerto `3100`, y desde el
+  04/09/2026 **nunca reutiliza uno que ya esté escuchando ahí**
+  (`reuseExistingServer: false`): con la opción contraria, Playwright encuentra el puerto
+  ocupado y devuelve sin quedarse nada que cerrar, así que al terminar deja el servidor
+  vivo y el puerto tomado. Peor aún en este repositorio, que trabaja con varios worktrees:
+  la suite acabaría corriendo contra el código de otra rama sin avisar. Si el 3100 está
+  ocupado, ahora falla en voz alta. La suite son **83 pruebas en 11 archivos**.
 - Deploy: Vercel (`econoluz-gt.vercel.app`), automático al empujar a `main` en GitHub
   (`Elesoj/econoluz-gt`). **El dominio `econoluzgt.com` todavía apunta al WordPress viejo**;
   cambiar el DNS es tarea del dueño del proyecto, no del código.
@@ -735,6 +741,8 @@ npm run identidad:probar    # prueba aprovisionamiento concurrente; crea y limpi
 npm run identidad:reconciliar # solo informa; añadir -- --aplicar para reparar huérfanos
 
 npm run envios:verificar    # 18 invariantes de esquema contra la base de desarrollo, siempre en ROLLBACK
+                            # Las tablas de 9A pueden tener datos históricos: los cuenta,
+                            # no los toca, y comprueba que quedan idénticas al terminar.
 npm run direcciones:migrar-codigos # empareja códigos INE en user_addresses (idempotente)
 ```
 
@@ -1174,8 +1182,10 @@ web no lo conoce**.
 plazos de entrega del contrato de envío, el formulario de creación de zonas de reparto y
 la ficha `/admin/envios/[zona]`, que ahora redirige a la portada. **Las tablas
 `shipping_zones`, `shipping_zone_areas` y `shipping_rates` no se tocan**: se conservan
-intactas y vacías, sin consumidores, para auditoría histórica y recuperación. Retirarlas
-necesitaría autorización expresa.
+intactas y sin consumidores, para auditoría histórica y recuperación. **Pueden contener
+datos**, y eso no es un problema: `npm run envios:verificar` los cuenta, trabaja con
+fixtures propios sobre áreas libres y comprueba al terminar que las tablas quedan
+exactamente como estaban. Retirarlas necesitaría autorización expresa.
 
 **La migración `015_direccion_zona_capitalina.sql`** añade `user_addresses.zona_capitalina`
 con dominio cerrado a las 22 zonas, impide que exista zona si el destino no es el
