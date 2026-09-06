@@ -27,8 +27,15 @@ test("comprar un producto con precio y encontrarlo al volver", async ({ page }) 
   const contador = page.getByRole("link", { name: /Ver el carrito/ });
   await expect(contador).toBeVisible();
 
+  // Se espera a la navegación que provoca el clic, no a que la URL cambie dentro
+  // del tiempo de una aserción. Son cosas distintas: `toHaveURL` sondea durante
+  // cinco segundos fijos, y en el servidor de desarrollo esta ruta puede tardar
+  // más —compila bajo demanda, y con `modelo_catalogo` en `shadow` el catálogo
+  // compara los 313 productos en cada carga—. `waitForURL` espera al evento de
+  // navegación con el plazo del test, así que sincroniza con lo que de verdad
+  // tiene que ocurrir en vez de apostar por un número.
   await contador.click();
-  await expect(page).toHaveURL(/\/carrito$/);
+  await page.waitForURL(/\/carrito$/);
 
   await expect(page.getByRole("heading", { name: "Tu carrito" })).toBeVisible();
   await expect(page.getByText(/^Total: Q/)).toBeVisible();
@@ -43,6 +50,8 @@ test("cambiar la cantidad recalcula el total", async ({ page }) => {
   await page.getByRole("button", { name: "Mostrar todos los productos" }).click();
   await page.getByRole("button", { name: "Agregar al carrito" }).first().click();
   await page.getByRole("link", { name: /Ver el carrito/ }).click();
+  // Igual que arriba: primero la navegación, y solo después se busca el total.
+  await page.waitForURL(/\/carrito$/);
 
   const total = page.getByText(/^Total: Q/);
   const inicial = await total.textContent();
