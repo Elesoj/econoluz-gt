@@ -67,7 +67,11 @@ test("municipio fuera de Guatemala limpia zona_capitalina a null", () => {
   }
 });
 
-test("sin códigos oficiales no se exige zona y no se guarda ninguna", () => {
+test("una dirección nueva sin códigos oficiales se rechaza", () => {
+  // Antes se aceptaba degradando los códigos a `null`, y esa puerta permitía
+  // exactamente lo que la zona capitalina quiere impedir: guardar
+  // «Guatemala/Guatemala» como texto libre, sin zona y sin códigos, y quedarse
+  // con una dirección que después no se puede enviar ni calcular.
   const sinCodigos = validarDireccion({
     destinatario: "Juan Perez",
     telefono: "12345678",
@@ -76,10 +80,12 @@ test("sin códigos oficiales no se exige zona y no se guarda ninguna", () => {
     direccion: "7a Avenida",
     zonaCapitalina: 10,
   });
-  assert.equal(sinCodigos.ok, true);
-  if (sinCodigos.ok) {
-    assert.equal(sinCodigos.direccion.departamentoCodigo, null);
-    assert.equal(sinCodigos.direccion.zonaCapitalina, null);
+  assert.equal(sinCodigos.ok, false);
+  if (!sinCodigos.ok) {
+    assert.ok(
+      sinCodigos.faltan.includes("departamento") || sinCodigos.faltan.includes("municipio"),
+      `faltan: ${sinCodigos.faltan.join(", ")}`,
+    );
   }
 });
 
@@ -241,5 +247,111 @@ test("una dirección legítima del interior sigue guardándose", () => {
     assert.equal(r.direccion.departamento, "Quetzaltenango");
     assert.equal(r.direccion.municipio, "Quetzaltenango");
     assert.equal(r.direccion.zonaCapitalina, null);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Los códigos son obligatorios en toda dirección nueva
+//
+// Dejarlos opcionales abría un rodeo: omitirlos evitaba la comprobación contra el
+// catálogo y, con ella, la obligatoriedad de la zona capitalina. La dirección se
+// guardaba como texto libre y el envío después no se podía calcular.
+//
+// Las direcciones históricas sin códigos siguen leyéndose sin problema: la
+// obligatoriedad es para lo que entra, no para lo que ya está guardado.
+// ---------------------------------------------------------------------------
+
+const SIN_CODIGOS = {
+  destinatario: "Sin Codigos",
+  telefono: "12345678",
+  departamento: "Guatemala",
+  municipio: "Guatemala",
+  direccion: "7a Avenida 1-00",
+};
+
+test("faltan los dos códigos", () => {
+  const r = validarDireccion(SIN_CODIGOS);
+  assert.equal(r.ok, false);
+});
+
+test("solo llega el departamento", () => {
+  const r = validarDireccion({ ...SIN_CODIGOS, departamentoCodigo: "01" });
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.ok(r.faltan.includes("municipio"), `faltan: ${r.faltan.join(", ")}`);
+  }
+});
+
+test("solo llega el municipio", () => {
+  const r = validarDireccion({ ...SIN_CODIGOS, municipioCodigo: "0101" });
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.ok(r.faltan.includes("departamento"), `faltan: ${r.faltan.join(", ")}`);
+  }
+});
+
+test("los códigos malformados se rechazan en vez de convertirse en null", () => {
+  for (const [dep, mun] of [
+    ["1", "abc"],
+    ["001", "0101"],
+    ["01", "101"],
+    ["ab", "cdef"],
+    ["01", "01011"],
+    [" 01", "0101"],
+  ]) {
+    const r = validarDireccion({ ...SIN_CODIGOS, departamentoCodigo: dep, municipioCodigo: mun });
+    assert.equal(r.ok, false, `debería rechazar ${dep}/${mun}`);
+  }
+});
+
+test("omitir los códigos ya no sirve para guardar «Guatemala/Guatemala» sin zona", () => {
+  // Este era el rodeo concreto: sin códigos no se pedía zona, y la dirección de
+  // la capital entraba igual.
+  const r = validarDireccion({
+    destinatario: "Rodeo De La Zona",
+    telefono: "12345678",
+    departamento: "Guatemala",
+    municipio: "Guatemala",
+    direccion: "7a Avenida",
+  });
+  assert.equal(r.ok, false);
+
+  // Y con los códigos puestos, la zona vuelve a ser obligatoria.
+  const conCodigos = validarDireccion({
+    destinatario: "Rodeo De La Zona",
+    telefono: "12345678",
+    departamento: "Guatemala",
+    municipio: "Guatemala",
+    departamentoCodigo: "01",
+    municipioCodigo: "0101",
+    direccion: "7a Avenida",
+  });
+  assert.equal(conCodigos.ok, false);
+  if (!conCodigos.ok) {
+    assert.ok(conCodigos.faltan.includes("zonaCapitalina"));
+  }
+});
+
+test("una dirección oficial completa se acepta y se normaliza", () => {
+  const r = validarDireccion({
+    destinatario: "Direccion Oficial",
+    telefono: "12345678",
+    departamento: "lo que escriba el navegador",
+    municipio: "lo que escriba el navegador",
+    departamentoCodigo: "01",
+    municipioCodigo: "0101",
+    zonaCapitalina: 15,
+    direccion: "21 Avenida 0-18, Vista Hermosa 2",
+    referencias: "Portón negro",
+    predeterminada: true,
+  });
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.direccion.departamentoCodigo, "01");
+    assert.equal(r.direccion.municipioCodigo, "0101");
+    assert.equal(r.direccion.departamento, "Guatemala");
+    assert.equal(r.direccion.municipio, "Guatemala");
+    assert.equal(r.direccion.zonaCapitalina, 15);
+    assert.equal(r.direccion.predeterminada, true);
   }
 });

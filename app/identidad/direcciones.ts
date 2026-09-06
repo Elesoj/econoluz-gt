@@ -99,19 +99,37 @@ export function validarDireccion(entrada: unknown): ResultadoDeValidacion {
     faltan.push("referencias");
   }
 
+  // Los códigos son **obligatorios** en toda dirección nueva, y no se degradan a
+  // `null` cuando faltan o vienen mal.
+  //
+  // Aceptarlos como opcionales abría un rodeo: omitirlos saltaba la comprobación
+  // contra el catálogo y, con ella, la obligatoriedad de la zona capitalina.
+  // Bastaba con guardar «Guatemala/Guatemala» como texto libre para quedarse con
+  // una dirección de la capital sin zona, que después no se puede repartir ni
+  // calcular.
+  //
+  // Esto no invalida nada de lo ya guardado: las direcciones históricas sin
+  // códigos se siguen leyendo igual. La obligatoriedad es para lo que entra.
   const depCodRaw = texto(datos.departamentoCodigo);
   const munCodRaw = texto(datos.municipioCodigo);
-  const tieneFormaDeCodigos = /^\d{2}$/.test(depCodRaw) && /^\d{4}$/.test(munCodRaw);
+  const depTieneForma = /^\d{2}$/.test(depCodRaw);
+  const munTieneForma = /^\d{4}$/.test(munCodRaw);
 
-  // Si vienen códigos, tienen que ser de un destino que existe de verdad. Un
-  // código inventado o una pareja incompatible —Quetzaltenango dentro de
-  // Guatemala— se rechaza, no se ignora en silencio: ignorarlo guardaría la
-  // dirección sin códigos y el envío no se podría calcular.
-  const oficial = tieneFormaDeCodigos
-    ? resolverDestinoOficial(depCodRaw, munCodRaw, MUNICIPIOS_OFICIALES)
-    : null;
+  if (!depTieneForma) {
+    faltan.push("departamento");
+  }
+  if (!munTieneForma) {
+    faltan.push("municipio");
+  }
 
-  if (tieneFormaDeCodigos && !oficial) {
+  // Con la forma correcta, tienen que ser además un destino que existe de verdad
+  // y corresponderse entre sí: Quetzaltenango no está dentro de Guatemala.
+  const oficial =
+    depTieneForma && munTieneForma
+      ? resolverDestinoOficial(depCodRaw, munCodRaw, MUNICIPIOS_OFICIALES)
+      : null;
+
+  if (depTieneForma && munTieneForma && !oficial) {
     faltan.push("municipio");
   }
 

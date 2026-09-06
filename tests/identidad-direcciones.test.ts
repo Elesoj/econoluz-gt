@@ -2,11 +2,21 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { mensajeDeFaltan, validarDireccion } from "../app/identidad/direcciones";
 
+/**
+ * La dirección real de ECONOLUZ, que es de la capital y por tanto lleva zona.
+ *
+ * Los códigos oficiales son obligatorios desde el 04/09/2026: sin ellos no se
+ * puede comprobar que el destino existe, y omitirlos servía para saltarse la
+ * obligatoriedad de la zona capitalina.
+ */
 const VALIDA = {
   destinatario: "Quien Recibe",
   telefono: "4042 8790",
   departamento: "Guatemala",
   municipio: "Guatemala",
+  departamentoCodigo: "01",
+  municipioCodigo: "0101",
+  zonaCapitalina: 15,
   direccion: "21 Avenida 0-18, Vista Hermosa 2, Zona 15",
   referencias: "Portón negro frente a la tienda",
   predeterminada: true,
@@ -85,26 +95,35 @@ test("un campo desconocido no rompe el mensaje ni filtra el nombre interno", () 
   assert.equal(mensaje.includes("campo_raro"), false);
 });
 
-test("los códigos geográficos se aceptan si tienen el formato oficial de 2 y 4 dígitos", () => {
+test("los códigos geográficos se aceptan si son de un destino real del catálogo", () => {
   const conCodigos = validarDireccion({
     ...VALIDA,
     departamentoCodigo: "01",
-    municipioCodigo: "0108",
+    municipioCodigo: "0108", // Mixco: fuera de la capital, así que sin zona
+    zonaCapitalina: null,
   });
   assert.equal(conCodigos.ok, true);
   if (conCodigos.ok) {
     assert.equal(conCodigos.direccion.departamentoCodigo, "01");
     assert.equal(conCodigos.direccion.municipioCodigo, "0108");
+    assert.equal(conCodigos.direccion.municipio, "Mixco");
   }
+});
 
+/**
+ * **Comportamiento cambiado el 04/09/2026.** Antes, un código malformado se
+ * convertía en `null` y la dirección se guardaba igual, con el nombre que hubiera
+ * escrito el navegador. Eso dejaba filas nuevas sin códigos, que no se pueden
+ * repartir, y servía además para esquivar la zona capitalina.
+ */
+test("un código malformado se rechaza, ya no se convierte en null", () => {
   const conCodigosInvalidos = validarDireccion({
     ...VALIDA,
     departamentoCodigo: "1",
     municipioCodigo: "abc",
   });
-  assert.equal(conCodigosInvalidos.ok, true);
-  if (conCodigosInvalidos.ok) {
-    assert.equal(conCodigosInvalidos.direccion.departamentoCodigo, null);
-    assert.equal(conCodigosInvalidos.direccion.municipioCodigo, null);
+  assert.equal(conCodigosInvalidos.ok, false);
+  if (!conCodigosInvalidos.ok) {
+    assert.deepEqual(conCodigosInvalidos.faltan.sort(), ["departamento", "municipio"]);
   }
 });
