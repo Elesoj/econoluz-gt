@@ -109,13 +109,19 @@ test("clasificarEstadoTablas9A identifica los tres estados: todas, ninguna y pre
   assert.deepEqual(parcial2.faltantes, ["shipping_zone_areas"]);
 });
 
-test("verificarPreflightTablas9A exige 0 filas en las tablas de 9A", () => {
+test("verificarPreflightTablas9A acepta datos históricos en las tablas de 9A", () => {
+  // La especificación manda conservarlas intactas «para recuperación y auditoría
+  // histórica». Rechazar la base por tener filas convertiría ese archivo en un
+  // motivo de fallo, y además impediría llegar a las comprobaciones 17 y 18.
   const vacias = { shipping_zones: 0, shipping_zone_areas: 0, shipping_rates: 0 };
   assert.equal(verificarPreflightTablas9A(vacias).ok, true);
+  assert.equal(verificarPreflightTablas9A(vacias).hayHistorico, false);
 
-  const conFilas = { shipping_zones: 1, shipping_zone_areas: 0, shipping_rates: 0 };
-  assert.equal(verificarPreflightTablas9A(conFilas).ok, false);
-  assert.match(verificarPreflightTablas9A(conFilas).motivo ?? "", /1 filas residuales/);
+  const conFilas = { shipping_zones: 3, shipping_zone_areas: 5, shipping_rates: 2 };
+  const res = verificarPreflightTablas9A(conFilas);
+  assert.equal(res.ok, true, "tener datos históricos no puede rechazar la base");
+  assert.equal(res.hayHistorico, true);
+  assert.equal(res.total, 10);
 });
 
 type ConsultaSql = (sql: string, parametros?: readonly unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
@@ -418,4 +424,108 @@ test("--contar no consulta las tablas de 9A cuando no existen", async () => {
     0,
     "contar una tabla inexistente rompe la ejecución justo después de haber pasado todo",
   );
+});
+
+test("con las tres tablas de 9A llenas de datos históricos, la verificación se ejecuta entera y no los toca", async () => {
+  // Una base con historia de 9A: 2 zonas, 2 coberturas y 1 tarifa que existían
+  // antes de empezar. Al terminar tienen que seguir exactamente igual.
+  const historico = {
+    shipping_zones: 2,
+    shipping_zone_areas: 2,
+    shipping_rates: 1,
+  };
+  const consultas: string[] = [];
+  let rollbackEjecutado = false;
+
+  const cliente: { query: ConsultaSql } = {
+    async query(sql: string) {
+      consultas.push(sql);
+      if (sql.includes("information_schema.tables")) {
+        return { rows: TABLAS_9A.map((t) => ({ table_name: t })) };
+      }
+      for (const t of TABLAS_9A) {
+        if (sql.includes('from "' + t + '"')) {
+          return { rows: [{ total: historico[t as keyof typeof historico] }] };
+        }
+      }
+      if (sql === "begin") return { rows: [] };
+      if (sql === "rollback") {
+        rollbackEjecutado = true;
+        return { rows: [] };
+      }
+      if (sql.startsWith("savepoint") || sql.startsWith("release savepoint")) return { rows: [] };
+      if (sql.startsWith("rollback to savepoint")) return { rows: [] };
+      if (sql.includes("from users")) return { rows: [{ id: 42 }] };
+      if (sql.includes("from app_settings")) {
+        return {
+          rows: [
+            { clave: "envios_zonas_metodos", valor: "{}" },
+            { clave: "envios_reglas_propias", valor: "{}" },
+          ],
+        };
+      }
+      return { rows: [] };
+    },
+  };
+
+  let avisoHistorico = false;
+  await ejecutarVerificaciones(cliente, {
+    debeContar: true,
+    onBien: (msg: string) => {
+      if (/datos hist[oó]ricos/i.test(msg)) avisoHistorico = true;
+    },
+  }).catch(() => {
+    // Un fallo de comprobación no invalida lo que aquí se mira; el doble no
+    // simula PostgreSQL entero. Lo que importa es que no se borre nada.
+  });
+
+  assert.equal(avisoHistorico, true, "debe decir que hay datos históricos y que los respeta");
+  assert.equal(rollbackEjecutado, true, "y terminar siempre en ROLLBACK");
+
+  // Ni un borrado ni un truncado sobre las tablas históricas fuera de la transacción.
+  const destructivas = consultas.filter(
+    (q) => /^\s*(truncate|drop)/i.test(q) || /delete from shipping_(zones|zone_areas|rates)\s*$/i.test(q),
+  );
+  assert.deepEqual(destructivas, [], "nunca se borra ni se trunca el histórico");
+});
+
+test("los fixtures de la verificación llevan un sufijo único por ejecución", async () => {
+  // Con datos históricos delante, un código fijo como 'test-zona-muni-1' choca con
+  // el de una ejecución anterior que no llegó a revertirse, y el fallo se leería
+  // como un invariante roto que no lo es.
+  const codigos: string[] = [];
+  const cliente: { query: ConsultaSql } = {
+    async query(sql: string) {
+      if (sql.includes("information_schema.tables")) {
+        return { rows: TABLAS_9A.map((t) => ({ table_name: t })) };
+      }
+      for (const t of TABLAS_9A) {
+        if (sql.includes('from "' + t + '"')) return { rows: [{ total: 0 }] };
+      }
+      const m = sql.match(/'(test-zona-[a-z0-9-]+)'/);
+      if (m) codigos.push(m[1]);
+      if (sql.includes("from users")) return { rows: [{ id: 42 }] };
+      if (sql.includes("from app_settings")) {
+        return {
+          rows: [
+            { clave: "envios_zonas_metodos", valor: "{}" },
+            { clave: "envios_reglas_propias", valor: "{}" },
+          ],
+        };
+      }
+      return { rows: [] };
+    },
+  };
+
+  await ejecutarVerificaciones(cliente).catch(() => {});
+
+  assert.ok(codigos.length > 0, "la verificación crea zonas de prueba");
+
+  // Todos tienen que acabar en el mismo sufijo de esta ejecución, y ese sufijo
+  // tiene que ser lo bastante largo para no repetirse por casualidad.
+  const sufijos = new Set(codigos.map((c) => c.split("-").at(-1) ?? ""));
+  assert.equal(sufijos.size, 1, `esperaba un solo sufijo y hay ${sufijos.size}: ${[...sufijos].join(", ")}`);
+
+  const sufijo = [...sufijos][0];
+  assert.match(sufijo, /^[a-z0-9]{6,}$/, `el sufijo «${sufijo}» no identifica la ejecución`);
 });

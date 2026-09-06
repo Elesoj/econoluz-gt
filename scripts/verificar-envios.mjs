@@ -86,18 +86,66 @@ export function clasificarEstadoTablas9A(tablasExistentes = []) {
   return { estado: "parcial", encontradas, faltantes };
 }
 
-/** Las tablas de 9A no tienen consumidores: si traen filas, algo escribió fuera de la prueba. */
+/**
+ * Cuenta lo que hay en las tablas de 9A **sin juzgarlo**.
+ *
+ * Estas tablas se conservan a propósito para recuperación y auditoría histórica
+ * —§1 del diseño operativo—, así que tener filas no es un error: es su función.
+ * Rechazar la base por eso convertiría el archivo en motivo de fallo y, peor,
+ * impediría llegar a las comprobaciones 17 y 18, que no dependen de 9A.
+ *
+ * Lo que sí hace falta cuando hay historia es no tropezar con ella: los fixtures
+ * llevan sufijo propio y las áreas de prueba se eligen entre las que están libres.
+ */
 export function verificarPreflightTablas9A(conteos) {
   const total =
     (conteos.shipping_zones ?? 0) +
     (conteos.shipping_zone_areas ?? 0) +
     (conteos.shipping_rates ?? 0);
-  if (total === 0) {
-    return { ok: true };
-  }
+  return { ok: true, total, hayHistorico: total > 0 };
+}
+
+/**
+ * El sufijo que distingue los fixtures de **esta** ejecución.
+ *
+ * Con datos históricos delante, un código fijo choca con el de una ejecución
+ * anterior que no llegara a revertirse, y ese choque se leería como un invariante
+ * roto cuando no lo es.
+ */
+export function nuevoSufijoDeFixture() {
+  const bruto = Math.random().toString(36).slice(2, 10).toLowerCase();
+  return bruto.replace(/[^a-z0-9]/g, "0").padEnd(8, "0");
+}
+
+/**
+ * Busca un municipio y un departamento **sin cobertura** para las comprobaciones
+ * de unicidad. Usar uno que ya tuviera cobertura histórica haría fallar el primer
+ * `insert` y la comprobación daría un falso negativo.
+ */
+export async function elegirAreasLibres(cliente, cuantas = 4) {
+  const { rows: municipios } = await cliente.query(
+    `select m.codigo
+       from geo_municipios m
+      where not exists (
+        select 1 from shipping_zone_areas a where a.municipio_codigo = m.codigo
+      )
+      order by m.codigo
+      limit $1`,
+    [cuantas],
+  );
+  const { rows: departamentos } = await cliente.query(
+    `select d.codigo
+       from geo_departamentos d
+      where not exists (
+        select 1 from shipping_zone_areas a where a.departamento_codigo = d.codigo
+      )
+      order by d.codigo
+      limit $1`,
+    [cuantas],
+  );
   return {
-    ok: false,
-    motivo: `Las tablas de 9A contienen ${total} filas residuales fuera de la prueba. Deben estar limpias (0 filas).`,
+    municipios: municipios.map((f) => String(f.codigo)),
+    departamentos: departamentos.map((f) => String(f.codigo)),
   };
 }
 
@@ -153,26 +201,42 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
   }
 
   let ejecutarBloque9A = false;
+  /** @type {Record<string, number>} */
+  let conteosAntes = {};
   if (diagnostico.estado === "ninguna") {
     onBien(
       "Aviso 9A: las tablas de 9A no existen en esta base. Se omiten las comprobaciones 1–16 y se continúa con las 17 y 18.",
     );
   } else {
-    const conteosAntes = await contarTablasConfiguracion(cliente, diagnostico.encontradas);
+    conteosAntes = await contarTablasConfiguracion(cliente, diagnostico.encontradas);
     if (debeContar) {
       console.log("Conteos previos de tablas 9A:", conteosAntes);
     }
     const preflight = verificarPreflightTablas9A(conteosAntes);
-    if (!preflight.ok) {
-      onMal("Preflight tablas 9A", preflight.motivo);
-      throw new Error(preflight.motivo);
+    if (preflight.hayHistorico) {
+      onBien(
+        `Preflight 9A: las 3 tablas existen y conservan ${preflight.total} filas de datos históricos. Se respetan: la verificación usa fixtures propios y termina en ROLLBACK.`,
+      );
+    } else {
+      onBien("Preflight 9A: las 3 tablas de configuración existen y están vacías");
     }
-    onBien("Preflight 9A: las 3 tablas de configuración existen y tienen 0 filas");
     ejecutarBloque9A = true;
   }
 
+  // Cada ejecución marca sus fixtures con lo suyo, para no chocar con los de otra
+  // que no llegara a revertirse ni con los datos históricos.
+  const SUFIJO = nuevoSufijoDeFixture();
+
   console.log("Iniciando transacción de verificación (concluirá siempre en ROLLBACK)...");
   await cliente.query("begin");
+
+  // Las comprobaciones 1 y 2 prueban que un área no puede estar en dos zonas. Si
+  // se usara un municipio o un departamento que ya tiene cobertura histórica, el
+  // primer `insert` fallaría y la comprobación diría que el invariante está roto
+  // cuando lo que está es ocupado. Se eligen entre los que están libres.
+  const areasLibres = ejecutarBloque9A
+    ? await elegirAreasLibres(cliente)
+    : { municipios: [], departamentos: [] };
 
   /** @type {Array<{ nombre: string; detalle?: string }>} */
   const fallosAcumulados = [];
@@ -193,26 +257,26 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: zA } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-muni-1', 'Zona Municipio 1', 'paqueteria', true)
+           values ('test-zona-muni-1-${SUFIJO}', 'Zona Municipio 1', 'paqueteria', true)
            returning id`,
         );
         const { rows: zB } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-muni-2', 'Zona Municipio 2', 'paqueteria', true)
+           values ('test-zona-muni-2-${SUFIJO}', 'Zona Municipio 2', 'paqueteria', true)
            returning id`,
         );
 
         await cliente.query(
           `insert into shipping_zone_areas (zone_id, municipio_codigo, activa)
-           values ($1, '0101', true)`,
-          [zA[0].id],
+           values ($1, $2, true)`,
+          [zA[0].id, areasLibres.municipios[0]],
         );
 
         const intento = await ejecutarConSavepoint(cliente, () =>
           cliente.query(
             `insert into shipping_zone_areas (zone_id, municipio_codigo, activa)
-             values ($1, '0101', true)`,
-            [zB[0].id],
+             values ($1, $2, true)`,
+            [zB[0].id, areasLibres.municipios[0]],
           ),
         );
 
@@ -229,26 +293,26 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: zA } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-depto-1', 'Zona Depto 1', 'paqueteria', true)
+           values ('test-zona-depto-1-${SUFIJO}', 'Zona Depto 1', 'paqueteria', true)
            returning id`,
         );
         const { rows: zB } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-depto-2', 'Zona Depto 2', 'paqueteria', true)
+           values ('test-zona-depto-2-${SUFIJO}', 'Zona Depto 2', 'paqueteria', true)
            returning id`,
         );
 
         await cliente.query(
           `insert into shipping_zone_areas (zone_id, departamento_codigo, activa)
-           values ($1, '02', true)`,
-          [zA[0].id],
+           values ($1, $2, true)`,
+          [zA[0].id, areasLibres.departamentos[0]],
         );
 
         const intento = await ejecutarConSavepoint(cliente, () =>
           cliente.query(
             `insert into shipping_zone_areas (zone_id, departamento_codigo, activa)
-             values ($1, '02', true)`,
-            [zB[0].id],
+             values ($1, $2, true)`,
+            [zB[0].id, areasLibres.departamentos[0]],
           ),
         );
 
@@ -265,7 +329,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-solape', 'Zona Solape', 'paqueteria', true)
+           values ('test-zona-solape-${SUFIJO}', 'Zona Solape', 'paqueteria', true)
            returning id`,
         );
 
@@ -299,7 +363,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-contigua', 'Zona Contigua', 'paqueteria', true)
+           values ('test-zona-contigua-${SUFIJO}', 'Zona Contigua', 'paqueteria', true)
            returning id`,
         );
 
@@ -342,7 +406,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-inmutable', 'Zona Inmutable', 'paqueteria', true)
+           values ('test-zona-inmutable-${SUFIJO}', 'Zona Inmutable', 'paqueteria', true)
            returning id`,
         );
         const { rows: t } = await cliente.query(
@@ -375,7 +439,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-despub', 'Zona Despublicar', 'paqueteria', true)
+           values ('test-zona-despub-${SUFIJO}', 'Zona Despublicar', 'paqueteria', true)
            returning id`,
         );
         const { rows: t } = await cliente.query(
@@ -408,7 +472,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-cierre', 'Zona Cierre', 'paqueteria', true)
+           values ('test-zona-cierre-${SUFIJO}', 'Zona Cierre', 'paqueteria', true)
            returning id`,
         );
         const { rows: t } = await cliente.query(
@@ -458,7 +522,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-sin-prog', 'Zona Sin Prog', 'paqueteria', true)
+           values ('test-zona-sin-prog-${SUFIJO}', 'Zona Sin Prog', 'paqueteria', true)
            returning id`,
         );
 
@@ -501,7 +565,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-borrar-tarifa', 'Zona Borrar Tarifa', 'paqueteria', true)
+           values ('test-zona-borrar-tarifa-${SUFIJO}', 'Zona Borrar Tarifa', 'paqueteria', true)
            returning id`,
         );
 
@@ -549,14 +613,15 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-con-hijos', 'Zona Con Hijos', 'paqueteria', true)
+           values ('test-zona-con-hijos-${SUFIJO}', 'Zona Con Hijos', 'paqueteria', true)
            returning id`,
         );
 
         await cliente.query(
           `insert into shipping_zone_areas (zone_id, municipio_codigo, activa)
-           values ($1, '0102', true)`,
-          [z[0].id],
+           values ($1, $2, true)`,
+          // El segundo municipio libre: el primero ya lo ocupó la comprobación 1.
+          [z[0].id, areasLibres.municipios[1]],
         );
 
         const intentoBorrar = await ejecutarConSavepoint(cliente, () =>
@@ -592,7 +657,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-vacia', 'Zona Vacia', 'paqueteria', true)
+           values ('test-zona-vacia-${SUFIJO}', 'Zona Vacia', 'paqueteria', true)
            returning id`,
         );
 
@@ -614,7 +679,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: u } = await cliente.query(
           `insert into users (firebase_uid, email, nombre)
-           values ('test-usr-envios-12', 'test-envios-12@ejemplo.invalido', 'Test Envios')
+           values ('test-usr-envios-12-${SUFIJO}', 'test-envios-12-${SUFIJO}@ejemplo.invalido', 'Test Envios')
            returning id`,
         );
 
@@ -675,7 +740,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
       {
         const { rows: z } = await cliente.query(
           `insert into shipping_zones (codigo, nombre, metodo, activa)
-           values ('test-zona-sustitucion', 'Zona Sustitucion', 'paqueteria', true)
+           values ('test-zona-sustitucion-${SUFIJO}', 'Zona Sustitucion', 'paqueteria', true)
            returning id`,
         );
         const zoneId = z[0].id;
@@ -821,7 +886,7 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
         const alta = await ejecutarConSavepoint(cliente, () =>
           cliente.query(
             `insert into users (firebase_uid, email, nombre, estado)
-             values ('test-verif-015', 'test-verif-015@econoluz.test', 'Usuario Sintetico 015', 'activa')
+             values ('test-verif-015-${SUFIJO}', 'test-verif-015-${SUFIJO}@econoluz.test', 'Usuario Sintetico 015', 'activa')
              returning id`,
           ),
         );
@@ -976,19 +1041,35 @@ export async function ejecutarVerificaciones(cliente, { debeContar = false, onBi
   }
 
 
-  // Si se pide --contar, verificamos tras el ROLLBACK que no quedó nada residual.
+  // Tras el ROLLBACK, las tablas de 9A tienen que estar **exactamente como
+  // estaban**: ni una fila de más de la verificación, ni una de menos del
+  // histórico. Se compara contra lo que se contó antes de empezar, no contra
+  // cero, porque cero solo es lo correcto en una base sin historia.
+  //
   // Solo si las tablas existen: contar una inexistente reventaría justo después
   // de haber pasado todas las comprobaciones.
-  if (debeContar && ejecutarBloque9A) {
+  if (ejecutarBloque9A) {
     const conteosDespues = await contarTablasConfiguracion(cliente, diagnostico.encontradas);
-    const totalFilasDespues = Object.values(conteosDespues).reduce((a, b) => a + b, 0);
-    if (totalFilasDespues === 0) {
-      onBien("las 3 tablas de configuración tienen 0 filas tras la verificación (--contar)");
+    const iguales = diagnostico.encontradas.every(
+      (tabla) => conteosDespues[tabla] === conteosAntes[tabla],
+    );
+
+    if (iguales) {
+      const total = Object.values(conteosDespues).reduce((a, b) => a + b, 0);
+      onBien(
+        total === 0
+          ? "Las 3 tablas de 9A siguen vacías tras el ROLLBACK: la verificación no dejó residuo"
+          : `Las 3 tablas de 9A conservan sus ${total} filas históricas intactas tras el ROLLBACK`,
+      );
     } else {
       onMal(
-        "las 3 tablas de configuración deben tener 0 filas tras el rollback",
-        JSON.stringify(conteosDespues),
+        "Las tablas de 9A cambiaron durante la verificación",
+        `antes: ${JSON.stringify(conteosAntes)}, después: ${JSON.stringify(conteosDespues)}`,
       );
+    }
+
+    if (debeContar) {
+      console.log("Conteos posteriores de tablas 9A:", conteosDespues);
     }
   }
 }
