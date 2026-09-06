@@ -1983,6 +1983,42 @@ Lo que se sabe, y lo que no:
 Si vuelve a ocurrir: ejecutar `npx playwright test --reporter=line`, **no repetir la
 ejecución**, y mirar `test-results/` y el nombre de la prueba antes de tocar nada.
 
+#### Identificada el 04/09/2026: es `tienda-carrito.spec.ts`
+
+Se siguió esa instrucción y esta vez sí se leyó el informe antes de repetir. Las pruebas
+que fallan son dos, las dos del mismo archivo:
+
+- `tests/tienda-carrito.spec.ts:11` — «comprar un producto con precio y encontrarlo al volver»
+- `tests/tienda-carrito.spec.ts:41` — «cambiar la cantidad recalcula el total»
+
+**Qué falla, exactamente.** Las dos hacen clic en el contador «Ver el carrito» de la barra
+y esperan llegar a `/carrito`. La aserción `toHaveURL(/\/carrito$/)` agota sus 5 segundos
+con la URL todavía en `/catalogo`. En el volcado de accesibilidad que Playwright guarda en
+`test-results/` se ve que el producto **sí está en el carrito** —«En el carrito (1)»— pero
+el enlace del contador **ya no aparece en la barra**: se pintó, la prueba lo vio, y para
+cuando llegó el clic había dejado de estar. Es una carrera con la hidratación del store
+del carrito, que es justo el pegamento con React que el comentario de la propia prueba
+dice que viene a ejercer.
+
+**No es una regresión del modelo operativo de envíos**, y se comprobó en vez de suponerlo:
+
+- La rama `feat/envios-operativos` **no toca ningún archivo** del carrito, de la barra de
+  navegación ni del catálogo (`git diff --name-only main...HEAD`).
+- Sustituyendo `playwright.config.ts` por el de `main` —el único archivo del diff que
+  podía influir en cómo se levanta el servidor— **las dos pruebas fallan exactamente
+  igual**.
+- En dos ejecuciones completas anteriores de esa misma rama, la batería dio **82/82**.
+
+**Lo que cambia entre una ejecución que pasa y una que falla** parece ser el estado de la
+caché de compilación del servidor de desarrollo: aparece después de un `npm run build`,
+que deja `.next/` con la compilación de producción y obliga a `next dev` a recompilar bajo
+demanda. Eso es una pista firme, no una demostración.
+
+**Queda abierta y es una decisión del dueño**, porque arreglarla está fuera del alcance de
+los envíos: lo que habría que hacer es que la prueba espere al enlace de forma estable
+—esperar la navegación en lugar de la URL, o anclar el clic al `href`— en vez de subir el
+tiempo de espera, que solo escondería la carrera.
+
 ### 10.3 Otras
 
 - `econoluzgt.com` sigue apuntando al WordPress viejo. Solo
