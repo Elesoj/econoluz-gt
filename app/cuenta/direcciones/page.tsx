@@ -30,6 +30,7 @@ async function guardar(
     predeterminada: datos.get("predeterminada") === "on",
     departamentoCodigo: datos.get("departamentoCodigo"),
     municipioCodigo: datos.get("municipioCodigo"),
+    zonaCapitalina: datos.get("zonaCapitalina"),
   });
 
   // Antes esto era un `return` a secas: la dirección se perdía sin decir nada.
@@ -61,8 +62,9 @@ export default async function DireccionesPage() {
           <li key={String(direccion.id)} className="rounded border border-neutral-200 p-4 text-sm">
             <p className="font-medium">{String(direccion.destinatario)}</p>
             <p className="text-neutral-600">
-              {String(direccion.direccion)}, {String(direccion.municipio)},{" "}
-              {String(direccion.departamento)}
+              {String(direccion.direccion)}
+              {direccion.zona_capitalina ? `, zona ${String(direccion.zona_capitalina)}` : ""},{" "}
+              {String(direccion.municipio)}, {String(direccion.departamento)}
             </p>
             {direccion.referencias ? (
               <p className="text-neutral-500">{String(direccion.referencias)}</p>

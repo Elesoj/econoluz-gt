@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useActionState } from "react";
 import type { DepartamentoCatalogo, MunicipioCatalogo } from "@/app/envios/geografia";
+import { ZONAS_CAPITALINAS_VALIDAS } from "@/app/envios/zonasCapitalinas";
 
 export type EstadoDelFormulario = { mensaje: string; guardada: boolean };
 
@@ -25,6 +26,7 @@ export default function FormularioDireccion({
   const [estado, enviar, enviando] = useActionState(accion, ESTADO_INICIAL);
   const [departamentoCodigo, setDepartamentoCodigo] = useState("");
   const [municipioCodigo, setMunicipioCodigo] = useState("");
+  const [zonaCapitalina, setZonaCapitalina] = useState("");
 
   const deptosOrdenados = useMemo(
     () => [...departamentos].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")),
@@ -37,6 +39,10 @@ export default function FormularioDireccion({
       .filter((m) => m.departamento === departamentoCodigo)
       .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
   }, [municipios, departamentoCodigo]);
+
+  // El mensajero propio solo entra en el municipio de Guatemala, así que la zona
+  // se pide únicamente allí.
+  const esMunicipioGuatemala = departamentoCodigo === "01" && municipioCodigo === "0101";
 
   const departamentoNombre =
     departamentos.find((d) => d.codigo === departamentoCodigo)?.nombre ?? "";
@@ -96,6 +102,7 @@ export default function FormularioDireccion({
           onChange={(e) => {
             setDepartamentoCodigo(e.target.value);
             setMunicipioCodigo("");
+            setZonaCapitalina("");
           }}
           className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2"
         >
@@ -116,7 +123,10 @@ export default function FormularioDireccion({
           required
           disabled={!departamentoCodigo}
           value={municipioCodigo}
-          onChange={(e) => setMunicipioCodigo(e.target.value)}
+          onChange={(e) => {
+            setMunicipioCodigo(e.target.value);
+            setZonaCapitalina("");
+          }}
           className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2 disabled:bg-neutral-100 disabled:text-neutral-400"
         >
           <option value="">
@@ -132,6 +142,26 @@ export default function FormularioDireccion({
         </select>
       </label>
       <input type="hidden" name="municipio" value={municipioNombre} />
+
+      {esMunicipioGuatemala ? (
+        <label className="block text-sm text-neutral-700">
+          Zona capitalina
+          <select
+            name="zonaCapitalina"
+            required
+            value={zonaCapitalina}
+            onChange={(e) => setZonaCapitalina(e.target.value)}
+            className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-2"
+          >
+            <option value="">Selecciona la zona</option>
+            {ZONAS_CAPITALINAS_VALIDAS.map((z) => (
+              <option key={z} value={z}>
+                Zona {z}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
 
       <label className="block text-sm text-neutral-700">
         Dirección

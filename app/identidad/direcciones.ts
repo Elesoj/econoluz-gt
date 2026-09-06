@@ -1,5 +1,7 @@
 /** Las direcciones de entrega del cliente. */
 
+import { esZonaCapitalinaValida } from "../envios/zonasCapitalinas";
+
 export type DireccionValidada = {
   destinatario: string;
   telefono: string;
@@ -10,6 +12,7 @@ export type DireccionValidada = {
   predeterminada: boolean;
   departamentoCodigo?: string | null;
   municipioCodigo?: string | null;
+  zonaCapitalina?: number | null;
 };
 
 export type ResultadoDeValidacion =
@@ -38,6 +41,7 @@ const ETIQUETAS: Record<string, string> = {
   municipio: "municipio",
   direccion: "dirección",
   referencias: "referencias",
+  zonaCapitalina: "zona capitalina",
 };
 
 /**
@@ -68,24 +72,46 @@ export function validarDireccion(entrada: unknown): ResultadoDeValidacion {
   }
 
   const datos = entrada as Record<string, unknown>;
-  const faltan = OBLIGATORIOS.filter((campo) => {
+  const faltan: string[] = OBLIGATORIOS.filter((campo) => {
     const valor = texto(datos[campo]);
     return valor.length === 0 || valor.length > LARGO_MAXIMO;
   });
 
-  if (faltan.length > 0) {
-    return { ok: false, faltan };
-  }
-
   const referencias = texto(datos.referencias);
   if (referencias.length > LARGO_MAXIMO) {
-    return { ok: false, faltan: ["referencias"] };
+    faltan.push("referencias");
   }
 
   const depCodRaw = texto(datos.departamentoCodigo);
   const munCodRaw = texto(datos.municipioCodigo);
   const departamentoCodigo = /^\d{2}$/.test(depCodRaw) ? depCodRaw : null;
   const municipioCodigo = /^\d{4}$/.test(munCodRaw) ? munCodRaw : null;
+
+  // La zona solo existe en el municipio de Guatemala, y allí es obligatoria: es
+  // lo único que distingue un destino con mensajero propio de uno que va por
+  // Guatex. Fuera de la capital se descarta cualquier valor que llegue.
+  const esMunicipioGuatemala = departamentoCodigo === "01" && municipioCodigo === "0101";
+  let zonaCapitalina: number | null = null;
+
+  if (esMunicipioGuatemala) {
+    const bruta = datos.zonaCapitalina;
+    // El formulario la envía como texto; el resto de llamadas, como número.
+    const numero =
+      typeof bruta === "number"
+        ? bruta
+        : typeof bruta === "string" && bruta.trim() !== ""
+          ? Number(bruta)
+          : Number.NaN;
+    if (!esZonaCapitalinaValida(numero)) {
+      faltan.push("zonaCapitalina");
+    } else {
+      zonaCapitalina = numero;
+    }
+  }
+
+  if (faltan.length > 0) {
+    return { ok: false, faltan };
+  }
 
   return {
     ok: true,
@@ -99,12 +125,13 @@ export function validarDireccion(entrada: unknown): ResultadoDeValidacion {
       predeterminada: datos.predeterminada === true,
       departamentoCodigo,
       municipioCodigo,
+      zonaCapitalina,
     },
   };
 }
 
 export const SQL_LISTAR_DIRECCIONES = `
-  select id, destinatario, telefono, departamento, municipio, direccion, referencias, predeterminada, departamento_codigo, municipio_codigo
+  select id, destinatario, telefono, departamento, municipio, direccion, referencias, predeterminada, departamento_codigo, municipio_codigo, zona_capitalina
   from user_addresses
   where user_id = $1
   order by predeterminada desc, id
@@ -117,7 +144,7 @@ export const SQL_QUITAR_PREDETERMINADA = `
 
 export const SQL_INSERTAR_DIRECCION = `
   insert into user_addresses
-    (user_id, destinatario, telefono, departamento, municipio, direccion, referencias, predeterminada, departamento_codigo, municipio_codigo)
-  values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    (user_id, destinatario, telefono, departamento, municipio, direccion, referencias, predeterminada, departamento_codigo, municipio_codigo, zona_capitalina)
+  values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
   returning id
 `;
