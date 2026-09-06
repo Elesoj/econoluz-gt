@@ -1,9 +1,21 @@
 // app/envios/contratos.ts
+//
+// Contratos del modelo operativo de envíos. Sustituyen a los de 9A: aquí ya no
+// hay zonas de reparto configurables, ni tarifas por tramo, ni plazos de entrega.
+//
+// La regla que gobierna estos tipos: Guatex tiene coste **desconocido**, y eso se
+// escribe `envioCents: null`. Nunca cero, porque cero significa «el envío es
+// gratuito» y prometeríamos algo que no sabemos.
 
 export type DestinoDeEnvio =
   | { tipo: "recogida_en_tienda" }
   | { tipo: "direccion_guardada"; direccionId: string }
-  | { tipo: "destino_directo"; departamentoCodigo: string; municipioCodigo: string };
+  | {
+      tipo: "destino_directo";
+      departamentoCodigo: string;
+      municipioCodigo: string;
+      zonaCapitalina?: number | null;
+    };
 
 export type MotivoDeCotizacion =
   | "sin_cobertura"
@@ -13,18 +25,28 @@ export type MotivoDeCotizacion =
   | "direccion_sin_codigos"
   | "pedido_grande";
 
+export type MetodoEnvioOperativo = "mensajero_propio" | "guatex";
+
+export type LineaDeEntrada = {
+  econoluzReference: string;
+  cantidad: number;
+};
+
 export type ResultadoDeEnvioBase =
   | { tipo: "sin_coste"; metodo: "recogida_en_tienda"; envioCents: 0 }
   | {
-      tipo: "con_tarifa";
-      zonaCodigo: string;
-      zonaNombre: string;
-      metodo: "mensajero_propio" | "paqueteria";
+      tipo: "calculado";
+      metodo: "mensajero_propio";
       envioCents: number;
       gratuito: boolean;
       faltanParaGratisCents: number | null;
-      plazoMinDias: number;
-      plazoMaxDias: number;
+    }
+  | {
+      tipo: "solicitud_contacto";
+      metodo: "guatex";
+      envioCents: null;
+      gratuito: false;
+      faltanParaGratisCents: null;
     }
   | { tipo: "requiere_cotizacion"; motivo: MotivoDeCotizacion }
   | { tipo: "metodo_no_disponible"; metodo: "recogida_en_tienda" }
@@ -36,11 +58,17 @@ export type ResultadoDeEnvio = { estimacion: boolean } & ResultadoDeEnvioBase;
 export type EnvioPublico = { estimacion: boolean } & (
   | {
       estado: "calculado";
+      metodo: "mensajero_propio";
       envioCents: number;
       gratuito: boolean;
       faltanParaGratisCents: number | null;
-      plazoMinDias: number;
-      plazoMaxDias: number;
+    }
+  | {
+      estado: "solicitud_contacto";
+      metodo: "guatex";
+      envioCents: null;
+      gratuito: false;
+      faltanParaGratisCents: null;
     }
   | { estado: "recogida_en_tienda"; envioCents: 0 }
   | { estado: "cotizacion_requerida" }
@@ -49,6 +77,11 @@ export type EnvioPublico = { estimacion: boolean } & (
   | { estado: "servicio_no_disponible" }
 );
 
+/**
+ * Traduce el resultado interno al que sale al navegador. El motivo de cotización
+ * nunca cruza: al visitante le basta con saber que hay que cotizar, y los motivos
+ * describen la configuración interna.
+ */
 export function aEnvioPublico(r: ResultadoDeEnvio): EnvioPublico {
   switch (r.tipo) {
     case "sin_coste":
@@ -57,15 +90,23 @@ export function aEnvioPublico(r: ResultadoDeEnvio): EnvioPublico {
         estado: "recogida_en_tienda",
         envioCents: 0,
       };
-    case "con_tarifa":
+    case "calculado":
       return {
         estimacion: r.estimacion,
         estado: "calculado",
+        metodo: r.metodo,
         envioCents: r.envioCents,
         gratuito: r.gratuito,
         faltanParaGratisCents: r.faltanParaGratisCents,
-        plazoMinDias: r.plazoMinDias,
-        plazoMaxDias: r.plazoMaxDias,
+      };
+    case "solicitud_contacto":
+      return {
+        estimacion: r.estimacion,
+        estado: "solicitud_contacto",
+        metodo: r.metodo,
+        envioCents: null,
+        gratuito: false,
+        faltanParaGratisCents: null,
       };
     case "requiere_cotizacion":
       return {

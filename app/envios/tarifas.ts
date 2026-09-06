@@ -1,97 +1,63 @@
 // app/envios/tarifas.ts
+//
+// Cálculo operativo del envío, en centavos enteros y sin acceso a nada externo.
+//
+// Sustituye al cálculo por tramos de 9A: hoy solo hay dos caminos, el mensajero
+// propio —con tarifa fija y umbral de gratuidad— y Guatex, cuyo coste depende del
+// peso del pedido y no se conoce desde la web.
 
-import type { ResultadoDeEnvioBase } from "./contratos";
+import type {
+  MetodoEnvioOperativo,
+  ResultadoDeEnvioBase,
+} from "./contratos";
 
-export type Tarifa = {
-  importeCents: number;
-  umbralGratisCents: number | null;
-  maxPiezas: number | null;
-  maxImporteCents: number | null;
-  plazoMinDias: number;
-  plazoMaxDias: number;
-  publicada: boolean;
-  vigenteDesde: Date;
-  vigenteHasta: Date | null;
+export const TARIFA_MENSAJERO_DEFECTO_CENTS = 3500;
+export const UMBRAL_GRATIS_DEFECTO_CENTS = 250000;
+
+export type ReglasPropias = { tarifaCents: number; umbralGratisCents: number };
+
+export const REGLAS_PROPIAS_DEFECTO: ReglasPropias = {
+  tarifaCents: TARIFA_MENSAJERO_DEFECTO_CENTS,
+  umbralGratisCents: UMBRAL_GRATIS_DEFECTO_CENTS,
 };
 
-export type Zona = {
-  codigo: string;
-  nombre: string;
-  metodo: "mensajero_propio" | "paqueteria";
-};
-
-export type PedidoCalculo = {
-  piezas: number;
-  subtotalCents: number;
-};
-
-export function estaVigente(tarifa: Tarifa, ahora: Date): boolean {
-  if (!tarifa.publicada) {
-    return false;
+/**
+ * La comparación del umbral es **inclusiva**: Q2.499,99 paga la tarifa y
+ * Q2.500,00 exactos no paga envío.
+ */
+export function calcularTarifaMensajeroPropio(
+  subtotalCents: number,
+  reglas: ReglasPropias = REGLAS_PROPIAS_DEFECTO,
+): { envioCents: number; gratuito: boolean; faltanParaGratisCents: number | null } {
+  if (subtotalCents >= reglas.umbralGratisCents) {
+    return { envioCents: 0, gratuito: true, faltanParaGratisCents: 0 };
   }
-  const tiempo = ahora.getTime();
-  const desde = tarifa.vigenteDesde.getTime();
-  if (tiempo < desde) {
-    return false;
-  }
-  if (tarifa.vigenteHasta !== null && tiempo >= tarifa.vigenteHasta.getTime()) {
-    return false;
-  }
-  return true;
+  return {
+    envioCents: reglas.tarifaCents,
+    gratuito: false,
+    faltanParaGratisCents: Math.max(0, reglas.umbralGratisCents - subtotalCents),
+  };
 }
 
-export function calcularEnvio(
-  tarifa: Tarifa,
-  zona: Zona,
-  pedido: PedidoCalculo,
-  ahora: Date
-): ResultadoDeEnvioBase {
-  if (!estaVigente(tarifa, ahora)) {
-    return { tipo: "requiere_cotizacion", motivo: "sin_tarifa_vigente" };
-  }
-
-  // Paso 7: Límites primero, antes que nada económico.
-  if (tarifa.maxPiezas !== null && pedido.piezas > tarifa.maxPiezas) {
-    return { tipo: "requiere_cotizacion", motivo: "pedido_grande" };
-  }
-
-  if (tarifa.maxImporteCents !== null && pedido.subtotalCents > tarifa.maxImporteCents) {
-    return { tipo: "requiere_cotizacion", motivo: "pedido_grande" };
-  }
-
-  // Paso 8: Gratuidad.
-  const alcanzaGratis =
-    tarifa.umbralGratisCents !== null && pedido.subtotalCents >= tarifa.umbralGratisCents;
-
-  if (alcanzaGratis) {
+export function calcularEnvioOperativo(params: {
+  metodo: MetodoEnvioOperativo;
+  subtotalCents: number;
+  reglas?: ReglasPropias;
+}): Extract<ResultadoDeEnvioBase, { tipo: "calculado" | "solicitud_contacto" }> {
+  if (params.metodo === "guatex") {
+    // Coste desconocido, no gratuito. Cero sería una promesa que no podemos cumplir.
     return {
-      tipo: "con_tarifa",
-      zonaCodigo: zona.codigo,
-      zonaNombre: zona.nombre,
-      metodo: zona.metodo,
-      envioCents: 0,
-      gratuito: true,
-      faltanParaGratisCents: 0,
-      plazoMinDias: Math.round(tarifa.plazoMinDias),
-      plazoMaxDias: Math.round(tarifa.plazoMaxDias),
+      tipo: "solicitud_contacto",
+      metodo: "guatex",
+      envioCents: null,
+      gratuito: false,
+      faltanParaGratisCents: null,
     };
   }
-
-  // Paso 9: Tarifa normal.
-  const faltanParaGratisCents =
-    tarifa.umbralGratisCents !== null
-      ? Math.max(0, Math.round(tarifa.umbralGratisCents - pedido.subtotalCents))
-      : null;
-
+  const calculo = calcularTarifaMensajeroPropio(params.subtotalCents, params.reglas);
   return {
-    tipo: "con_tarifa",
-    zonaCodigo: zona.codigo,
-    zonaNombre: zona.nombre,
-    metodo: zona.metodo,
-    envioCents: Math.round(tarifa.importeCents),
-    gratuito: false,
-    faltanParaGratisCents,
-    plazoMinDias: Math.round(tarifa.plazoMinDias),
-    plazoMaxDias: Math.round(tarifa.plazoMaxDias),
+    tipo: "calculado",
+    metodo: "mensajero_propio",
+    ...calculo,
   };
 }

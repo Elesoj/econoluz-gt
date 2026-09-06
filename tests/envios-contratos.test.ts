@@ -21,23 +21,21 @@ test("los seis motivos internos producen el mismo estado público", () => {
   }
 });
 
-test("el DTO público no lleva identificadores internos", () => {
+test("el DTO público de Guatex no inventa un coste ni promete gratuidad", () => {
   const publico = aEnvioPublico({
     estimacion: false,
-    tipo: "con_tarifa",
-    zonaCodigo: "capital",
-    zonaNombre: "Capital",
-    metodo: "mensajero_propio",
-    envioCents: 3500,
+    tipo: "solicitud_contacto",
+    metodo: "guatex",
+    envioCents: null,
     gratuito: false,
-    faltanParaGratisCents: 1000,
-    plazoMinDias: 2,
-    plazoMaxDias: 3,
+    faltanParaGratisCents: null,
   });
-  const texto = JSON.stringify(publico);
-  assert.equal(texto.includes("capital"), false);
-  assert.equal(texto.includes("Capital"), false);
-  assert.equal(texto.includes("mensajero_propio"), false);
+  assert.equal(publico.estado, "solicitud_contacto");
+  assert(publico.estado === "solicitud_contacto");
+  // Cero significaría «el envío es gratis»; desconocido se escribe null.
+  assert.equal(publico.envioCents, null);
+  assert.notEqual(publico.envioCents, 0);
+  assert.equal(publico.gratuito, false);
 });
 
 test("carrito_no_comprable sí puede nombrar referencias públicas", () => {
