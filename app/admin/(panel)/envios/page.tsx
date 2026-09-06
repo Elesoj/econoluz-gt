@@ -102,6 +102,8 @@ export default async function EnviosPage({
                     name="tarifaQuetzales"
                     defaultValue={aQuetzales(reglas.tarifaCents).toFixed(2)}
                     required
+                    pattern="[0-9,]+(\.[0-9]{1,2})?"
+                    title="Una cantidad en quetzales, por ejemplo 35.00"
                     className="w-full px-3 py-2 text-sm"
                   />
                 </span>
@@ -125,6 +127,8 @@ export default async function EnviosPage({
                     name="umbralGratisQuetzales"
                     defaultValue={aQuetzales(reglas.umbralGratisCents).toFixed(2)}
                     required
+                    pattern="[0-9,]+(\.[0-9]{1,2})?"
+                    title="Una cantidad en quetzales, por ejemplo 2,500.00"
                     className="w-full px-3 py-2 text-sm"
                   />
                 </span>
@@ -205,12 +209,15 @@ export default async function EnviosPage({
           <p className="mt-1 text-sm text-neutral-600">
             Estado actual:{" "}
             <strong className={recogida.activa ? "text-proyectos" : "text-neutral-700"}>
-              {recogida.activa
-                ? "se ofrece al cliente, y es gratis"
-                : "no se ofrece al cliente"}
+              {recogida.activa ? "marcada como disponible" : "marcada como no disponible"}
             </strong>
-            . Quien la elige recoge el pedido en la tienda: no paga envío y no hace falta
+            . Quien la elija recogerá el pedido en la tienda: no paga envío y no hace falta
             una dirección de entrega.
+          </p>
+          <p className="mt-2 border-l-2 border-tienda bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
+            <strong>Todavía no hay dónde enseñárselo al cliente.</strong> La compra en línea
+            —el checkout— no existe aún, así que lo que se guarde aquí queda listo y se
+            empezará a mostrar cuando exista.
           </p>
 
           <form action={guardarRecogidaAction} className="mt-5 space-y-4">

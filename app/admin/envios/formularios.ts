@@ -154,7 +154,19 @@ export type ResultadoAccionRecogida =
  */
 export function validarFormularioRecogida(formData: FormData): ResultadoAccionRecogida {
   const activa = formData.get("activa") === "on";
-  const texto = String(formData.get("texto") ?? "").trim();
+
+  // El mismo guardia de tipo que aplica `importeAQuetzalesEnCentavos`. Un `POST`
+  // multipart hecho a mano puede mandar un fichero donde se espera texto, y
+  // `String(...)` lo aceptaría: guardaría «[object File]» como la información que
+  // ve el cliente.
+  const bruto = formData.get("texto");
+  if (bruto !== null && typeof bruto !== "string") {
+    return {
+      ok: false,
+      error: "La información para el cliente tiene que ser texto.",
+    };
+  }
+  const texto = (bruto ?? "").trim();
 
   if (texto.length > LARGO_TEXTO_RECOGIDA) {
     return {

@@ -127,7 +127,67 @@ test.describe("Panel de envíos operativos", () => {
 
     // Nace apagada, y se dice con claridad.
     await expect(page.locator('input[name="activa"]')).not.toBeChecked();
-    await expect(page.getByText(/no se ofrece al cliente/i)).toBeVisible();
+    await expect(page.getByText(/marcada como no disponible/i)).toBeVisible();
+  });
+
+  test("7.quater guardar y restaurar la recogida en tienda de verdad", async ({ page, context }) => {
+    // Las demás pruebas del panel solo leen la pantalla. Esta recorre el camino
+    // entero —formulario, Server Action, `guardarRecogidaEnTienda`, auditoría e
+    // invalidación de caché— y comprueba lo que quedó en `app_settings`.
+    await autenticarComoAdmin(context);
+    const sql = getE2ESql();
+
+    const previas = await sql`SELECT valor FROM app_settings WHERE clave = 'recogida_en_tienda'`;
+    const valorPrevio = previas[0]?.valor ?? null;
+
+    try {
+      await page.goto("/admin/envios");
+
+      // Activarla sin texto no se acepta: el servidor lo rechaza.
+      await page.locator('input[name="activa"]').check();
+      await page.locator('textarea[name="texto"]').fill("");
+      await page.getByRole("button", { name: /guardar recogida/i }).click();
+      await page.waitForURL(/\/admin\/envios\?error=/);
+      await expect(page.locator('p[role="alert"]')).toContainText(/informaci[oó]n para el cliente/i);
+
+      const trasElRechazo = await sql`SELECT valor FROM app_settings WHERE clave = 'recogida_en_tienda'`;
+      expect(trasElRechazo[0]?.valor ?? null).toBe(valorPrevio);
+
+      // Con texto sí entra.
+      await page.goto("/admin/envios");
+      await page.locator('input[name="activa"]').check();
+      await page.locator('textarea[name="texto"]').fill("Vista Hermosa 2, zona 15. De 8:00 a 17:00.");
+      await page.getByRole("button", { name: /guardar recogida/i }).click();
+      await page.waitForURL(/\/admin\/envios\?guardado=1/);
+
+      const guardado = await sql`SELECT valor FROM app_settings WHERE clave = 'recogida_en_tienda'`;
+      const config = JSON.parse(String(guardado[0].valor));
+      expect(config.activa).toBe(true);
+      expect(config.texto).toBe("Vista Hermosa 2, zona 15. De 8:00 a 17:00.");
+
+      // Y quedó constancia de quién lo cambió.
+      const auditoria = await sql`
+        SELECT accion FROM audit_log
+         WHERE accion = 'configurar_recogida' AND entidad_id = 'recogida_en_tienda'
+         ORDER BY id DESC LIMIT 1
+      `;
+      expect(auditoria.length).toBe(1);
+
+      // La pantalla lo refleja sin esperar a que caduque la caché.
+      await page.goto("/admin/envios");
+      await expect(page.locator('input[name="activa"]')).toBeChecked();
+      await expect(page.getByText("marcada como disponible", { exact: true })).toBeVisible();
+    } finally {
+      // La configuración es global: se deja como estaba.
+      await page.goto("/admin/envios");
+      await page.locator('input[name="activa"]').uncheck();
+      await page.locator('textarea[name="texto"]').fill("");
+      await page.getByRole("button", { name: /guardar recogida/i }).click();
+      await page.waitForURL(/\/admin\/envios\?guardado=1/);
+
+      await page.goto("/admin/envios");
+      await expect(page.locator('input[name="activa"]')).not.toBeChecked();
+    }
   });
 
   test("8. la ficha de zona de 9A redirige a la portada", async ({ page, context }) => {

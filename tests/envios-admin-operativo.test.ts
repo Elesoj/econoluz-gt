@@ -249,3 +249,22 @@ test("exactamente 200 caracteres se admite", () => {
   const r = validarFormularioRecogida(recogida("on", "x".repeat(200)));
   assert.equal(r.ok, true);
 });
+
+test("un campo «texto» que no sea texto se rechaza, no se convierte en «[object File]»", () => {
+  // Un POST multipart hecho a mano puede mandar un fichero donde se espera texto.
+  // `String(...)` lo aceptaría y guardaría «[object File]» como la información
+  // que ve el cliente.
+  const fd = new FormData();
+  fd.set("activa", "on");
+  fd.set("texto", new File(["contenido"], "nota.txt", { type: "text/plain" }));
+
+  const r = validarFormularioRecogida(fd);
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.equal(
+      r.error.includes("[object File]"),
+      false,
+      "y el mensaje tampoco repite la basura recibida",
+    );
+  }
+});

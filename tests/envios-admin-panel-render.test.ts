@@ -44,3 +44,33 @@ test("la recogida en tienda es un formulario, no una tarjeta que solo informa", 
 test("el estado actual de la recogida se ve de un vistazo", () => {
   assert.match(pagina, /recogida\.activa/);
 });
+
+// ---------------------------------------------------------------------------
+// Lo que todavía no tiene efecto visible se dice en la propia pantalla
+// ---------------------------------------------------------------------------
+
+test("la recogida avisa de que aún no hay dónde ofrecérsela al cliente", () => {
+  // Hoy nadie lee `recogida.texto` fuera del panel: no existe `/checkout`. Dejar
+  // que la pantalla diga «se ofrece al cliente» haría creer al administrador que
+  // ya la está viendo alguien, y encima le obliga a redactar un texto que nadie
+  // muestra. Quien administra lee el panel, no el documento de diseño.
+  assert.match(
+    pagina,
+    /todavía no hay|aún no hay|cuando exista/i,
+    "la tarjeta debe decir que la compra en línea todavía no existe",
+  );
+  assert.match(pagina, /checkout/i, "y nombrar lo que falta");
+  assert.equal(
+    /se ofrece al cliente/.test(pagina),
+    false,
+    "no puede afirmar que ya se le ofrece al cliente",
+  );
+});
+
+test("los campos de dinero ayudan al navegador a avisar antes de enviar", () => {
+  // Al pasar de `type="number"` a texto se perdió la validación del navegador, y
+  // un error del servidor vacía el formulario: se pierde lo escrito en los dos
+  // campos por equivocarse en uno.
+  const patrones = pagina.match(/pattern="[^"]+"/g) ?? [];
+  assert.equal(patrones.length, 2, `esperaba un patrón por campo de dinero, hay ${patrones.length}`);
+});
