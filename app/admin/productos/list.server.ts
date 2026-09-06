@@ -1,16 +1,11 @@
 import "server-only";
 
-import { leer } from "../../lib/datos";
+import { escribir, leer } from "../../lib/datos";
+import { proyectarProductoEnTransaccion } from "../../data/proyeccionPublicaTransaccion";
 import { leerProductosAdmin, type FiltrosProductos, type ResultadoListado } from "./list";
 
 /**
- * Solo la conexión, ahora por la capa de datos. La comprobación de
- * `DATABASE_URL` se conserva para que el error siga saliendo aquí y no en la
- * primera consulta.
- *
- * Va por `leer` incluso para el `update` de abajo: es una sola sentencia, que
- * en Postgres ya es atómica, así que el camino no cambia respecto a antes del
- * traslado.
+ * Conexión de lectura para listado y contadores.
  */
 function conectar() {
   if (!process.env.DATABASE_URL) {
@@ -36,17 +31,25 @@ export type CambioProducto = {
  * Guarda los cambios de una fila. Se actualiza solo lo que administra la
  * persona: `CLAUDE.md` y el importador respetan estas cuatro columnas, y el
  * resto del producto se edita en su ficha, no aquí.
+ *
+ * La actualización de `products` y la proyección en `public_products` se realizan
+ * dentro de la misma transacción atómica con `escribir()`.
  */
 export async function guardarCambiosProducto(cambio: CambioProducto): Promise<void> {
-  const query = conectar();
-  await query(
-    `
-      update products
-      set price_gtq = $1,
-          stock = $2,
-          published = $3
-      where econoluz_reference = $4
-    `,
-    [cambio.precio, cambio.existencias, cambio.publicado, cambio.referencia],
+  await escribir(
+    async (ejecutar) => {
+      await ejecutar(
+        `
+          update products
+          set price_gtq = $1,
+              stock = $2,
+              published = $3
+          where econoluz_reference = $4
+        `,
+        [cambio.precio, cambio.existencias, cambio.publicado, cambio.referencia],
+      );
+      await proyectarProductoEnTransaccion(ejecutar, cambio.referencia);
+    },
+    { suceso: "guardar-cambios-producto" },
   );
 }

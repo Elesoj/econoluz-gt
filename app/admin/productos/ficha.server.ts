@@ -1,6 +1,7 @@
 import "server-only";
 
-import { leer } from "../../lib/datos";
+import { escribir, leer } from "../../lib/datos";
+import { proyectarProductoEnTransaccion } from "../../data/proyeccionPublicaTransaccion";
 import {
   guardarFichaProducto,
   leerProductoPorReferencia,
@@ -9,14 +10,9 @@ import {
 } from "./ficha";
 
 /**
- * Solo la conexión, ahora por la capa de datos. Todo lo demás vive en
- * `ficha.ts`, que es puro: así se puede probar sin base de datos y lo pueden
- * usar los scripts de terminal, que no saben resolver "server-only".
- *
- * Tanto la lectura como el guardado resuelven una sola sentencia, así que van
- * por `leer` y su atomicidad queda igual que antes del traslado. La
- * comprobación de `DATABASE_URL` se conserva para que el error siga saliendo
- * aquí y no en la primera consulta.
+ * Solo la conexión para lecturas y transacciones atómicas para escrituras.
+ * Al guardar la ficha, actualiza `products` y `public_products` en la misma
+ * transacción de modo que si la proyección falla, revierte la mutación.
  */
 function conectar() {
   if (!process.env.DATABASE_URL) {
@@ -32,5 +28,11 @@ export async function getProductoFicha(referencia: string): Promise<ProductoFich
 }
 
 export async function saveProductoFicha(cambio: CambioFicha): Promise<void> {
-  return guardarFichaProducto(conectar(), cambio);
+  await escribir(
+    async (ejecutar) => {
+      await guardarFichaProducto(ejecutar, cambio);
+      await proyectarProductoEnTransaccion(ejecutar, cambio.referencia);
+    },
+    { suceso: "guardar-ficha-producto" },
+  );
 }

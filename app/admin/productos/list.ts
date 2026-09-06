@@ -6,7 +6,7 @@ import type { AdminAuthQuery } from "../auth/types";
  */
 export const PRODUCTOS_POR_PAGINA = 25;
 
-export type EstadoProducto = "todos" | "publicados" | "ocultos" | "sin_precio";
+export type EstadoProducto = "todos" | "publicados" | "ocultos" | "incompletos" | "sin_precio";
 
 export type FiltrosProductos = {
   busqueda?: string;
@@ -15,11 +15,16 @@ export type FiltrosProductos = {
   pagina?: number;
 };
 
+export type ContadoresEstado = {
+  todos: number;
+  publicados: number;
+  ocultos: number;
+  incompletos: number;
+};
+
 /**
- * Lo que el listado necesita de cada producto. **Sin el `id` interno**: esa
- * columna es un texto del estilo "construlita-cuasar" y lleva dentro el nombre
- * del fabricante, así que ni se lee. La referencia pública identifica igual de
- * bien y es la que el dueño cita al cotizar.
+ * Lo que el listado necesita de cada producto. Incluye el código del
+ * fabricante para gestión interna pero sin exponer datos sensibles del proveedor.
  */
 export type ProductoAdmin = {
   referencia: string;
@@ -27,14 +32,18 @@ export type ProductoAdmin = {
   tipo: string;
   tipoEtiqueta: string;
   imagen: string;
+  proveedorCodigo?: string;
   precio: number | null;
   existencias: number | null;
   publicado: boolean;
+  incompleto?: boolean;
+  motivoIncompleto?: string;
 };
 
 export type ResultadoListado = {
   productos: ProductoAdmin[];
   total: number;
+  contadores: ContadoresEstado;
   pagina: number;
   paginas: number;
 };
@@ -69,7 +78,7 @@ function construirFiltro(filtros: FiltrosProductos) {
   if (busqueda) {
     params.push(`%${busqueda}%`);
     condiciones.push(
-      `(public_name ilike $${params.length} or econoluz_reference ilike $${params.length})`,
+      `(public_name ilike $${params.length} or econoluz_reference ilike $${params.length} or supplier_code ilike $${params.length})`,
     );
   }
 
@@ -80,6 +89,9 @@ function construirFiltro(filtros: FiltrosProductos) {
 
   if (filtros.estado === "publicados") condiciones.push("published");
   if (filtros.estado === "ocultos") condiciones.push("not published");
+  if (filtros.estado === "incompletos") {
+    condiciones.push("(published and (supplier_code is null or trim(supplier_code) = ''))");
+  }
   if (filtros.estado === "sin_precio") condiciones.push("price_gtq is null");
 
   return {
@@ -110,10 +122,15 @@ export async function leerProductosAdmin(
       product_type,
       product_type_label,
       image,
+      supplier_code,
       price_gtq,
       stock,
       published,
-      count(*) over () as total_filtrado
+      count(*) over () as total_filtrado,
+      count(*) over () as total_todos,
+      count(*) filter (where published) over () as total_publicados,
+      count(*) filter (where not published) over () as total_ocultos,
+      count(*) filter (where published and (supplier_code is null or trim(supplier_code) = '')) over () as total_incompletos
     from products
     ${clausula}
     order by position
@@ -123,22 +140,48 @@ export async function leerProductosAdmin(
 
   const filas = await query(texto, params);
 
-  const productos = filas.map((fila) => ({
-    referencia: String(fila.econoluz_reference),
-    nombre: String(fila.public_name),
-    tipo: String(fila.product_type),
-    tipoEtiqueta: String(fila.product_type_label),
-    imagen: String(fila.image),
-    precio: aNumeroONulo(fila.price_gtq),
-    existencias: aNumeroONulo(fila.stock),
-    publicado: Boolean(fila.published),
-  }));
+  const productos: ProductoAdmin[] = filas.map((fila) => {
+    const proveedorCodigo = fila.supplier_code ? String(fila.supplier_code).trim() : undefined;
+    const publicado = Boolean(fila.published);
+    const faltaCodigo = !proveedorCodigo || proveedorCodigo.length === 0;
+    const incompleto = publicado && faltaCodigo;
+
+    return {
+      referencia: String(fila.econoluz_reference),
+      nombre: String(fila.public_name),
+      tipo: String(fila.product_type),
+      tipoEtiqueta: String(fila.product_type_label),
+      imagen: String(fila.image),
+      proveedorCodigo,
+      precio: aNumeroONulo(fila.price_gtq),
+      existencias: aNumeroONulo(fila.stock),
+      publicado,
+      incompleto,
+      motivoIncompleto: incompleto ? "Falta código del fabricante" : undefined,
+    };
+  });
 
   const total = filas.length > 0 ? Number(filas[0].total_filtrado) : 0;
+
+  const contadores: ContadoresEstado =
+    filas.length > 0 && "total_todos" in filas[0]
+      ? {
+          todos: Number(filas[0].total_todos ?? total),
+          publicados: Number(filas[0].total_publicados ?? 0),
+          ocultos: Number(filas[0].total_ocultos ?? 0),
+          incompletos: Number(filas[0].total_incompletos ?? 0),
+        }
+      : {
+          todos: total,
+          publicados: filtros.estado === "publicados" ? total : 0,
+          ocultos: filtros.estado === "ocultos" ? total : 0,
+          incompletos: filtros.estado === "incompletos" ? total : 0,
+        };
 
   return {
     productos,
     total,
+    contadores,
     pagina,
     paginas: Math.max(1, Math.ceil(total / PRODUCTOS_POR_PAGINA)),
   };

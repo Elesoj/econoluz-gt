@@ -40,6 +40,29 @@ export function validarPrefijo(entrada: string): ValidacionPrefijo {
   return { ok: true, valor };
 }
 
+export type ValidacionPublicacion = { ok: true } | { ok: false; error: string };
+
+/**
+ * Regla de negocio para publicación:
+ * - Se puede guardar un producto como borrador sin código del fabricante.
+ * - Para publicar un producto nuevo o modificado es obligatorio el código.
+ */
+export function validarPublicacion({
+  publicado,
+  proveedorCodigo,
+}: {
+  publicado: boolean;
+  proveedorCodigo?: string | null;
+}): ValidacionPublicacion {
+  if (publicado && (!proveedorCodigo || proveedorCodigo.trim().length === 0)) {
+    return {
+      ok: false,
+      error: "Para publicar un producto debes ingresar el código del fabricante/proveedor.",
+    };
+  }
+  return { ok: true };
+}
+
 export type ProductoNuevo = {
   prefijo: string;
   nombre: string;
@@ -49,8 +72,11 @@ export type ProductoNuevo = {
   tipoEtiqueta: string;
   aplicacion: string;
   aplicacionEtiqueta: string;
+  acabado?: string;
+  acabadoEtiqueta?: string;
   familia: string;
   fichaTecnica: FichaTecnica;
+  proveedorCodigo?: string;
   publicado: boolean;
 };
 
@@ -79,12 +105,14 @@ export async function crearProducto(query: AdminAuthQuery, datos: ProductoNuevo)
         id, econoluz_reference, position,
         public_name, public_description, image, technical_specs,
         product_type, product_type_label, application, application_label,
-        family_label, published
+        finish, finish_label,
+        family_label, supplier_code, published
       ) values (
         $1, $2, $3,
         $4, $5, $6, $7::jsonb,
         $8, $9, $10, $11,
-        $12, $13
+        $12, $13,
+        $14, $15, $16
       )
     `,
     [
@@ -99,7 +127,10 @@ export async function crearProducto(query: AdminAuthQuery, datos: ProductoNuevo)
       datos.tipoEtiqueta,
       datos.aplicacion,
       datos.aplicacionEtiqueta,
+      datos.acabado ? datos.acabado.trim() : "",
+      datos.acabadoEtiqueta ? datos.acabadoEtiqueta.trim() : "",
       datos.familia,
+      datos.proveedorCodigo ? datos.proveedorCodigo.trim() : "",
       datos.publicado,
     ],
   );

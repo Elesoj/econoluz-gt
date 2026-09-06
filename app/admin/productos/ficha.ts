@@ -1,4 +1,10 @@
-import { applications, productTypes } from "../../data/catalogTaxonomy";
+import {
+  applications,
+  finishes,
+  getFinishId,
+  getFinishLabel,
+  productTypes,
+} from "../../data/catalogTaxonomy";
 import type { AdminAuthQuery } from "../auth/types";
 
 /**
@@ -21,7 +27,7 @@ export const CAMPOS_FICHA_TECNICA = [
   { clave: "dimensions", etiqueta: "Dimensiones", ayuda: "0.30 m / 0.60 m" },
   { clave: "material", etiqueta: "Material", ayuda: "Aluminio inyectado" },
   { clave: "dimming", etiqueta: "Regulación", ayuda: "ON/OFF, 0-10 V…" },
-  { clave: "lifespan", etiqueta: "Vida útil", ayuda: "50 000 h" },
+  { clave: "lifetime", etiqueta: "Vida útil", ayuda: "50 000 h" },
   { clave: "warranty", etiqueta: "Garantía", ayuda: "3 años" },
 ] as const;
 
@@ -65,6 +71,52 @@ export function aplicacionesDe(tipo: string) {
   }));
 }
 
+export type ResultadoAcabado =
+  | { ok: true; acabado: string; acabadoEtiqueta: string }
+  | { ok: false; error: string };
+
+/**
+ * Resuelve y valida la opción de acabado elegida:
+ * - Acabados conocidos del catálogo
+ * - 'otro' con texto libre personalizado
+ * - 'sin_especificar' o vacío
+ */
+export function resolverAcabado(seleccion: string, textoOtro?: string): ResultadoAcabado {
+  const seleccionLimpia = (seleccion ?? "").trim();
+  if (!seleccionLimpia || seleccionLimpia === "sin_especificar") {
+    return { ok: true, acabado: "", acabadoEtiqueta: "" };
+  }
+
+  if (seleccionLimpia === "otro") {
+    const personalizado = (textoOtro ?? "").trim();
+    if (personalizado.length === 0) {
+      return { ok: false, error: "Si eliges 'Otro acabado...', debes escribir el nombre del acabado." };
+    }
+    return {
+      ok: true,
+      acabado: getFinishId(personalizado),
+      acabadoEtiqueta: personalizado,
+    };
+  }
+
+  if (Object.hasOwn(finishes, seleccionLimpia)) {
+    const conocido = finishes[seleccionLimpia as keyof typeof finishes];
+    return {
+      ok: true,
+      acabado: conocido.id,
+      acabadoEtiqueta: conocido.label,
+    };
+  }
+
+  const idNormalizado = getFinishId(seleccionLimpia);
+  const etiqueta = getFinishLabel(idNormalizado);
+  return {
+    ok: true,
+    acabado: idNormalizado,
+    acabadoEtiqueta: etiqueta !== idNormalizado ? etiqueta : seleccionLimpia,
+  };
+}
+
 /**
  * Valida lo que llega del formulario.
  *
@@ -99,9 +151,19 @@ export function validarFichaProducto(entrada: EntradaFicha): ResultadoValidacion
     );
   }
 
+  const resAcabado = resolverAcabado(entrada.acabado, entrada.acabadoEtiqueta);
+  if (!resAcabado.ok) {
+    errores.push(resAcabado.error);
+  }
+
   if (errores.length > 0) {
     return { ok: false, errores };
   }
+
+  const acabadoFinal = resAcabado.ok ? resAcabado.acabado : entrada.acabado.trim();
+  const acabadoEtiquetaFinal = resAcabado.ok
+    ? resAcabado.acabadoEtiqueta
+    : entrada.acabadoEtiqueta.trim();
 
   return {
     ok: true,
@@ -110,8 +172,8 @@ export function validarFichaProducto(entrada: EntradaFicha): ResultadoValidacion
       nombre,
       imagen,
       descripcion: entrada.descripcion.trim(),
-      acabado: entrada.acabado.trim(),
-      acabadoEtiqueta: entrada.acabadoEtiqueta.trim(),
+      acabado: acabadoFinal,
+      acabadoEtiqueta: acabadoEtiquetaFinal,
       familia: entrada.familia.trim(),
       tipoEtiqueta: productTypes[entrada.tipo].label,
       aplicacionEtiqueta: aplicacion?.label ?? "",
@@ -120,20 +182,58 @@ export function validarFichaProducto(entrada: EntradaFicha): ResultadoValidacion
 }
 
 /**
- * Arma la ficha técnica desde el formulario. Un campo vacío **no se guarda**:
- * dejarlo como cadena vacía llenaría la ficha del catálogo de renglones sin
- * contenido.
+ * Normaliza las especificaciones al leerlas: convierte la clave histórica
+ * `lifespan` a la canónica `lifetime` y elimina `lifespan`. Si existen ambas,
+ * `lifetime` tiene prioridad.
  */
-export function fichaTecnicaDesdeFormulario(
+export function normalizarFichaTecnicaLectura(
+  specs: FichaTecnica | null | undefined,
+): FichaTecnica {
+  if (!specs) return {};
+  const copia: FichaTecnica = { ...specs };
+  if ("lifespan" in copia) {
+    if (!copia.lifetime && copia.lifespan) {
+      copia.lifetime = copia.lifespan;
+    }
+    delete copia.lifespan;
+  }
+  return copia;
+}
+
+/**
+ * Actualiza la ficha técnica preservando todas las especificaciones que el
+ * formulario no administra (como amperage, frequency, etc.).
+ *
+ * - Clona las especificaciones preexistentes normalizadas.
+ * - Actualiza únicamente las claves administradas que tengan valor.
+ * - Si una clave administrada se vacía deliberadamente, se elimina del objeto.
+ * - Elimina la clave histórica `lifespan` garantizando que solo quede `lifetime`.
+ * - Gestiona `specialFeatures` actualizándolo o eliminándolo si está vacío.
+ */
+export function actualizarFichaTecnica(
+  actual: FichaTecnica | null | undefined,
   campos: Record<string, string>,
   caracteristicas: string,
 ): FichaTecnica {
-  const ficha: FichaTecnica = {};
+  const base = normalizarFichaTecnicaLectura(actual);
+  const resultado: FichaTecnica = { ...base };
+
+  const clavesAdministradas = new Set<string>(CAMPOS_FICHA_TECNICA.map((c) => c.clave));
 
   for (const [clave, valor] of Object.entries(campos)) {
+    const claveCanon = clave === "lifespan" ? "lifetime" : clave;
     const limpio = valor.trim();
+
     if (limpio.length > 0) {
-      ficha[clave] = limpio;
+      resultado[claveCanon] = limpio;
+      if (claveCanon === "lifetime") {
+        delete resultado.lifespan;
+      }
+    } else if (clavesAdministradas.has(claveCanon)) {
+      delete resultado[claveCanon];
+      if (claveCanon === "lifetime") {
+        delete resultado.lifespan;
+      }
     }
   }
 
@@ -143,10 +243,22 @@ export function fichaTecnicaDesdeFormulario(
     .filter((linea) => linea.length > 0);
 
   if (lista.length > 0) {
-    ficha.specialFeatures = lista;
+    resultado.specialFeatures = lista;
+  } else {
+    delete resultado.specialFeatures;
   }
 
-  return ficha;
+  return resultado;
+}
+
+/**
+ * Arma la ficha técnica desde el formulario para altas nuevas partiendo de cero.
+ */
+export function fichaTecnicaDesdeFormulario(
+  campos: Record<string, string>,
+  caracteristicas: string,
+): FichaTecnica {
+  return actualizarFichaTecnica({}, campos, caracteristicas);
 }
 
 /** Devuelve una lista guardada al formulario, un elemento por renglón. */
@@ -226,7 +338,7 @@ export async function leerProductoPorReferencia(
     descripcion: comoTexto(fila.public_description),
     imagen: comoTexto(fila.image),
     galeria: Array.isArray(fila.images) ? fila.images.map(String) : [],
-    fichaTecnica: (fila.technical_specs as FichaTecnica) ?? {},
+    fichaTecnica: normalizarFichaTecnicaLectura(fila.technical_specs as FichaTecnica),
     tipo: comoTexto(fila.product_type),
     aplicacion: comoTexto(fila.application),
     acabado: comoTexto(fila.finish),
