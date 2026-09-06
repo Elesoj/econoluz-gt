@@ -5,6 +5,7 @@ import {
   crearProducto,
   prefijoSugerido,
   validarPrefijo,
+  validarPublicacion,
 } from "../app/admin/productos/nuevo";
 
 type Registro = { text: string; params: readonly unknown[] };
@@ -67,6 +68,48 @@ test("el producto nuevo se coloca al final del catálogo", async () => {
   assert.ok(insercion);
   // La última posición usada era 3130, así que el nuevo va diez más allá.
   assert.equal(insercion.params.includes(3140), true);
+});
+
+test("crearProducto guarda finish, finish_label y supplier_code en products", async () => {
+  const registro: Registro[] = [];
+  await crearProducto(queryFalsa(registro), {
+    prefijo: "CAT",
+    nombre: "Luminaria prueba",
+    descripcion: "",
+    imagen: "/catalogos/x/y.webp",
+    tipo: "tiras_led",
+    tipoEtiqueta: "Tiras LED",
+    aplicacion: "tiras",
+    aplicacionEtiqueta: "Tiras",
+    acabado: "negro_mate",
+    acabadoEtiqueta: "Negro mate",
+    familia: "",
+    fichaTecnica: {},
+    proveedorCodigo: "FAB-12345",
+    publicado: true,
+  });
+
+  const insercion = registro.at(-1);
+  assert.ok(insercion);
+  assert.equal(insercion.params.includes("negro_mate"), true, "Debe guardar finish");
+  assert.equal(insercion.params.includes("Negro mate"), true, "Debe guardar finish_label");
+  assert.equal(insercion.params.includes("FAB-12345"), true, "Debe guardar supplier_code");
+});
+
+test("validarPublicacion permite borrador sin supplier_code", () => {
+  const resultado = validarPublicacion({ publicado: false, proveedorCodigo: "" });
+  assert.equal(resultado.ok, true);
+});
+
+test("validarPublicacion exige supplier_code si el producto se publica", () => {
+  const sinCodigo = validarPublicacion({ publicado: true, proveedorCodigo: "   " });
+  assert.equal(sinCodigo.ok, false);
+  if (!sinCodigo.ok) {
+    assert.match(sinCodigo.error, /código del fabricante/i);
+  }
+
+  const conCodigo = validarPublicacion({ publicado: true, proveedorCodigo: "APL-001" });
+  assert.equal(conCodigo.ok, true);
 });
 
 test("el identificador interno se construye con la referencia, no con la marca", async () => {

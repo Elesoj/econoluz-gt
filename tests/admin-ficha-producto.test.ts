@@ -4,6 +4,9 @@ import {
   CAMPOS_FICHA_TECNICA,
   aplicacionesDe,
   fichaTecnicaDesdeFormulario,
+  actualizarFichaTecnica,
+  normalizarFichaTecnicaLectura,
+  resolverAcabado,
   leerProductoPorReferencia,
   lineasDesdeLista,
   validarFichaProducto,
@@ -121,4 +124,160 @@ test("un producto sin galería ni ficha técnica se lee sin huecos", async () =>
 
 test("una referencia que no existe devuelve null, no un producto vacío", async () => {
   assert.equal(await leerProductoPorReferencia(async () => [], "ECO-NO-9999"), null);
+});
+
+test("CAMPOS_FICHA_TECNICA contiene lifetime y no lifespan", () => {
+  const claves: readonly string[] = CAMPOS_FICHA_TECNICA.map((c) => c.clave);
+  assert.equal(claves.includes("lifetime"), true, "Debe contener lifetime");
+  assert.equal(claves.includes("lifespan"), false, "No debe contener lifespan");
+});
+
+test("normalizarFichaTecnicaLectura convierte lifespan a lifetime y elimina lifespan", () => {
+  const specs = { lifespan: "40000", power: "15 W" };
+  const normalizada = normalizarFichaTecnicaLectura(specs);
+  assert.equal(normalizada.lifetime, "40000");
+  assert.equal("lifespan" in normalizada, false);
+  assert.equal(normalizada.power, "15 W");
+});
+
+test("normalizarFichaTecnicaLectura da prioridad a lifetime si ambos existen", () => {
+  const specs = { lifespan: "30000", lifetime: "50000" };
+  const normalizada = normalizarFichaTecnicaLectura(specs);
+  assert.equal(normalizada.lifetime, "50000");
+  assert.equal("lifespan" in normalizada, false);
+});
+
+test("actualizarFichaTecnica preserva claves no visibles (amperage, frequency)", () => {
+  const preexistente = {
+    amperage: "15A",
+    frequency: "50/60Hz",
+    certification: "NOM",
+    power: "10 W",
+    lifespan: "40000",
+  };
+
+  const camposFormulario = {
+    power: "15 W",
+    lifetime: "40000",
+    warranty: "5 años",
+  };
+
+  const resultado = actualizarFichaTecnica(preexistente, camposFormulario, "Característica 1");
+
+  assert.equal(resultado.power, "15 W");
+  assert.equal(resultado.lifetime, "40000");
+  assert.equal(resultado.warranty, "5 años");
+  assert.equal(resultado.amperage, "15A", "amperage debe conservarse");
+  assert.equal(resultado.frequency, "50/60Hz", "frequency debe conservarse");
+  assert.equal(resultado.certification, "NOM", "certification debe conservarse");
+  assert.equal("lifespan" in resultado, false, "lifespan debe eliminarse");
+  assert.deepEqual(resultado.specialFeatures, ["Característica 1"]);
+});
+
+test("actualizarFichaTecnica elimina únicamente la clave administrada que se vacía deliberadamente", () => {
+  const preexistente = {
+    amperage: "15A",
+    power: "15 W",
+    voltage: "120-277 V",
+    lifetime: "50000",
+  };
+
+  // El usuario vacía voltage y power
+  const camposFormulario = {
+    power: "   ",
+    voltage: "",
+    lifetime: "50000",
+  };
+
+  const resultado = actualizarFichaTecnica(preexistente, camposFormulario, "");
+
+  assert.equal("power" in resultado, false, "power debe haber sido eliminado");
+  assert.equal("voltage" in resultado, false, "voltage debe haber sido eliminado");
+  assert.equal(resultado.lifetime, "50000");
+  assert.equal(resultado.amperage, "15A", "amperage no visible debe permanecer");
+});
+
+test("resolverAcabado con acabado conocido devuelve identificador y etiqueta oficiales", () => {
+  const resultado = resolverAcabado("blanco_brillante");
+  assert.deepEqual(resultado, {
+    ok: true,
+    acabado: "blanco_brillante",
+    acabadoEtiqueta: "Blanco brillante",
+  });
+});
+
+test("resolverAcabado con 'otro' y texto personalizado genera slug y conserva etiqueta", () => {
+  const resultado = resolverAcabado("otro", "Gris espacial metalizado");
+  assert.deepEqual(resultado, {
+    ok: true,
+    acabado: "gris_espacial_metalizado",
+    acabadoEtiqueta: "Gris espacial metalizado",
+  });
+});
+
+test("resolverAcabado con 'otro' pero texto vacío devuelve error", () => {
+  const resultado = resolverAcabado("otro", "   ");
+  assert.equal(resultado.ok, false);
+  if (!resultado.ok) {
+    assert.match(resultado.error, /acabado/i);
+  }
+});
+
+test("resolverAcabado con 'sin_especificar' o vacío devuelve cadenas vacías válidas", () => {
+  assert.deepEqual(resolverAcabado("sin_especificar"), {
+    ok: true,
+    acabado: "",
+    acabadoEtiqueta: "",
+  });
+  assert.deepEqual(resolverAcabado(""), {
+    ok: true,
+    acabado: "",
+    acabadoEtiqueta: "",
+  });
+});
+
+test("reparación idempotente de ECO-ELE-0001 restaura specs y normaliza lifetime", () => {
+  // Estado degradado de ECO-ELE-0001 (APL-001) tras haber sido editado previamente:
+  const estadoDegradado = {
+    power: "15 W",
+    lifespan: "40000",
+    warranty: "5 años",
+  };
+
+  // Al simular la lógica de reparación / guardado con actualización:
+  const restaurado = actualizarFichaTecnica(
+    estadoDegradado,
+    {
+      power: "15 W",
+      lifetime: "40000",
+      warranty: "5 años",
+    },
+    "",
+  );
+
+  // Restaurar claves históricas no visibles
+  restaurado.amperage = "15A";
+  restaurado.frequency = "50/60Hz";
+
+  assert.equal(restaurado.lifetime, "40000");
+  assert.equal("lifespan" in restaurado, false);
+  assert.equal(restaurado.amperage, "15A");
+  assert.equal(restaurado.frequency, "50/60Hz");
+  assert.equal(restaurado.warranty, "5 años");
+
+  // Al actualizar nuevamente (idempotencia)
+  const reaplicado = actualizarFichaTecnica(
+    restaurado,
+    {
+      lifetime: "40000",
+      warranty: "5 años",
+    },
+    "",
+  );
+
+  assert.equal(reaplicado.lifetime, "40000");
+  assert.equal("lifespan" in reaplicado, false);
+  assert.equal(reaplicado.amperage, "15A");
+  assert.equal(reaplicado.frequency, "50/60Hz");
+  assert.equal(reaplicado.warranty, "5 años");
 });

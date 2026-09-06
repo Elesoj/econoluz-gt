@@ -6,6 +6,7 @@ import {
   parsearExistencias,
   parsearPrecio,
 } from "../app/admin/productos/list";
+import { validarPublicacion } from "../app/admin/productos/nuevo";
 
 type Registro = { text: string; params: readonly unknown[] };
 
@@ -60,12 +61,21 @@ test("lo que escribe el usuario viaja como parámetro, nunca dentro del SQL", as
   );
 });
 
-test("la búsqueda mira el nombre y también la referencia", async () => {
+test("la búsqueda mira el nombre, la referencia y el código del fabricante", async () => {
   const registro: Registro[] = [];
-  await leerProductosAdmin(queryFalsa([], registro), { busqueda: "ECO-CAT-0007" });
+  await leerProductosAdmin(queryFalsa([], registro), { busqueda: "APL-001" });
   const [{ text }] = registro;
   assert.match(text, /public_name/);
   assert.match(text, /econoluz_reference/);
+  assert.match(text, /supplier_code/);
+});
+
+test("el producto en el listado administrativo incluye el código de fabricante para uso interno", async () => {
+  const { productos } = await leerProductosAdmin(
+    queryFalsa([{ ...FILA, supplier_code: "PROV-999" }]),
+    {},
+  );
+  assert.equal(productos[0].proveedorCodigo, "PROV-999");
 });
 
 test("la tercera página se salta exactamente las dos anteriores", async () => {
@@ -89,6 +99,34 @@ test("el filtro de sin precio no se confunde con precio cero", async () => {
   await leerProductosAdmin(queryFalsa([], registro), { estado: "sin_precio" });
   const [{ text }] = registro;
   assert.match(text, /price_gtq is null/);
+});
+
+test("el filtro de incompletos busca productos publicados sin supplier_code", async () => {
+  const registro: Registro[] = [];
+  await leerProductosAdmin(queryFalsa([], registro), { estado: "incompletos" });
+  const [{ text }] = registro;
+  assert.match(text, /supplier_code/);
+  assert.match(text, /published/);
+});
+
+test("leerProductosAdmin devuelve contadores de cada estado sin consultas N+1", async () => {
+  const filaConContadores = {
+    ...FILA,
+    supplier_code: null,
+    total_todos: "313",
+    total_publicados: "300",
+    total_ocultos: "13",
+    total_incompletos: "5",
+  };
+  const resultado = await leerProductosAdmin(queryFalsa([filaConContadores]), {});
+  assert.deepEqual(resultado.contadores, {
+    todos: 313,
+    publicados: 300,
+    ocultos: 13,
+    incompletos: 5,
+  });
+  assert.equal(resultado.productos[0].incompleto, true);
+  assert.match(resultado.productos[0].motivoIncompleto ?? "", /código/i);
 });
 
 test("el precio acepta la forma en que se escribe de verdad", () => {
@@ -133,4 +171,16 @@ test("el listado no arrastra el identificador interno del proveedor", async () =
   const { productos } = await leerProductosAdmin(queryFalsa([FILA], registro), {});
   assert.equal("id" in productos[0], false);
   assert.equal(JSON.stringify(productos).includes("construlita"), false);
+});
+
+test("el guardado del listado rápido exige código de fabricante si el producto se marca como publicado", () => {
+  const sinCodigo = validarPublicacion({ publicado: true, proveedorCodigo: "" });
+  assert.equal(sinCodigo.ok, false);
+  assert.match(sinCodigo.error, /código del fabricante/i);
+
+  const conCodigo = validarPublicacion({ publicado: true, proveedorCodigo: "PROV-123" });
+  assert.equal(conCodigo.ok, true);
+
+  const borradorSinCodigo = validarPublicacion({ publicado: false, proveedorCodigo: "" });
+  assert.equal(borradorSinCodigo.ok, true);
 });

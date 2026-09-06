@@ -4,6 +4,10 @@ import { join } from "node:path";
 import test from "node:test";
 import { products } from "../app/data/products";
 import { toPublicProduct } from "../app/data/publicProduct";
+import {
+  PUBLIC_TECHNICAL_SPEC_KEYS,
+  PUBLIC_TECHNICAL_SPEC_REGISTRY,
+} from "../app/data/publicProductContract";
 
 const IDENTIFICADORES_PUBLICOS_PROHIBIDOS = [
   "Artlite",
@@ -71,4 +75,56 @@ test("el catálogo interno conserva los datos que necesita el personal autorizad
   }
 
   assert.equal(catalogoInterno.includes("magnetrack pro"), true);
+});
+
+test("la garantía (warranty) es estrictamente interna y nunca forma parte del catálogo público", () => {
+  // 1. No debe figurar en el registro de especificaciones públicas ni en sus claves
+  const registryKeys: readonly string[] = PUBLIC_TECHNICAL_SPEC_REGISTRY.map((entry) => entry.key);
+  assert.equal(
+    registryKeys.includes("warranty"),
+    false,
+    "warranty no debe estar presente en PUBLIC_TECHNICAL_SPEC_REGISTRY",
+  );
+  assert.equal(
+    (PUBLIC_TECHNICAL_SPEC_KEYS as readonly string[]).includes("warranty"),
+    false,
+    "warranty no debe estar en PUBLIC_TECHNICAL_SPEC_KEYS",
+  );
+
+  // 2. Ningún producto público proyectado debe tener la clave warranty en su technicalSpecs
+  for (const product of products) {
+    const publicProduct = toPublicProduct({
+      ...product,
+      technicalSpecs: {
+        ...product.technicalSpecs,
+        warranty: "5 años",
+      } as Record<string, unknown>,
+    });
+
+    assert.equal(
+      "warranty" in (publicProduct.technicalSpecs ?? {}),
+      false,
+      `warranty se filtró a technicalSpecs del producto público ${publicProduct.econoluzReference}`,
+    );
+  }
+});
+
+test("el código del fabricante (supplier_code) nunca se proyecta en el catálogo público", () => {
+  for (const product of products) {
+    const publicProduct = toPublicProduct({
+      ...product,
+      supplier_code: "CODIGO-SECRETO-PROV-123",
+    } as unknown as (typeof products)[number]);
+
+    assert.equal(
+      "supplier_code" in publicProduct,
+      false,
+      "supplier_code no debe existir en PublicProduct",
+    );
+    assert.equal(
+      "proveedorCodigo" in publicProduct,
+      false,
+      "proveedorCodigo no debe existir en PublicProduct",
+    );
+  }
 });
