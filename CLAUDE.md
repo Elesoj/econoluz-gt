@@ -1205,6 +1205,18 @@ un ID token al emulador de Firebase Authentication y se canjea por
 o cualquiera de sus variables, la suite falla de forma explícita en lugar de degradar a
 un atajo. Cómo levantarlo está en `docs/OPERACION-FIREBASE.md` §6.
 
+**El panel habla en quetzales desde el 06/09/2026** (`feat/envios-panel-ux`, sin fusionar).
+Ninguna interfaz pide ni muestra importes en centavos: el administrador escribe `35.00` y
+`2500.00` con la Q delante, y la conversión al entero que guarda `app_settings` ocurre en el
+servidor. `tarifaCents` y `umbralGratisCents` no cambian, y no hay migración.
+
+**La recogida en tienda ya se puede ofrecer.** Se activa desde `/admin/envios` con un texto
+obligatorio de hasta 200 caracteres; es gratuita, no pide dirección y no consulta geografía.
+Sigue apagada mientras nadie la encienda, pero la orden de mantenerla **siempre** apagada
+quedó derogada por el dueño. Cuando exista `/checkout`, deberá ofrecerla como
+**«Recogida en tienda — Gratis»** leyendo la configuración real del servidor; el requisito
+está en §2.5 de `docs/superpowers/specs/2026-09-04-envios-checkout-operativo-design.md`.
+
 **Dos endurecimientos posteriores** (04/09/2026): el verificador de envíos **respeta los
 datos históricos** de `shipping_zones`, `shipping_zone_areas` y `shipping_rates` en vez de
 abortar cuando tienen filas —usa fixtures con sufijo propio, elige áreas libres y comprueba

@@ -92,7 +92,44 @@ Leer esta documentación no ejecuta esa retirada ni basta como autorización.
 
 ---
 
-## 0.1 Qué hacer ahora (04/09/2026)
+## 0.1 Qué hacer ahora (06/09/2026)
+
+### El panel de envíos habla en quetzales, y la recogida ya se puede ofrecer (06/09/2026)
+
+Implementado en `feat/envios-panel-ux`, **sin fusionar, sin publicar y sin desplegar**.
+
+**El formulario pedía los importes en centavos.** Decía «Tarifa fija (en céntimos de Q)» y
+enseñaba `3500`. Es correcto por dentro y penoso por fuera: obliga a quien administra a
+convertir mentalmente, y un cero de más cambia el precio del envío por diez. Ahora se
+escribe `35.00` y `2500.00`, con la Q a la vista, y la conversión a los enteros que guarda
+`app_settings` ocurre en el servidor. **Por dentro no cambia nada**: `tarifaCents` y
+`umbralGratisCents` siguen siendo los mismos enteros, en la misma clave, sin migración.
+
+La conversión **no usa `Number()` sobre el texto crudo**, y conviene no «simplificarlo»:
+`Number("3.5e3")` da 3500 y `Number("")` da 0, así que una versión ingenua aceptaría en
+silencio importes que nadie escribió. Solo entra lo que tiene forma de cantidad de dinero,
+y los centavos se calculan sobre los dígitos, sin coma flotante, para que Q35.35 no acabe
+siendo 3534.
+
+**La recogida en tienda pasa de tarjeta informativa a formulario.** Se puede activar y
+desactivar desde `/admin/envios`, con un texto obligatorio de hasta 200 caracteres para
+decirle al cliente dónde y cuándo recoger. Reutiliza lo que ya existía —la clave
+`recogida_en_tienda`, `guardarRecogidaEnTienda`, la auditoría `configurar_recogida` y la
+invalidación de caché—, así que **no hay migración nueva**. Al desactivarla el texto se
+conserva, para no obligar a redactarlo otra vez.
+
+**Sigue apagada mientras nadie la encienda.** Lo que cambia es que ahora se puede encender:
+la orden anterior de mantenerla siempre apagada quedó **derogada por el dueño el
+06/09/2026**. La redacción vigente está en §2.5 del diseño operativo.
+
+**El checkout no se ha fingido.** No existe `/checkout`, y este trabajo no ha creado
+ninguna pantalla ni selector sin consumidor. Lo que queda escrito, como **requisito
+obligatorio** del subproyecto 6, es cómo tendrá que comportarse: leer la configuración real
+del servidor, ofrecerla como **«Recogida en tienda — Gratis»** cuando esté activa, no
+mostrarla en absoluto cuando no lo esté, no pedir dirección ni consultar geografía, y no
+elegirla nunca por su cuenta. Está en §2.5 del diseño.
+
+---
 
 ### El modelo operativo de envíos, implementado en `feat/envios-operativos`
 
@@ -275,7 +312,7 @@ Subproyecto 9A **completado** en la rama `feat/envios-tarifas` (HEAD: `d4b5e9e`)
 1. Crear las zonas de reparto reales desde el panel `/admin/envios`.
 2. Asignar coberturas geográficas a cada zona.
 3. Publicar tarifas oficiales (importe, umbral de gratuidad, plazos).
-4. Configurar la recogida en tienda si aplica.
+4. Configurar la recogida en tienda desde `/admin/envios` si se quiere ofrecer.
 5. Ejecutar `npm run direcciones:migrar-codigos -- --aplicar-produccion` en producción para rellenar los códigos INE de las direcciones existentes.
 
 **Ramas de Neon creadas para 9A** (no borrar hasta que la rama se integre en `main`):

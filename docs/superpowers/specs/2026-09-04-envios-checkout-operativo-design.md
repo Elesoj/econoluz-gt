@@ -59,8 +59,43 @@ El coste de Guatex depende del pedido y de su peso. ECONOLUZ no dispone de una t
 
 El coste de envío de Guatex se representa como dato desconocido (`null`), **nunca como cero** (cero significaría erróneamente que el envío es gratuito). El pedido pasa a una solicitud en estado `pendiente_de_contacto` y la compra se finaliza directamente entre ECONOLUZ y el cliente por WhatsApp.
 
-### 2.5 Recogida en tienda
-La recogida en tienda permanece apagada (`recogidaActiva: false` por defecto en `app_settings`) y fuera de este flujo. No se presenta al cliente ni se utiliza como alternativa automática.
+### 2.5 Recogida en tienda — decisión del dueño del 06/09/2026
+
+**La recogida en tienda es un método de entrega real, gratuito y administrable.** El dueño
+lo decidió el 06/09/2026, y esta redacción sustituye a la anterior, que ordenaba mantenerla
+siempre apagada y fuera del flujo.
+
+- Se activa y se desactiva desde **`/admin/envios`**, con la clave `recogida_en_tienda` de
+  `app_settings` que ya existía. Nace **apagada** (`activa: false`), y sigue apagada
+  mientras nadie la encienda: lo que cambia es que ahora se puede encender.
+- Al activarla es **obligatorio** escribir la información para el cliente —dónde y cuándo
+  recoger—, con un máximo de 200 caracteres. Ofrecer una opción que no explica nada sería
+  peor que no ofrecerla.
+- Su coste es **siempre Q0.00**. No es una tarifa de valor cero: es la ausencia de envío.
+- **No pide dirección de entrega ni consulta la geografía.** No hay departamento, municipio
+  ni zona capitalina que resolver, porque no hay nada que repartir.
+- **No lleva plazo de entrega.** El plazo depende del proveedor, y este documento no
+  inventa plazos.
+
+#### Lo que `/checkout` deberá cumplir cuando se construya
+
+Esto es un **requisito obligatorio** del futuro subproyecto 6, no una sugerencia:
+
+1. `/checkout` **lee la configuración real del servidor** con `obtenerRecogidaEnTienda()`.
+   No puede dar por hecho ningún valor ni guardarlo en el código.
+2. Si `activa` es `true`, se ofrece al cliente exactamente como
+   **«Recogida en tienda — Gratis»**, acompañada del texto que escribió el administrador.
+3. Si `activa` es `false`, **no aparece como opción**. Ni apagada, ni deshabilitada, ni
+   explicada: no está.
+4. Elegirla **no pide dirección** ni pasa por la deducción de método de §5.2, y produce
+   `{ tipo: "sin_coste", metodo: "recogida_en_tienda", envioCents: 0 }`, que es el contrato
+   que ya devuelve `orquestar` hoy.
+5. Nunca se elige por su cuenta como alternativa automática cuando otro método falla: es
+   una decisión del cliente.
+
+**Hoy no existe `/checkout`, y este documento no finge que exista.** El contrato del
+dominio, la configuración y el panel están listos; la pantalla que se lo ofrece al cliente
+se construye en el subproyecto 6.
 
 ---
 
@@ -221,7 +256,7 @@ el ejemplo corto de cuatro cifras del boceto comercial original queda derogado, 
 Muestra exclusivamente:
 - Resumen comercial: tarifa de mensajero propio (Q35,00) y umbral de gratuidad (Q2.500,00) con controles numéricos para su edición auditada en `app_settings`.
 - Desglose de zonas: tabla de las 22 zonas capitalinas con selector cerrado entre `Mensajero propio` y `Guatex`.
-- Estado de recogida en tienda (desactivada).
+- Recogida en tienda: interruptor para ofrecerla y el texto que ve el cliente, con su estado actual a la vista.
 - Se retira el formulario de creación de zonas libres y la ruta `/admin/envios/[zona]` redirige a `/admin/envios`.
 
 ### 6.2 Gestión de pedidos y solicitudes (`/admin/pedidos`)
