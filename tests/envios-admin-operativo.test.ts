@@ -8,6 +8,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   validarFormularioMetodoZona,
+  validarFormularioRecogida,
   validarFormularioReglasEnvio,
 } from "../app/admin/envios/formularios";
 
@@ -66,84 +67,185 @@ test("validarFormularioMetodoZona acepta pares válidos", () => {
   }
 });
 
-test("validarFormularioReglasEnvio rechaza decimales y negativos", () => {
-  const fd1 = new FormData();
-  fd1.set("tarifaCents", "35.5");
-  fd1.set("umbralGratisCents", "250000");
-  assert.equal(validarFormularioReglasEnvio(fd1).ok, false);
+// ---------------------------------------------------------------------------
+// Los importes se piden en quetzales, nunca en centavos
+//
+// Quien administra escribe 35.00 y 2500.00, como se escribe cualquier cantidad
+// de dinero. La conversión a los enteros que guarda `app_settings` ocurre aquí,
+// en la frontera del servidor: por dentro se sigue sumando en centavos.
+// ---------------------------------------------------------------------------
 
-  const fd2 = new FormData();
-  fd2.set("tarifaCents", "-100");
-  fd2.set("umbralGratisCents", "250000");
-  assert.equal(validarFormularioReglasEnvio(fd2).ok, false);
-
-  const fd3 = new FormData();
-  fd3.set("tarifaCents", "3500");
-  fd3.set("umbralGratisCents", "2500.25");
-  assert.equal(validarFormularioReglasEnvio(fd3).ok, false);
-});
-
-test("validarFormularioReglasEnvio rechaza campos vacíos o no numéricos", () => {
-  for (const [tarifa, umbral] of [
-    ["", "250000"],
-    ["3500", ""],
-    ["mucho", "250000"],
-    ["3500", "bastante"],
-  ]) {
-    const fd = new FormData();
-    fd.set("tarifaCents", tarifa);
-    fd.set("umbralGratisCents", umbral);
-    assert.equal(
-      validarFormularioReglasEnvio(fd).ok,
-      false,
-      `debería rechazar tarifa «${tarifa}» y umbral «${umbral}»`,
-    );
-  }
-});
-
-test("validarFormularioReglasEnvio acepta enteros válidos en centavos", () => {
+function reglas(tarifa: string, umbral: string): FormData {
   const fd = new FormData();
-  fd.set("tarifaCents", "3500");
-  fd.set("umbralGratisCents", "250000");
-  const r = validarFormularioReglasEnvio(fd);
+  fd.set("tarifaQuetzales", tarifa);
+  fd.set("umbralGratisQuetzales", umbral);
+  return fd;
+}
+
+test("Q35.00 se guarda como 3500 centavos", () => {
+  const r = validarFormularioReglasEnvio(reglas("35.00", "2500.00"));
   assert.equal(r.ok, true);
   if (r.ok) {
     assert.equal(r.reglas.tarifaCents, 3500);
+  }
+});
+
+test("Q2500.00 se guarda como 250000 centavos", () => {
+  const r = validarFormularioReglasEnvio(reglas("35.00", "2500.00"));
+  assert.equal(r.ok, true);
+  if (r.ok) {
     assert.equal(r.reglas.umbralGratisCents, 250000);
   }
 });
 
-test("validarFormularioReglasEnvio admite el cero: tarifa gratis y umbral cero son configuraciones legítimas", () => {
-  const fd = new FormData();
-  fd.set("tarifaCents", "0");
-  fd.set("umbralGratisCents", "0");
-  const r = validarFormularioReglasEnvio(fd);
+test("se admiten cero, uno y dos decimales", () => {
+  const casos: Array<[string, number]> = [
+    ["35", 3500],
+    ["35.", 3500],
+    ["35.5", 3550],
+    ["35.50", 3550],
+    ["0", 0],
+    ["0.05", 5],
+    ["2500", 250000],
+  ];
+  for (const [escrito, esperado] of casos) {
+    const r = validarFormularioReglasEnvio(reglas(escrito, "2500"));
+    assert.equal(r.ok, true, `debería aceptar «${escrito}»`);
+    if (r.ok) {
+      assert.equal(r.reglas.tarifaCents, esperado, `«${escrito}» debería dar ${esperado}`);
+    }
+  }
+});
+
+test("se admiten separadores de millar tal como los escribe una persona", () => {
+  const r = validarFormularioReglasEnvio(reglas("35.00", "2,500.00"));
   assert.equal(r.ok, true);
   if (r.ok) {
-    assert.equal(r.reglas.tarifaCents, 0);
-    assert.equal(r.reglas.umbralGratisCents, 0);
+    assert.equal(r.reglas.umbralGratisCents, 250000);
   }
 });
 
-test("validarFormularioReglasEnvio rechaza importes desmesurados", () => {
-  // Un dedazo o un POST a mano no pueden meter un número que después se arrastre
-  // a los cálculos. Cien millones de céntimos son un millón de quetzales.
-  for (const importe of ["100000001", "99999999999999999999", "1e21"]) {
-    const fd = new FormData();
-    fd.set("tarifaCents", importe);
-    fd.set("umbralGratisCents", "250000");
-    assert.equal(validarFormularioReglasEnvio(fd).ok, false, `debería rechazar «${importe}»`);
-
-    const fd2 = new FormData();
-    fd2.set("tarifaCents", "3500");
-    fd2.set("umbralGratisCents", importe);
-    assert.equal(validarFormularioReglasEnvio(fd2).ok, false, `debería rechazar «${importe}»`);
+test("más de dos decimales se rechaza: no hay medio centavo", () => {
+  const r = validarFormularioReglasEnvio(reglas("35.005", "2500"));
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.match(r.error, /decimales/i);
   }
 });
 
-test("validarFormularioReglasEnvio acepta justo el máximo", () => {
+test("los negativos se rechazan", () => {
+  assert.equal(validarFormularioReglasEnvio(reglas("-35.00", "2500")).ok, false);
+  assert.equal(validarFormularioReglasEnvio(reglas("35.00", "-1")).ok, false);
+});
+
+test("el texto y los campos vacíos se rechazan", () => {
+  for (const bruto of ["", "   ", "treinta y cinco", "Q35", "35 quetzales", "--5", "3.5.5"]) {
+    assert.equal(
+      validarFormularioReglasEnvio(reglas(bruto, "2500")).ok,
+      false,
+      `debería rechazar «${bruto}»`,
+    );
+  }
+});
+
+test("la notación científica se rechaza aunque JavaScript la entienda", () => {
+  // `Number("3.5e3")` da 3500, así que una conversión ingenua la aceptaría y
+  // guardaría un importe que nadie escribió a propósito.
+  for (const bruto of ["3.5e3", "1e2", "2.5E3", "Infinity", "NaN"]) {
+    assert.equal(
+      validarFormularioReglasEnvio(reglas(bruto, "2500")).ok,
+      false,
+      `debería rechazar «${bruto}»`,
+    );
+  }
+});
+
+test("por encima del máximo permitido se rechaza", () => {
+  assert.equal(validarFormularioReglasEnvio(reglas("1000000.01", "2500")).ok, false);
+  assert.equal(validarFormularioReglasEnvio(reglas("35", "1000000.01")).ok, false);
+  // Justo el máximo sí entra.
+  const r = validarFormularioReglasEnvio(reglas("1000000.00", "1000000"));
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.reglas.tarifaCents, 100_000_000);
+  }
+});
+
+test("los errores se expresan en quetzales, sin hablar de centavos", () => {
+  const errores = [
+    validarFormularioReglasEnvio(reglas("-1", "2500")),
+    validarFormularioReglasEnvio(reglas("35.005", "2500")),
+    validarFormularioReglasEnvio(reglas("", "2500")),
+    validarFormularioReglasEnvio(reglas("9999999", "2500")),
+  ];
+  for (const r of errores) {
+    assert.equal(r.ok, false);
+    if (!r.ok) {
+      assert.equal(
+        /c[eé]ntimo|centavo/i.test(r.error),
+        false,
+        `el mensaje no debe hablar de centavos: «${r.error}»`,
+      );
+      assert.match(r.error, /Q|quetzal/i, `el mensaje debería hablar en quetzales: «${r.error}»`);
+    }
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Recogida en tienda
+// ---------------------------------------------------------------------------
+
+function recogida(activa: string | null, texto: string): FormData {
   const fd = new FormData();
-  fd.set("tarifaCents", "100000000");
-  fd.set("umbralGratisCents", "100000000");
-  assert.equal(validarFormularioReglasEnvio(fd).ok, true);
+  if (activa !== null) fd.set("activa", activa);
+  fd.set("texto", texto);
+  return fd;
+}
+
+test("activar la recogida exige un texto para el cliente", () => {
+  const r = validarFormularioRecogida(recogida("on", "   "));
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.match(r.error, /informaci[oó]n|texto/i);
+  }
+});
+
+test("activar la recogida con texto es válido y lo recorta", () => {
+  const r = validarFormularioRecogida(recogida("on", "  Vista Hermosa 2, zona 15  "));
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.recogida.activa, true);
+    assert.equal(r.recogida.texto, "Vista Hermosa 2, zona 15");
+  }
+});
+
+test("desactivarla es válido y no exige texto", () => {
+  const r = validarFormularioRecogida(recogida(null, ""));
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.recogida.activa, false);
+    assert.equal(r.recogida.texto, "");
+  }
+});
+
+test("desactivarla conserva el texto que hubiera escrito, para no perderlo", () => {
+  const r = validarFormularioRecogida(recogida(null, "Vista Hermosa 2, zona 15"));
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.recogida.activa, false);
+    assert.equal(r.recogida.texto, "Vista Hermosa 2, zona 15");
+  }
+});
+
+test("el texto no puede pasar de 200 caracteres", () => {
+  const r = validarFormularioRecogida(recogida("on", "x".repeat(201)));
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.match(r.error, /200/);
+  }
+});
+
+test("exactamente 200 caracteres se admite", () => {
+  const r = validarFormularioRecogida(recogida("on", "x".repeat(200)));
+  assert.equal(r.ok, true);
 });

@@ -16,7 +16,12 @@ import {
 } from "../../../envios/configuracion.server";
 import { ZONAS_CAPITALINAS_VALIDAS } from "../../../envios/zonasCapitalinas";
 import { formatPrice } from "../../../lib/formatters";
-import { cambiarMetodoZonaAction, guardarReglasEnvioAction } from "../../envios/actions";
+import { aQuetzales } from "../../../lib/dinero";
+import {
+  cambiarMetodoZonaAction,
+  guardarRecogidaAction,
+  guardarReglasEnvioAction,
+} from "../../envios/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -77,45 +82,55 @@ export default async function EnviosPage({
         <section className="border border-neutral-200 bg-white p-6 shadow-xs">
           <h2 className="text-lg font-semibold text-proyectos">Reglas del mensajero propio</h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Hoy: {formatPrice(reglas.tarifaCents / 100)} de envío, gratis a partir de{" "}
-            {formatPrice(reglas.umbralGratisCents / 100)} de productos. El umbral es
+            Hoy: {formatPrice(aQuetzales(reglas.tarifaCents))} de envío, gratis a partir de{" "}
+            {formatPrice(aQuetzales(reglas.umbralGratisCents))} de productos. El umbral es
             inclusivo: un pedido de exactamente esa cantidad ya no paga envío.
           </p>
 
           <form action={guardarReglasEnvioAction} className="mt-5 grid gap-5 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium text-neutral-800">
-                Tarifa fija, en céntimos de quetzal
-                <input
-                  type="number"
-                  name="tarifaCents"
-                  defaultValue={reglas.tarifaCents}
-                  required
-                  min={0}
-                  step={1}
-                  className="mt-1 block w-full border border-neutral-300 px-3 py-2 text-sm"
-                />
+                Tarifa fija (Q)
+                <span className="mt-1 flex items-center border border-neutral-300">
+                  <span
+                    aria-hidden="true"
+                    className="border-r border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-600"
+                  >Q</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    name="tarifaQuetzales"
+                    defaultValue={aQuetzales(reglas.tarifaCents).toFixed(2)}
+                    required
+                    className="w-full px-3 py-2 text-sm"
+                  />
+                </span>
               </label>
               <span className="mt-1 block text-xs text-neutral-500">
-                3500 céntimos son {formatPrice(35)}.
+                Lo que paga quien compra por debajo del umbral.
               </span>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-neutral-800">
-                Umbral de gratuidad, en céntimos de quetzal
-                <input
-                  type="number"
-                  name="umbralGratisCents"
-                  defaultValue={reglas.umbralGratisCents}
-                  required
-                  min={0}
-                  step={1}
-                  className="mt-1 block w-full border border-neutral-300 px-3 py-2 text-sm"
-                />
+                Envío gratis a partir de (Q)
+                <span className="mt-1 flex items-center border border-neutral-300">
+                  <span
+                    aria-hidden="true"
+                    className="border-r border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-600"
+                  >Q</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    name="umbralGratisQuetzales"
+                    defaultValue={aQuetzales(reglas.umbralGratisCents).toFixed(2)}
+                    required
+                    className="w-full px-3 py-2 text-sm"
+                  />
+                </span>
               </label>
               <span className="mt-1 block text-xs text-neutral-500">
-                250000 céntimos son {formatPrice(2500)}.
+                Se cuenta sobre el importe de los productos, sin el envío.
               </span>
             </div>
 
@@ -185,13 +200,53 @@ export default async function EnviosPage({
           </div>
         </section>
 
-        <section className="mt-8 border border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-600">
-          <h2 className="font-semibold text-neutral-900">Recogida en tienda</h2>
-          <p className="mt-1">
-            {recogida.activa
-              ? "Activada. El cliente puede elegirla al comprar."
-              : "Desactivada. No se le ofrece al cliente ni se usa como alternativa automática."}
+        <section className="mt-8 border border-neutral-200 bg-white p-6 shadow-xs">
+          <h2 className="text-lg font-semibold text-proyectos">Recogida en tienda</h2>
+          <p className="mt-1 text-sm text-neutral-600">
+            Estado actual:{" "}
+            <strong className={recogida.activa ? "text-proyectos" : "text-neutral-700"}>
+              {recogida.activa
+                ? "se ofrece al cliente, y es gratis"
+                : "no se ofrece al cliente"}
+            </strong>
+            . Quien la elige recoge el pedido en la tienda: no paga envío y no hace falta
+            una dirección de entrega.
           </p>
+
+          <form action={guardarRecogidaAction} className="mt-5 space-y-4">
+            <label className="flex items-center gap-2 text-sm font-medium text-neutral-800">
+              <input
+                type="checkbox"
+                name="activa"
+                defaultChecked={recogida.activa}
+                className="size-4"
+              />
+              Ofrecer recogida en tienda
+            </label>
+
+            <label className="block text-sm font-medium text-neutral-800">
+              Información para el cliente
+              <textarea
+                name="texto"
+                defaultValue={recogida.texto}
+                maxLength={200}
+                rows={3}
+                placeholder="21 Avenida 0-18, Vista Hermosa 2, zona 15. De lunes a viernes, de 8:00 a 17:00."
+                className="mt-1 block w-full border border-neutral-300 px-3 py-2 text-sm"
+              />
+            </label>
+            <span className="block text-xs text-neutral-500">
+              Dónde y cuándo recoger, en 200 caracteres como mucho. Es obligatorio si se
+              ofrece la recogida.
+            </span>
+
+            <button
+              type="submit"
+              className="bg-tienda px-4 py-2 text-sm font-medium text-white hover:bg-tienda-fuerte"
+            >
+              Guardar recogida
+            </button>
+          </form>
         </section>
       </div>
     </>

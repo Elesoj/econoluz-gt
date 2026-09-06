@@ -94,10 +94,40 @@ test.describe("Panel de envíos operativos", () => {
   test("7. no hay ninguna superficie para ponerle tarifa a Guatex", async ({ page, context }) => {
     await autenticarComoAdmin(context);
     await page.goto("/admin/envios");
-    // Los dos únicos campos numéricos son los del mensajero propio.
-    await expect(page.locator('input[name="tarifaCents"]')).toHaveCount(1);
-    await expect(page.locator('input[name="umbralGratisCents"]')).toHaveCount(1);
-    await expect(page.locator('input[type="number"]')).toHaveCount(2);
+    // Los dos únicos campos de dinero son los del mensajero propio, y se piden en
+    // quetzales.
+    await expect(page.locator('input[name="tarifaQuetzales"]')).toHaveCount(1);
+    await expect(page.locator('input[name="umbralGratisQuetzales"]')).toHaveCount(1);
+    await expect(page.locator('input[inputmode="decimal"]')).toHaveCount(2);
+  });
+
+  test("7.bis los importes se muestran en quetzales, no en centavos", async ({ page, context }) => {
+    await autenticarComoAdmin(context);
+    await page.goto("/admin/envios");
+
+    await expect(page.locator('input[name="tarifaQuetzales"]')).toHaveValue("35.00");
+    await expect(page.locator('input[name="umbralGratisQuetzales"]')).toHaveValue("2500.00");
+
+    // Ni la palabra ni los valores internos aparecen en la pantalla.
+    const texto = (await page.locator("body").innerText()).toLowerCase();
+    expect(texto).not.toContain("céntimo");
+    expect(texto).not.toContain("centavo");
+    expect(texto).not.toContain("250000");
+    expect(texto).not.toContain("3500");
+  });
+
+  test("7.ter la recogida en tienda es configurable desde el panel", async ({ page, context }) => {
+    await autenticarComoAdmin(context);
+    await page.goto("/admin/envios");
+
+    await expect(page.getByText(/Ofrecer recogida en tienda/)).toBeVisible();
+    await expect(page.locator('input[name="activa"]')).toHaveCount(1);
+    await expect(page.locator('textarea[name="texto"]')).toHaveCount(1);
+    await expect(page.getByRole("button", { name: /guardar recogida/i })).toBeVisible();
+
+    // Nace apagada, y se dice con claridad.
+    await expect(page.locator('input[name="activa"]')).not.toBeChecked();
+    await expect(page.getByText(/no se ofrece al cliente/i)).toBeVisible();
   });
 
   test("8. la ficha de zona de 9A redirige a la portada", async ({ page, context }) => {

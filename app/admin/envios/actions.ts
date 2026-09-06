@@ -12,8 +12,10 @@ import { redirect } from "next/navigation";
 import { registrar } from "../../lib/datos";
 import { verificarPermisoParaAccion } from "../auth/authorization.server";
 import { guardarMetodoZona, guardarReglasPropias } from "../../envios/configuracion.server";
+import { guardarRecogidaEnTienda } from "../../lib/ajustes.server";
 import {
   validarFormularioMetodoZona,
+  validarFormularioRecogida,
   validarFormularioReglasEnvio,
 } from "./formularios";
 
@@ -61,6 +63,36 @@ export async function guardarReglasEnvioAction(formData: FormData): Promise<void
     });
     redirect(
       `/admin/envios?error=${encodeURIComponent("No se pudieron guardar las reglas de envío. Vuelve a intentarlo.")}`,
+    );
+  }
+
+  redirect("/admin/envios?guardado=1");
+}
+
+/**
+ * La recogida en tienda: si se ofrece al cliente y con qué texto.
+ *
+ * No escribe en `app_settings` por su cuenta: reutiliza
+ * `guardarRecogidaEnTienda`, que ya conoce la clave `recogida_en_tienda`, deja la
+ * auditoría `configurar_recogida` con el antes y el después, e invalida la caché
+ * de envíos. Repetir eso aquí sería tener dos sitios que escriben lo mismo.
+ */
+export async function guardarRecogidaAction(formData: FormData): Promise<void> {
+  const admin = await verificarPermisoParaAccion("envios:escribir");
+
+  const res = validarFormularioRecogida(formData);
+  if (!res.ok) {
+    redirect(`/admin/envios?error=${encodeURIComponent(res.error)}`);
+  }
+
+  try {
+    await guardarRecogidaEnTienda(res.recogida, admin.id);
+  } catch (err) {
+    registrar("error", "admin-guardar-recogida", {
+      clase: err instanceof Error ? err.constructor.name : "desconocida",
+    });
+    redirect(
+      `/admin/envios?error=${encodeURIComponent("No se pudo guardar la recogida en tienda. Vuelve a intentarlo.")}`,
     );
   }
 
