@@ -4,7 +4,8 @@
 // sin Neon, sin sesión y sin red.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { orquestar, estimarEnvio, type DependenciasEnvios } from "../app/envios/envios.server";
+import { orquestar, type DependenciasEnvios } from "../app/envios/orquestacion";
+import { estimarEnvio } from "../app/envios/envios.server";
 import { ErrorDeDatos } from "../app/lib/datos/errores";
 import { mapaMetodosPorDefecto } from "../app/envios/zonasCapitalinas";
 import { REGLAS_PROPIAS_DEFECTO } from "../app/envios/tarifas";
