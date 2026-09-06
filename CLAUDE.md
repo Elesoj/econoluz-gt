@@ -1195,6 +1195,15 @@ un ID token al emulador de Firebase Authentication y se canjea por
 o cualquiera de sus variables, la suite falla de forma explícita en lugar de degradar a
 un atajo. Cómo levantarlo está en `docs/OPERACION-FIREBASE.md` §6.
 
+**Dos endurecimientos posteriores** (04/09/2026): el verificador de envíos **respeta los
+datos históricos** de `shipping_zones`, `shipping_zone_areas` y `shipping_rates` en vez de
+abortar cuando tienen filas —usa fixtures con sufijo propio, elige áreas libres y comprueba
+al final que las tablas quedan idénticas—; y `validarDireccion` **valida la geografía contra
+el catálogo del INE**: el departamento y el municipio tienen que existir, el municipio tiene
+que pertenecer al departamento y los nombres que se guardan salen del catálogo, no del
+formulario. Sin lo segundo, enviar `01`/`0101` a mano convertía cualquier dirección en
+capitalina y elegible para el mensajero propio a Q35.
+
 **La suite de Playwright son 83 pruebas en 11 archivos.** `tests/admin-envios.spec.ts`
 está fuera de `testMatch` a propósito y **no se ejecuta**: probaba el panel de zonas de
 reparto y tarifas de 9A, retirado aquí. Se conserva en disco solo como evidencia

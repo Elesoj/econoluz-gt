@@ -151,17 +151,27 @@ integre.
   `shipping_zone_areas` y `shipping_rates` ya no tienen consumidores, pero no se borran.
   El verificador comprueba que siguen a 0 filas antes de empezar.
 
-**Verificación fresca del cierre** (04/09/2026, contra `envios-operativos-dev`, después
-de aplicar los hallazgos de la revisión independiente):
-`test:datos` **700/700**, `test:admin` **226/226**, `test:proveedores` 3/3,
-`test:permisos` correcto con las 27 tablas protegidas denegadas, `envios:verificar`
-**18 de 18** con ROLLBACK y 0 filas residuales, `typecheck` y `lint` limpios, `build`
-correcto y **Playwright 81 de 83**.
+**Dos correcciones posteriores que conviene conocer** (04/09/2026), pedidas por el dueño
+antes de aceptar el trabajo:
 
-Los dos que faltan son `tienda-carrito.spec.ts:11` y `:41`, la inestabilidad de la
-sección 10.2.bis: **no son de esta rama**, y se comprobó en vez de suponerlo (ver ahí el
-detalle). Las **13 pruebas nuevas** de `envios-operativos.spec.ts`, con sesión de cliente
-auténtica, pasan todas.
+- **El verificador respeta los datos históricos de 9A.** Antes abortaba si
+  `shipping_zones`, `shipping_zone_areas` o `shipping_rates` tenían una sola fila, lo que
+  contradecía la orden de conservarlas «para recuperación y auditoría histórica» e impedía
+  llegar a las comprobaciones 17 y 18. Ahora cuenta sin juzgar, usa fixtures con sufijo
+  propio de cada ejecución, elige áreas de prueba entre las que están libres y al terminar
+  comprueba que las tablas tienen **exactamente las filas que tenían**, no cero.
+- **La geografía se valida contra el catálogo del INE en la frontera del servidor.** Antes
+  solo se comprobaba la forma de los códigos. Ahora el departamento y el municipio tienen
+  que existir, el municipio tiene que pertenecer al departamento, y **los nombres que se
+  guardan salen del catálogo, no del `FormData`**. Sin esto, enviar 01/0101 a mano
+  convertía cualquier dirección en capitalina y elegible para el mensajero propio a Q35.
+
+**Verificación fresca del cierre** (04/09/2026, contra `envios-operativos-dev`):
+`test:datos` **709/709**, `test:admin` **226/226**, `test:proveedores` 3/3,
+`test:permisos` correcto con las 27 tablas protegidas denegadas, `envios:verificar`
+**20 comprobaciones correctas con datos históricos presentes** —conteos y huella de
+contenido idénticos antes y después—, `typecheck` y `lint` limpios, `build` correcto y
+**Playwright 83 de 83**, con salida 0 y el puerto 3100 liberado.
 
 **Lo que encontró la revisión independiente, y qué se hizo con cada cosa.** Se pidió una
 revisión del diff completo antes de dar el trabajo por terminado. No encontró nada
@@ -184,20 +194,19 @@ y señaló seis puntos importantes:
   `node --test` sin poder cargar el archivo. Queda explicado en el propio código para que
   nadie lo vuelva a «arreglar».
 
-**Tres cosas que la revisión dejó como decisión del dueño, y que conviene mirar:**
+**Tres cosas que la revisión dejó como decisión del dueño. Las dos primeras ya están
+resueltas; la tercera sigue abierta a propósito:**
 
-1. **El preflight exige 0 filas en las tablas de 9A y aborta si las hay.** Es lo que pide
-   el plan certificado, pero choca con conservarlas «para auditoría histórica»: el día
-   que tengan una fila legítima, `npm run envios:verificar` dejará de poder pasar.
-2. **Los códigos de departamento y municipio no se comprueban contra el catálogo INE**,
-   solo su forma (`\d{2}` y `\d{4}`). Es deuda anterior a este trabajo, pero ahora pesa
-   más: un `POST` a mano con `01`/`0101` convierte cualquier dirección en capitalina y
-   elegible para el mensajero propio a Q35. El catálogo para validarlo ya existe en
-   `app/envios/geografia.ts`.
-3. **El cálculo nuevo todavía no lo llama nadie.** `cotizarEnvioDelCliente`,
-   `estimarEnvio` y `aEnvioPublico` no tienen consumidores: es coherente con el alcance
-   —el checkout es el plan B—, pero significa que la regla «Guatex es `null`, nunca `0`»
-   está demostrada por tipos y pruebas unitarias, **nunca de extremo a extremo**.
+1. ~~El preflight exige 0 filas en las tablas de 9A y aborta si las hay.~~ **Resuelto el
+   04/09/2026**: ahora las cuenta sin juzgarlas y comprueba al final que siguen idénticas.
+2. ~~Los códigos de departamento y municipio no se comprueban contra el catálogo INE.~~
+   **Resuelto el 04/09/2026**: se validan contra el catálogo, se exige que el municipio
+   pertenezca al departamento y los nombres persistidos salen del catálogo.
+3. **El cálculo nuevo todavía no lo llama nadie, y así se queda.** `cotizarEnvioDelCliente`,
+   `estimarEnvio` y `aEnvioPublico` no tienen consumidores fuera de `app/envios`: es
+   coherente con el alcance —el checkout es el plan B— y **conectarlo aquí sería ampliarlo**.
+   Significa que la regla «Guatex es `null`, nunca `0`» está demostrada por los tipos y por
+   las pruebas unitarias, **nunca de extremo a extremo**. Se hará al construir el checkout.
 
 **Un dato de la documentación que estaba equivocado, ya corregido:** este archivo y
 `CLAUDE.md` decían que las migraciones `012`–`014` seguían pendientes en Producción. No
