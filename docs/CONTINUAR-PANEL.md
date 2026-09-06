@@ -168,9 +168,18 @@ antes de aceptar el trabajo:
   que existir, el municipio tiene que pertenecer al departamento, y **los nombres que se
   guardan salen del catálogo, no del `FormData`**. Sin esto, enviar 01/0101 a mano
   convertía cualquier dirección en capitalina y elegible para el mensajero propio a Q35.
+- **Los códigos son obligatorios en toda dirección nueva.** La primera versión de lo
+  anterior solo rechazaba cuando los dos códigos tenían forma correcta y no existían; si
+  faltaban o venían mal, los convertía en `null` y aceptaba la dirección fiándose de los
+  nombres de texto libre. Eso dejaba un rodeo: **omitir los códigos saltaba la comprobación
+  contra el catálogo y, con ella, la obligatoriedad de la zona capitalina**, de modo que
+  «Guatemala/Guatemala» entraba sin zona y después no se podía repartir. Ya no se degradan
+  a `null`: ausentes, parciales o malformados se rechazan. **Las direcciones históricas sin
+  códigos se siguen leyendo igual**; la obligatoriedad es solo para lo que entra.
 
-**Verificación fresca del cierre** (04/09/2026, contra `envios-operativos-dev`):
-`test:datos` **709/709**, `test:admin` **226/226**, `test:proveedores` 3/3,
+**Verificación fresca del cierre** (04/09/2026, contra `envios-operativos-dev`, con el
+emulador de Firebase levantado):
+`test:datos` **716/716**, `test:admin` **226/226**, `test:proveedores` 3/3,
 `test:permisos` correcto con las **29** tablas protegidas denegadas, `envios:verificar`
 **20 comprobaciones correctas con datos históricos presentes** —conteos y huella de
 contenido idénticos antes y después—, `typecheck` y `lint` limpios, `build` correcto y

@@ -1214,6 +1214,11 @@ que pertenecer al departamento y los nombres que se guardan salen del catálogo,
 formulario. Sin lo segundo, enviar `01`/`0101` a mano convertía cualquier dirección en
 capitalina y elegible para el mensajero propio a Q35.
 
+**Y los códigos son obligatorios en toda dirección nueva**: ausentes, parciales o
+malformados se rechazan, ya no se degradan a `null`. Aceptarlos como opcionales dejaba un
+rodeo —omitirlos evitaba la comprobación contra el catálogo y con ella la obligatoriedad
+de la zona—. Las direcciones históricas sin códigos se siguen leyendo sin problema.
+
 **La suite de Playwright son 83 pruebas en 11 archivos.** `tests/admin-envios.spec.ts`
 está fuera de `testMatch` a propósito y **no se ejecuta**: probaba el panel de zonas de
 reparto y tarifas de 9A, retirado aquí. Se conserva en disco solo como evidencia
