@@ -5,15 +5,16 @@ import { verificarSesion } from "../../auth/authorization.server";
 import { guardarProductos } from "../../productos/actions";
 import { PRODUCTOS_POR_PAGINA, type EstadoProducto } from "../../productos/list";
 import { getProductosAdmin } from "../../productos/list.server";
+import ModalAvisoOperacion from "./ModalAvisoOperacion";
 
 // Depende de la cookie y de los filtros: no se puede prerenderizar.
 export const dynamic = "force-dynamic";
 
-const ESTADOS: { valor: EstadoProducto; etiqueta: string }[] = [
+const PESTANAS: { valor: EstadoProducto; etiqueta: string }[] = [
   { valor: "todos", etiqueta: "Todos" },
   { valor: "publicados", etiqueta: "Publicados" },
   { valor: "ocultos", etiqueta: "Sin publicar" },
-  { valor: "sin_precio", etiqueta: "Sin precio" },
+  { valor: "incompletos", etiqueta: "Necesitan completar" },
 ];
 
 type Busqueda = Record<string, string | string[] | undefined>;
@@ -40,7 +41,7 @@ export default async function ProductosPage({
   const estado = (unTexto(parametros.estado) || "todos") as EstadoProducto;
   const pagina = Number(unTexto(parametros.pagina)) || 1;
 
-  const { productos, total, paginas } = await getProductosAdmin({
+  const { productos, total, contadores, paginas } = await getProductosAdmin({
     busqueda,
     tipo,
     estado,
@@ -60,6 +61,17 @@ export default async function ProductosPage({
     return `/admin/productos?${copia.toString()}`;
   };
 
+  const enlaceDePestana = (nuevoEstado: EstadoProducto) => {
+    const copia = new URLSearchParams(filtrosActuales);
+    if (nuevoEstado === "todos") {
+      copia.delete("estado");
+    } else {
+      copia.set("estado", nuevoEstado);
+    }
+    copia.delete("pagina");
+    return `/admin/productos?${copia.toString()}`;
+  };
+
   const guardados = Number(unTexto(parametros.guardados));
   const errores = unTexto(parametros.errores);
   const desde = total === 0 ? 0 : (pagina - 1) * PRODUCTOS_POR_PAGINA + 1;
@@ -67,6 +79,8 @@ export default async function ProductosPage({
 
   return (
     <>
+      <ModalAvisoOperacion guardados={guardados} errores={errores} />
+
       <section className="bg-proyectos text-white">
         <div className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8">
           <Link
@@ -97,19 +111,60 @@ export default async function ProductosPage({
       </section>
 
       <div className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
-        {/* Filtros. Van por GET para que la búsqueda quede en la dirección y se
-            pueda recargar, compartir o volver atrás sin perderla. */}
+        {/* Pestañas de estado con contadores sin N+1 */}
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-neutral-200 pb-4" role="tablist" aria-label="Filtro por estado de producto">
+          {PESTANAS.map((pestana) => {
+            const activa = estado === pestana.valor;
+            const cuenta =
+              pestana.valor === "todos"
+                ? contadores.todos
+                : pestana.valor === "publicados"
+                  ? contadores.publicados
+                  : pestana.valor === "ocultos"
+                    ? contadores.ocultos
+                    : contadores.incompletos;
+
+            return (
+              <Link
+                key={pestana.valor}
+                href={enlaceDePestana(pestana.valor)}
+                role="tab"
+                aria-selected={activa}
+                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition duration-200 ${
+                  activa
+                    ? "bg-proyectos text-white shadow-xs"
+                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                }`}
+              >
+                <span>{pestana.etiqueta}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs tabular-nums ${
+                    activa
+                      ? "bg-white/20 text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {cuenta}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Filtros. Van por GET para que la búsqueda quede en la dirección */}
         <form action="/admin/productos" className="flex flex-wrap items-end gap-3">
+          <input type="hidden" name="estado" value={estado} />
+
           <div className="flex min-w-[14rem] flex-1 flex-col gap-2">
             <label htmlFor="busqueda" className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-              Buscar por nombre o referencia
+              Buscar por nombre, referencia o código fabricante
             </label>
             <input
               id="busqueda"
               name="busqueda"
               type="search"
               defaultValue={busqueda}
-              placeholder="ECO-CAT-0132, panel, tira…"
+              placeholder="ECO-CAT-0132, panel, código de fabricante…"
               className="min-h-11 rounded-xl border border-proyectos/25 px-4 text-base text-proyectos"
             />
           </div>
@@ -124,28 +179,10 @@ export default async function ProductosPage({
               defaultValue={tipo}
               className="min-h-11 rounded-xl border border-proyectos/25 px-3 text-base text-proyectos"
             >
-              <option value="">Todos</option>
+              <option value="">Todos los tipos</option>
               {Object.values(productTypes).map((valor) => (
                 <option key={valor.id} value={valor.id}>
                   {valor.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="estado" className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-              Estado
-            </label>
-            <select
-              id="estado"
-              name="estado"
-              defaultValue={estado}
-              className="min-h-11 rounded-xl border border-proyectos/25 px-3 text-base text-proyectos"
-            >
-              {ESTADOS.map((opcion) => (
-                <option key={opcion.valor} value={opcion.valor}>
-                  {opcion.etiqueta}
                 </option>
               ))}
             </select>
@@ -159,19 +196,6 @@ export default async function ProductosPage({
           </button>
         </form>
 
-        {guardados > 0 ? (
-          <p className="mt-6 border-l-2 border-proyectos bg-neutral-50 px-4 py-3 text-sm text-proyectos">
-            {guardados === 1 ? "Se guardó 1 producto." : `Se guardaron ${guardados} productos.`}{" "}
-            El catálogo de la web ya muestra el cambio.
-          </p>
-        ) : null}
-
-        {errores ? (
-          <p className="mt-4 border-l-2 border-error bg-neutral-50 px-4 py-3 text-sm text-error">
-            No se guardó todo: {errores}
-          </p>
-        ) : null}
-
         <p className="mt-6 text-sm text-neutral-600">
           {total === 0
             ? "Ningún producto coincide con esos filtros."
@@ -183,10 +207,11 @@ export default async function ProductosPage({
             <input type="hidden" name="volverA" value={filtrosActuales.toString()} />
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[54rem] border-collapse text-left">
+              <table className="w-full min-w-[58rem] border-collapse text-left">
                 <thead>
                   <tr className="bg-proyectos text-xs uppercase tracking-[0.18em] text-white">
                     <th className="px-4 py-3 font-semibold">Producto</th>
+                    <th className="px-4 py-3 font-semibold">Cód. Fabricante</th>
                     <th className="px-4 py-3 font-semibold">Tipo</th>
                     <th className="px-4 py-3 font-semibold">Precio (Q)</th>
                     <th className="px-4 py-3 font-semibold">Existencias</th>
@@ -195,12 +220,19 @@ export default async function ProductosPage({
                 </thead>
                 <tbody>
                   {productos.map((producto) => (
-                    <tr key={producto.referencia} className="border-b border-neutral-200 align-middle">
+                    <tr
+                      key={producto.referencia}
+                      className={`border-b border-neutral-200 align-middle ${
+                        producto.incompleto ? "bg-amber-50/50" : ""
+                      }`}
+                    >
                       <td className="px-4 py-3">
-                        {/* La referencia identifica la fila en el formulario:
-                            el identificador interno lleva el nombre del
-                            proveedor y no puede salir en el HTML. */}
                         <input type="hidden" name="referencia" value={producto.referencia} />
+                        <input
+                          type="hidden"
+                          name={`proveedorCodigo_${producto.referencia}`}
+                          value={producto.proveedorCodigo ?? ""}
+                        />
                         <input
                           type="hidden"
                           name={`original_${producto.referencia}`}
@@ -221,9 +253,24 @@ export default async function ProductosPage({
                             >
                               {producto.nombre}
                             </Link>
-                            <p className="font-mono text-xs text-neutral-500">{producto.referencia}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-xs text-neutral-500">{producto.referencia}</span>
+                              {producto.incompleto ? (
+                                <span
+                                  className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-2xs font-semibold text-amber-800"
+                                  title={producto.motivoIncompleto}
+                                >
+                                  Incompleto
+                                </span>
+                              ) : null}
+                            </div>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className="font-mono text-xs text-neutral-600">
+                          {producto.proveedorCodigo || "—"}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-neutral-600">{producto.tipoEtiqueta}</td>
                       <td className="px-4 py-3">
@@ -261,8 +308,6 @@ export default async function ProductosPage({
               </table>
             </div>
 
-            {/* La barra se queda pegada abajo: con veinticinco filas, un botón
-                al final de la página obliga a bajar cada vez. */}
             <div className="sticky bottom-0 mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 bg-white/95 py-4 backdrop-blur">
               <p className="text-sm text-neutral-600">
                 Cambia un producto o los que quieras: se guarda solo lo que hayas tocado.

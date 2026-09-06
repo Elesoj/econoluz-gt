@@ -1,11 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { productTypes } from "../../../../data/catalogTaxonomy";
 import { verificarSesion } from "../../../auth/authorization.server";
 import { guardarFicha } from "../../../productos/actions";
-import { CAMPOS_FICHA_TECNICA, aplicacionesDe, lineasDesdeLista } from "../../../productos/ficha";
+import { CAMPOS_FICHA_TECNICA, lineasDesdeLista } from "../../../productos/ficha";
 import { getProductoFicha } from "../../../productos/ficha.server";
+import SelectorTipoAplicacion from "../SelectorTipoAplicacion";
+import SelectorAcabado from "../SelectorAcabado";
+import ComboboxEditable from "../ComboboxEditable";
+import ModalAvisoOperacion from "../ModalAvisoOperacion";
+import { SUGERENCIAS_ESPECIFICACIONES } from "../sugerenciasSpecs";
 
 export const dynamic = "force-dynamic";
 
@@ -53,10 +57,15 @@ export default async function FichaProductoPage({
   const error = typeof consulta.error === "string" ? consulta.error : "";
   const guardado = consulta.guardado === "1";
   const creado = consulta.creado === "1";
-  const aplicacionesDelTipo = aplicacionesDe(producto.tipo);
 
   return (
     <>
+      <ModalAvisoOperacion
+        guardado={guardado}
+        creado={creado}
+        errores={error}
+      />
+
       <section className="bg-proyectos text-white">
         <div className="mx-auto w-full max-w-4xl px-5 py-10 sm:px-8">
           <Link
@@ -71,25 +80,6 @@ export default async function FichaProductoPage({
       </section>
 
       <div className="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8">
-        {creado ? (
-          <p className="mb-6 border-l-2 border-tienda bg-neutral-50 px-4 py-3 text-sm text-proyectos">
-            Producto creado con la referencia <strong>{producto.referencia}</strong>. Aquí puedes
-            completar el precio, las existencias y los datos del fabricante.
-          </p>
-        ) : null}
-
-        {guardado ? (
-          <p className="mb-6 border-l-2 border-proyectos bg-neutral-50 px-4 py-3 text-sm text-proyectos">
-            Guardado. El catálogo de la web ya muestra el cambio.
-          </p>
-        ) : null}
-
-        {error ? (
-          <p className="mb-6 border-l-2 border-error bg-neutral-50 px-4 py-3 text-sm text-error">
-            {error}
-          </p>
-        ) : null}
-
         <form action={guardarFicha} className="flex flex-col gap-9">
           <input type="hidden" name="referencia" value={producto.referencia} />
 
@@ -169,91 +159,60 @@ export default async function FichaProductoPage({
           </Seccion>
 
           <Seccion
-            titulo="Clasificación"
-            descripcion="La aplicación tiene que pertenecer al tipo elegido. Si no coincide, el producto deja de aparecer en los filtros del catálogo."
+            titulo="Clasificación y Acabado"
+            descripcion="La aplicación se sincroniza automáticamente con el tipo elegido para garantizar que el producto aparezca en los filtros del catálogo."
           >
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="tipo" className={claseEtiqueta}>
-                  Tipo de producto
-                </label>
-                <select id="tipo" name="tipo" defaultValue={producto.tipo} className={claseCampo}>
-                  {Object.values(productTypes).map((valor) => (
-                    <option key={valor.id} value={valor.id}>
-                      {valor.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <SelectorTipoAplicacion
+              tipoInicial={producto.tipo}
+              aplicacionInicial={producto.aplicacion}
+              familiaInicial={producto.familia}
+            />
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="aplicacion" className={claseEtiqueta}>
-                  Aplicación
-                </label>
-                {/* Agrupadas por tipo: sin JavaScript no se pueden filtrar al
-                    vuelo, así que al menos se ve a cuál pertenece cada una. */}
-                <select
-                  id="aplicacion"
-                  name="aplicacion"
-                  defaultValue={producto.aplicacion}
-                  className={claseCampo}
-                >
-                  {Object.values(productTypes).map((valor) => (
-                    <optgroup key={valor.id} label={valor.label}>
-                      {aplicacionesDe(valor.id).map((aplicacion) => (
-                        <option key={aplicacion.id} value={aplicacion.id}>
-                          {aplicacion.label}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-                <p className="text-xs text-neutral-500">
-                  Las de {productTypes[producto.tipo as keyof typeof productTypes]?.label ?? "este tipo"}{" "}
-                  son: {aplicacionesDelTipo.map((a) => a.label).join(", ")}.
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="familia" className={claseEtiqueta}>
-                  Familia
-                </label>
-                <input
-                  id="familia"
-                  name="familia"
-                  defaultValue={producto.familia}
-                  className={claseCampo}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <span className={claseEtiqueta}>Acabado</span>
-                <p className="min-h-11 rounded-xl border border-dashed border-neutral-300 px-4 py-3 text-sm text-neutral-500">
-                  {producto.acabadoEtiqueta || "Sin acabado"}
-                </p>
-              </div>
+            <div className="mt-2 grid gap-5 sm:grid-cols-2">
+              <SelectorAcabado
+                acabadoInicial={producto.acabado}
+                acabadoEtiquetaInicial={producto.acabadoEtiqueta}
+              />
             </div>
           </Seccion>
 
           <Seccion
             titulo="Ficha técnica"
-            descripcion="Lo que dejes vacío no aparece en la web."
+            descripcion="Lo que dejes vacío no aparece en la web. Puedes seleccionar opciones recomendadas o escribir libremente."
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              {CAMPOS_FICHA_TECNICA.map((campo) => (
-                <div key={campo.clave} className="flex flex-col gap-2">
-                  <label htmlFor={`spec_${campo.clave}`} className={claseEtiqueta}>
-                    {campo.etiqueta}
-                  </label>
-                  <input
-                    id={`spec_${campo.clave}`}
-                    name={`spec_${campo.clave}`}
-                    defaultValue={String(producto.fichaTecnica[campo.clave] ?? "")}
-                    placeholder={campo.ayuda}
-                    className={claseCampo}
-                  />
-                </div>
-              ))}
+              {CAMPOS_FICHA_TECNICA.map((campo) => {
+                const sugerencias = SUGERENCIAS_ESPECIFICACIONES[campo.clave];
+                const valorActual = String(producto.fichaTecnica[campo.clave] ?? "");
+
+                if (sugerencias && sugerencias.length > 0) {
+                  return (
+                    <ComboboxEditable
+                      key={campo.clave}
+                      name={`spec_${campo.clave}`}
+                      etiqueta={campo.etiqueta}
+                      ayuda={campo.ayuda}
+                      defaultValue={valorActual}
+                      sugerencias={sugerencias}
+                    />
+                  );
+                }
+
+                return (
+                  <div key={campo.clave} className="flex flex-col gap-2">
+                    <label htmlFor={`spec_${campo.clave}`} className={claseEtiqueta}>
+                      {campo.etiqueta}
+                    </label>
+                    <input
+                      id={`spec_${campo.clave}`}
+                      name={`spec_${campo.clave}`}
+                      defaultValue={valorActual}
+                      placeholder={campo.ayuda}
+                      className={claseCampo}
+                    />
+                  </div>
+                );
+              })}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -289,12 +248,13 @@ export default async function FichaProductoPage({
               </div>
               <div className="flex flex-col gap-2">
                 <label htmlFor="proveedorCodigo" className={claseEtiqueta}>
-                  Código del fabricante
+                  Código del fabricante / proveedor
                 </label>
                 <input
                   id="proveedorCodigo"
                   name="proveedorCodigo"
                   defaultValue={producto.proveedorCodigo}
+                  placeholder="Obligatorio para publicar"
                   className={claseCampo}
                 />
               </div>
@@ -358,12 +318,6 @@ export default async function FichaProductoPage({
               </div>
             </div>
 
-            {/* Aquí había una casilla de «se venderá en línea». Se retiró al
-                construir el carrito: ahora el precio es lo que decide. Un
-                interruptor que ya no cambia nada es peor que no tenerlo, porque
-                haría creer que un producto no está a la venta cuando sí lo
-                está. La columna sigue en la base de datos por si vuelve a hacer
-                falta. */}
             <p className="border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600">
               Un producto con precio se puede comprar desde la web. Si todavía no
               quieres venderlo en línea, déjalo sin precio: seguirá en el
@@ -377,7 +331,7 @@ export default async function FichaProductoPage({
                 defaultChecked={producto.publicado}
                 className="h-5 w-5 accent-[color:var(--tienda)]"
               />
-              Publicado: se ve en el catálogo de la web
+              Publicado: se ve en el catálogo de la web (requiere código del fabricante)
             </label>
           </Seccion>
 
